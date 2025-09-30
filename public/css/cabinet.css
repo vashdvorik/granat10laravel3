@@ -1,0 +1,239 @@
+/* Основные стили с префиксом cabinet */
+        .cabinet-body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .cabinet-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .cabinet-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .cabinet-title {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .cabinet-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #54f0ff, #c26af5);
+            border-radius: 2px;
+        }
+        
+        .cabinet-profile {
+            background: white;
+            border-radius: 12px;
+            /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);*/
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .cabinet-profile-section {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cabinet-profile-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .cabinet-profile-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .cabinet-profile-label {
+            width: 150px;
+            font-weight: 600;
+            font-size: 1.7rem;
+            color: #555;
+        }
+        
+        .cabinet-profile-value {
+            flex: 1;
+            font-size: 1.7rem;
+        }
+        
+        .cabinet-profile-edit {
+            color: #c26af5;
+            text-decoration: none;
+            margin-left: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cabinet-profile-edit:hover {
+            color: #54f0ff;
+            text-decoration: underline;
+        }
+        
+        /* Обновленные стили кнопок - фиолетовые */
+        .cabinet-profile-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #c26af5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1.5rem;
+            margin-top: 5px;
+        }
+        
+        .cabinet-profile-button:hover {
+            background: #a84be0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(194, 106, 245, 0.4);
+        }
+        
+        .cabinet-profile-button.outline {
+            background: transparent;
+            border: 2px solid #c26af5;
+            color: #c26af5;
+        }
+        
+        .cabinet-profile-button.outline:hover {
+            background: #c26af5;
+            color: white;
+        }
+        
+        .cabinet-profile-status {
+            display: inline-block;
+            padding: 5px 15px;
+            background-color: #e9ecef;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .cabinet-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            margin-bottom: 30px; 
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .cabinet-profile-row {
+            /*    flex-direction: column;*/
+                align-items: flex-start;
+            }
+            
+            .cabinet-profile-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .cabinet-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .cabinet-profile-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+ /* Cnbkb для окна смены имени */
+    .cabname-modal {
+        display: none;
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+    }
+
+    /* Modal content */
+    .cabname-modal-content {
+        background: #fff;
+        margin: 10% auto;
+        padding: 2.5rem;
+        width: 300px;
+        position: relative;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Modal heading */
+    .cabname-modal h3 {
+        font-size: 2.5rem;
+        margin-bottom: 2.5rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    /* Form elements */
+    .cabname-modal input[type="text"] {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1.6rem;
+    }
+
+    /* Buttons */
+    .cabname-modal button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 4px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+    }
+
+    /* Primary button */
+    .cabname-modal .cabname-btn-primary {
+        background-color: #54f0ff;
+        color: #000;
+        font-weight: 600;
+    }
+
+    /* Secondary button */
+    .cabname-modal .cabname-btn-secondary {
+        background-color: #e2e8f0;
+        color: #000;
+    }
+
+    /* Hover states */
+    .cabname-modal .cabname-btn-primary:hover {
+        background-color: #3ad8e8;
+    }
+
+    .cabname-modal .cabname-btn-secondary:hover {
+        background-color: #cbd5e0;
+    }
