@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -14,25 +14,34 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('users')->delete();
+        $defaultRoleId = DB::table('roles')->where('name', 'user')->value('id');
 
-        DB::table('users')->insert([
+        if (!$defaultRoleId) {
+            return;
+        }
+
+        $users = [
             [
-                'id' => 1,
-                'name' => 'Продавец 1',
+                'name' => 'Seller 1',
                 'email' => 'seller1@example.com',
-                'password' => Hash::make('password'),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => 'password',
             ],
             [
-                'id' => 2,
-                'name' => 'Продавец 2',
+                'name' => 'Seller 2',
                 'email' => 'seller2@example.com',
-                'password' => Hash::make('password'),
-                'created_at' => now(),
-                'updated_at' => now(),
+                'password' => 'password',
             ],
-        ]);
+        ];
+
+        foreach ($users as $userData) {
+            User::updateOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => Hash::make($userData['password']),
+                    'role_id' => $defaultRoleId,
+                ]
+            );
+        }
     }
 }

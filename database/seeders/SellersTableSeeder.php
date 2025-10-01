@@ -15,9 +15,16 @@ class SellersTableSeeder extends Seeder
     {
         DB::table('sellers')->delete();
 
+        $seller1UserId = DB::table('users')->where('email', 'seller1@example.com')->value('id');
+        $seller2UserId = DB::table('users')->where('email', 'seller2@example.com')->value('id');
+
+        if (!$seller1UserId || !$seller2UserId) {
+            return;
+        }
+
         DB::table('sellers')->insert([
             [
-                'user_id' => 1,
+                'user_id' => $seller1UserId,
                 'name' => '"Мода"',
                 'phone' => '077993603',
                 'town' => 'Тирасполь',
@@ -36,7 +43,7 @@ class SellersTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'user_id' => 2,
+                'user_id' => $seller2UserId,
                 'name' => 'Обувной рай',
                 'phone' => '77993603',
                 'town' => 'Тирасполь',
@@ -57,3 +64,4 @@ class SellersTableSeeder extends Seeder
         ]);
     }
 }
+

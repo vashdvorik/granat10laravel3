@@ -693,10 +693,18 @@
                                        <span class="menu-text">Log In</span>
                                     </a>
                                  </li>
-                                 <li>
+                              <!--<li>
                                     <a href="sign-up.html" class="">
                                        <span class="menu-text">Sign Up</span>
                                     </a>
+                                 </li>-->
+                                 <li>
+                                 <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="menu-link">
+                                          <span class="menu-text">Выйти</span>
+                                    </button>
+                                 </form>
                                  </li>
                               </ul>
                            </li>
@@ -2051,7 +2059,19 @@
                         <span class="nav-icon uil uil-sign-out-alt"></span>
                         <span class="menu-text">Sign Up</span>
                      </a>
+                  </li> 
+                  <li class="">
+                  <a href="{{ route('logout') }}"
+                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                     <span class="nav-icon uil uil-sign-out-alt"></span>
+                     <span class="menu-text">Выйти</span>
+                  </a>
+
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                     @csrf
+                  </form>
                   </li>
+
                </ul>
             </div>
          </div>
