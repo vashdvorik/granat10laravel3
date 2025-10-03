@@ -1,6 +1,6 @@
 {{--
 @if(auth()->check())
-    {{-- Если пользователь авторизован, перенаправляем в кабинет --}}
+     Если пользователь авторизован, перенаправляем в кабинет 
     <script>window.location = "{{ route('cabinet') }}";</script>
     @php exit; @endphp
 @endif
@@ -31,6 +31,8 @@
         @endif
 
         <div>
+        <input type="hidden" name="token" value="{{ request()->route('token') }}">
+        <input type="hidden" name="email" value="{{ request('email') }}">
             <label for="password">
                 <p class="text-left text-sm mb-2 text-gray-1100 dark:text-gray-dark-1100">Новый пароль</p>
             </label>
@@ -43,6 +45,32 @@
                     </button>
                 </div>
             </div>
+            <div class="mt-[20px]">
+                <label for="password_confirmation">
+                    <p class="text-left text-sm mb-2 text-gray-1100 dark:text-gray-dark-1100">Подтверждение пароля</p>
+                </label>
+                <div class="form-control mb-[20px]">
+                    <div class="input-group border rounded-lg border-[#E8EDF2] dark:border-[#313442]">
+                        <input
+                            class="input flex-1 bg-transparent text-gray-900 focus:outline-none dark:text-gray-dark-300"
+                            type="password"
+                            placeholder="Повторите пароль"
+                            name="password_confirmation"
+                            id="password-confirmation-input"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <button
+                            type="button"
+                            id="toggle-password-confirmation"
+                            class="btn-square border-white flex items-center justify-center bg-transparent"
+                        >
+                            <img src="{{ asset('auth/assets/images/icons/icon-eye.svg') }}" alt="eye icon">
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         </div>
         <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Подтвердить</button>
         <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="{{ route('login') }}">Вспомнили пароль?</a>
