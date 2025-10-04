@@ -72,36 +72,6 @@
                             </div>
                         @endforelse
 
-            <!--        <div class="product-col">
-                            <div class="img active">
-                                <img src="{{ asset('img/single/sony.jpg') }}" alt="photo" class="img-reponsive">
-                            </div>
-                        </div>
-                        <div class="product-col">
-                            <div class="img">
-                                <img src="{{ asset('img/single/sony2.jpg') }}" alt="images" class="img-responsive">
-                            </div>
-                        </div>
-                        <div class="product-col">
-                            <div class="img">
-                                <img src="{{ asset('img/single/sony3.jpg') }}" alt="images" class="img-responsive">
-                            </div>
-                        </div>
-                        <div class="product-col">
-                            <div class="img">
-                                <img src="{{ asset('img/single/sony4.jpg') }}" alt="images" class="img-responsive">
-                            </div>
-                        </div>
-                        <div class="product-col">
-                            <div class="img">
-                                <img src="{{ asset('img/single/sony4.jpg') }}" alt="images" class="img-responsive">
-                            </div>
-                        </div>
-                        <div class="product-col">
-                            <div class="img">
-                                <img src="{{ asset('img/single/sony4.jpg') }}" alt="images" class="img-responsive">
-                            </div>
-                        </div> -->
                     </div>
                 </div>
                     
@@ -231,8 +201,8 @@
                                     <img src="{{ asset('img/feature/credit-card2.png') }}" alt="">
                                 </div>
                                 <div class="single-feature-info">
-                                    <h3>Safe Payment</h3>
-                                    <p>Pay with the world’s most payment methods.</p>
+                                    <h3>Оплата продавцу</h3>
+                                    <p>Маркетплейс не принимает оплату.</p>
                                 </div>
                             </div>
 
@@ -241,8 +211,8 @@
                                     <img src="{{ asset('img/feature/safety2.png') }}" alt="">
                                 </div>
                                 <div class="single-feature-info">
-                                    <h3>Confidence</h3>
-                                    <p>Protection covers your purchase</p>
+                                    <h3>Ответственность</h3>
+                                    <p>Мы — только рекламная платформа.</p>
                                 </div>
                             </div>
 
@@ -251,8 +221,8 @@
                                     <img src="{{ asset('img/feature/truck2.png') }}" alt="">
                                 </div>
                                 <div class="single-feature-info">
-                                    <h3>Worldwide Delivery</h3>
-                                    <p>Ship to over 200 countries & regions.</p>
+                                    <h3>Доставка от продавца</h3>
+                                    <p>Доставку осуществляет сам продавец.</p>
                                 </div>
                             </div>
                         </div>
