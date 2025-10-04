@@ -159,7 +159,7 @@
                                         <a class="js-minus quantity-left-minus"><i class="fa fa-caret-down"></i></a>
                                     </div>
                                 </div>
-                                <a href="#" class="btn-add-cart">Add to cart <span class="icon-bg icon-cart v2"></span></a>
+                                <a href="#" class="btn-add-cart"> В корзину<span class="icon-bg icon-cart v2"></span></a>
                             </div>
                             <a href="#" class="e-btn btn-icon">
                                 <span class="icon-bg icon-wishlist"></span>
@@ -171,9 +171,10 @@
                         </div>
                         {{--Вывод номера телефона--}}
                         <div class="hot-line e-gradient">
-                            <p></p>
+                        <div aria-hidden="true" style="height:2px;"></div>
                             <div class="flex align-center tele" >
                                 <div class="phone-number">
+                                <div aria-hidden="true" style="height:14px;"></div>
                                     <a href="tel:{{ preg_replace('/\D+/', '', $product->seller->phone) }}">
                                         {{ $product->seller->phone }}
                                     </a>
