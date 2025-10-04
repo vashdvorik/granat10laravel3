@@ -24,21 +24,22 @@
                 
                     <div class="product-images">
                         <div class="main-img js-product-slider">
-                            @foreach($product->images->sortBy('order') as $image)
+
+                            @forelse($product->images->sortBy('order') as $image)
                                 <a href="#" class="hover-images effect">
                                     <img src="{{ Storage::url($image->path) }}"
                                         alt="{{ $image->alt ?? $product->name }}"
                                         class="img-reponsive"
                                         onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';">
                                 </a>
-                            @endforeach
-                <!--        <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony.jpg') }}" alt="photo" class="img-reponsive"></a>
-                            <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony2.jpg') }}" alt="photo" class="img-reponsive"></a>
-                            <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony3.jpg') }}" alt="photo" class="img-reponsive"></a>
-                            <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony4.jpg') }}" alt="photo" class="img-reponsive"></a>
-                            <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony4.jpg') }}" alt="photo" class="img-reponsive"></a>
-                            <a href="#" class="hover-images effect"><img src="{{ asset('img/single/sony4.jpg') }}" alt="photo" class="img-reponsive"></a>
-                -->    </div>
+                            @empty
+                                <a href="#" class="hover-images effect">
+                                    <img src="{{ asset('img/no-image.jpg') }}"
+                                        alt="{{ $product->name }}"
+                                        class="img-reponsive">
+                                </a>
+                            @endforelse
+                    </div>
                         @php
                             $discount = null;
                             if (!is_null($product->lowprice) && $product->price > 0) {
@@ -51,7 +52,8 @@
                     </div>
                     <div class="multiple-img-list-ver2 js-click-product">
                     
-                        @foreach($product->images->sortBy('order') as $key => $image)
+
+                        @forelse($product->images->sortBy('order') as $key => $image)
                             <div class="product-col">
                                 <div class="img{{ $key === 0 ? ' active' : '' }}">
                                     <img src="{{ Storage::url($image->path) }}"
@@ -60,7 +62,16 @@
                                         onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';">
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <div class="product-col">
+                                <div class="img active">
+                                    <img src="{{ asset('img/no-image.jpg') }}"
+                                        alt="{{ $product->name }}"
+                                        class="img-responsive">
+                                </div>
+                            </div>
+                        @endforelse
+
             <!--        <div class="product-col">
                             <div class="img active">
                                 <img src="{{ asset('img/single/sony.jpg') }}" alt="photo" class="img-reponsive">
