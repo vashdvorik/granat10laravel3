@@ -282,44 +282,19 @@
                <ul class="sidebar_nav">
                   <li class="has-child">
                      <a href="#" class="">
-                        <span class="nav-icon uil uil-envelope"></span>
-                        <span class="menu-text">Email</span>
-                        <span class="toggle-icon"></span>
-                     </a>
-                     <ul>
-                        <li class="">
-                           <a href="inbox.html">Inbox</a>
-                        </li>
-                        <li class="">
-                           <a href="read-email.html">Read
-                              Email</a>
-                        </li>
-                     </ul>
-                  </li>
-                  <li>
-                     <a href="chat.html" class="">
-                        <span class="nav-icon uil uil-chat"></span>
-                        <span class="menu-text">Chat</span>
-                        <span class="badge badge-success menuItem rounded-circle">3</span>
-                     </a>
-                  </li>
-                  <li class="has-child">
-                     <a href="#" class="">
                         <span class="nav-icon uil uil-bag"></span>
-                        <span class="menu-text text-initial">eCommerce</span>
+                        <span class="menu-text text-initial">Магазин</span>
                         <span class="toggle-icon"></span>
                      </a>
                      <ul>
                         <li class="">
-                           <a href="products.html">Products</a>
+                           <a href="products.html">Каталог</a>
                         </li>
                         <li class="">
-                           <a href="product-details.html">Product
-                              Details</a>
+                           <a href="product-details.html">wait</a>
                         </li>
                         <li class="">
-                           <a href="add-product.html">Product
-                              Add</a>
+                           <a href="add-product.html">Добавить товар</a>
                         </li>
                         <li class="">
                            <a href="add-product.html">Product

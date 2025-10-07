@@ -1,3 +1,5 @@
+{{--Главная станица в кабинете продавца--}}
+
 @extends('backend.cabinet.layout_cabinet')
 @section('content_cabinet')
 <div class="contents">
