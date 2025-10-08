@@ -1,4 +1,4 @@
-{{--Главная станица в кабинете продавца--}}
+{{--Главная страница в кабинете продавца--}}
 
 @extends('backend.cabinet.layout_cabinet')
 @section('content_cabinet')
