@@ -5,15 +5,55 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Seller;
+use Illuminate\Validation\Rule;
 
 class CabinetController extends Controller
 {
     // Метод для отображения личного кабинета
     public function cabinet()
     {
-        return view('backend.cabinet.cabinet'); 
+        $user = Auth::user(); 
+        $seller = $user->seller; // из модели user получили селлер
+        return view('backend.cabinet.cabinet', compact('seller'));
     }
     
+    //метод создания магазина
+    public function createShop()
+    {
+        $user = Auth::user();
+        if ($user->seller) {
+            return redirect()->route('cabinet')->with('error', 'Магазин уже создан');
+        }
+        return view('backend.cabinet.create_shop');
+    }
+
+    public function storeShop(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->seller) {
+            return redirect()->route('cabinet')->with('error', 'Магазин уже создан');
+        }
+
+        $data = $request->validate([
+            'name' => ['required','string','max:255'],
+            'alias' => ['required','string','max:255','alpha_dash', Rule::unique('sellers','alias')],
+            'phone' => ['nullable','string','max:50'],
+            'town' => ['nullable','string','max:255'],
+            'sellerplace' => ['nullable','string','max:255'],
+            'address' => ['nullable','string'],
+            'description' => ['nullable','string'],
+            'link' => ['nullable','url'],
+            'telegram' => ['nullable','string','max:255'],
+            'instagram' => ['nullable','string','max:255'],
+            'viber' => ['nullable','string','max:255'],
+        ]);
+
+        $data['user_id'] = $user->id;
+        Seller::create($data);
+
+        return redirect()->route('cabinet')->with('success', 'Магазин создан');
+    }
     // Метод для обновления имени пользователя
     public function updateName(Request $request)
     {

@@ -48,16 +48,6 @@ Route::get('/account', [CabinetController::class, 'cabinet'])
     ->middleware('auth')
     ->name('cabinet');
 
-// кнопка изменить имя пользователя в личном кабинете, через модальное окно
-Route::post('/cabinet/update-name', [CabinetController::class, 'updateName'])
-    ->middleware('auth')
-    ->name('cabinet.update_name');
-
-// кнопка изменить email в личном кабинете, через модальное окно
-Route::post('/cabinet/update-password', [CabinetController::class, 'updatePassword'])
-    ->middleware('auth')
-    ->name('cabinet.update_password');
-
 // Новые роуты для продавца
 Route::middleware('auth')->prefix('cabinet')->group(function () {
     Route::get('/create-shop', [CabinetController::class, 'createShop'])->name('cabinet.create_shop');

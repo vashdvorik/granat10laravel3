@@ -1,12 +1,57 @@
 {{--Главная страница в кабинете продавца--}}
 
 @extends('backend.cabinet.layout_cabinet')
+
 @section('content_cabinet')
 <div class="contents">
 
    <div class="crm mb-25">
       <div class="container-fluid">
          <div class="row ">
+         
+                  @if(!$seller)
+                  <div class="col-lg-12">
+
+                     <div class="breadcrumb-main">
+                        <h4 class="text-capitalize breadcrumb-title">Добро пожаловать!</h4>
+                        <div class="breadcrumb-action justify-content-center flex-wrap">
+                        <!--   <nav aria-label="breadcrumb">
+                              <ol class="breadcrumb">
+                                 <li class="breadcrumb-item"><a href="#"><i class="uil uil-estate"></i>Dashboard</a></li>
+                                 <li class="breadcrumb-item active" aria-current="page">Demo 1</li>
+                              </ol>
+                           </nav> -->
+                        </div>
+                     </div>
+
+                     </div>
+                  <div class="col-lg-12">
+                     <div class="card card-default card-md mb-4">
+                        <div class="card-header">
+                           <h6>Создание магазина</h6>
+                        </div>
+                        <div class="card-body">
+
+
+                           <div class="dm-empty text-center">
+                              <div class="dm-empty__text">
+
+                                 <p>Чтобы начать нажмите создать магазин. Нажимая создать магазин, вы соглашаетесь с условиями пользования.<a href="#">Читать условия</a></p>
+                                 <div class="dm-empty__action">
+                                 <a href="{{ route('cabinet.create_shop') }}" class="btn btn-primary btn-sm btn-squared">
+                                    Создать магазин
+                                 </a>
+                                 </div>
+
+                              </div>
+                           </div>
+
+
+                        </div>
+                     </div>
+                  </div>
+                  @else 
+         
             <div class="col-lg-12">
 
                <div class="breadcrumb-main">
@@ -25,6 +70,7 @@
             <div class="col-xxl-6">
                <div class="row">
                   <div class="col-xxl-6 col-sm-6 mb-25">
+
                      <!-- Card 1  -->
                      <div class="ap-po-details ap-po-details--2 p-25 radius-xl d-flex justify-content-between">
 
@@ -209,6 +255,7 @@
             </div>
          </div>
          <!-- ends: .row -->
+         @endif
       </div>
    </div>
 

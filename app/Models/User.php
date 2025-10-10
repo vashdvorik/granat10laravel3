@@ -49,5 +49,9 @@ class User extends \TCG\Voyager\Models\User
     {
     $this->notify(new ResetPasswordCustom($token));
     }
-
+    
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
+    }
 }
