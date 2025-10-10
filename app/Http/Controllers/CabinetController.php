@@ -18,7 +18,7 @@ class CabinetController extends Controller
         return view('backend.cabinet.cabinet', compact('seller'));
     }
     
-    //метод создания магазина
+    //страница создания магазина
     public function createShop()
     {
         $user = Auth::user();

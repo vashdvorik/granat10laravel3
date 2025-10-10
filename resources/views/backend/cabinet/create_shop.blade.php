@@ -22,10 +22,6 @@
                      <a class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" href="#v-pills-home" role="tab" aria-selected="true">
                         <img src="img/svg/briefcase.svg" alt="user" class="svg">Страница магазина</a>
                   </li>
-        <!--      <li class="nav-item">
-                     <a class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" href="#v-pills-profile" role="tab" aria-selected="false">
-                        <img src="img/svg/user.svg" alt="briefcase" class="svg">Личная информация</a>
-                  </li> -->
                </ul>
             </div>
             <div class="tab-content" id="v-pills-tabContent">
@@ -52,156 +48,56 @@
                               </div>
                            </div>
                            <div class="edit-profile__body">
-                              <form>
-                                 <div class="form-group mb-25">
-                                    <label for="name1">Название магазина</label>
-                                    <input type="text" class="form-control" id="name1" placeholder="Магазин одежды мода">
-                                 </div>
-                                 <div class="form-group mb-25">
-                                    <label for="name3">Описание</label>
-                                    <input type="text" class="form-control" id="name3" placeholder="Большой выбор зимних курток, спортивной одежды.">
-                                 </div>
-                                 <div class="form-group mb-25">
-                                    <label for="phoneNumber5">Телефон</label>
-                                    <input type="tel" class="form-control" id="phoneNumber5" placeholder="077993603">
-                                 </div>
-                                 <div class="form-group mb-25">
-                                    <div class="countryOption">
-                                       <label for="countryOption">
-                                          Город
-                                       </label>
-                                       <select class="js-example-basic-single js-states form-control" id="countryOption">
-                                          <option value="JAN">Тирасполь</option>
-                                       </select>
+                                <form action="{{ route('cabinet.store_shop') }}" method="POST">
+                                @csrf    
+                                    <div class="form-group mb-25">
+                                        <label for="name">Название магазина</label>
+                                        <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required>
+                                        @error('name') <div class="text-danger small">{{ $message }}</div> @enderror
                                     </div>
-                                 </div>
-                                 <div class="form-group mb-25">
-                                    <div class="cityOption">
-                                       <label for="cityOption">
-                                          Район Тирасполя
-                                       </label>
-                                       <select class="js-example-basic-single js-states form-control" id="cityOption">
-                                          <option value="JAN">Центр</option>
-                                          <option value="FBR">Балка</option>
-                                          <option value="FBR">Промзона</option>
-                                          <option value="FBR">Бородинка</option>
-                                          <option value="FBR">Красные казармы</option>
-                                          <option value="FBR">Западный</option>
-                                       </select>
+                                    <div class="form-group mb-25">
+                                        <label for="description">Описание</label>
+                                        <input id="description" type="text" class="form-control"  name="description" value="{{ old('description') }}" >
                                     </div>
-                                 </div>
-                                 <div class=" mb-30">
-                                    <label for="webUrl">Вебсайт</label>
-                                    <div class="input-group flex-nowrap">
-                                       <div class="input-group-prepend">
-                                          <span class="input-group-text bg-ruby border-ruby text-white wh-44 radius-xs justify-content-center" id="addon-wrapping3">
-                                             <i class="las la-basketball-ball fs-18"></i>
-                                          </span>
-                                       </div>
-                                       <input type="text" class="form-control form-control--social" placeholder="Url" aria-label="Username" aria-describedby="addon-wrapping3" id="webUrl">
+                                    <div class="form-group mb-25">
+                                        <label for="phone">Телефон</label>
+                                        <input type="tel" class="form-control" name="phone" id="phone" placeholder="077993603" value="{{ old('phone') }}" >
                                     </div>
-                                 </div>
-                                 <div class=" mb-30">
-                                    <label for="instagramUrl">instagram</label>
-                                    <div class="input-group flex-nowrap">
-                                       <div class="input-group-prepend">
-                                          <span class="input-group-text bg-instagram border-instagram text-white wh-44 radius-xs justify-content-center" id="addon-wrapping4">
-                                             <i class="lab la-instagram fs-18"></i>
-                                          </span>
-                                       </div>
-                                       <input type="text" class="form-control form-control--social" aria-describedby="addon-wrapping4" placeholder="Url" id="instagramUrl">
+                                    <div class="form-group mb-25">
+                                        <div class="countryOption">
+                                        <label for="town">
+                                            Город
+                                        </label>
+                                        <select class="js-example-basic-single js-states form-control" id="town" name="town" >
+                                            <option value="JAN">Тирасполь</option>
+                                        </select>
+                                        </div>
                                     </div>
-                                 </div>
-                                 <div class="button-group d-flex pt-sm-25 justify-content-md-end justify-content-start ">
-
-                                    <button class="btn btn-light btn-default btn-squared fw-400 text-capitalize radius-md btn-sm">Отменить
-                                    </button>
-
-                                    <button class="btn btn-primary btn-default btn-squared text-capitalize radius-md shadow2 btn-sm">Сохранить
-                                    </button>
-                                 </div>
-                              </form>
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-               <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-                  <div class="row justify-content-center">
-                     <div class="col-xxl-4 col-10">
-                        <div class="mt-40 mb-50">
-                           <div class="user-tab-info-title mb-35 text-capitalize">
-                              <h5 class="fw-500">О предпринимателе</h5>
-                           </div>
-                           <div class="edit-profile__body">
-                              <form>
-                                 <div class="form-group mb-25">
-                                    <label for="name4">ФИО</label>
-                                    <input type="text" class="form-control" id="name4" placeholder="Фамилия и имя">
-                                 </div>
-                                 <div class="form-group mb-25">
-                                    <label for="phoneNumber1">Личный телефон</label>
-                                    <p>Для звонков менеджера техподдержки</p>
-                                    <input type="text" class="form-control" id="phoneNumber1" placeholder="077993603">
-                                 </div>
-                                 <div class="form-group mb-25 status-radio">
-                                    <label class="mb-15" for="phoneNumber2">Вид деятельности</label>
-                                    <div class="d-flex">
-                                       <div class="radio-horizontal-list d-flex flex-wrap">
-
-
-                                          <div class="radio-theme-default custom-radio ">
-                                             <input class="radio" type="radio" name="radio-optional" value=0 id="radio-hl1">
-                                             <label for="radio-hl1">
-                                                <span class="radio-text">ИП</span>
-                                             </label>
-                                          </div>
-
-
-
-
-                                          <div class="radio-theme-default custom-radio ">
-                                             <input class="radio" type="radio" name="radio-optional" value=0 id="radio-hl2">
-                                             <label for="radio-hl2">
-                                                <span class="radio-text">Предприятие</span>
-                                             </label>
-                                          </div>
-
-
-
-
-                                          <div class="radio-theme-default custom-radio ">
-                                             <input class="radio" type="radio" name="radio-optional" value=0 id="radio-hl3">
-                                             <label for="radio-hl3">
-                                                <span class="radio-text">Другое</span>
-                                             </label>
-                                          </div>
-
-
-                                       </div>
+                                    <div class="form-group mb-25">
+                                        <div class="cityOption">
+                                        <label for="sellerplace">
+                                            Район Тирасполя
+                                        </label>
+                                        <select class="js-example-basic-single js-states form-control" id="sellerplace" name="sellerplace">
+                                            <option value="JAN">Центр</option>
+                                            <option value="FBR">Балка</option>
+                                            <option value="FBR">Промзона</option>
+                                            <option value="FBR">Бородинка</option>
+                                            <option value="FBR">Красные казармы</option>
+                                            <option value="FBR">Западный</option>
+                                        </select>
+                                        </div>
                                     </div>
-                                 </div>
-                                 <div class="button-group d-flex pt-20 justify-content-md-end justify-content-start">
+                                    <div class="form-group mb-25">
+                                        <label for="address">Адресс</label>
+                                        <input type="text" class="form-control" id="address" name="address" value="{{ old('address')}}">
+                                    </div>
+                                    <div class="button-group d-flex pt-sm-25 justify-content-md-end justify-content-start ">
 
-
-                                    <button class="btn btn-light btn-default btn-squared fw-400 text-capitalize radius-md">Отменить
-                                    </button>
-
-
-
-
-
-
-
-                                    <button class="btn btn-primary btn-default btn-squared text-capitalize radius-md shadow2">Сохранить
-                                    </button>
-
-
-
-
-
-                                 </div>
-                              </form>
+                                        <button type="submit" class="btn btn-primary btn-default btn-squared text-capitalize radius-md shadow2 btn-sm">Создать
+                                        </button>
+                                    </div>
+                                </form>
                            </div>
                         </div>
                      </div>
