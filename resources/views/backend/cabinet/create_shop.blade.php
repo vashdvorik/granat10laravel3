@@ -61,7 +61,7 @@
                                     </div>
                                     <div class="form-group mb-25">
                                         <label for="phone">Телефон</label>
-                                        <input type="tel" class="form-control" name="phone" id="phone" placeholder="077993603" value="{{ old('phone') }}" >
+                                        <input type="tel" class="form-control" name="phone" id="phone" value="{{ old('phone') }}" >
                                     </div>
                                     <div class="form-group mb-25">
                                         <div class="countryOption">
