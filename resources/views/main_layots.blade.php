@@ -32,7 +32,8 @@
            </div>
         </form>
         <ul class="nav-home5 js-menubar">
-            
+            @include('components.menu-tree', ['items' => $categories, 'level' => 1])
+            <!--
             <li class="level1 active dropdown"><a href="#">Одежда и обувь</a>
                 <span class="icon-sub-menu"></span>
                 <div class="menu-level1 js-open-menu">   
@@ -86,6 +87,8 @@
                     <div class="clearfix"></div>
                 </div>
             </li>
+            -->
+            {{-- Меню категорий (рекурсивно через components.menu-tree) --}}
             <!--<li class="level1 active dropdown"><a href="#">Mega Menu</a></li>-->
         </ul>
     </div>
