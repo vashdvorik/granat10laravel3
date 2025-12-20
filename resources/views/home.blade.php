@@ -10,8 +10,13 @@
             <div class="col-lg-3 widget-verticalmenu">
                 <div class="vertical-wrapper">
                     <ul class="vertical-group">
-                        <li class="vertical-item level1 mega-parent"><a href="#">Магазины рядом </a></li>
+                        <li class="vertical-item level1 mega-parent"><a href="{{ route('shops') }}">Магазины рядом </a></li>
                         <li class="vertical-item level1 mega-parent"><a href="#">Товары для Вас <span class="h-ribbon e-red mg-l10">ХИТЫ</span></a></li>
+                        @foreach($categories->take(7) as $category)
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', $category->alias ?? $category->id) }}">{{ $category->name }}</a>
+                        </li>
+                        @endforeach
+                        <!--
                         <li class="vertical-item level1 vertical-drop"><a href="#">Одежда и обувь</a>
                             <div class="menu-level-1 dropdown-menu vertical-menu v2 tvbg pd2 style1">
                                 <ul class="level1">
@@ -198,7 +203,7 @@
                                     <li><a href="#">Installation Accessories.</a></li>
                                 </ul>
                             </div>
-                        </li>
+                        </li>    
                         <li class="vertical-item level1 vertical-drop mega-parent"><a href="#">Все категории</a>
                             <div class="menu-level-1 dropdown-menu vertical-menu v2 pd">
                                 <div class="row">
@@ -228,6 +233,9 @@
                                     </div>
                                 </div>
                             </div>
+                        </li>
+                        -->
+                        <li class="vertical-item level1 vertical-drop mega-parent"><a href="{{ route('catalog.index') }}">Все категории</a>
                         </li>
                     </ul>
                 </div>
