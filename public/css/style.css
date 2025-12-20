@@ -15803,7 +15803,7 @@ span.star:before {
     padding-left: 48px; }
     .nav-home5 .menu-level1 .level2 > a {
       font: 14px/33px "Helvetica Neue LT Std", sans-serif;
-      text-transform: capitalize;
+      text-transform: none;
       color: #a4a4a4;
       position: relative; }
       .nav-home5 .menu-level1 .level2 > a:focus {
@@ -15828,7 +15828,7 @@ span.star:before {
     padding-left: 15px; }
     .nav-home5 .menu-level-2 .level3 > a {
       font: 400 14px/33px "Helvetica Neue LT Std", sans-serif;
-      text-transform: capitalize;
+      text-transform: none;
       color: #545454;
       position: relative; }
       .nav-home5 .menu-level-2 .level3 > a:focus {
@@ -19047,5 +19047,52 @@ footer .f-top {
   .banner-img img {
     width: 100%; } }
 
+/* Мобильное меню внизу */
+.mobile-bottom-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #e0e0e0;
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
 
+.mobile-navbar-wrapper {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    max-width: 100%;
+}
+
+.mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-decoration: none;
+    color: #666;
+    font-size: 12px;
+    transition: color 0.3s ease, background 0.3s ease;
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item:active {
+    color: #ff6b6b;
+    background: #f5f5f5;
+}
+
+.mobile-nav-item i {
+    font-size: 18px;
+    margin-bottom: 4px;
+}
+
+.mobile-nav-label {
+    font-size: 11px;
+    white-space: nowrap;
+}
 /*# sourceMappingURL=style.css.map */

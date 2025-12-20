@@ -30,7 +30,23 @@
             <!-- МЕНЮ-->
             <div class="filter filter-cate ">
                 <ul class="wiget-content v2">
-            
+                        {{-- Кнопка "Назад" (если есть родитель) --}}
+                    @if($category->parent)
+                        <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                            <a href="{{ route('catalog.show', $category->parent->alias) }}" style="display: flex; align-items: center; color: #666;">
+                                <i class="ion-ios-arrow-left" style="margin-right: 8px;"></i>
+                                <strong> Назад</strong>
+                            </a>
+                        </li>
+                    @else
+                        {{-- Кнопка на корневой уровень (каталог) --}}
+                        <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                            <a href="{{ route('catalog.index') }}" style="display: flex; align-items: center; color: #666;">
+                                <i class="ion-ios-arrow-left" style="margin-right: 8px;"></i>
+                                <strong> В каталог</strong>
+                            </a>
+                        </li>
+                    @endif
                     @foreach ($categories as $subcategory)
                      <li class="{{ $subcategory->children->isNotEmpty() ? 'active' : '' }}">
                         <a href="{{ route('catalog.show', $subcategory->alias) }}">

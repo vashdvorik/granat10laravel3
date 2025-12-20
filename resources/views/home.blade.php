@@ -16,7 +16,7 @@
                         <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', $category->alias ?? $category->id) }}">{{ $category->name }}</a>
                         </li>
                         @endforeach
-                        <!--
+                    <!--
                         <li class="vertical-item level1 vertical-drop"><a href="#">Одежда и обувь</a>
                             <div class="menu-level-1 dropdown-menu vertical-menu v2 tvbg pd2 style1">
                                 <ul class="level1">
@@ -234,7 +234,7 @@
                                 </div>
                             </div>
                         </li>
-                        -->
+                    -->
                         <li class="vertical-item level1 vertical-drop mega-parent"><a href="{{ route('catalog.index') }}">Все категории</a>
                         </li>
                     </ul>

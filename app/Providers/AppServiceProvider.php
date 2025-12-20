@@ -32,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         if (Schema::hasTable('categories')) {
             $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
             View::share('categories', $categories);
+            View::share('menuRootCategories', $categories); // <-- для push-меню
         }
     }
 }

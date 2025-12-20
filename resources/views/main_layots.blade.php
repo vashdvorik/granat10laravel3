@@ -32,7 +32,7 @@
            </div>
         </form>
         <ul class="nav-home5 js-menubar">
-            @include('components.menu-tree', ['items' => $categories, 'level' => 1])
+            @include('components.menu-tree', ['items' => $menuRootCategories, 'level' => 1])
             <!--
             <li class="level1 active dropdown"><a href="#">Одежда и обувь</a>
                 <span class="icon-sub-menu"></span>
@@ -365,28 +365,22 @@
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
                     <div class="footer-block">
-                        <h3 class="footer-block-title">Quick menu</h3>
+                        <h3 class="footer-block-title">Категории</h3>
                         <ul class="footer-block-content">
-                            <li><a href="#">TV & Video</a></li>
-                            <li><a href="#">Home Audio & Theater</a></li>
-                            <li><a href="#">Camera, Photo & Video</a></li>
-                            <li><a href="#">Cell Phones & Accessories</a></li>
-                            <li><a href="#">Headphones</a></li>
-                            <li><a href="#">Video Games</a></li>
-                            <li><a href="#">Bluetooth & Wireless Speakers</a></li>
-                            <li><a href="#">Car Electronics</a></li>
+                            @foreach($categories->take(7) as $category)
+                            <li><a href="{{ route('catalog.show', $category->alias ?? $category->id) }}">{{ $category->name }}</a></li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>
                 <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
                     <div class="footer-block">
-                        <h3 class="footer-block-title">Customer Service</h3>
+                        <h3 class="footer-block-title">Кабинет продавца</h3>
                         <ul class="footer-block-content">
-                            <li><a href="#">My Account</a></li>
-                            <li><a href="#">Track your Order</a></li>
-                            <li><a href="#">Returns/Exchange</a></li>
-                            <li><a href="#">FAQs</a></li>
-                            <li><a href="#">Customer Service</a></li>
+                            <li><a href="{{ route('cabinet') }}">Войти в аккаунт</a></li>
+                            <li><a href="{{ route('register') }}">Регистрация</a></li>
+                            <li><a href="{{ route('gobuyer') }}">Помощь</a></li>
+
                         </ul>
                     </div>
                 </div>
@@ -428,6 +422,28 @@
         </div>
     </div>
 </footer>
+<!-- МОБИЛЬНОЕ МЕНЮ ВНИЗУ (Bottom Navbar) -->
+<div class="mobile-bottom-navbar hidden-md hidden-lg">
+    <div class="mobile-navbar-wrapper">
+        <a href="#" class="mobile-nav-item js-push-menu icon-pushmenu" title="Меню">
+            <i class="fa fa-bars f-18"></i>
+            <span class="mobile-nav-label">Каталог</span>
+        </a>
+        <a href="#" class="mobile-nav-item" title="Избранное">
+            <i class="fa fa-heart f-18"></i>
+            <span class="mobile-nav-label">Понравившиеся</span>
+        </a>
+        <a href="{{ route('catalog.sale') }}" class="mobile-nav-item" title="Распродажи">
+            <img src="{{ asset('img/skidka-logo.png') }}" alt="Распродажи" style="width:20px; height:20px;">
+            <span class="mobile-nav-label">Распродажи</span>
+        </a>
+        <a href="{{ route('shops') }}" class="mobile-nav-item" title="Магазины">
+            <img src="{{ asset('img/icon-ship.png') }}" alt="Магазины" style="width:20px; height:20px;">
+            <span class="mobile-nav-label">Магазины</span>
+        </a>
+    </div>
+</div>
+<!-- /// -->
 </div>
     <!-- кнопка перемотки наверх страницы -->  
     <a href="#" class="btn-gradient scroll_top"><i class="ion-ios-arrow-up"></i></a>
