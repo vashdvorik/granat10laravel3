@@ -27,8 +27,11 @@ class AppServiceProvider extends ServiceProvider
         View::share('categories', $categories);
     }*/
     
+
     public function boot(): void
     {
+        Schema::defaultStringLength(191);
+        
         if (Schema::hasTable('categories')) {
             $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
             View::share('categories', $categories);
