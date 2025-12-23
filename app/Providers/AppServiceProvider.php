@@ -25,13 +25,14 @@ class AppServiceProvider extends ServiceProvider
         $categories = Category::whereNull('parent_id')->with('children')->get();
 
         View::share('categories', $categories);
+        View::share('menuRootCategories', $categories); // <-- для push-меню
     }*/
     
 
     public function boot(): void
     {
         Schema::defaultStringLength(191);
-        
+
         if (Schema::hasTable('categories')) {
             $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
             View::share('categories', $categories);
