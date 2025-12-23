@@ -1,3 +1,6 @@
 /.osp
 /.idea
 /.vscode
+/.cursor
+.env
+.htaccess
