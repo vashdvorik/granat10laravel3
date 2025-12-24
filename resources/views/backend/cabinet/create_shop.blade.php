@@ -69,7 +69,7 @@
                                             Город
                                         </label>
                                         <select class="js-example-basic-single js-states form-control" id="town" name="town" >
-                                            <option value="JAN">Тирасполь</option>
+                                            <option value="Тирасполь">Тирасполь</option>
                                         </select>
                                         </div>
                                     </div>
@@ -79,12 +79,12 @@
                                             Район Тирасполя
                                         </label>
                                         <select class="js-example-basic-single js-states form-control" id="sellerplace" name="sellerplace">
-                                            <option value="JAN">Центр</option>
-                                            <option value="FBR">Балка</option>
-                                            <option value="FBR">Промзона</option>
-                                            <option value="FBR">Бородинка</option>
-                                            <option value="FBR">Красные казармы</option>
-                                            <option value="FBR">Западный</option>
+                                            <option value="Центр">Центр</option>
+                                            <option value="Балка">Балка</option>
+                                            <option value="Промзона">Промзона</option>
+                                            <option value="Бородинка">Бородинка</option>
+                                            <option value="Красные казармы">Красные казармы</option>
+                                            <option value="Западный">Западный</option>
                                         </select>
                                         </div>
                                     </div>
