@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\SellerPackage;
 
 class Seller extends Model
 {
@@ -34,4 +35,23 @@ class Seller extends Model
     {
         return $this->hasMany(Product::class);
     } 
+
+        /**
+     * Связь с пакетами через таблицу seller_packages
+     */
+    public function sellerPackages()
+    {
+        return $this->hasMany(SellerPackage::class);
+    }
+
+    /**
+     * Получить активный пакет продавца
+     */
+    public function activePackage()
+    {
+        return $this->sellerPackages()
+            ->where('is_active', true)
+            ->where('end_date', '>=', now())
+            ->first();
+    }
 }

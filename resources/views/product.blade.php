@@ -170,6 +170,7 @@
                             </a> --}}
                         </div>
                         {{--Вывод номера телефона--}}
+                        @if(!empty($product->seller->phone))
                         <div class="hot-line e-gradient">
                         <div aria-hidden="true" style="height:2px;"></div>
                             <div class="flex align-center tele" >
@@ -181,6 +182,7 @@
                                 </div>
                             </div>
                         </div>  
+                        @endif
                         {{--Вывод тегов--}}
                         <div class="product-tags">
                             <label></label>

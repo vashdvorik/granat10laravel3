@@ -33,8 +33,8 @@ return new class extends Migration
             $table->text('viber')->nullable();
             
             //фотографии
-            $table->text('photos')->nullable()->comment('Фото магазина для витрины');
-            $table->string('logo')->nullable();
+            $table->text('photos')->nullable()->comment('Фото магазина 442');
+            $table->string('photo')->nullable()->comment('Фото магазина 1040');
             
             // Баланс
             $table->decimal('balance', 10, 2)->default(0)->comment('Баланс для оплаты подписок и услуг');
