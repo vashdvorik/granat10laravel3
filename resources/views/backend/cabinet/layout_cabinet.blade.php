@@ -248,12 +248,21 @@
                                        <i class="uil uil-bill"></i> Финансы</a>
                                  </li>
                                  <li>
+                                    {{--
                                     <a href="{{ route('logout') }}"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                        <i class="uil uil-sign-out-alt"></i> Выйти</a>
                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                           @csrf
                                        </form>
+                                    --}}
+                                    <a href="{{ route('logout') }}">
+                                       <span class="nav-icon uil uil-sign-out-alt"></span>
+                                       <span class="menu-text">Выйти</span>
+                                    </a>
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                                       @csrf
+                                    </form>
                                  </li>
                               </ul>
                            </div>
@@ -281,78 +290,41 @@
             <div class="sidebar__menu-group">
                <ul class="sidebar_nav">
                   <!--магазин-->
-                  <li class="has-child">
-                     <a href="#" class="">
+                  <li class="has-child {{ request()->routeIs('account.store.*') ? 'open active' : '' }}">
+                     <a href="{{ route('account.store.index') }}" class="">
                         <span class="nav-icon uil uil-bag"></span>
                         <span class="menu-text text-initial">Магазин</span>
                         <span class="toggle-icon"></span>
                      </a>
                      <ul>
-                        <li class="">
-                           <a href="products.html">Каталог</a>
+                        <li class="{{ request()->routeIs('account.store.products') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.products') }}">Каталог</a>
                         </li>
-                        <li class="">
-                           <a href="product-details.html">wait</a>
-                        </li>
-                        <li class="">
+                        <li class="{{ request()->is('add-product.html') ? 'active' : '' }}">
                            <a href="add-product.html">Добавить товар</a>
                         </li>
-                        <li class="">
-                           <a href="add-product.html">Product
-                              Edit</a>
-                        </li>
-                        <li class="">
-                           <a href="cart.html">Cart</a>
-                        </li>
-                        <li class="">
-                           <a href="order.html">Orders</a>
-                        </li>
-                        <li class="">
-                           <a href="sellers.html">Sellers</a>
-                        </li>
-                        <li class="">
-                           <a href="{{ route('cabinet.create_shop') }}">О магазине</a>
+                        <li class="{{ request()->routeIs('account.store.about') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.about') }}">О магазине</a>
                         </li>
                      </ul>
                   </li>
-                  <!--пользователь-->
-                  <li class="has-child">
-                     <a href="#" class="">
+                  <!--аккаунт-->
+                  <li class="has-child {{ request()->routeIs('account.user.*') ? 'open active' : '' }}">
+                     <a href="{{ route('account.user.index') }}" class="">
                         <span class="nav-icon uil uil-users-alt"></span>
-                        <span class="menu-text">Пользователь</span>
+                        <span class="menu-text">Аккаунт</span>
                         <span class="toggle-icon"></span>
                      </a>
                      <ul>
-                        <li class="">
-                           <a href="users-membar.html">Team</a>
-                        </li>
-                        <li class="">
-                           <a href="users-card.html">Users Grid</a>
-                        </li>
-                        <li class="">
-                           <a href="users-list.html">Users
-                              List</a>
-                        </li>
-                        <li class="">
-                           <a href="users-card2.html">Users Grid
-                              style</a>
-                        </li>
-                        <li class="">
-                           <a href="users-group.html">Users
-                              Group</a>
-                        </li>
-                        <li class="">
-                           <a href="user-info.html">Add User</a>
-                        </li>
-                        <li class="">
-                           <a href="users-datatable.html">Users
-                              Table</a>
+                        <li class="{{ request()->routeIs('account.user.change_password') ? 'active' : '' }}">
+                           <a href="{{ route('account.user.change_password') }}">Сменить пароль</a>
                         </li>
 
                      </ul>
                   </li>
                   <!--выйти-->
                   <li class="">
+                  {{--
                      <a href="{{ route('logout') }}"
                      onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                      <span class="nav-icon uil uil-sign-out-alt"></span>
@@ -362,6 +334,15 @@
                      <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
                      @csrf
                      </form>
+                  --}}
+                  <a href="{{ route('logout') }}">
+                     <span class="nav-icon uil uil-sign-out-alt"></span>
+                     <span class="menu-text">Выйти</span>
+                  </a>
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                     @csrf
+                  </form>
+
                   </li>
 
                </ul>
@@ -463,6 +444,28 @@
 <script src="{{ asset('cabinet/assets/theme_assets/js/jvectormap-init.js') }}"></script>
 <script src="{{ asset('cabinet/assets/theme_assets/js/leaflet-init.js') }}"></script>
 <script src="{{ asset('cabinet/assets/theme_assets/js/main.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   
+<!--Подтверждение выхода из аккаунта -->
+<script>
+$(function() {
+    $('a[href="{{ route('logout') }}"]').on('click', function(e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Вы уверены?',
+            text: 'Вы действительно хотите выйти из кабинета?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Выйти',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#logout-form').submit();
+            }
+        });
+    });
+});
+</script>
 </body>
 
 </html>

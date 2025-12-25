@@ -48,6 +48,23 @@ Route::get('/account', [CabinetController::class, 'cabinet'])
     ->middleware('auth')
     ->name('cabinet');
 
+
+// Группировка роутов личного кабинета с префиксом /account
+Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+    Route::prefix('store')->name('store.')->group(function () {
+        Route::get('/', [CabinetController::class, 'storeIndex'])->name('index');
+        Route::get('products', [CabinetController::class, 'storeProducts'])->name('products');
+        Route::get('about', [CabinetController::class, 'storeAbout'])->name('about');
+    });
+
+    // пользователь
+    Route::prefix('user')->name('user.')->group(function () {
+        Route::get('/', [CabinetController::class, 'userIndex'])->name('index');
+        Route::get('change-password', [CabinetController::class, 'showChangePasswordForm'])->name('change_password');
+        Route::post('change-password', [CabinetController::class, 'updatePassword'])->name('update_password');
+    });
+});
+
 // Новые роуты для продавца
 Route::middleware('auth')->prefix('cabinet')->group(function () {
     Route::get('/create-shop', [CabinetController::class, 'createShop'])->name('cabinet.create_shop');

@@ -95,4 +95,33 @@ class CabinetController extends Controller
 
         return redirect()->route('cabinet')->with('success', 'Пароль успешно изменён!');
     }
+    // Маршруты для выдачи страниц акаунта
+    public function storeIndex()
+    {
+        $user = Auth::user();
+        return view('backend.cabinet.store.index', compact('user'));
+    }
+
+    public function storeProducts()
+    {
+        $user = Auth::user();
+        return view('backend.cabinet.store.products', compact('user'));
+    }
+
+    public function storeAbout()
+    {
+        $user = Auth::user();
+        return view('backend.cabinet.store.about', compact('user'));
+    }
+
+    public function userIndex()
+    {
+        $user = Auth::user();
+        return view('backend.cabinet.user.index', compact('user'));
+    }
+
+    public function showChangePasswordForm()
+    {
+        return view('backend.cabinet.user.change_password');
+    }
 }
