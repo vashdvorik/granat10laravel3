@@ -168,8 +168,9 @@
                         <div class="overview-content w-100">
                            <div class=" ap-po-details-content d-flex flex-wrap justify-content-between">
                               <div class="ap-po-details__titlebar">
-                                 <h1>5</h1>
+                                 <h1>{{ $seller->products()->where('is_vip', true)->count() }}</h1>
                                  <p>VIP товаров</p>
+
                               </div>
                               <div class="ap-po-details__icon-area">
                                  <div class="svg-icon order-bg-opacity-info color-info">
@@ -190,7 +191,7 @@
                         <div class="overview-content w-100">
                            <div class=" ap-po-details-content d-flex flex-wrap justify-content-between">
                               <div class="ap-po-details__titlebar">
-                                 <h1>{{ $seller->balance }} руб.</h1>
+                                 <h1>{{ auth()->user()->balance }} руб.</h1>
                                  <p>На счету</p>
                               </div>
                               <div class="ap-po-details__icon-area">
@@ -259,8 +260,8 @@
                                        <tr>
                                           <th>Тариф </th>
                                           <th>Цена</th>
-                                          <th>Дата подключения</th>
-                                          <th>Дата окончания</th>
+                                          <th>Активирован</th>
+                                          <th>Действует до</th>
                                        </tr>
                                     </thead>
                                     <tbody>

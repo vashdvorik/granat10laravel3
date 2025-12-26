@@ -40,7 +40,7 @@ return new class extends Migration
             $table->decimal('balance', 10, 2)->default(0)->comment('Баланс для оплаты подписок и услуг');
             
             //Может ли принимать заказы
-            $table->boolean('can_order')->default(false)->comment('Может ли продавец принимать заказы');
+            $table->boolean('can_order')->default(false)->comment('Может ли магазин принимать заказы');
 
             // Таймстампы и индексы
             $table->timestamps();
