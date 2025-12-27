@@ -62,6 +62,8 @@ class CabinetController extends Controller
 
         return redirect()->route('cabinet')->with('success', 'Магазин создан');
     }
+
+    
     // Метод для обновления имени пользователя
     public function updateName(Request $request)
     {

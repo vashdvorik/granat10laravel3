@@ -290,22 +290,37 @@
             <div class="sidebar__menu-group">
                <ul class="sidebar_nav">
                   <!--магазин-->
-                  <li class="has-child {{ request()->routeIs('account.store.*') ? 'open active' : '' }}">
+                  <li class="has-child {{ request()->routeIs('account.store.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
                      <a href="{{ route('account.store.index') }}" class="">
                         <span class="nav-icon uil uil-bag"></span>
                         <span class="menu-text text-initial">Магазин</span>
                         <span class="toggle-icon"></span>
                      </a>
                      <ul>
-                        <li class="{{ request()->routeIs('account.store.products') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.products') }}">Каталог</a>
+                        @if(auth()->check() && !auth()->user()->seller)
+                           <li class="{{ request()->routeIs('cabinet.create_shop') ? 'active' : '' }}">
+                              <a href="{{ route('cabinet.create_shop') }}">Создать магазин</a>
+                           </li>
+                        @endif
+                        <li class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.index') }}">Общая информация</a>
                         </li>
-                        <li class="{{ request()->is('add-product.html') ? 'active' : '' }}">
-                           <a href="add-product.html">Добавить товар</a>
+                        <li class="{{ request()->routeIs('account.store.products') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.products') }}">Каталог товаров</a>
+                        </li>
+                        <li class="{{ request()->is('account.g') ? 'active' : '' }}">
+                           <a href="account.g">Добавить товар</a>
                         </li>
                         <li class="{{ request()->routeIs('account.store.about') ? 'active' : '' }}">
                            <a href="{{ route('account.store.about') }}">О магазине</a>
                         </li>
+                        {{-- Если магазин существует, то показывать этот пункт меню --}}
+                        @if(auth()->check() && auth()->user()->seller)
+                           <li class="{{ request()->routeIs('cabinet.create_shop') ? 'active' : '' }}">
+                              <a href="{{ route('cabinet.create_shop') }}">Удалить магазин</a>
+                           </li>
+                        @endif
+              
                      </ul>
                   </li>
                   <!--аккаунт-->
@@ -315,6 +330,7 @@
                         <span class="menu-text">Аккаунт</span>
                         <span class="toggle-icon"></span>
                      </a>
+                     
                      <ul>
                         <li class="{{ request()->routeIs('account.user.change_password') ? 'active' : '' }}">
                            <a href="{{ route('account.user.change_password') }}">Сменить пароль</a>
@@ -324,17 +340,6 @@
                   </li>
                   <!--выйти-->
                   <li class="">
-                  {{--
-                     <a href="{{ route('logout') }}"
-                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                     <span class="nav-icon uil uil-sign-out-alt"></span>
-                     <span class="menu-text">Выйти</span>
-                     </a>
-
-                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
-                     @csrf
-                     </form>
-                  --}}
                   <a href="{{ route('logout') }}">
                      <span class="nav-icon uil uil-sign-out-alt"></span>
                      <span class="menu-text">Выйти</span>

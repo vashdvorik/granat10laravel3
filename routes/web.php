@@ -65,9 +65,12 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     });
 });
 
-// Новые роуты для продавца
+// Роут создания магазина для продавца
 Route::middleware('auth')->prefix('cabinet')->group(function () {
     Route::get('/create-shop', [CabinetController::class, 'createShop'])->name('cabinet.create_shop');
     Route::post('/create-shop', [CabinetController::class, 'storeShop'])->name('cabinet.store_shop');
-    // Здесь можно добавить другие роуты для продавца
+    // 
 });
+
+Route::resource('backend/sellers', \App\Http\Controllers\Backend\SellerController::class);
+
