@@ -5,7 +5,7 @@
 {{--
 @if(auth()->check())
     <!-- Если пользователь авторизован, перенаправляем в кабинет -->
-    <script>window.location = "{{ route('cabinet') }}";</script>
+    <script>window.location = "{{ route('account.index') }}";</script>
     @php exit; @endphp
 @endif
 --}}

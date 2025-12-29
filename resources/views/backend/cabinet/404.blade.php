@@ -20,7 +20,7 @@
                     <div class="error-page__title">404</div>
                     <h5 class="fw-500">Извините! Страница, которую вы ищете, не существует.</h5>
                     <div class="content-center mt-30">
-                        <a href="{{ route('cabinet') }}" class="btn btn-primary btn-default btn-squared px-30">Вернуться в кабинет</a>
+                        <a href="{{ route('account.index') }}" class="btn btn-primary btn-default btn-squared px-30">Вернуться в кабинет</a>
                     </div>
                 </div>
             </div>

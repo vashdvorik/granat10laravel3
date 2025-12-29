@@ -20,7 +20,7 @@
                <ul class="nav px-30 ap-tab-main text-capitalize" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                   <li class="nav-item">
                      <a class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" href="#v-pills-home" role="tab" aria-selected="true">
-                        <img src="img/svg/briefcase.svg" alt="user" class="svg">Страница магазина</a>
+                        <img src="{{ asset('cabinet/img/svg/briefcase.svg') }}" alt="user" class="svg">Страница магазина</a>
                   </li>
                </ul>
             </div>
@@ -37,9 +37,9 @@
                                  <input id="file-upload" type="file" name="fileUpload" class="d-none">
                                  <!-- Profile picture image-->
                                  <label for="file-upload">
-                                    <img class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="img/author/profile.png" alt="profile">
+                                    <img class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="profile">
                                     <span class="cross" id="remove_pro_pic">
-                                       <img src="img/svg/camera.svg" alt="camera" class="svg">
+                                       <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="camera" class="svg">
                                     </span>
                                  </label>
                               </div>
@@ -48,7 +48,7 @@
                               </div>
                            </div>
                            <div class="edit-profile__body">
-                                <form action="{{ route('cabinet.store_shop') }}" method="POST">
+                                <form action="{{ route('account.store.store') }}" method="POST">
                                 @csrf    
                                     <div class="form-group mb-25">
                                         <label for="name">Название магазина</label>

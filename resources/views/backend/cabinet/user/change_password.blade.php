@@ -111,7 +111,7 @@
                            <button type="submit" class="btn btn-primary btn-default btn-squared me-15 text-capitalize">
                               Сохранить изменения
                            </button>
-                           <a href="{{ route('cabinet') }}" class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
+                           <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
                               Отмена
                            </a>
                         </div>

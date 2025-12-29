@@ -5,150 +5,104 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Models\Seller;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class SellerController extends Controller
 {
-    /*
-    Применяет middleware auth ко всем методам контроллера
-    */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Показывыет только свой магазин текущего пользователя
+     * Показывает магазин (общая информация)
      */
-    public function index(): View
+    public function index()
     {
-        $seller = Seller::where('user_id', auth()->id())->first();
+        $user = Auth::user();
+        $seller = $user->seller;
         
         if (!$seller) {
-            return view('backend.sellers.no-seller');
+            return redirect()->route('account.store.create')
+                ->with('info', 'Создайте магазин для начала работы');
         }
-
-        return view('backend.sellers.index', compact('seller'));
+        
+        return view('backend.cabinet.store.index', compact('user', 'seller'));
     }
 
     /**
-     * Показывает форму создания магазина (если его еще нет)
+     * Show the form for creating a new resource.
      */
-    public function create(): View
+    public function create()
     {
-        if (Seller::where('user_id', auth()->id())->exists()) {
-            return redirect()->route('backend.sellers.index');
-        }
-
-        return view('backend.sellers.create');
+        //
     }
 
     /**
-     * Создает новый магазин для текущего пользователя с валидацией 
-     * всех полей.
+     * Store a newly created resource in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
-        if (Seller::where('user_id', auth()->id())->exists()) {
-            return redirect()->route('backend.sellers.index');
+        //
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Seller $seller)
+    {
+        //
+    }
+
+    /**
+     * Форма редактирования магазина (О магазине)
+     */
+    public function edit(Seller $seller)
+    {
+        if ($seller->user_id !== Auth::id()) {
+            abort(403, 'Доступ запрещён');
+        }
+        
+        $user = Auth::user();
+        
+        return view('backend.cabinet.store.about', compact('seller', 'user'));
+    }
+
+    /**
+     * Обновление данных магазина
+     */
+    public function update(Request $request, Seller $seller)
+    {
+        if ($seller->user_id !== Auth::id()) {
+            abort(403, 'Доступ запрещён');
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'town' => 'nullable|string|max:255',
-            'sellerplace' => 'nullable|string',
-            'address' => 'nullable|string',
-            'description' => 'nullable|string',
-            'alias' => 'nullable|string|max:255|unique:sellers',
-            'region_id' => 'nullable|integer',
-            'link' => 'nullable|url',
-            'link_map' => 'nullable|url',
-            'telegram' => 'nullable|string',
-            'instagram' => 'nullable|string',
-            'viber' => 'nullable|string',
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')->ignore($seller->id)],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'town' => ['nullable', 'string', 'max:255'],
+            'sellerplace' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'link' => ['nullable', 'url'],
+            'link_map' => ['nullable', 'url'],
+            'telegram' => ['nullable', 'string', 'max:255'],
+            'instagram' => ['nullable', 'string', 'max:255'],
+            'viber' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $validated['user_id'] = auth()->id();
-        Seller::create($validated);
+        $seller->update($data);
 
-        return redirect()->route('backend.sellers.index')
-            ->with('success', 'Магазин создан');
+        return redirect()->route('account.store.index')
+            ->with('success', 'Магазин обновлён');
     }
 
     /**
-     * show(Seller $seller)
-     * Показывает детальную информацию о магазине (только владельцу)
+     * Remove the specified resource from storage.
      */
-    public function show(Seller $seller): View
+    public function destroy(Seller $seller)
     {
-        // Простая проверка - магазин принадлежит текущему пользователю
-        if ($seller->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        return view('backend.sellers.show', compact('seller'));
-    }
-
-    /**
-     * edit(Seller $seller)
-     * Показывает форму редактирования магазина (только владельцу)
-     */
-    public function edit(Seller $seller): View
-    {
-        if ($seller->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        return view('backend.sellers.edit', compact('seller'));
-    }
-
-    /**
-     * update(Request $request, Seller $seller)
-     * Обновляет данные магазина (только владельцу)
-     */
-    public function update(Request $request, Seller $seller): RedirectResponse
-    {
-        if ($seller->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'town' => 'nullable|string|max:255',
-            'sellerplace' => 'nullable|string',
-            'address' => 'nullable|string',
-            'description' => 'nullable|string',
-            'alias' => 'nullable|string|max:255|unique:sellers,alias,' . $seller->id,
-            'region_id' => 'nullable|integer',
-            'link' => 'nullable|url',
-            'link_map' => 'nullable|url',
-            'telegram' => 'nullable|string',
-            'instagram' => 'nullable|string',
-            'viber' => 'nullable|string',
-        ]);
-
-        $seller->update($validated);
-
-        return redirect()->route('backend.sellers.index')
-            ->with('success', 'Магазин обновлен');
-    }
-
-    /**
-     * destroy(Seller $seller)
-     *  Удаляет магазин (только владельцу)
-     */
-    public function destroy(Seller $seller): RedirectResponse
-    {
-        if ($seller->user_id !== auth()->id()) {
-            abort(403);
-        }
-
-        $seller->delete();
-
-        return redirect()->route('backend.sellers.index')
-            ->with('success', 'Магазин удален');
+        //
     }
 }

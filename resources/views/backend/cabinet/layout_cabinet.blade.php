@@ -51,7 +51,7 @@
       <nav class="navbar navbar-light">
          <div class="navbar-left">
             <div class="logo-area">
-               <a class="navbar-brand" href="{{ route('cabinet') }}">
+               <a class="navbar-brand" href="{{ route('account.index') }}">
                   <img class="dark" src="{{ asset('img/logo.png') }}" alt="logo">
                   <img class="light" src="{{ asset('img/logo.png') }}" alt="logo">
                </a>
@@ -298,28 +298,51 @@
                      </a>
                      <ul>
                         @if(auth()->check() && !auth()->user()->seller)
-                           <li class="{{ request()->routeIs('cabinet.create_shop') ? 'active' : '' }}">
-                              <a href="{{ route('cabinet.create_shop') }}">Создать магазин</a>
+                           <li class="{{ request()->routeIs('account.store.create') ? 'active' : '' }}">
+                              <a href="{{ route('account.store.create') }}">Создать магазин</a>
+                           </li>
+                        @endif
+                        
+                        @if(auth()->check() && auth()->user()->seller)
+                        <li class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.index') }}">Общая информация</a>
+                        </li>
+                        <li class="{{ request()->routeIs('account.store.products.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.products.index') }}">Каталог товаров</a>
+                        </li>
+                        <li class="{{ request()->is('account.g') ? 'active' : '' }}">
+                           <a href="account.g">Добавить товар</a>
+                        </li>
+                        <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>
+                        </li>
+                        <li class="{{ request()->routeIs('account.store.delete') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.delete') }}">Удалить магазин</a>
+                        </li>
+                        @endif  
+                     {{--  @if(auth()->check() && !auth()->user()->seller)
+                           <li class="{{ request()->routeIs('account.store.create') ? 'active' : '' }}">
+                              <a href="{{ route('account.store.create') }}">Создать магазин</a>
                            </li>
                         @endif
                         <li class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}">
                            <a href="{{ route('account.store.index') }}">Общая информация</a>
                         </li>
-                        <li class="{{ request()->routeIs('account.store.products') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.products') }}">Каталог товаров</a>
+                        <li class="{{ request()->routeIs('account.store.products.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.products.index') }}">Каталог товаров</a>
                         </li>
                         <li class="{{ request()->is('account.g') ? 'active' : '' }}">
                            <a href="account.g">Добавить товар</a>
                         </li>
-                        <li class="{{ request()->routeIs('account.store.about') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.about') }}">О магазине</a>
+                        <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>
                         </li>
-                        {{-- Если магазин существует, то показывать этот пункт меню --}}
+                        
                         @if(auth()->check() && auth()->user()->seller)
-                        <li class="{{ request()->routeIs('cabinet.delete_shop') ? 'active' : '' }}">
-                           <a href="{{ route('cabinet.delete_shop') }}">Удалить магазин</a>
+                        <li class="{{ request()->routeIs('account.store.delete') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.delete') }}">Удалить магазин</a>
                         </li>
-                        @endif
+                        @endif --}} 
               
                      </ul>
                   </li>

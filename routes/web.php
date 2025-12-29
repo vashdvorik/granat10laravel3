@@ -17,14 +17,13 @@ use App\Http\Controllers\CabinetController;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "web" middleware group. Make something great!
 |
+/*
+ПУБЛИЧНЕЫ РОУТЫ САЙТА
 */
 
-/*Route::get('/', [HomeController::class, 'home']);*/ 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/home', [HomeController::class, 'home'])->name('home');
-/*
-Route::get('catalog', [CatalogController::class, 'catalog']);
-*/
+
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
 Route::get('/catalog/{alias}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/sale', [CatalogController::class, 'sale'])->name('catalog.sale');
@@ -45,7 +44,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'only.my.emai
     Voyager::routes();
 });
 
-
+/*
 // роут для личного кабинета
 Route::get('/account', [CabinetController::class, 'cabinet'])
     ->middleware('auth')
@@ -75,6 +74,54 @@ Route::middleware('auth')->prefix('cabinet')->group(function () {
     Route::get('/delete-shop', [CabinetController::class, 'deleteShop'])->name('cabinet.delete_shop');
     Route::delete('/delete-shop', [CabinetController::class, 'destroyShop'])->name('cabinet.destroy_shop');
 });
+*/
 
-Route::resource('backend/sellers', \App\Http\Controllers\Backend\SellerController::class);
-
+// === ЛИЧНЫЙ КАБИНЕТ (BACKEND) ===
+Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+    
+    // Главная страница кабинета
+    Route::get('/', [CabinetController::class, 'cabinet'])->name('index');
+    
+    // === РАЗДЕЛ МАГАЗИНА ===
+    Route::prefix('store')->name('store.')->group(function () {
+        // Общая информация магазина
+        Route::get('/', [App\Http\Controllers\Backend\SellerController::class, 'index'])->name('index');
+        
+        // Создание магазина (КОНКРЕТНЫЙ ПУТЬ - ПЕРВЫМ!)
+        Route::get('create', [CabinetController::class, 'createShop'])->name('create');
+        Route::post('create', [CabinetController::class, 'storeShop'])->name('store');
+        
+        // Удаление магазина (КОНКРЕТНЫЙ ПУТЬ - ПЕРВЫМ!)
+        Route::get('delete', [CabinetController::class, 'deleteShop'])->name('delete');
+        Route::delete('delete', [CabinetController::class, 'destroyShop'])->name('destroy');
+        
+        // === ТОВАРЫ МАГАЗИНА (КОНКРЕТНЫЙ ПУТЬ - ПЕРВЫМ!) ===
+        Route::prefix('products')->name('products.')->group(function () {
+            Route::get('/', [App\Http\Controllers\Backend\ProductController::class, 'index'])->name('index');
+            Route::get('create', [App\Http\Controllers\Backend\ProductController::class, 'create'])->name('create');
+            Route::post('/', [App\Http\Controllers\Backend\ProductController::class, 'store'])->name('store');
+            Route::get('{product}/edit', [App\Http\Controllers\Backend\ProductController::class, 'edit'])->name('edit');
+            Route::get('{product}', [App\Http\Controllers\Backend\ProductController::class, 'show'])->name('show');
+            Route::put('{product}', [App\Http\Controllers\Backend\ProductController::class, 'update'])->name('update');
+            Route::delete('{product}', [App\Http\Controllers\Backend\ProductController::class, 'destroy'])->name('destroy');
+        });
+        
+        // Редактирование магазина (ПАРАМЕТРИЗОВАННЫЙ ПУТЬ - В КОНЦЕ!)
+        Route::get('{seller}/edit', [App\Http\Controllers\Backend\SellerController::class, 'edit'])->name('edit');
+        Route::put('{seller}', [App\Http\Controllers\Backend\SellerController::class, 'update'])->name('update');
+    });
+    
+    // === РАЗДЕЛ ПОЛЬЗОВАТЕЛЯ ===
+    Route::prefix('user')->name('user.')->group(function () {
+        // Общая информация
+        Route::get('/', [CabinetController::class, 'userIndex'])->name('index');
+        
+        // Редактирование профиля
+        Route::get('edit', [App\Http\Controllers\Backend\UserProfileController::class, 'edit'])->name('edit');
+        Route::put('/', [App\Http\Controllers\Backend\UserProfileController::class, 'update'])->name('update');
+        
+        // Смена пароля
+        Route::get('change-password', [CabinetController::class, 'showChangePasswordForm'])->name('change_password');
+        Route::post('change-password', [CabinetController::class, 'updatePassword'])->name('update_password');
+    });
+});

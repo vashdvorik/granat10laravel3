@@ -241,7 +241,7 @@
                         </div>
                 <!-- Иконки -->
                         <div class="header-sub-element row">
-                            <a class="hidden-xs hidden-sm" href="{{ route('cabinet') }}"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
+                            <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
                             <a href="#"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
                             <div class="cart">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="label5">
@@ -377,7 +377,7 @@
                     <div class="footer-block">
                         <h3 class="footer-block-title">Кабинет продавца</h3>
                         <ul class="footer-block-content">
-                            <li><a href="{{ route('cabinet') }}">Войти в аккаунт</a></li>
+                            <li><a href="{{ route('account.index') }}">Войти в аккаунт</a></li>
                             <li><a href="{{ route('register') }}">Регистрация</a></li>
                             <li><a href="{{ route('gobuyer') }}">Помощь</a></li>
 

@@ -23,7 +23,7 @@
                         <p><strong>Магазин:</strong> {{ $user->seller->name }}</p>
                         <p><strong>Товаров:</strong> {{ $user->seller->product_count ?? 0 }}</p>
                         
-                        <form method="POST" action="{{ route('cabinet.destroy_shop') }}">
+                        <form method="POST" action="{{ route('account.store.destroy') }}">
                             @csrf
                             @method('DELETE')
                             
@@ -36,7 +36,7 @@
                                 <button type="submit" class="btn btn-danger btn-default btn-squared mr-15">
                                     Удалить магазин
                                 </button>
-                                <a href="{{ route('cabinet') }}" class="btn btn-light btn-default btn-squared">
+                                <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared">
                                     Отмена
                                 </a>
                             </div>

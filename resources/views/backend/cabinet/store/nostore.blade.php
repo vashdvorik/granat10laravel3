@@ -17,7 +17,7 @@
                                     <p>Для начала нужно создать магазин и заполнить информацию о нем. После создания магазина вы сможете добавлять товары и управлять ими.
                                     </p>
                                     <div class="dm-empty__action">
-                                    <a href="{{ route('cabinet.create_shop') }}" class="btn btn-primary btn-sm btn-squared">
+                                    <a href="{{ route('account.store.create') }}" class="btn btn-primary btn-sm btn-squared">
                                        Создать магазин
                                     </a>
                                     </div>

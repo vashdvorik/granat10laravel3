@@ -31,7 +31,7 @@ class CabinetController extends Controller
     {
         $user = Auth::user();
         if ($user->seller) {
-            return redirect()->route('cabinet')->with('error', 'Магазин уже создан');
+            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
         }
         return view('backend.cabinet.create_shop');
     }
@@ -43,7 +43,7 @@ class CabinetController extends Controller
     {
         $user = Auth::user();
         if ($user->seller) {
-            return redirect()->route('cabinet')->with('error', 'Магазин уже создан');
+            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
         }
 
         $data = $request->validate([
@@ -70,7 +70,7 @@ class CabinetController extends Controller
         $data['alias'] = $alias;
         Seller::create($data);
 
-        return redirect()->route('cabinet')->with('success', 'Магазин создан');
+        return redirect()->route('account.index')->with('success', 'Магазин создан');
     }
 
     
@@ -85,7 +85,7 @@ class CabinetController extends Controller
         $user->name = $request->input('name');
         $user->save();
 
-        return redirect()->route('cabinet')->with('success', 'Имя успешно обновлено!');
+        return redirect()->route('account.index')->with('success', 'Имя успешно обновлено!');
     }
 
     // Изменяет пароль пользователя после проверки текущего пароля
@@ -99,13 +99,13 @@ class CabinetController extends Controller
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->route('cabinet')->with('error', 'Текущий пароль неверный.');
+            return redirect()->route('account.index')->with('error', 'Текущий пароль неверный.');
         }
 
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return redirect()->route('cabinet')->with('success', 'Пароль успешно изменён!');
+        return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
     }
 
     // Аккант. Магазин. Страница "Общая информация"
@@ -149,7 +149,7 @@ class CabinetController extends Controller
         $user = Auth::user();
         
         if (!$user->seller) {
-            return redirect()->route('cabinet')->with('error', 'У вас нет магазина');
+            return redirect()->route('account.index')->with('error', 'У вас нет магазина');
         }
         
         return view('backend.cabinet.delete_shop', compact('user'));
@@ -164,7 +164,7 @@ class CabinetController extends Controller
         $seller = $user->seller;
         
         if (!$seller) {
-            return redirect()->route('cabinet')->with('error', 'Магазин не найден');
+            return redirect()->route('account.index')->with('error', 'Магазин не найден');
         }
         
         // Опциональная проверка пароля для безопасности
@@ -179,6 +179,6 @@ class CabinetController extends Controller
         // Удаляем магазин
         $seller->delete();
         
-        return redirect()->route('cabinet')->with('success', 'Магазин успешно удалён');
+        return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
     }
 }
