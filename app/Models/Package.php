@@ -15,7 +15,17 @@ class Package extends Model
         'duration_days',
         'active_products_limit',
         'vip_products_limit',
+        'has_website_link',
+        'has_social_links',
+        'has_order_system',
         'is_active',
+    ];
+
+    protected $casts = [
+    'has_website_link' => 'boolean',
+    'has_social_links' => 'boolean',
+    'has_order_system' => 'boolean',
+    'is_active' => 'boolean',
     ];
 
     public function sellerPackages()

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Seller;
+use App\Models\SellerPackage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -68,25 +69,22 @@ class CabinetController extends Controller
         }
 
         $data['alias'] = $alias;
-        Seller::create($data);
+        // Создаем магазин
+        
+        $seller = Seller::create($data);
 
+        // Автоматически присваиваем базовый пакет (ID = 1)
+        \App\Models\SellerPackage::create([
+            'seller_id' => $seller->id,
+            'package_id' => 1,
+            'start_date' => now(),
+            'end_date' => null, // Базовый пакет бессрочный
+            'is_active' => true,
+        ]);
         return redirect()->route('account.index')->with('success', 'Магазин создан');
     }
 
     
-    // Метод для обновления имени пользователя // НЕ ПОДКЛЮЧЕНО
-    public function updateName(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $user = Auth::user();
-        $user->name = $request->input('name');
-        $user->save();
-
-        return redirect()->route('account.index')->with('success', 'Имя успешно обновлено!');
-    }
 
     // Изменяет пароль пользователя после проверки текущего пароля
     public function updatePassword(Request $request)
@@ -106,27 +104,6 @@ class CabinetController extends Controller
         $user->save();
 
         return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
-    }
-
-    // Аккант. Магазин. Страница "Общая информация"
-    public function storeIndex()
-    {
-        $user = Auth::user();
-        return view('backend.cabinet.store.index', compact('user'));
-    }
-
-    // Аккаунт. Магазин. Страница "Каталог товаров"
-    public function storeProducts()
-    {
-        $user = Auth::user();
-        return view('backend.cabinet.store.products', compact('user'));
-    } 
-
-    // Аккаунт. Магазин. Страница "О МАГАЗИНЕ"
-    public function storeAbout()
-    {
-        $user = Auth::user();
-        return view('backend.cabinet.store.about', compact('user'));
     }
 
     // Аккаунт. ПОльзователь. Общая информация

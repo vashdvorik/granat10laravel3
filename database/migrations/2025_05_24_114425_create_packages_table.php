@@ -16,8 +16,17 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('price', 10, 2);
             $table->integer('duration_days')->nullable()->comment('Количество дней действия пакета');
-            $table->integer('active_products_limit')->comment('Лимит активных товаров');
-            $table->integer('vip_products_limit')->comment('Лимит VIP-товаров');
+
+            // Лимиты товаров
+            $table->integer('active_products_limit')->nullable()->comment('Лимит активных товаров (null = безлимит)');
+            $table->integer('vip_products_limit')->nullable()->comment('Лимит VIP-товаров (null = безлимит)');
+
+            // Функциональные возможности
+             $table->boolean('has_website_link')->default(false)->comment('Размещение ссылки на сайт');
+            $table->boolean('has_social_links')->default(false)->comment('Подключение соцсетей');
+            $table->boolean('has_order_system')->default(false)->comment('Полноценный прием заказов');
+
+            // активен ли пакет( для админа)
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             

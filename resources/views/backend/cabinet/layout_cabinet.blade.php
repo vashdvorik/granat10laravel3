@@ -5,7 +5,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-   <title>HexaDash</title>
+   <title>Кабинет продавца | Маркетплейс Гранат</title>
 
    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -316,33 +316,16 @@
                         <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
                            <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>
                         </li>
+                        @if(auth()->check() && auth()->user()->seller)
+                        <li class="{{ request()->routeIs('account.packages.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.packages.index') }}">Тарифы</a>
+                        </li>
+                        @endif
                         <li class="{{ request()->routeIs('account.store.delete') ? 'active' : '' }}">
                            <a href="{{ route('account.store.delete') }}">Удалить магазин</a>
                         </li>
                         @endif  
-                     {{--  @if(auth()->check() && !auth()->user()->seller)
-                           <li class="{{ request()->routeIs('account.store.create') ? 'active' : '' }}">
-                              <a href="{{ route('account.store.create') }}">Создать магазин</a>
-                           </li>
-                        @endif
-                        <li class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.index') }}">Общая информация</a>
-                        </li>
-                        <li class="{{ request()->routeIs('account.store.products.index') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.products.index') }}">Каталог товаров</a>
-                        </li>
-                        <li class="{{ request()->is('account.g') ? 'active' : '' }}">
-                           <a href="account.g">Добавить товар</a>
-                        </li>
-                        <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>
-                        </li>
-                        
-                        @if(auth()->check() && auth()->user()->seller)
-                        <li class="{{ request()->routeIs('account.store.delete') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.delete') }}">Удалить магазин</a>
-                        </li>
-                        @endif --}} 
+
               
                      </ul>
                   </li>
@@ -494,6 +477,7 @@ $(function() {
     });
 });
 </script>
+@stack('scripts')
 </body>
 
 </html>

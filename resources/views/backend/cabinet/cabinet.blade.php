@@ -173,7 +173,7 @@
                                           </td>
                                           <td>{{ $activePackage->package->price }}</td>
                                           <td>{{ $activePackage->start_date->format('d.m.Y') }}</td>
-                                          <td>{{ $activePackage->end_date->format('d.m.Y') }}</td>
+                                          <td>{{ $activePackage->end_date ? $activePackage->end_date->format('d.m.Y') : 'Бессрочно' }}</td>
                                           @else
                                              <span>Нет активного тарифа</span>
                                           @endif

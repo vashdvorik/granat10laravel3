@@ -124,4 +124,10 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
         Route::get('change-password', [CabinetController::class, 'showChangePasswordForm'])->name('change_password');
         Route::post('change-password', [CabinetController::class, 'updatePassword'])->name('update_password');
     });
+
+    // === РАЗДЕЛ ТАРИФОВ ===
+    Route::prefix('packages')->name('packages.')->group(function () {
+    Route::get('/', [App\Http\Controllers\Backend\PackageController::class, 'index'])->name('index');
+    Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
+});
 });
