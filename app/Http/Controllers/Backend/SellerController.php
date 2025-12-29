@@ -10,13 +10,16 @@ use Illuminate\Http\RedirectResponse;
 
 class SellerController extends Controller
 {
+    /*
+    Применяет middleware auth ко всем методам контроллера
+    */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Display только свой магазин текущего пользователя
+     * Показывыет только свой магазин текущего пользователя
      */
     public function index(): View
     {
@@ -30,7 +33,7 @@ class SellerController extends Controller
     }
 
     /**
-     * Show form for creating (если магазина еще нет)
+     * Показывает форму создания магазина (если его еще нет)
      */
     public function create(): View
     {
@@ -42,7 +45,8 @@ class SellerController extends Controller
     }
 
     /**
-     * Store a new seller
+     * Создает новый магазин для текущего пользователя с валидацией 
+     * всех полей.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -74,7 +78,8 @@ class SellerController extends Controller
     }
 
     /**
-     * Show seller
+     * show(Seller $seller)
+     * Показывает детальную информацию о магазине (только владельцу)
      */
     public function show(Seller $seller): View
     {
@@ -87,7 +92,8 @@ class SellerController extends Controller
     }
 
     /**
-     * Edit form
+     * edit(Seller $seller)
+     * Показывает форму редактирования магазина (только владельцу)
      */
     public function edit(Seller $seller): View
     {
@@ -99,7 +105,8 @@ class SellerController extends Controller
     }
 
     /**
-     * Update seller
+     * update(Request $request, Seller $seller)
+     * Обновляет данные магазина (только владельцу)
      */
     public function update(Request $request, Seller $seller): RedirectResponse
     {
@@ -130,7 +137,8 @@ class SellerController extends Controller
     }
 
     /**
-     * Delete seller
+     * destroy(Seller $seller)
+     *  Удаляет магазин (только владельцу)
      */
     public function destroy(Seller $seller): RedirectResponse
     {

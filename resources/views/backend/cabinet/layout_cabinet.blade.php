@@ -316,9 +316,9 @@
                         </li>
                         {{-- Если магазин существует, то показывать этот пункт меню --}}
                         @if(auth()->check() && auth()->user()->seller)
-                           <li class="{{ request()->routeIs('cabinet.create_shop') ? 'active' : '' }}">
-                              <a href="{{ route('cabinet.create_shop') }}">Удалить магазин</a>
-                           </li>
+                        <li class="{{ request()->routeIs('cabinet.delete_shop') ? 'active' : '' }}">
+                           <a href="{{ route('cabinet.delete_shop') }}">Удалить магазин</a>
+                        </li>
                         @endif
               
                      </ul>

@@ -39,10 +39,13 @@ Route::get('/shops/{alias}', [SellerController::class, 'seller'])->name('seller'
 Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
 Route::get('help', [PageController::class, 'help'])->name('help');
 
+
 // не пропускать страницы, которые не админы и не прописаны в app/Http/Middleware/OnlyMyEmail.php
 Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'only.my.email']], function () {
     Voyager::routes();
 });
+
+
 // роут для личного кабинета
 Route::get('/account', [CabinetController::class, 'cabinet'])
     ->middleware('auth')
@@ -65,11 +68,12 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     });
 });
 
-// Роут создания магазина для продавца
+// Роут создания и удаления магазина для продавца
 Route::middleware('auth')->prefix('cabinet')->group(function () {
     Route::get('/create-shop', [CabinetController::class, 'createShop'])->name('cabinet.create_shop');
     Route::post('/create-shop', [CabinetController::class, 'storeShop'])->name('cabinet.store_shop');
-    // 
+    Route::get('/delete-shop', [CabinetController::class, 'deleteShop'])->name('cabinet.delete_shop');
+    Route::delete('/delete-shop', [CabinetController::class, 'destroyShop'])->name('cabinet.destroy_shop');
 });
 
 Route::resource('backend/sellers', \App\Http\Controllers\Backend\SellerController::class);

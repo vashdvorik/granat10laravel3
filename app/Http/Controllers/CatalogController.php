@@ -9,8 +9,20 @@ use App\Models\Seller;
 use Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+/*
+catalog(Request $request) - Отображает главную страницу каталога со всеми
+товарами, фильтрует по продавцам и ценам, сохраняет фильтры в сессии, 
+разделяет VIP и обычные товары, загружает дерево категорий до 8 уровней 
+вложенности.
 
+show($alias, Request $request) - Показывает товары определенной категории 
+по её alias, применяет фильтры по продавцам и ценам, собирает хлебные крошки,
+получает товары из текущей категории и всех подкатегорий, показывает 
+подкатегории или родственные категории.
 
+sale() - Отображает страницу распродажи с товарами, у которых есть скидка 
+(поле lowprice заполнено).
+*/
 class CatalogController extends Controller
 {
     public function catalog(Request $request)

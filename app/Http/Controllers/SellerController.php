@@ -9,13 +9,21 @@ use App\Models\Category;
 
 class SellerController extends Controller
 {
+    /*
+     Отображает список всех магазинов, отсортированных по количеству товаров
+    */
         public function shops(): View
     {
         $sellers = Seller::orderBy('product_count', 'desc')->get();
 
         return view('sellers', compact('sellers'));
     }
-
+    /*
+    seller(string $alias) - Показывает страницу конкретного магазина по alias, 
+    фильтрует категории первого уровня, показывая только те, 
+    в которых есть товары данного продавца, рекурсивно подсчитывает 
+    товары во всех подкатегориях. 
+    */
         public function seller(string $alias): View
     {
         $seller = Seller::where('alias', $alias)->firstOrFail();

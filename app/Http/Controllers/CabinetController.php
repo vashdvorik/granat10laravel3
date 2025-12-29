@@ -11,7 +11,11 @@ use Illuminate\Validation\Rule;
 
 class CabinetController extends Controller
 {
-    // Метод для отображения личного кабинета
+    /* 
+    Отображает главную страницу личного кабинета 
+    пользователя с информацией о магазине 
+    */
+
     public function cabinet()
     {
         $user = Auth::user(); 
@@ -19,7 +23,10 @@ class CabinetController extends Controller
         return view('backend.cabinet.cabinet', compact('seller'));
     }
     
-    //страница создания магазина
+    /*
+    Показывает форму создания магазина
+    (проверяет, что магазин еще не создан)
+    */
     public function createShop()
     {
         $user = Auth::user();
@@ -28,7 +35,10 @@ class CabinetController extends Controller
         }
         return view('backend.cabinet.create_shop');
     }
-
+    /* 
+    Сохраняет новый магазин в базе данных
+    генерирует уникальный alias из имени магазина, валидирует данные. 
+    */
     public function storeShop(Request $request)
     {
         $user = Auth::user();
@@ -64,7 +74,7 @@ class CabinetController extends Controller
     }
 
     
-    // Метод для обновления имени пользователя
+    // Метод для обновления имени пользователя // НЕ ПОДКЛЮЧЕНО
     public function updateName(Request $request)
     {
         $request->validate([
@@ -78,7 +88,7 @@ class CabinetController extends Controller
         return redirect()->route('cabinet')->with('success', 'Имя успешно обновлено!');
     }
 
-    // Метод для обновления пароля
+    // Изменяет пароль пользователя после проверки текущего пароля
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -97,33 +107,78 @@ class CabinetController extends Controller
 
         return redirect()->route('cabinet')->with('success', 'Пароль успешно изменён!');
     }
-    // Маршруты для выдачи страниц акаунта
+
+    // Аккант. Магазин. Страница "Общая информация"
     public function storeIndex()
     {
         $user = Auth::user();
         return view('backend.cabinet.store.index', compact('user'));
     }
 
+    // Аккаунт. Магазин. Страница "Каталог товаров"
     public function storeProducts()
     {
         $user = Auth::user();
         return view('backend.cabinet.store.products', compact('user'));
-    }
+    } 
 
+    // Аккаунт. Магазин. Страница "О МАГАЗИНЕ"
     public function storeAbout()
     {
         $user = Auth::user();
         return view('backend.cabinet.store.about', compact('user'));
     }
 
+    // Аккаунт. ПОльзователь. Общая информация
     public function userIndex()
     {
         $user = Auth::user();
         return view('backend.cabinet.user.index', compact('user'));
     }
 
+    // Показывает форму изменения пароля пользователя
     public function showChangePasswordForm()
     {
         return view('backend.cabinet.user.change_password');
+    }
+    /**
+     * Показывает форму подтверждения удаления магазина
+     */
+    public function deleteShop()
+    {
+        $user = Auth::user();
+        
+        if (!$user->seller) {
+            return redirect()->route('cabinet')->with('error', 'У вас нет магазина');
+        }
+        
+        return view('backend.cabinet.delete_shop', compact('user'));
+    }
+
+    /**
+     * Удаляет магазин текущего пользователя
+     */
+    public function destroyShop(Request $request)
+    {
+        $user = Auth::user();
+        $seller = $user->seller;
+        
+        if (!$seller) {
+            return redirect()->route('cabinet')->with('error', 'Магазин не найден');
+        }
+        
+        // Опциональная проверка пароля для безопасности
+        $request->validate([
+            'password' => 'required',
+        ]);
+        
+        if (!Hash::check($request->password, $user->password)) {
+            return redirect()->back()->with('error', 'Неверный пароль');
+        }
+        
+        // Удаляем магазин
+        $seller->delete();
+        
+        return redirect()->route('cabinet')->with('success', 'Магазин успешно удалён');
     }
 }
