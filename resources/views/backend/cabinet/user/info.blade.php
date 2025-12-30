@@ -206,7 +206,7 @@
                         <div class="p-20 pb-25">
                             <div class="button-group d-flex flex-column gap-2">
                                 <a href="{{ route('account.user.edit') }}" class="btn btn-primary btn-squared">
-                                    <i class="uil uil-edit"></i> Редактировать профиль
+                                    <i class="uil uil-edit"></i> Редактировать данные
                                 </a>
                                 <a href="{{ route('account.user.change_password') }}" class="btn btn-outline-lighten btn-squared">
                                     <i class="uil uil-lock"></i> Сменить пароль
