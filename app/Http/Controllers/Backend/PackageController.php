@@ -40,11 +40,16 @@ class PackageController extends Controller
     {
         $user = Auth::user();
         $seller = $user->seller;
-        
+        // Проверка, что магазин существует
         if (!$seller) {
             return redirect()->route('account.store.create')
                 ->with('error', 'Сначала создайте магазин');
         }
+        // Проверяем владение магазином (защита от IDOR)
+        if ($seller->user_id !== $user->id) {
+            abort(403, 'Доступ запрещён');
+        }
+
         
         // Проверка баланса (если пакет платный)
         if ($package->price > 0 && $user->balance < $package->price) {
