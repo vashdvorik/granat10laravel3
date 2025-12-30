@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: packagePrice == 0 ? 'Да, выбрать' : 'Да, купить',
                 cancelButtonText: 'Отмена',
-                reverseButtons: true
+                reverseButtons: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     // Показываем индикатор загрузки

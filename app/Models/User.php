@@ -22,15 +22,16 @@ class User extends \TCG\Voyager\Models\User
         'name',
         'email',
         'phone',
+        'password',
     ];
     protected $guarded = [
         'id',
-        'password',
         'balance',
         'role_id',
         'remember_token',
     ];
     /**
+     * 
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
