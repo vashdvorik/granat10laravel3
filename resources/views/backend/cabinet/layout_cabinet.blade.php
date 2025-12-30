@@ -290,7 +290,7 @@
             <div class="sidebar__menu-group">
                <ul class="sidebar_nav">
                   <!--магазин-->
-                  <li class="has-child {{ request()->routeIs('account.store.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
+                  <li class="has-child {{ request()->routeIs('account.store.*') || request()->routeIs('account.packages.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
                      <a href="{{ route('account.store.index') }}" class="">
                         <span class="nav-icon uil uil-bag"></span>
                         <span class="menu-text text-initial">Магазин</span>
@@ -336,8 +336,11 @@
                         <span class="menu-text">Аккаунт</span>
                         <span class="toggle-icon"></span>
                      </a>
-                     
                      <ul>
+                        <li class="{{ request()->routeIs('account.user.index') ? 'active' : '' }}">
+                              <a href="{{ route('account.user.index') }}">Профиль</a>
+                        </li>
+                        
                         <li class="{{ request()->routeIs('account.user.change_password') ? 'active' : '' }}">
                            <a href="{{ route('account.user.change_password') }}">Сменить пароль</a>
                         </li>

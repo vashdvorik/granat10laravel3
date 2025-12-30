@@ -110,7 +110,7 @@ class CabinetController extends Controller
     public function userIndex()
     {
         $user = Auth::user();
-        return view('backend.cabinet.user.index', compact('user'));
+        return view('backend.cabinet.user.info', compact('user'));
     }
 
     // Показывает форму изменения пароля пользователя
