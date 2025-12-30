@@ -94,7 +94,7 @@
                 </div>
             </div>
         </div>
-
+        {{--
         <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Зарегистрироваться</button>
         <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="#">Или зарегистрируйтесь через соцсети</a>
         <div class="flex items-center gap-x-2 justify-between mb-[20px]">
@@ -106,7 +106,7 @@
                 <img src="{{ asset('auth/assets/images/icons/icon-facebook.svg') }}" alt="facebook icon">
                 <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Facebook аккаунт</span>
             </a>
-        </div>
+        </div> --}}
         <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">
             Уже есть аккаунт?
             <a class="text-color-brands" href="{{ route('login') }}">Войти</a>
