@@ -143,19 +143,39 @@
                             <h6 class="fw-500 mb-0">Контакты и соцсети</h6>
                         </div>
                         <div class="card-body">
+                            @php
+                                $activePackage = $seller->activePackage();
+                                $hasWebsiteLink = $activePackage && $activePackage->package && $activePackage->package->has_website_link;
+                                $hasSocialLinks = $activePackage && $activePackage->package && $activePackage->package->has_social_links;
+                            @endphp
+
+                            {{-- Сообщение об ограничениях тарифа --}}
+                            @if(!$hasWebsiteLink || !$hasSocialLinks)
+                                <div class="alert alert-warning d-flex align-items-center mb-3">
+                                    <i class="uil uil-exclamation-triangle me-2"></i>
+                                    <div>
+                                        <strong>Ограничения тарифа:</strong>
+                                        @if(!$hasWebsiteLink) Ссылка на сайт недоступна. @endif
+                                        @if(!$hasSocialLinks) Подключение соцсетей недоступно. @endif
+                                        
+                                    </div>
+                                </div>
+                            @endif
+
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <div class="p-3 border rounded bg-light-subtle">
+                                    <div class="p-3 border rounded">
                                         <div class="d-flex align-items-start">
                                             <div class="me-3">
                                                 <i class="uil uil-globe text-primary fs-24"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <small class="text-muted d-block mb-1">Веб-сайт</small>
-                                                @if($seller->link)
-                                                    <a href="{{ $seller->link }}" target="_blank" class="text-decoration-none fw-500">
-                                                        {{ Str::limit($seller->link, 30) }}
-                                                        <i class="uil uil-external-link-alt fs-12"></i>
+                                                @if(!$hasWebsiteLink)
+                                                    <span class="text-danger fw-500"><i class="uil uil-lock-alt"></i> Недоступно</span>
+                                                @elseif($seller->link)
+                                                    <a href="{{ $seller->link }}" target="_blank" class="fw-500">
+                                                        {{ Str::limit($seller->link, 30) }} ↗
                                                     </a>
                                                 @else
                                                     <span class="text-muted">Не указан</span>
@@ -166,17 +186,17 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <div class="p-3 border rounded bg-light-subtle">
+                                    <div class="p-3 border rounded">
                                         <div class="d-flex align-items-start">
                                             <div class="me-3">
                                                 <i class="uil uil-map text-danger fs-24"></i>
                                             </div>
                                             <div class="flex-grow-1">
-                                                <small class="text-muted d-block mb-1">Карта (Google Maps)</small>
+                                                <small class="text-muted d-block mb-1">Google Maps</small>
+                                                {{-- Карта доступна всем --}}
                                                 @if($seller->link_map)
-                                                    <a href="{{ $seller->link_map }}" target="_blank" class="text-decoration-none fw-500">
-                                                        Открыть на карте
-                                                        <i class="uil uil-external-link-alt fs-12"></i>
+                                                    <a href="{{ $seller->link_map }}" target="_blank" class="fw-500">
+                                                        Открыть на карте ↗
                                                     </a>
                                                 @else
                                                     <span class="text-muted">Не указана</span>
@@ -187,15 +207,17 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="p-3 border rounded bg-light-subtle">
+                                    <div class="p-3 border rounded">
                                         <div class="d-flex align-items-start">
                                             <div class="me-3">
                                                 <i class="uil uil-telegram text-info fs-24"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <small class="text-muted d-block mb-1">Telegram</small>
-                                                @if($seller->telegram)
-                                                    <strong class="d-block">{{ $seller->telegram }}</strong>
+                                                @if(!$hasSocialLinks)
+                                                    <span class="text-danger fw-500"><i class="uil uil-lock-alt"></i> Недоступно</span>
+                                                @elseif($seller->telegram)
+                                                    <strong>{{ $seller->telegram }}</strong>
                                                 @else
                                                     <span class="text-muted">Не указан</span>
                                                 @endif
@@ -205,15 +227,17 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="p-3 border rounded bg-light-subtle">
+                                    <div class="p-3 border rounded">
                                         <div class="d-flex align-items-start">
                                             <div class="me-3">
                                                 <i class="uil uil-instagram text-danger fs-24"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <small class="text-muted d-block mb-1">Instagram</small>
-                                                @if($seller->instagram)
-                                                    <strong class="d-block">{{ $seller->instagram }}</strong>
+                                                @if(!$hasSocialLinks)
+                                                    <span class="text-danger fw-500"><i class="uil uil-lock-alt"></i> Недоступно</span>
+                                                @elseif($seller->instagram)
+                                                    <strong>{{ $seller->instagram }}</strong>
                                                 @else
                                                     <span class="text-muted">Не указан</span>
                                                 @endif
@@ -223,15 +247,17 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="p-3 border rounded bg-light-subtle">
+                                    <div class="p-3 border rounded">
                                         <div class="d-flex align-items-start">
                                             <div class="me-3">
                                                 <i class="uil uil-phone-volume text-success fs-24"></i>
                                             </div>
                                             <div class="flex-grow-1">
                                                 <small class="text-muted d-block mb-1">Viber</small>
-                                                @if($seller->viber)
-                                                    <strong class="d-block">{{ $seller->viber }}</strong>
+                                                @if(!$hasSocialLinks)
+                                                    <span class="text-danger fw-500"><i class="uil uil-lock-alt"></i> Недоступно</span>
+                                                @elseif($seller->viber)
+                                                    <strong>{{ $seller->viber }}</strong>
                                                 @else
                                                     <span class="text-muted">Не указан</span>
                                                 @endif
@@ -242,10 +268,16 @@
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-top">
-                            <div class="d-flex justify-content-end">
-                                <a href="{{ route('account.store.edit', $seller->id) }}" class="btn btn-sm btn-outline-primary">
-                                    <i class="uil uil-edit"></i> Редактировать
-                                </a>
+                            <div class="d-flex justify-content-end gap-2">
+                                    @if(!$hasWebsiteLink || !$hasSocialLinks)
+                                          <a href="{{ route('account.packages.index') }}" class="btn btn-sm btn-warning">
+                                             <i class="uil uil-arrow-circle-up"></i> Обновить тариф
+                                          </a>
+                                    @endif                                
+                                    <a href="{{ route('account.store.edit', $seller->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="uil uil-edit"></i> Редактировать
+                                    </a>
+
                             </div>
                         </div>
                     </div>
