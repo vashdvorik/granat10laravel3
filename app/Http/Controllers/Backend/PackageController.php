@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PackageController extends Controller
 {
@@ -50,37 +51,49 @@ class PackageController extends Controller
             abort(403, 'Доступ запрещён');
         }
 
+    try {
+        DB::transaction(function () use ($user, $seller, $package) {
+            
+            // 🔒 ВАЖНО! Блокируем запись пользователя для обновления
+            $user = $user->lockForUpdate()->find($user->id);
+            
+            // Проверка баланса (если пакет платный)
+            if ($package->price > 0 && $user->balance < $package->price) {
+                throw new \Exception('Недостаточно средств на балансе');
+            }
+            
+            // Деактивируем текущий пакет
+            $currentPackage = $seller->activePackage();
+            if ($currentPackage) {
+                $currentPackage->update(['is_active' => false]);
+            }
+            
+            // Создаём новый активный пакет
+            $endDate = $package->duration_days 
+                ? now()->addDays($package->duration_days) 
+                : null;
+            
+            $seller->sellerPackages()->create([
+                'package_id' => $package->id,
+                'start_date' => now(),
+                'end_date' => $endDate,
+                'is_active' => true,
+            ]);
+            
+            // Списываем средства (если пакет платный)
+            if ($package->price > 0) {
+                $user->decrement('balance', $package->price);
+            }
+        });
         
-        // Проверка баланса (если пакет платный)
-        if ($package->price > 0 && $user->balance < $package->price) {
-            return redirect()->back()
-                ->with('error', 'Недостаточно средств на балансе');
-        }
-        
-        // Деактивируем текущий пакет
-        $currentPackage = $seller->activePackage();
-        if ($currentPackage) {
-            $currentPackage->update(['is_active' => false]);
-        }
-        
-        // Создаём новый активный пакет
-        $endDate = $package->duration_days 
-            ? now()->addDays($package->duration_days) 
-            : null;
-        
-        $seller->sellerPackages()->create([
-            'package_id' => $package->id,
-            'start_date' => now(),
-            'end_date' => $endDate,
-            'is_active' => true,
-        ]);
-        
-        // Списываем средства (если пакет платный)
-        if ($package->price > 0) {
-            $user->decrement('balance', $package->price);
-        }
-        
+        // ✅ Success - возвращаем ПОСЛЕ успешной транзакции
         return redirect()->route('account.packages.index')
             ->with('success', 'Тариф "' . $package->name . '" успешно активирован!');
+            
+        } catch (\Exception $e) {
+            // ✅ Ошибка - ловим и показываем пользователю
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
 }

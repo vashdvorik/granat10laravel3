@@ -21,12 +21,14 @@ class Product extends Model
         'alias',
         'is_vip',
         'is_active',
-        'sale_started_at',
-        'push_at',
         'category_id',
-        'seller_id',
     ];
-
+    protected $guarded = [
+    'id',
+    'seller_id',      // Только код устанавливает владельца
+    'sale_started_at', // Автоматически при активации акции
+    'push_at',        // Автоматически при продвижении
+];
     public function category()
     {
         return $this->belongsTo(\App\Models\Category::class);

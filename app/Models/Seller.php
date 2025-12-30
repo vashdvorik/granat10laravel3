@@ -11,7 +11,7 @@ class Seller extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+    
         'name',
         'phone',
         'town',
@@ -28,9 +28,15 @@ class Seller extends Model
         'viber',
         'photos',
         'logo',
-        'balance',
+        
     ];
-
+    protected $guarded = [
+    'id',
+    'user_id',      // Только код может установить владельца
+    'balance',      // Только система меняет баланс
+    'product_count', // Автоматически считается
+    ];
+    
     public function products()
     {
         return $this->hasMany(Product::class);
