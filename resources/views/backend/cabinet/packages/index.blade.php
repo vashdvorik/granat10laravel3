@@ -1,4 +1,4 @@
-{{-- Страница тарифов в личном кабинете --}}
+{{-- Страница тарифов в магазине --}}
 
 @extends('backend.cabinet.layout_cabinet')
 
@@ -57,11 +57,11 @@
                 <div class="col-xxl-3 col-lg-4 col-sm-6 mb-30">
                     <div class="card h-100">
                         <div class="card-body p-30">
-<div class="pricing d-flex align-items-center">
-    <span class="pricing__tag {{ $isCurrentPackage ? 'color-success order-bg-opacity-success' : 'color-primary order-bg-opacity-primary' }} rounded-pill">
-        {{ $package->name }}
-    </span>
-</div>
+                            <div class="pricing d-flex align-items-center">
+                                <span class="pricing__tag {{ $isCurrentPackage ? 'color-success order-bg-opacity-success' : 'color-primary order-bg-opacity-primary' }} rounded-pill">
+                                    {{ $package->name }}
+                                </span>
+                            </div>
                             
                             <div class="pricing__price rounded">
                                 <p class="pricing_value display-3 color-dark d-flex align-items-center text-capitalize fw-600 mb-1">

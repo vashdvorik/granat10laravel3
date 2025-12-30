@@ -1,4 +1,4 @@
-{{-- ПОЛЬЗОВАТЕЛЬ--}}
+{{--  Смена пароля пользователя--}}
 
 @extends('backend.cabinet.layout_cabinet')
 

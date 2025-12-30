@@ -1,4 +1,4 @@
-{{-- Редактирование профиля пользователя --}}
+{{-- Редактирование профиля пользователя  --}}
 
 @extends('backend.cabinet.layout_cabinet')
 
@@ -149,43 +149,7 @@
                 </div>
                 <!-- Edit Profile End -->
 
-                <!-- Дополнительная информация -->
-                <div class="card mt-25 mb-25">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-20 mb-md-0">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-15">
-                                        <div class="wh-50 rounded-circle d-flex align-items-center justify-content-center" 
-                                             style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);">
-                                            <i class="uil uil-calendar-alt fs-20" style="color: #667eea;"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0 color-light fs-13">Дата регистрации</p>
-                                        <h6 class="mb-0 fw-500">{{ $user->created_at->format('d.m.Y H:i') }}</h6>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-15">
-                                        <div class="wh-50 rounded-circle d-flex align-items-center justify-content-center" 
-                                             style="background: linear-gradient(135deg, rgba(250, 112, 154, 0.15) 0%, rgba(254, 225, 64, 0.15) 100%);">
-                                            <i class="uil uil-lock fs-20" style="color: #fa709a;"></i>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="mb-0 color-light fs-13">Безопасность</p>
-                                        <a href="{{ route('account.user.change_password') }}" class="fw-500 text-primary">
-                                            Изменить пароль <i class="uil uil-arrow-right"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
