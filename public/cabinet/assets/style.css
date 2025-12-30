@@ -3712,7 +3712,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 14px;
   font-weight: 500 !important;
   font-family: "Jost", sans-serif;
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 4px;
   color: var(--color-gray);
 }
@@ -4548,7 +4548,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
-  text-transform: capitalize;
+  text-transform: none;
   display: flex;
   align-items: center;
   width: auto;
@@ -5555,7 +5555,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   position: relative;
   font-weight: 500;
   line-height: 1.3571428571;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .sidebar__menu-group ul.sidebar_nav li > a .nav-icon {
   color: var(--color-lighten);
@@ -6693,7 +6693,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   color: var(--color-light);
   display: flex;
   align-items: center;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .breadcrumb-item + .breadcrumb-item::before {
@@ -6759,7 +6759,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   justify-content: space-between;
   align-items: center;
   border-radius: 10px 10px 0 0;
-  text-transform: capitalize;
+  text-transform: none;
   padding-top: 0;
   padding-bottom: 0;
   min-height: 66px;
@@ -7565,7 +7565,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
 }
 .feature-cards6 .card-short .card-short-checkbox .checkbox-text {
   color: var(--color-success);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .feature-cards6 .card-short .card-short-checkbox .custom-checkbox input[type=checkbox]:checked + label:after {
   border: 1px solid var(--color-success);
@@ -9182,7 +9182,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.6666666667;
   font-weight: 500;
   width: max-content;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 /* Chart label detail */
@@ -9350,7 +9350,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 15px;
   margin-top: 7px;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .revenueSourceChart .chart-content__single span.data {
   font-weight: 500;
@@ -9513,7 +9513,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.7857142857;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .user-bio__content {
@@ -9521,7 +9521,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.6666666667;
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .user-bio .card-body {
   padding-top: 18px;
@@ -9708,7 +9708,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 15px;
   line-height: 1.6666666667;
   font-weight: 400;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .ap-po-details--2 .ap-po-details-time {
   border-radius: 8px;
@@ -9927,7 +9927,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   padding: 17px 25px;
   color: var(--color-dark);
 }
@@ -9946,7 +9946,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   padding: 17px 25px;
   font-size: 14px;
   font-weight: 400;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .ap-content-wrapper .card-header img,
@@ -9998,7 +9998,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.6923076923;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .ap-post-content__feedback a:not(:last-child) {
   margin-right: 20px;
@@ -10040,7 +10040,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
 .ap-post-attach__btn {
   display: none;
   height: 35px;
-  text-transform: capitalize;
+  text-transform: none;
   box-shadow: 0 8px 13px rgba(95, 99, 242, 0.2);
 }
 .ap-post-attach__headImg {
@@ -10203,7 +10203,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 14px;
   line-height: 1.5714285714;
   font-weight: 400;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .ap-post-cc-reply__reaction {
   margin-top: 3px;
@@ -10214,7 +10214,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 13px;
   line-height: 1.6923076923;
   font-weight: 400;
-  text-transform: capitalize;
+  text-transform: none;
   position: relative;
 }
 .ap-post-cc-reply__reaction li:not(:last-child) {
@@ -10328,7 +10328,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-size: 12px;
   line-height: 1.25;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   padding: 8px 14px;
   border-radius: 5px;
   border: 1px solid var(--border-color);
@@ -10448,7 +10448,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.4285714286;
   font-weight: 500;
   border-radius: 6px;
-  text-transform: capitalize;
+  text-transform: none;
   padding: 15px 10px;
   color: var(--color-light);
   height: 46px;
@@ -11290,7 +11290,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-weight: 500;
   height: 40px;
   border-radius: 6px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .user-member .action-btn a img.svg,
 .user-member .action-btn a svg {
@@ -11447,7 +11447,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
 .user-group .user-group-progress-top {
   margin-top: 14px;
   margin-bottom: 20px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .user-group .user-group-progress-top span {
   white-space: nowrap;
@@ -11581,21 +11581,21 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   color: var(--color-gray);
   font-size: 14px;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .userDatatable-title {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .projectDatatable-title {
   font-size: 14px;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .userDatatable-inline-title p {
@@ -11603,7 +11603,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.8333333333;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .project-table .userDatatable-inline-title h6 {
@@ -11618,7 +11618,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.4285714286;
   font-weight: 500;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .userDatatable-content-status {
@@ -11766,7 +11766,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   font-weight: 400;
   color: var(--color-lighten);
   padding: 0 15px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .project-tap .nav-link.active {
   color: var(--color-primary);
@@ -11801,7 +11801,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
 }
 
 .project-category {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .project-category .select2-container--default .select2-selection--single,
 .project-category .select2-container--default .select2-selection--multiple {
@@ -11969,7 +11969,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   color: var(--color-light);
 }
 .new-member-modal .form-group label {
-  text-transform: capitalize;
+  text-transform: none;
   color: var(--color-dark);
   font-size: 14px;
   line-height: 1.8571428571;
@@ -12193,7 +12193,7 @@ body.top-menu .navbar-left .customizer-trigger + .top-menu {
   line-height: 1.3333333333;
   font-weight: 500;
   border-radius: 4px;
-  text-transform: capitalize;
+  text-transform: none;
   margin-left: 7px;
 }
 .timeline-box .timeline-single__days {
@@ -14391,11 +14391,11 @@ select.select-arrow-none::-ms-expand,
   line-height: 1.7857142857;
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .select2-results__option {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .select2-container .select2-selection--single .select2-selection__rendered {
@@ -14424,7 +14424,7 @@ select.select-arrow-none::-ms-expand,
   line-height: 1.2727272727;
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__rendered {
@@ -14533,7 +14533,7 @@ select.select-arrow-none::-ms-expand,
 }
 
 .acButton {
-  text-transform: capitalize;
+  text-transform: none;
   padding: 3px 15px;
   margin: 4px 0;
   display: flex;
@@ -14824,7 +14824,7 @@ input[type=checkbox]:checked + label.strikethrough {
 }
 
 .files-area__right p {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .files-area__right .dropdown img,
 .files-area__right .dropdown svg {
@@ -14834,7 +14834,7 @@ input[type=checkbox]:checked + label.strikethrough {
 
 .breadcrumb-edit,
 .breadcrumb-remove {
-  text-transform: capitalize;
+  text-transform: none;
   padding: 5px 15px;
 }
 .breadcrumb-edit img,
@@ -15054,7 +15054,7 @@ input[type=checkbox]:checked + label.strikethrough {
   width: 22px;
 }
 .chat-body .chat-header .media h5 {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .chat-wrapper {
@@ -15466,7 +15466,7 @@ input[type=checkbox]:checked + label.strikethrough {
   color: var(--color-gray);
   font-weight: 400;
   padding: 10px 25px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media only screen and (max-width: 479px) {
   .chat-text-box__other .dropdown-default .dropdown-item,
@@ -15484,7 +15484,7 @@ input[type=checkbox]:checked + label.strikethrough {
   font-size: 14px;
   line-height: 1.5714285714;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .user-button-top button img,
 .user-button-top button svg {
@@ -15799,7 +15799,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 }
 #full-calendar .fc-toolbar-chunk .fc-today-button {
   padding: 6.5px 15px;
-  text-transform: capitalize;
+  text-transform: none;
   font-size: 13px;
   font-weight: 500;
   border: 1px solid var(--border-color);
@@ -15864,7 +15864,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   font-size: 13px;
   font-weight: 500;
   padding: 6.5px 13.68px;
-  text-transform: capitalize;
+  text-transform: none;
   border: 1px solid var(--border-color);
   color: var(--color-light);
 }
@@ -16540,7 +16540,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 }
 .product-item__body .card-title {
   margin-bottom: 9px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .product-item__button button {
   height: 34px;
@@ -16548,7 +16548,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   line-height: 1.25;
   font-weight: 500;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
   border: 1px solid var(--border-light);
   border-radius: 4px;
 }
@@ -16669,7 +16669,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 .product--list .product-item__body .card-title {
   font-size: calc(16.2px + 0.15vw);
   margin-bottom: 0;
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media (min-width: 1200px) {
   .product--list .product-item__body .card-title {
@@ -16843,7 +16843,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   font-size: 15px;
   line-height: 1.3333333333;
   position: relative;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .product-sidebar-widget .widget_title h6:before {
   content: "\f107";
@@ -16882,7 +16882,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 .product-ratings ul li,
 .product-brands ul li,
 .product-category ul li {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .product-ratings ul li:not(:last-child),
 .product-brands ul li:not(:last-child),
@@ -16917,7 +16917,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 /* See more & see less */
 .limit-list-item .more {
   color: var(--color-primary);
-  text-transform: capitalize;
+  text-transform: none;
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -17050,7 +17050,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   font-weight: 500;
   color: var(--color-dark);
   margin-bottom: 0;
-  text-transform: capitalize;
+  text-transform: none;
   flex-basis: 65px;
   margin-bottom: 0;
 }
@@ -17386,7 +17386,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   line-height: 1.4666666667;
   font-weight: 500;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .product-cart__cupon {
   display: flex;
@@ -17472,7 +17472,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   line-height: 2.1428571429;
   font-weight: 500;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .Product-cart-title .media p:not(:last-child) {
   margin-right: 20px;
@@ -17548,7 +17548,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .order-summery .total > div span {
   color: var(--color-dark);
@@ -17574,7 +17574,7 @@ table.fc-scrollgrid thead .fc-scroller-harness .fc-scroller {
 
 .order-summery .checkout {
   border-radius: 8px;
-  text-transform: capitalize;
+  text-transform: none;
   color: var(--color-white);
   font-size: 15px;
   font-weight: 500;
@@ -17595,7 +17595,7 @@ td.order-summery .total > div {
 }
 
 .promo-code {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .promo-code label {
   font-size: 14px;
@@ -18112,7 +18112,7 @@ td.order-summery .total > div {
   line-height: 1.5333333333;
   font-weight: 400;
   color: var(--body-color);
-  text-transform: capitalize;
+  text-transform: none;
   background-color: transparent;
 }
 .wizard7 .checkout-shipping-form .edit-profile__body .form-control-plaintext:focus {
@@ -18242,7 +18242,7 @@ td.order-summery .total > div {
   font-weight: 400;
   margin-bottom: 5px;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .payment-method-card .card-body .form-control {
   height: 48px;
@@ -18250,7 +18250,7 @@ td.order-summery .total > div {
 }
 .payment-method-card .card-body .form-control input, .payment-method-card .card-body .form-control::placeholder {
   color: var(--color-lighten);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .payment-method-card .card-body .form-control:focus {
   background-color: transparent;
@@ -18258,7 +18258,7 @@ td.order-summery .total > div {
 .payment-method-card .select2-container .select2-selection--single .select2-selection__rendered,
 .payment-method-card .select2-container--default .select2-selection--single .select2-selection__placeholder {
   color: var(--color-lighten);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .payment-method-area--top {
@@ -18334,7 +18334,7 @@ td.order-summery .total > div {
   }
 }
 .crc__title-btn {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .crc__title-btn img,
 .crc__title-btn svg {
@@ -18459,7 +18459,7 @@ td.order-summery .total > div {
 .payment-invoice-logo span {
   font-size: calc(17.1px + 0.825vw);
   font-weight: bold;
-  text-transform: capitalize;
+  text-transform: none;
   color: var(--color-dark);
 }
 @media (min-width: 1200px) {
@@ -18480,7 +18480,7 @@ td.order-summery .total > div {
 .payment-invoice__btn button {
   font-size: 14px;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   height: 38px;
   -webkit-print-color-adjust: exact;
 }
@@ -18579,7 +18579,7 @@ td.order-summery .total > div {
   line-height: 1.6;
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .payment-invoice-table.userDatatable table thead tr th {
@@ -18783,7 +18783,7 @@ td.order-summery .total > div {
   font-size: 12px;
   line-height: 1.25;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .orderDatatable_actions {
@@ -18958,7 +18958,7 @@ td.order-summery .total > div {
   color: var(--color-gray);
 }
 .selling-table-wrap--traffic .selling-product-img span {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .selling-table-wrap--member table tbody td {
   color: var(--color-gray);
@@ -19065,7 +19065,7 @@ table.table-rounded tr td {
 }
 table.table-rounded thead tr th {
   padding: 16px 20px;
-  text-transform: capitalize;
+  text-transform: none;
   background-color: var(--bg-normal);
   color: var(--color-gray);
 }
@@ -19217,7 +19217,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.4285714286;
   font-weight: 500;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 7px;
 }
 .add-product__body .form-group .form-control {
@@ -19234,7 +19234,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.4285714286;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .add-product__body .form-group .form-control:-moz-placeholder {
   line-height: 35px;
@@ -19564,7 +19564,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.1428571429;
   font-weight: 500;
   color: var(--color-primary);
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 @media only screen and (max-width: 767px) {
@@ -19590,7 +19590,7 @@ table.table-rounded tbody tr td:last-child {
   font-size: 13px;
   line-height: 1.6923076923;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .search-keyword ul li a.active {
   background-color: var(--color-primary);
@@ -19601,7 +19601,7 @@ table.table-rounded tbody tr td:last-child {
 }
 
 .search-content .search-content__keyResult a h6 {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .search-content .search-content__keyResult a h6 span {
   font-weight: 600;
@@ -19618,7 +19618,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.25;
   font-weight: 600;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 0;
 }
 .search-content .keyword-searching span {
@@ -19967,7 +19967,7 @@ table.table-rounded tbody tr td:last-child {
 .breadcrumb-main.application-ui .breadcrumb-action .action-btn .btn {
   padding: 0 15px;
   height: 35px;
-  text-transform: capitalize;
+  text-transform: none;
   border-radius: 5px;
   border-color: var(--color-primary);
 }
@@ -20000,7 +20000,7 @@ table.table-rounded tbody tr td:last-child {
   font-size: 14px;
   line-height: 1.5714285714;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   padding: 0 13px;
   color: var(--color-gray);
   height: 30px;
@@ -20076,7 +20076,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.5384615385;
   font-weight: 500;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .pricing__price sup {
   font-size: 16px;
@@ -20097,7 +20097,7 @@ table.table-rounded tbody tr td:last-child {
   padding-left: 1.33333rem;
   margin-left: 0;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .pricing__features ul li:not(:last-child) {
   margin-bottom: 15px;
@@ -20490,7 +20490,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.25;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
   margin-top: 12px;
 }
 
@@ -20686,7 +20686,7 @@ table.table-rounded tbody tr td:last-child {
   height: auto;
   border-radius: 4px;
   margin-bottom: 14px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .version-list__single:not(:last-child) {
   margin-bottom: 30px;
@@ -20834,7 +20834,7 @@ table.table-rounded tbody tr td:last-child {
   margin: 19px 0 21px 0;
 }
 .banner-feature__btn {
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media only screen and (max-width: 1399px) {
   .banner-feature .banner-feature__shape img {
@@ -21005,7 +21005,7 @@ table.table-rounded tbody tr td:last-child {
   color: var(--color-gray);
 }
 .banner-feature--7 .banner-feature__heading {
-  text-transform: capitalize;
+  text-transform: none;
 }
 .banner-feature--7 .banner-feature__shape.position-absolute {
   right: 0;
@@ -22133,7 +22133,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.3333333333;
   font-weight: 500;
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
   transition: var(--transition);
   margin-top: 11px;
   padding-bottom: 6px;
@@ -22182,7 +22182,7 @@ table.table-rounded tbody tr td:last-child {
   font-size: 15px;
   line-height: 1.3333333333;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   transition: var(--transition);
   position: relative;
 }
@@ -22342,7 +22342,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.7857142857;
   font-weight: 400;
   height: 36px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .knowledgebase-help .card-body button img,
 .knowledgebase-help .card-body button svg {
@@ -23258,7 +23258,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.4285714286;
   font-weight: 500;
   height: 38px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .kanban-modal__progress .progress-wrap {
@@ -23280,7 +23280,7 @@ table.table-rounded tbody tr td:last-child {
   font-weight: 500;
   height: 36px;
   padding: 0 37px;
-  text-transform: capitalize;
+  text-transform: none;
   border: 1px solid transparent;
 }
 .kanban-modal__list ul {
@@ -23319,7 +23319,7 @@ table.table-rounded tbody tr td:last-child {
   color: var(--color-gray);
   font-size: 14px;
   font-weight: 400;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .kanban-modal__list .custom-checkbox input[type=checkbox]:checked + label {
   color: var(--color-light);
@@ -23380,7 +23380,7 @@ table.table-rounded tbody tr td:last-child {
 }
 
 .close-popup-modal {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .is-open {
@@ -23585,7 +23585,7 @@ table.table-rounded tbody tr td:last-child {
 }
 .bookmark__button .btn {
   margin: 5px;
-  text-transform: capitalize;
+  text-transform: none;
   border-radius: 3px;
   height: 32px;
   padding: 0 15px;
@@ -23671,7 +23671,7 @@ table.table-rounded tbody tr td:last-child {
   line-height: 1.7857142857;
   font-weight: 500;
   height: 44px;
-  text-transform: capitalize;
+  text-transform: none;
   margin: 7px;
 }
 .layout-button button.btn-primary {
@@ -23986,7 +23986,7 @@ body:after {
   line-height: 1.7857142857;
   font-weight: 400;
   color: var(--color-gray-x);
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media only screen and (max-width: 575px) {
   #filter-form-container .form-group {
@@ -24052,7 +24052,7 @@ body:after {
   height: 40px;
   border: 1px solid var(--border-color);
   color: var(--color-dark);
-  text-transform: capitalize;
+  text-transform: none;
   width: 200px;
 }
 @media only screen and (max-width: 479px) {
@@ -24334,7 +24334,7 @@ body:after {
   outline: none;
   border: none;
   padding: 0 12px;
-  text-transform: capitalize;
+  text-transform: none;
   transition: 0.3s ease-in-out;
 }
 .team-members ul li .team-member__right .team-member__add button:hover {
@@ -24508,7 +24508,7 @@ body:after {
   border-color: var(--color-primary);
 }
 .ticket_modal .modal-content .ticket_modal-modal form .button-group .btn {
-  text-transform: capitalize;
+  text-transform: none;
   transition: 0.3s ease-in-out;
   padding: 0 30px;
 }
@@ -24564,7 +24564,7 @@ body:after {
   border-color: var(--color-primary);
 }
 .new-ticket .ticket_modal .ticket_modal-modal form .button-group .btn {
-  text-transform: capitalize;
+  text-transform: none;
   transition: 0.3s ease-in-out;
   padding: 3px 30px;
 }
@@ -24641,7 +24641,7 @@ body:after {
   border: none;
   box-shadow: none;
   padding: 0 20px;
-  text-transform: capitalize;
+  text-transform: none;
   margin-left: 20px;
   transition: var(--transition);
 }
@@ -24668,7 +24668,7 @@ body:after {
   font-weight: 400;
   color: var(--color-gray);
   margin-right: 10px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .support-form .support-form__input-id {
   margin: 0 30px 0 0;
@@ -24728,7 +24728,7 @@ body:after {
   font-weight: 500;
   line-height: 1.4285714286;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
   display: inline-flex;
   align-items: center;
 }
@@ -25111,7 +25111,7 @@ body:after {
   align-items: center;
   justify-self: center;
   min-height: 46px;
-  text-transform: capitalize;
+  text-transform: none;
   font-size: 15px;
   font-weight: 400;
   line-height: 1.6666666667;
@@ -25229,7 +25229,7 @@ body:after {
   line-height: 1.4285714286;
   background-color: var(--bg-deep);
   text-decoration: none;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .job-item__button button:hover {
   background-color: var(--color-primary);
@@ -25407,7 +25407,7 @@ body:after {
   color: var(--color-white);
   font-size: 13px;
   font-weight: 500;
-  text-transform: capitalize;
+  text-transform: none;
   border-radius: 5px;
   padding: 0 15px;
   height: 38px;
@@ -25446,7 +25446,7 @@ body:after {
   border-color: var(--color-primary);
 }
 .job-apply-wrapper .job-apply__content form .button-group .btn {
-  text-transform: capitalize;
+  text-transform: none;
   transition: 0.3s ease-in-out;
   padding: 0 30px;
   height: 50px;
@@ -25495,7 +25495,7 @@ body:after {
   font-weight: 600;
   font-size: 18px;
   margin-top: 20px;
-  text-transform: capitalize;
+  text-transform: none;
   word-break: break-all;
 }
 @media only screen and (max-width: 1399px) {
@@ -25736,10 +25736,10 @@ body:after {
   font-weight: 400;
   line-height: 1.6666666667;
   color: var(--color-gray-x);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .course-accordion .dm-collapse-item .dm-collapse-item__body .course-collapse-body-item .course-preview-lectures {
-  text-transform: capitalize;
+  text-transform: none;
   font-size: 14px;
   font-weight: 400;
   line-height: 1.4285714286;
@@ -25927,7 +25927,7 @@ body:after {
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4666666667;
-  text-transform: capitalize;
+  text-transform: none;
   color: var(--color-white);
   display: inline-flex;
   align-items: center;
@@ -26126,7 +26126,7 @@ body:after {
   font-size: 15px;
   font-weight: 400;
   color: var(--color-light);
-  text-transform: capitalize;
+  text-transform: none;
 }
 .blog-card__header-top {
   margin-top: 11px;
@@ -26364,7 +26364,7 @@ body:after {
   font-size: calc(16.2px + 0.15vw);
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media (min-width: 1200px) {
   .blog-body ul li {
@@ -26396,7 +26396,7 @@ body:after {
   font-size: calc(16.2px + 0.15vw);
   font-weight: 400;
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
 }
 @media (min-width: 1200px) {
   .blog-body ol li {
@@ -26453,7 +26453,7 @@ body:after {
   font-weight: 500;
   color: var(--color-dark);
   white-space: nowrap;
-  text-transform: capitalize;
+  text-transform: none;
   margin: 10px 18px 10px 0;
 }
 .blog-share ul {
@@ -26477,7 +26477,7 @@ body:after {
   border: 1px solid var(--border-color);
   background-color: var(--bg-white);
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
   transition: var(--transition);
 }
 .blog-share ul li a:hover {
@@ -26713,7 +26713,7 @@ body:after {
   font-weight: 500;
   color: #5C637E;
   white-space: nowrap;
-  text-transform: capitalize;
+  text-transform: none;
   margin: 12px;
 }
 .blog-details .blog-share-top .blog-share-fixed ul {
@@ -26733,7 +26733,7 @@ body:after {
   border: 1px solid var(--border-color);
   background-color: var(--bg-white);
   color: var(--color-gray);
-  text-transform: capitalize;
+  text-transform: none;
   transition: var(--transition);
   width: 50px;
   height: 50px;
@@ -26933,7 +26933,7 @@ body:after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 19px;
   margin-top: 23px;
 }
@@ -27110,7 +27110,7 @@ body:after {
 }
 
 .edit-profile__body label {
-  text-transform: capitalize;
+  text-transform: none;
   margin-bottom: 8px;
 }
 .edit-profile__body .form-group label {
@@ -30288,7 +30288,7 @@ body:after {
   height: 3rem;
 }
 .add-contact .add-new-contact button {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .contact-list-wrap {

@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
-                    <h4 class="text-capitalize breadcrumb-title">Редактирование профиля</h4>
+                    <h4 class="breadcrumb-title">Редактирование профиля</h4>
                     <div class="breadcrumb-action justify-content-center flex-wrap">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
@@ -150,7 +150,7 @@
                 <!-- Edit Profile End -->
 
                 <!-- Дополнительная информация -->
-                <div class="card mt-25">
+                <div class="card mt-25 mb-25">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6 mb-20 mb-md-0">
