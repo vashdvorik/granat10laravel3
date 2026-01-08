@@ -94,9 +94,9 @@
                 </div>
             </div>
         </div>
-        {{--
+        
         <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Зарегистрироваться</button>
-        <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="#">Или зарегистрируйтесь через соцсети</a>
+    {{--    <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="#">Или зарегистрируйтесь через соцсети</a>
         <div class="flex items-center gap-x-2 justify-between mb-[20px]">
             <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
                 <img src="{{ asset('auth/assets/images/icons/icon-google.svg') }}" alt="google icon">
