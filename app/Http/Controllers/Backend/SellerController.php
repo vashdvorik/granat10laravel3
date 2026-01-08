@@ -66,7 +66,7 @@ class SellerController extends Controller
         
         $user = Auth::user();
         
-        return view('backend.cabinet.store.about', compact('seller', 'user'));
+        return view('backend.cabinet.store.edit', compact('seller', 'user'));
     }
 
     /**
