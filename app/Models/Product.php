@@ -22,12 +22,13 @@ class Product extends Model
         'is_vip',
         'is_active',
         'category_id',
+        'seller_id',      
+        'sale_started_at', 
+        'push_at',        
     ];
     protected $guarded = [
     'id',
-    'seller_id',      // Только код устанавливает владельца
-    'sale_started_at', // Автоматически при активации акции
-    'push_at',        // Автоматически при продвижении
+
 ];
     public function category()
     {

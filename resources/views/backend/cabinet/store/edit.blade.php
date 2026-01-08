@@ -125,7 +125,7 @@
                                             <strong>Ограничения тарифа:</strong>
                                             @if(!$hasWebsiteLink) Ссылка на сайт недоступна на вашем тарифе. @endif
                                             @if(!$hasSocialLinks) Подключение соцсетей недоступно на вашем тарифе. @endif
-                                            <a href="{{ route('account.packages.index') }}" class="alert-link">Обновить тариф</a>
+                
                                         </div>
                                     </div>
                                 @endif
@@ -136,7 +136,7 @@
                                         <label for="link" class="form-label">
                                             <i class="uil uil-globe"></i> Веб-сайт
                                             @if(!$hasWebsiteLink)
-                                                <span class="badge bg-danger ms-2">Недоступно</span>
+                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
                                             @endif
                                         </label>
                                         <input type="url" 
@@ -164,7 +164,7 @@
                                                id="link_map" 
                                                name="link_map" 
                                                value="{{ old('link_map', $seller->link_map) }}"
-                                               placeholder="https://maps.google.com/...">
+                                               placeholder="https://maps.app.goo.gl/pP9mUgkPdA5BnkF25">
                                         <small class="text-muted">Доступно на всех тарифах</small>
                                         @error('link_map')
                                             <div class="invalid-feedback">{{ $message }}</div>
