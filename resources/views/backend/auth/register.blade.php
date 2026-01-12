@@ -10,7 +10,7 @@
 @endif
 --}}
 <div>
-    <form class="rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] my-[84px] dark:bg-[#1F2128]"
+    <form class="rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] mt-0 mb-6 md:my-[84px] dark:bg-[#1F2128]"
           action="{{ route('register') }}" method="POST">
         @csrf
 
@@ -21,10 +21,20 @@
         <p class="text-sm text-gray-500 mb-[30px] dark:text-gray-dark-500">Вы создаете аккаунт продавца</p>
 
         @if ($errors->any())
-            <div class="mb-4 text-red-500">
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
+            <div style="background-color: #FEE2E2; border: 1px solid #FCA5A5; border-radius: 8px; padding: 16px; margin-bottom: 16px; text-align: left;">
+                <div style="display: flex; align-items: flex-start;">
+                    <svg style="width: 20px; height: 20px; color: #DC2626; margin-right: 12px; margin-top: 2px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <div style="flex: 1;">
+                        <p style="font-weight: 600; color: #991B1B; margin-bottom: 8px; margin-top: 0;">Обнаружены ошибки:</p>
+                        <ul style="list-style-type: disc; padding-left: 20px; margin: 0;">
+                            @foreach ($errors->all() as $error)
+                                <li style="color: #B91C1C; font-size: 14px; margin-bottom: 4px;">{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
             </div>
         @endif
 

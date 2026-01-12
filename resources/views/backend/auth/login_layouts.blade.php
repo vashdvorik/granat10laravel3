@@ -20,11 +20,10 @@
     <header class="flex items-center justify-between flex-wrap bg-neutral-bg p-5 gap-5 md:py-6 md:pl-[25px] md:pr-[38px] lg:flex-nowrap dark:bg-dark-neutral-bg lg:gap-0">
         <a class="hidden logo" href="/">
             <img class="md:mr-[100px] lg:mr-[133px]" src="{{ asset('img/logo.png') }}" alt="логотип"></a>
-        <div class="bg-gray-100 flex rounded-xl w-full m-0 py-[14px] px-[18px] xl:w-[360px] dark:bg-gray-dark-100 lg:max-w-[250px] xl:max-w-[360px] lg:mr-[47px] lg:ml-6 order-last lg:order-first">
+      <!--  <div class="bg-gray-100 flex rounded-xl w-full m-0 py-[14px] px-[18px] xl:w-[360px] dark:bg-gray-dark-100 lg:max-w-[250px] xl:max-w-[360px] lg:mr-[47px] lg:ml-6 order-last lg:order-first">
             <img src="{{ asset('auth/assets/images/icons/icon-search-normal.svg') }}" alt="seacrh icon">
           <input class="input w-full bg-transparent outline-none pl-2 h-5 text-gray-300 focus:!outline-none placeholder:text-gray-900 dark:placeholder:text-gray-dark-300 placeholder:font-semibold" type="text" placeholder="Я ищу ...">
-    <!--      <img src="{{ asset('auth/assets/images/icons/icon-microphone-2.svg') }}" alt="microphone icon"> -->
-        </div>
+        </div> -->
     </header>
 
     <main class="overflow-x-scroll scrollbar-hide flex flex-col justify-between pt-[42px] px-[23px] pb-[28px]">
@@ -36,11 +35,11 @@
       <div class="w-full bg-neutral h-[1px] dark:bg-dark-neutral-border mb-[25px]"></div>
       <div class="flex items-center justify-between text-desc text-gray-400 flex-wrap gap-5 dark:text-gray-dark-400">
         <div class="flex items-center gap-2 flex-wrap">
-          <p> <span>© 2023 -</span><span class="text-color-brands">&nbsp;Frox</span><span>&nbsp;Dashboard</span></p>
+          <p> <span>© 2025 -</span><span class="text-color-brands">&nbsp;Маркетплейс</span><span>&nbsp;Гранат</span></p>
           <div class="bg-color-brands rounded-full hidden w-[2px] h-[2px] md:block"></div>
-          <p> <span>Made by</span><a class="text-color-brands" href="https://alithemes.com" target="_blank">&nbsp;AliThemes</a></p>
+          <p> <span>Создан:</span><a class="text-color-brands" href="https://granatlab.com/" target="_blank">&nbsp; Рекламное агентство "Гранат"</a></p>
         </div>
-        <div class="flex items-center gap-[15px]"><a class="transition-colors duration-300 hover:text-color-brands" href="#">About</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Careers</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Policy</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Contact</a></div>
+      <!--  <div class="flex items-center gap-[15px]"><a class="transition-colors duration-300 hover:text-color-brands" href="#">Об агентстве</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Careers</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Policy</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Contact</a></div> -->
       </div>
     </footer>
     </main>
