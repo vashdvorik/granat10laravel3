@@ -11,7 +11,7 @@
 @section('content')
 <div>
 
-    <form class="rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] my-[84px] dark:bg-[#1F2128]" action="{{ route('login') }}" method="POST">
+    <form class="rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] mt-0 mb-6 md:my-[84px] dark:bg-[#1F2128]" action="{{ route('login') }}" method="POST">
         @csrf
         <div class="mb-4 text-center mx-auto">
         {{--    <img class="inline-block" src="{{ asset('auth/assets/images/icons/icon-landing-success-1.svg') }}" alt="landing success">--}}

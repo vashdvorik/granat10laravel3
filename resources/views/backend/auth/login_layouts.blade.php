@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&amp;family=Noto+Sans:wght@400;500;600;700;800&amp;display=swap">
   </head>
 <body class="w-screen relative overflow-x-hidden min-h-screen bg-gray-100 scrollbar-hide authentication-sign-in-page dark:bg-[#000]">
-    <div class="wrapper mx-auto text-gray-900 font-normal grid scrollbar-hide grid-cols-[257px,1fr] grid-rows-[auto,1fr]" id="layout">
+  <div class="wrapper mx-auto text-gray-900 font-normal grid min-h-screen scrollbar-hide grid-cols-[257px,1fr] grid-rows-[auto,1fr]" id="layout">
 
     <header class="flex items-center justify-between flex-wrap bg-neutral-bg p-5 gap-5 md:py-6 md:pl-[25px] md:pr-[38px] lg:flex-nowrap dark:bg-dark-neutral-bg lg:gap-0">
         <a class="hidden logo" href="/">
@@ -26,16 +26,16 @@
         </div> -->
     </header>
 
-    <main class="overflow-x-scroll scrollbar-hide flex flex-col justify-between pt-[42px] px-[23px] pb-[28px]">
+    <main class="overflow-x-scroll scrollbar-hide flex flex-1 min-h-0 flex-col pt-[42px] px-[23px] pb-[28px]">
     @yield('content') 
         
     
     
-    <footer class="mt-[37px]">
+    <footer class="mt-auto pt-[37px]">
       <div class="w-full bg-neutral h-[1px] dark:bg-dark-neutral-border mb-[25px]"></div>
       <div class="flex items-center justify-between text-desc text-gray-400 flex-wrap gap-5 dark:text-gray-dark-400">
         <div class="flex items-center gap-2 flex-wrap">
-          <p> <span>© 2025 -</span><span class="text-color-brands">&nbsp;Маркетплейс</span><span>&nbsp;Гранат</span></p>
+          <p> <span>© 2025 -</span><span class="text-color-brands">&nbsp;Маркетплейс</span><span>&nbsp;</span></p>
           <div class="bg-color-brands rounded-full hidden w-[2px] h-[2px] md:block"></div>
           <p> <span>Создан:</span><a class="text-color-brands" href="https://granatlab.com/" target="_blank">&nbsp; Рекламное агентство "Гранат"</a></p>
         </div>
