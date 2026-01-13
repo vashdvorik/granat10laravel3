@@ -3,18 +3,6 @@
 @extends('backend.cabinet.layout_cabinet')
 
 @section('content_cabinet')
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
 <div class="contents">
     <div class="container-fluid">
@@ -39,7 +27,10 @@
                     <div class="row justify-content-center">
                         <div class="col-xxl-7 col-lg-10">
                             <div class="mx-sm-30 mx-20">
-                                <form action="{{ route('account.store.products.store') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('account.store.products.store') }}" 
+                                      method="POST" 
+                                      enctype="multipart/form-data"
+                                      novalidate>
                                     @csrf
 
                                     {{-- Основная информация --}}
@@ -48,6 +39,54 @@
                                             <div class="card-header">
                                                 <h6 class="fw-500">Информация о товаре</h6>
                                             </div>
+
+                                            {{-- ============================================ --}}
+                                            {{-- БЛОК СООБЩЕНИЙ И ОШИБОК --}}
+                                            {{-- ============================================ --}}
+                                            <div class="px-sm-40 px-20 pt-20">
+                                                {{-- ✅ СООБЩЕНИЕ ОБ УСПЕХЕ --}}
+                                                @if(session('success'))
+                                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                                        <div class="alert-content">
+                                                            <p>{{ session('success') }}</p>
+                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
+                                                                <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                {{-- ✅ СООБЩЕНИЕ ОБ ОШИБКЕ --}}
+                                                @if(session('error'))
+                                                    <div class="alert-big alert alert-danger alert-dismissible fade show" role="alert">
+                                                        <div class="alert-content">
+                                                            <h6 class="alert-heading">Ошибка</h6>
+                                                            <p>{{ session('error') }}</p>
+                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
+                                                                <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endif
+
+                                                {{-- ✅ ОШИБКИ ВАЛИДАЦИИ (включая лимиты пакета) --}}
+                                                @if($errors->any())
+                                                    <div class="alert-big alert alert-danger alert-dismissible fade show" role="alert">
+                                                        <div class="alert-content">
+                                                            <h6 class="alert-heading">Ошибка при сохранении товара</h6>
+                                                            <ul class="mb-0">
+                                                                @foreach($errors->all() as $error)
+                                                                    <li>{{ $error }}</li>
+                                                                @endforeach
+                                                            </ul>
+                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
+                                                                <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
                                             <div class="add-product__body px-sm-40 px-20">
                                                 {{-- Название --}}
                                                 <div class="form-group">
@@ -95,7 +134,7 @@
                                                         <input type="number" 
                                                                class="form-control @error('price') is-invalid @enderror" 
                                                                name="price" 
-                                                               value="{{ old('price', 0) }}" 
+                                                               value="{{ old('price') }}" 
                                                                min="0" 
                                                                step="1"
                                                                placeholder="0"
@@ -130,13 +169,13 @@
                                                     @enderror
                                                 </div>
 
-                                                {{-- Статус --}}
+                                                {{-- Статус активности --}}
                                                 <div class="form-group mb-20">
-                                                    <label class="mb-15">Статус</label>
-                                                    <div class="d-flex">
+                                                    <label class="form-label">Статус активности</label>
+                                                    <div class="d-flex gap-3">
                                                         <div class="radio-horizontal-list d-flex flex-wrap gap-3">
                                                             <div class="radio-theme-default custom-radio">
-                                                                <input class="radio" 
+                                                                <input class="radio @error('is_active') is-invalid @enderror" 
                                                                        type="radio" 
                                                                        name="is_active" 
                                                                        value="1" 
@@ -147,7 +186,7 @@
                                                                 </label>
                                                             </div>
                                                             <div class="radio-theme-default custom-radio">
-                                                                <input class="radio" 
+                                                                <input class="radio @error('is_active') is-invalid @enderror" 
                                                                        type="radio" 
                                                                        name="is_active" 
                                                                        value="0" 
@@ -159,9 +198,21 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    
+                                                    {{-- ⚠️ Ошибка лимита АКТИВНЫХ товаров --}}
+                                                    @error('is_active')
+                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
+                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
+                                                            <div>
+                                                                <small class="d-block mb-0 text-dark">
+                                                                    <strong>{{ $message }}</strong>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    @enderror
                                                 </div>
 
-                                                {{-- VIP товар --}}
+                                                {{-- ✅ VIP ТОВАР С ИНФОРМАЦИОННЫМ БЛОКОМ --}}
                                                 <div class="form-group mb-20">
                                                     <div class="checkbox-theme-default custom-checkbox">
                                                         <input class="checkbox" 
@@ -176,7 +227,28 @@
                                                             </span>
                                                         </label>
                                                     </div>
-                                                    <small class="text-muted">VIP товары выделяются в каталоге</small>
+                                                    
+                                                    {{-- ℹ️ Информационное сообщение --}}
+                                                    <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #5F63F2;">
+                                                        <i class="uil uil-info-circle me-2 mt-1" style="font-size: 18px; color: #5F63F2;"></i>
+                                                        <div>
+                                                            <small class="d-block mb-0">
+                                                                <strong>VIP товары показываются всегда первыми</strong> в каталоге и в поиске
+                                                            </small>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- ⚠️ Ошибка лимита VIP товаров --}}
+                                                    @error('is_vip')
+                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
+                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
+                                                            <div>
+                                                                <small class="d-block mb-0 text-dark">
+                                                                    <strong>{{ $message }}</strong>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    @enderror
                                                 </div>
 
                                                 {{-- Описание --}}

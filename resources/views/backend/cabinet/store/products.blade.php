@@ -138,15 +138,45 @@
 
                                                                         {{-- Статус активности --}}
                                                                         <div class="mb-2">
-                                                                            @if($product->is_active)
-                                                                                <span class="dm-tag tag-success tag-transparented">
-                                                                                    <i class="uil uil-check"></i> Активен
-                                                                                </span>
-                                                                            @else
-                                                                                <span class="dm-tag tag-danger tag-transparented">
-                                                                                    <i class="uil uil-pause"></i> Неактивен
-                                                                                </span>
-                                                                            @endif
+                                                                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                                                                @if($product->is_active)
+                                                                                    <span class="dm-tag tag-success tag-transparented">
+                                                                                        <i class="uil uil-check"></i> Активен
+                                                                                    </span>
+                                                                                    {{-- Кнопка деактивации --}}
+                                                                                    <form action="{{ route('account.store.products.deactivate', $product->id) }}" 
+                                                                                          method="POST" 
+                                                                                          class="status-change-form"
+                                                                                          data-action="deactivate"
+                                                                                          data-product-name="{{ $product->name }}">
+                                                                                        @csrf
+                                                                                        @method('PATCH')
+                                                                                        <button type="button" 
+                                                                                                class="btn btn-xs btn-outline-warning status-change-btn px-2 py-1"
+                                                                                                style="font-size: 11px; line-height: 1.2;">
+                                                                                            <i class="uil uil-pause" style="font-size: 12px;"></i> Остановить
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @else
+                                                                                    <span class="dm-tag tag-danger tag-transparented">
+                                                                                        <i class="uil uil-pause"></i> Неактивен
+                                                                                    </span>
+                                                                                    {{-- Кнопка активации --}}
+                                                                                    <form action="{{ route('account.store.products.activate', $product->id) }}" 
+                                                                                          method="POST" 
+                                                                                          class="status-change-form"
+                                                                                          data-action="activate"
+                                                                                          data-product-name="{{ $product->name }}">
+                                                                                        @csrf
+                                                                                        @method('PATCH')
+                                                                                        <button type="button" 
+                                                                                                class="btn btn-xs btn-success status-change-btn px-2 py-1"
+                                                                                                style="font-size: 11px; line-height: 1.2;">
+                                                                                            <i class="uil uil-play" style="font-size: 12px;"></i> Активировать
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
                                                                     </div>
 
@@ -174,12 +204,12 @@
                                                                         {{-- Кнопка Удалить --}}
                                                                         <form action="{{ route('account.store.products.destroy', $product->id) }}" 
                                                                               method="POST" 
-                                                                              class="d-inline"
-                                                                              onsubmit="return confirm('Удалить товар {{ $product->name }}?');">
+                                                                              class="delete-product-form"
+                                                                              data-product-name="{{ $product->name }}">
                                                                             @csrf
                                                                             @method('DELETE')
-                                                                            <button type="submit" 
-                                                                                    class="btn btn-default btn-squared color-light btn-outline-light px-20">
+                                                                            <button type="button" 
+                                                                                    class="btn btn-default btn-squared color-light btn-outline-light px-20 delete-product-btn">
                                                                                  Удалить
                                                                             </button>
                                                                         </form>
@@ -276,3 +306,200 @@
 }
 </style>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Настройка CSRF токена для всех AJAX запросов
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('input[name="_token"]').first().val()
+        }
+    });
+    
+    // Подтверждение удаления товара
+    $('.delete-product-btn').on('click', function(e) {
+        e.preventDefault();
+        const form = $(this).closest('.delete-product-form');
+        const productName = form.data('product-name');
+        
+        Swal.fire({
+            title: 'Удалить товар?',
+            html: `
+                <p>Вы уверены, что хотите удалить товар</p>
+                <h5 class="mt-2 mb-2 text-danger">${productName}</h5>
+                <p class="text-muted mb-0">Это действие невозможно отменить</p>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="uil uil-trash-alt me-1"></i> Да, удалить',
+            cancelButtonText: 'Отмена',
+            reverseButtons: true,
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Показываем индикатор загрузки
+                Swal.fire({
+                    title: 'Удаление...',
+                    text: 'Пожалуйста, подождите',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Отправляем форму
+                form.submit();
+            }
+        });
+    });
+
+    // Обработка активации/деактивации товара
+    $(document).on('click', '.status-change-btn', function(e) {
+        e.preventDefault();
+        const button = $(this);
+        const form = button.closest('.status-change-form');
+        const action = form.data('action');
+        const productName = form.data('product-name');
+        
+        let title, text, icon, confirmText;
+        
+        if (action === 'activate') {
+            title = 'Активировать товар?';
+            text = `Товар "${productName}" будет активирован и станет доступен для покупателей`;
+            icon = 'question';
+            confirmText = '<i class="uil uil-play me-1"></i> Да, активировать';
+        } else {
+            title = 'Остановить товар?';
+            text = `Товар "${productName}" будет деактивирован и скрыт от покупателей`;
+            icon = 'warning';
+            confirmText = '<i class="uil uil-pause me-1"></i> Да, остановить';
+        }
+        
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: icon,
+            showCancelButton: true,
+            confirmButtonColor: action === 'activate' ? '#28a745' : '#ffc107',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: confirmText,
+            cancelButtonText: 'Отмена',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Показываем индикатор загрузки
+                Swal.fire({
+                    title: action === 'activate' ? 'Активация...' : 'Деактивация...',
+                    text: 'Пожалуйста, подождите',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Отправляем AJAX запрос
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    success: function(response) {
+                        console.log('Success response:', response);
+                        
+                        // Находим контейнер со статусом
+                        const statusContainer = form.parent();
+                        const newAction = action === 'activate' ? 'deactivate' : 'activate';
+                        const newUrl = form.attr('action').replace(action, newAction);
+                        
+                        // Создаем новый HTML в зависимости от действия
+                        let newHtml = '';
+                        if (action === 'activate') {
+                            // Товар стал активным
+                            newHtml = `
+                                <span class="dm-tag tag-success tag-transparented">
+                                    <i class="uil uil-check"></i> Активен
+                                </span>
+                                <form action="${newUrl}" 
+                                      method="POST" 
+                                      class="status-change-form"
+                                      data-action="deactivate"
+                                      data-product-name="${productName}">
+                                    <input type="hidden" name="_token" value="${form.find('input[name="_token"]').val()}">
+                                    <input type="hidden" name="_method" value="PATCH">
+                                    <button type="button" 
+                                            class="btn btn-xs btn-outline-warning status-change-btn px-2 py-1"
+                                            style="font-size: 11px; line-height: 1.2;">
+                                        <i class="uil uil-pause" style="font-size: 12px;"></i> Остановить
+                                    </button>
+                                </form>
+                            `;
+                        } else {
+                            // Товар стал неактивным
+                            newHtml = `
+                                <span class="dm-tag tag-danger tag-transparented">
+                                    <i class="uil uil-pause"></i> Неактивен
+                                </span>
+                                <form action="${newUrl}" 
+                                      method="POST" 
+                                      class="status-change-form"
+                                      data-action="activate"
+                                      data-product-name="${productName}">
+                                    <input type="hidden" name="_token" value="${form.find('input[name="_token"]').val()}">
+                                    <input type="hidden" name="_method" value="PATCH">
+                                    <button type="button" 
+                                            class="btn btn-xs btn-success status-change-btn px-2 py-1"
+                                            style="font-size: 11px; line-height: 1.2;">
+                                        <i class="uil uil-play" style="font-size: 12px;"></i> Активировать
+                                    </button>
+                                </form>
+                            `;
+                        }
+                        
+                        // Заменяем содержимое контейнера
+                        statusContainer.html(newHtml);
+                        
+                        // Показываем уведомление об успехе
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Выполнено',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr) {
+                        console.log('Error response:', xhr);
+                        
+                        Swal.close();
+                        
+                        let errorMessage = 'Произошла ошибка';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage = xhr.responseJSON.error;
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        }
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ошибка',
+                            html: errorMessage,
+                            confirmButtonText: 'Понятно'
+                        });
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+@endpush

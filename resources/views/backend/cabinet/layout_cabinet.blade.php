@@ -310,8 +310,8 @@
                         <li class="{{ request()->routeIs('account.store.products.index') ? 'active' : '' }}">
                            <a href="{{ route('account.store.products.index') }}">Каталог товаров</a>
                         </li>
-                        <li class="{{ request()->is('account.g') ? 'active' : '' }}">
-                           <a href="account.g">Добавить товар</a>
+                        <li class="{{ request()->routeIs('account.store.products.create') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.products.create') }}">Добавить товар</a>
                         </li>
                         <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
                            <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>

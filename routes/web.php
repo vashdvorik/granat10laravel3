@@ -104,6 +104,10 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
             Route::get('{product}', [App\Http\Controllers\Backend\ProductController::class, 'show'])->name('show');
             Route::put('{product}', [App\Http\Controllers\Backend\ProductController::class, 'update'])->name('update');
             Route::delete('{product}', [App\Http\Controllers\Backend\ProductController::class, 'destroy'])->name('destroy');
+            
+            // Активация/деактивация товаров
+            Route::patch('{product}/activate', [App\Http\Controllers\Backend\ProductController::class, 'activate'])->name('activate');
+            Route::patch('{product}/deactivate', [App\Http\Controllers\Backend\ProductController::class, 'deactivate'])->name('deactivate');
         });
         
         // Редактирование магазина (ПАРАМЕТРИЗОВАННЫЙ ПУТЬ - В КОНЦЕ!)
