@@ -320,6 +320,48 @@
                                         </div>
                                     </div>
 
+                                    {{-- Изображения товара --}}
+                                    <div class="card add-product p-sm-30 p-20 mb-30">
+                                        <div class="card-body p-0">
+                                            <div class="card-header">
+                                                <h6 class="fw-500">Изображения товара</h6>
+                                            </div>
+                                            <!-- Start: product body -->
+                                            <div class="add-product__body-img px-sm-40 px-20">
+                                                <label for="upload-images" class="file-upload__label">
+                                                    <span class="upload-product-img px-10 d-block">
+                                                        <span class="file-upload">
+                                                            <img class="svg" src="{{ asset('cabinet/img/svg/upload.svg') }}" alt="">
+                                                            <input id="upload-images" 
+                                                                   class="file-upload__input" 
+                                                                   type="file" 
+                                                                   name="images[]" 
+                                                                   multiple 
+                                                                   accept="image/jpeg,image/png,image/jpg,image/webp">
+                                                        </span>
+                                                        <span class="pera">Перетащите изображения сюда</span>
+                                                        
+                                                        <span>или <a href="javascript:void(0)" class="color-secondary" onclick="document.getElementById('upload-images').click()">Выберите файлы</a> для загрузки</span>
+                                                        <span class="d-block mt-10 fs-13 text-muted">(JPG, PNG, WebP • макс. 5 МБ каждое • до 5 фото)</span>
+                                                    </span>
+                                                </label>
+                                                
+                                                @error('images')
+                                                    <div class="alert alert-danger mt-3">{{ $message }}</div>
+                                                @enderror
+                                                @error('images.*')
+                                                    <div class="alert alert-danger mt-3">{{ $message }}</div>
+                                                @enderror
+                                                
+                                                <!-- Preview area -->
+                                                <div id="upload-preview-area" class="mt-25" style="display: none;">
+                                                    <!-- Previews will be inserted here -->
+                                                </div>
+                                            </div>
+                                            <!-- End: product body -->
+                                        </div>
+                                    </div>
+
                                     {{-- Кнопки --}}
                                     <div class="button-group add-product-btn d-flex justify-content-sm-end justify-content-center mt-40 gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
@@ -341,3 +383,159 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    let selectedFiles = [];
+    const maxFiles = 5;
+    const maxFileSize = 5 * 1024 * 1024; // 5 MB
+    
+    // Handle file selection
+    $('#upload-images').on('change', function(e) {
+        handleFiles(e.target.files);
+    });
+    
+    // Drag and drop
+    $('.upload-product-img').on('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragging');
+    });
+    
+    $('.upload-product-img').on('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragging');
+    });
+    
+    $('.upload-product-img').on('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragging');
+        
+        const files = e.originalEvent.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    function handleFiles(files) {
+        const filesArray = Array.from(files);
+        
+        // Check total count
+        if (selectedFiles.length + filesArray.length > maxFiles) {
+            alert(`Можно загрузить максимум ${maxFiles} изображений`);
+            return;
+        }
+        
+        filesArray.forEach((file, arrayIndex) => {
+            // Validate file size
+            if (file.size > maxFileSize) {
+                alert(`Файл ${file.name} слишком большой (макс. 5 МБ)`);
+                return;
+            }
+            
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert(`Файл ${file.name} не является изображением`);
+                return;
+            }
+            
+            // Вычисляем правильный индекс ДО добавления в массив
+            const correctIndex = selectedFiles.length;
+            selectedFiles.push(file);
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                addPreview(file, e.target.result, correctIndex);
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        updateFileInput();
+    }
+    
+    function addPreview(file, src, index) {
+        const isMain = index === 0;
+        const sizeKB = (file.size / 1024).toFixed(1);
+        
+        const previewHtml = `
+            <div class="upload-product-media d-flex justify-content-between align-items-center mt-15" data-file-index="${index}">
+                <div class="upload-media-area d-flex">
+                    <img src="${src}" alt="${file.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                    <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
+                        <div>
+                            <p class="mb-0">${file.name}</p>
+                            <span class="fs-13 text-muted">${sizeKB} KB</span>
+                            ${isMain ? '<span class="btn btn-light btn-default btn-squared ">Главное</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="upload-media-area__btn">
+                    <button type="button" 
+                            class="btn-remove-image transparent rounded-circle wh-30 border-0 color-danger" 
+                            data-file-index="${index}">
+                        <img class="svg" src="{{ asset('cabinet/img/svg/trash-2.svg') }}" alt="">
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        $('#upload-preview-area').append(previewHtml).show();
+    }
+    
+    // Remove image
+    $(document).on('click', '.btn-remove-image', function(e) {
+        e.preventDefault();
+        const card = $(this).closest('.upload-product-media[data-file-index]');
+        const visualIndex = $('#upload-preview-area .upload-product-media[data-file-index]').index(card);
+        
+        selectedFiles.splice(visualIndex, 1);
+        card.remove();
+        
+        // Update indices and main badge
+        updatePreviews();
+        
+        if (selectedFiles.length === 0) {
+            $('#upload-preview-area').hide();
+        }
+        
+        updateFileInput();
+    });
+    
+    function updatePreviews() {
+        $('#upload-preview-area .upload-product-media[data-file-index]').each(function(index) {
+            $(this).attr('data-file-index', index);
+            $(this).find('.btn-remove-image').attr('data-file-index', index);
+            
+            // Remove all main badges first
+            $(this).find('.badge-primary').remove();
+            
+            // Add main badge to first item
+            if (index === 0) {
+                $(this).find('.upload-media-area__title > div').append(
+                    '<span class="btn btn-light btn-default btn-squared">Главное</span>'
+                );
+            }
+        });
+    }
+    
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        selectedFiles.forEach(file => dataTransfer.items.add(file));
+        document.getElementById('upload-images').files = dataTransfer.files;
+    }
+});
+</script>
+
+<style>
+.upload-product-img.dragging {
+    border-color: #5F63F2 !important;
+    background-color: rgba(95, 99, 242, 0.05);
+}
+
+.upload-media-area img {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+</style>
+@endpush

@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Image as ProductImage;
 
 class ProductController extends Controller
 {
@@ -88,6 +91,8 @@ class ProductController extends Controller
             'features4' => ['nullable', 'string', 'max:255'],
             'is_vip' => ['boolean'],
             'is_active' => ['boolean'],
+            'images' => ['nullable', 'array', 'max:5'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ], [
             // Кастомные сообщения
             'name.required' => 'Поле "Название товара" обязательно для заполнения',
@@ -100,6 +105,10 @@ class ProductController extends Controller
             'lowprice.numeric' => 'Цена со скидкой должна быть числом',
             'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
             'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
+            'images.max' => 'Можно загрузить максимум 5 изображений',
+            'images.*.image' => 'Файл должен быть изображением',
+            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
+            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
         ]);
 
         // ===================================================
@@ -172,7 +181,35 @@ class ProductController extends Controller
         // ===================================================
         // ШАГ 7: СОЗДАНИЕ ТОВАРА
         // ===================================================
-        Product::create($data);
+        $product = Product::create($data);
+
+        // ШАГ 8: ЗАГРУЗКА И СЖАТИЕ ИЗОБРАЖЕНИЙ
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $file) {
+                // Генерируем уникальное имя
+                $filename = Str::uuid() . '.webp';
+                $path = 'products/' . date('Y/m');
+                
+                // Читаем и обрабатываем изображение
+                $image = Image::make($file)->orientate();
+                
+                // Сохраняем оригинал (большое изображение - макс. 1200px)
+                $image->resize(1200, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                })->encode('webp', 85);
+                
+                $fullPath = $path . '/' . $filename;
+                Storage::disk('public')->put($fullPath, (string) $image);
+                
+                // Создаем запись в БД
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'path' => $fullPath,
+                    'is_main' => $index === 0, // Первое изображение - главное
+                ]);
+            }
+        }
 
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар создан');
@@ -234,6 +271,8 @@ class ProductController extends Controller
             'features4' => ['nullable', 'string', 'max:255'],
             'is_vip' => ['boolean'],
             'is_active' => ['boolean'],
+            'images' => ['nullable', 'array', 'max:5'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ], [
             // Кастомные сообщения
             'name.required' => 'Поле "Название товара" обязательно для заполнения',
@@ -246,6 +285,10 @@ class ProductController extends Controller
             'lowprice.numeric' => 'Цена со скидкой должна быть числом',
             'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
             'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
+            'images.max' => 'Можно загрузить максимум 5 изображений',
+            'images.*.image' => 'Файл должен быть изображением',
+            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
+            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
         ]);
 
         // ===================================================
@@ -309,9 +352,48 @@ class ProductController extends Controller
         // ===================================================
         // ШАГ 5: ОБНОВЛЕНИЕ ТОВАРА
         // ===================================================
-           
-
         $product->update($data);
+
+        // ===================================================
+        // ШАГ 6: ЗАГРУЗКА НОВЫХ ИЗОБРАЖЕНИЙ
+        // ===================================================
+        if ($request->hasFile('images')) {
+            $existingCount = $product->images()->count();
+            $newFilesCount = count($request->file('images'));
+            
+            // Проверяем лимит
+            if ($existingCount + $newFilesCount > 5) {
+                return redirect()->back()
+                    ->with('error', 'Превышен лимит изображений. Можно загрузить ещё ' . (5 - $existingCount) . ' фото.')
+                    ->withInput();
+            }
+            
+            foreach ($request->file('images') as $index => $file) {
+                // Генерируем уникальное имя
+                $filename = Str::uuid() . '.webp';
+                $path = 'products/' . date('Y/m');
+                
+                // Читаем и обрабатываем изображение
+                $image = Image::make($file)->orientate();
+                
+                // Сохраняем оригинал (большое изображение - макс. 1200px)
+                $image->resize(1200, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                })->encode('webp', 85);
+                
+                $fullPath = $path . '/' . $filename;
+                Storage::disk('public')->put($fullPath, (string) $image);
+                
+                // Создаем запись в БД
+                // Если нет главного изображения - делаем первое загружаемое главным
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'path' => $fullPath,
+                    'is_main' => $existingCount === 0 && $index === 0,
+                ]);
+            }
+        }
 
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар обновлён');
@@ -396,5 +478,69 @@ class ProductController extends Controller
         }
 
         return redirect()->back()->with('success', 'Товар "' . $product->name . '" деактивирован');
+    }
+
+    /**
+     * Удаление изображения товара
+     */
+    public function destroyImage(ProductImage $image)
+    {
+        $product = $image->product;
+        
+        if ($product->seller->user_id !== Auth::id()) {
+            abort(403, 'Доступ запрещён');
+        }
+
+        // Удаляем файл из хранилища
+        if (Storage::disk('public')->exists($image->path)) {
+            Storage::disk('public')->delete($image->path);
+        }
+
+        // Если удаляем главное изображение и есть другие - делаем главным первое
+        $wasMain = $image->is_main;
+        $image->delete();
+
+        if ($wasMain) {
+            $firstImage = $product->images()->first();
+            if ($firstImage) {
+                $firstImage->update(['is_main' => true]);
+            }
+        }
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Изображение удалено'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Изображение удалено');
+    }
+
+    /**
+     * Установить главное изображение
+     */
+    public function setMainImage(ProductImage $image)
+    {
+        $product = $image->product;
+        
+        if ($product->seller->user_id !== Auth::id()) {
+            abort(403, 'Доступ запрещён');
+        }
+
+        // Сбрасываем is_main у всех изображений товара
+        $product->images()->update(['is_main' => false]);
+
+        // Устанавливаем текущее как главное
+        $image->update(['is_main' => true]);
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Главное изображение обновлено'
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Главное изображение обновлено');
     }
 }

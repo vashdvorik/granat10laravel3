@@ -108,6 +108,10 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
             // Активация/деактивация товаров
             Route::patch('{product}/activate', [App\Http\Controllers\Backend\ProductController::class, 'activate'])->name('activate');
             Route::patch('{product}/deactivate', [App\Http\Controllers\Backend\ProductController::class, 'deactivate'])->name('deactivate');
+
+            // Работа с изображениями товаров
+            Route::delete('images/{image}', [App\Http\Controllers\Backend\ProductController::class, 'destroyImage'])->name('images.destroy');
+            Route::patch('images/{image}/set-main', [App\Http\Controllers\Backend\ProductController::class, 'setMainImage'])->name('images.set-main');
         });
         
         // Редактирование магазина (ПАРАМЕТРИЗОВАННЫЙ ПУТЬ - В КОНЦЕ!)
@@ -135,3 +139,4 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
 });
 });
+
