@@ -334,45 +334,41 @@
                                                 @if($product->images->count() > 0)
                                                     <div class="existing-images mb-25">
                                                         <h6 class="fw-500 mb-15">Текущие изображения</h6>
-                                                        <div class="row g-3" id="existing-images-container">
-                                                            @foreach($product->images->sortByDesc('is_main') as $image)
-                                                                <div class="col-md-6" data-image-id="{{ $image->id }}">
-                                                                    <div class="card border">
-                                                                        <div class="card-body p-3">
-                                                                            <div class="d-flex align-items-start gap-3">
-                                                                                <img src="{{ asset('storage/' . $image->path) }}" 
-                                                                                     alt="Product image" 
-                                                                                     class="rounded"
-                                                                                     style="width: 100px; height: 100px; object-fit: cover;">
-                                                                                <div class="flex-grow-1">
-                                                                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                                                                        <div>
-                                                                                            @if($image->is_main)
-                                                                                                <span class="btn btn-light btn-default btn-squared">Главное</span>
-                                                                                            @endif
-                                                                                            <p class="mb-0 text-muted small">{{ basename($image->path) }}</p>
-                                                                                        </div>
-                                                                                        <button type="button" 
-                                                                                                class="btn btn-sm btn-outline-danger delete-existing-image"
-                                                                                                data-image-id="{{ $image->id }}"
-                                                                                                title="Удалить">
-                                                                                            <i class="uil uil-trash-alt"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                    @if(!$image->is_main && $product->images->count() > 1)
-                                                                                        <button type="button" 
-                                                                                                class="btn btn-sm btn-outline-primary set-main-image"
-                                                                                                data-image-id="{{ $image->id }}">
-                                                                                            <i class="uil uil-star"></i> Сделать главным
-                                                                                        </button>
-                                                                                    @endif
-                                                                                </div>
-                                                                            </div>
+                                                        @foreach($product->images->sortByDesc('is_main') as $image)
+                                                            <div class="upload-product-media d-flex justify-content-between align-items-center mt-15" data-image-id="{{ $image->id }}">
+                                                                <div class="upload-media-area d-flex">
+                                                                    <img src="{{ asset('storage/' . $image->path) }}" 
+                                                                         alt="Product image" 
+                                                                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                                                    <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
+                                                                        <div>
+                                                                            <p class="mb-0">{{ Str::limit(basename($image->path), 8, '...') }}</p>
+                                                                            <span class="fs-13 text-muted">{{ number_format(Storage::disk('public')->size($image->path) / 1024, 1) }} KB</span>
+                                                                            @if($image->is_main)
+                                                                                <span class="btn btn-light btn-default btn-squared ms-2">Главное</span>
+                                                                            @endif
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            @endforeach
-                                                        </div>
+                                                                <div class="upload-media-area__btn d-flex gap-2">
+                                                                    @if(!$image->is_main && $product->images->count() > 1)
+                                                                        <button type="button" 
+                                                                                class="set-main-image border rounded"
+                                                                                data-image-id="{{ $image->id }}"
+                                                                                title="Сделать главным"
+                                                                                style="width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; background: white; border-color: #5F63F2 !important; color: #5F63F2; cursor: pointer;">
+                                                                            <i class="uil uil-star" style="font-size: 16px; line-height: 1;"></i>
+                                                                        </button>
+                                                                    @endif
+                                                                    <button type="button" 
+                                                                            class="delete-existing-image transparent rounded-circle wh-30 border-0 color-danger" 
+                                                                            data-image-id="{{ $image->id }}"
+                                                                            title="Удалить">
+                                                                        <i class="uil uil-trash-alt"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
                                                     </div>
                                                 @endif
 
@@ -456,7 +452,7 @@ $(document).ready(function() {
     $(document).on('click', '.delete-existing-image', function() {
         const button = $(this);
         const imageId = button.data('image-id');
-        const card = button.closest('.col-md-6[data-image-id="' + imageId + '"]');
+        const card = button.closest('.upload-product-media[data-image-id="' + imageId + '"]');
         
         Swal.fire({
             title: 'Удалить изображение?',
@@ -505,10 +501,10 @@ $(document).ready(function() {
     $(document).on('click', '.set-main-image', function() {
         const button = $(this);
         const imageId = button.data('image-id');
-        const currentCard = button.closest('[data-image-id]');
+        const currentCard = button.closest('.upload-product-media[data-image-id]');
         
         // Показываем индикатор загрузки
-        button.prop('disabled', true).html('<i class="uil uil-spinner-alt"></i> Обработка...');
+        button.prop('disabled', true).html('<i class="uil uil-spinner-alt"></i>');
         
         $.ajax({
             url: '{{ route("account.store.products.images.set-main", ":id") }}'.replace(':id', imageId),
@@ -517,20 +513,30 @@ $(document).ready(function() {
                 'X-CSRF-TOKEN': $('input[name="_token"]').val()
             },
             success: function(response) {
-                // Убираем бейдж "Главное" у всех изображений
-                $('#existing-images-container .badge-primary').remove();
-                
-                // Показываем все кнопки "Сделать главным"
-                $('#existing-images-container .set-main-image').each(function() {
-                    $(this).show().prop('disabled', false).html('<i class="uil uil-star"></i> Сделать главным');
+                // Убираем все бейджи "Главное" и показываем кнопки
+                $('.existing-images .upload-product-media').each(function() {
+                    $(this).find('.btn-squared:contains("Главное")').remove();
+                    const setMainBtn = $(this).find('.set-main-image');
+                    if (setMainBtn.length === 0 && $(this).data('image-id') !== imageId) {
+                        $(this).find('.upload-media-area__btn').prepend(
+                            `<button type="button" 
+                                    class="set-main-image border rounded"
+                                    data-image-id="${$(this).data('image-id')}"
+                                    title="Сделать главным"
+                                    style="width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; background: white; border-color: #5F63F2 !important; color: #5F63F2; cursor: pointer;">
+                                <i class="uil uil-star" style="font-size: 16px; line-height: 1;"></i>
+                            </button>`
+                        );
+                    }
                 });
                 
-                // Добавляем бейдж "Главное" в правильное место
-                const targetDiv = currentCard.find('.card-body .d-flex.align-items-start .flex-grow-1 .d-flex.justify-content-between.align-items-start > div').first();
-                targetDiv.prepend('<span class="btn btn-light btn-default btn-squared">Главное</span>');
+                // Добавляем бейдж "Главное" к текущему
+                currentCard.find('.upload-media-area__title > div').append(
+                    '<span class="btn btn-light btn-default btn-squared ms-2">Главное</span>'
+                );
                 
-                // Скрываем кнопку "Сделать главным" у текущего изображения
-                button.hide();
+                // Убираем кнопку "Сделать главным" у текущего изображения
+                button.remove();
                 
                 // Показываем уведомление
                 Swal.fire({
@@ -545,7 +551,7 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 // Восстанавливаем кнопку
-                button.prop('disabled', false).html('<i class="uil uil-star"></i> Сделать главным');
+                button.prop('disabled', false).html('<i class="uil uil-star"></i>');
                 
                 Swal.fire({
                     icon: 'error',
@@ -558,7 +564,7 @@ $(document).ready(function() {
     
     // Обновление счетчика изображений
     function updateImageCount() {
-        const count = $('#existing-images-container [data-image-id]').length;
+        const count = $('.existing-images .upload-product-media[data-image-id]').length;
         $('.badge-light').text(count + '/5');
         
         if (count < 5 && $('.new-images-upload').length === 0) {
@@ -642,7 +648,7 @@ $(document).ready(function() {
                         <img src="${src}" alt="${file.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
                         <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
                             <div>
-                                <p class="mb-0">${file.name}</p>
+                                <p class="mb-0">${file.name.length > 8 ? file.name.substring(0, 8) + '...' : file.name}</p>
                                 <span class="fs-13 text-muted">${sizeKB} KB</span>
                                 ${isMain ? '<span class="btn btn-light btn-default btn-squared ms-2">Главное</span>' : ''}
                             </div>
@@ -722,6 +728,20 @@ $(document).ready(function() {
 
 .existing-images .card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.set-main-image {
+    transition: all 0.3s ease;
+}
+
+.set-main-image:hover {
+    background: #5F63F2 !important;
+    color: white !important;
+}
+
+.set-main-image i {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 </style>
 @endpush

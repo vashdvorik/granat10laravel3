@@ -465,7 +465,7 @@ $(document).ready(function() {
                     <img src="${src}" alt="${file.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
                     <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
                         <div>
-                            <p class="mb-0">${file.name}</p>
+                            <p class="mb-0">${file.name.length > 8 ? file.name.substring(0, 8) + '...' : file.name}</p>
                             <span class="fs-13 text-muted">${sizeKB} KB</span>
                             ${isMain ? '<span class="btn btn-light btn-default btn-squared ">Главное</span>' : ''}
                         </div>

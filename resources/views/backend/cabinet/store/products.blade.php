@@ -109,7 +109,11 @@
                                                                     @endif
                                                                     
                                                                     <a href="{{ route('account.store.products.show', $product->id) }}">
-                                                                        @if($product->images->first())
+                                                                        @if($product->images->where('is_main', true)->first())
+                                                                            <img class="card-img-top img-fluid" 
+                                                                                 src="{{ asset('storage/' . $product->images->where('is_main', true)->first()->path) }}" 
+                                                                                 alt="{{ $product->name }}">
+                                                                        @elseif($product->images->first())
                                                                             <img class="card-img-top img-fluid" 
                                                                                  src="{{ asset('storage/' . $product->images->first()->path) }}" 
                                                                                  alt="{{ $product->name }}">

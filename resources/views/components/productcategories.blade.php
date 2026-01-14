@@ -3,7 +3,7 @@
     <div class="pd-bd product-inner">
         <div class="product-img">
             @php
-                $mainImage = $product->images->sortBy('order')->first();
+                $mainImage = $product->images->where('is_main', true)->first() ?? $product->images->first();
                 $discount = null;
                 if (!is_null($product->lowprice) && $product->price > 0) {
                     $discount = round(100 - ($product->lowprice / $product->price * 100));

@@ -25,7 +25,7 @@
                     <div class="product-images">
                         <div class="main-img js-product-slider">
 
-                            @forelse($product->images->sortBy('order') as $image)
+                            @forelse($product->images->sortByDesc('is_main') as $image)
                                 <a href="#" class="hover-images effect">
                                     <img src="{{ Storage::url($image->path) }}"
                                         alt="{{ $image->alt ?? $product->name }}"
@@ -53,7 +53,8 @@
                     <div class="multiple-img-list-ver2 js-click-product">
                     
 
-                        @forelse($product->images->sortBy('order') as $key => $image)
+                        
+                        @forelse($product->images->sortByDesc('is_main') as $key => $image)
                             <div class="product-col">
                                 <div class="img{{ $key === 0 ? ' active' : '' }}">
                                     <img src="{{ Storage::url($image->path) }}"
@@ -1043,6 +1044,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="product-item">
                 <div class="pd-bd product-inner">
                     <div class="product-img">

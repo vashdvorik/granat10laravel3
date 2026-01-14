@@ -408,6 +408,13 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
         
+        // Удаляем все изображения из storage
+        foreach ($product->images as $image) {
+            if (Storage::disk('public')->exists($image->path)) {
+                Storage::disk('public')->delete($image->path);
+            }
+        }
+        
         $product->delete();
         
         return redirect()->route('account.store.products.index')
