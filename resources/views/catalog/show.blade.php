@@ -17,10 +17,10 @@
     @endforeach
 
     </ul>
-    <div class="filter-collection-left hidden-lg hidden-md">
+<!--<div class="filter-collection-left hidden-lg hidden-md">
       <a class="btn">Filter</a>
-    </div>
-    <div class="row shop-colect">
+    </div>-->
+    <div class="row shop-colect">  
     <!--СИТИБАР СЛЕВА  -->
         <div class="col-md-3 col-sm-3 col-xs-12 col-left collection-sidebar" id="filter-sidebar">
             <div class="close-sidebar-collection hidden-lg hidden-md">
@@ -286,7 +286,7 @@
         <div class="col-md-9 col-sm-12 col-xs-12 collection-list">
             <div class="e-product">
                 <div class="pd-banner">
-                   <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/shop-banner_3.jpg') }}" alt="" class="img-reponsive"></a> 
+                   <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/shop-banner.jpg') }}" alt="" class="img-reponsive"></a> 
                 </div>
                 <div class="pd-top">
                     <h1 class="title">Каталог</h1>

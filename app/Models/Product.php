@@ -29,7 +29,12 @@ class Product extends Model
     protected $guarded = [
     'id',
 
-];
+    ];
+    protected $casts = [
+        'push_at' => 'datetime',
+        'sale_started_at' => 'datetime',
+    ];
+
     public function category()
     {
         return $this->belongsTo(\App\Models\Category::class);

@@ -234,7 +234,10 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
         
-        $product->load(['category', 'images', 'seller']);
+        $product->load(['category', 'seller']);
+        $product->load(['images' => function ($query) {
+            $query->orderByDesc('is_main');
+        }]);
         
         return view('backend.cabinet.products.show', compact('product'));
     }
@@ -453,9 +456,9 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
 
-        // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
+        // ✅ ПРОВЕРКА: Нельзя опубликовать товар без изображений
         if (!$product->images()->exists()) {
-            $errorMessage = 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "неактивен".';
+            $errorMessage = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "снят с публикации".';
             if (request()->ajax()) {
                 return response()->json([
                     'error' => $errorMessage
@@ -493,11 +496,11 @@ class ProductController extends Controller
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Товар "' . $product->name . '" активирован'
+                'message' => 'Товар "' . $product->name . '" опубликован'
             ]);
         }
 
-        return redirect()->back()->with('success', 'Товар "' . $product->name . '" активирован');
+        return redirect()->back()->with('success', 'Товар "' . $product->name . '" опубликован');
     }
 
     /**
@@ -514,11 +517,11 @@ class ProductController extends Controller
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Товар "' . $product->name . '" деактивирован'
+                'message' => 'Товар "' . $product->name . '" снят с публикации'
             ]);
         }
 
-        return redirect()->back()->with('success', 'Товар "' . $product->name . '" деактивирован');
+        return redirect()->back()->with('success', 'Товар "' . $product->name . '" снят с публикации');
     }
 
     /**
@@ -594,5 +597,43 @@ class ProductController extends Controller
         }
 
         return redirect()->back()->with('success', 'Главное изображение обновлено');
+    }
+
+    /**
+     * Поднять товар выше в списке
+     */
+    public function pushUp(Product $product)
+    {
+        if ($product->seller->user_id !== Auth::id()) {
+            abort(403, 'Доступ запрещён');
+        }
+
+        // Проверяем, прошло ли 24 часа с последнего поднятия
+        if ($product->push_at && $product->push_at->addHours(24)->isFuture()) {
+            $availableAt = $product->push_at->addHours(24);
+            $errorMessage = 'Поднять товар можно только раз в 24 часа. Следующее поднятие доступно: ' . $availableAt->format('d.m.Y в H:i');
+            
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => $errorMessage,
+                    'available_at' => $availableAt->toIso8601String()
+                ], 422);
+            }
+            return redirect()->back()->with('error', $errorMessage);
+        }
+
+        // Обновляем только push_at
+        $product->update(['push_at' => now()]);
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Товар "' . $product->name . '" поднят в списке',
+                'push_at' => now()->format('d.m.Y в H:i'),
+                'next_available_at' => now()->addHours(24)->toIso8601String()
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Товар "' . $product->name . '" поднят в списке');
     }
 }

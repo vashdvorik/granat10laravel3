@@ -78,7 +78,7 @@
                     <span class="icon-bg icon-wishlist"></span>
                 </a>
                 <a href="#" class="btn-icon">
-                    <span class="icon-bg icon-compare"></span>
+                    <span class="icon-bg icon-shop"></span>
                 </a>
             </div>
         </div>

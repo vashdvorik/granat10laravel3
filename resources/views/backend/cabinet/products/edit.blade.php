@@ -10,10 +10,13 @@
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
                     <h4 class="text-capitalize breadcrumb-title">Редактировать товар</h4>
-                    <div class="breadcrumb-action justify-content-center flex-wrap">
-                        <a href="{{ route('account.store.products.index') }}" class="btn btn-sm btn-secondary">
+                    <div class="breadcrumb-action justify-content-center flex-wrap gap-2">
+                        <a href="{{ url()->previous() }}" class="btn btn-sm btn-secondary">
                             <i class="uil uil-arrow-left"></i> Назад
                         </a>
+                        <button type="submit" form="product-edit-form" class="btn btn-sm btn-primary">
+                            <i class="uil uil-save"></i> Сохранить изменения
+                        </button>
                     </div>
                 </div>
             </div>
@@ -30,6 +33,7 @@
                                 <form action="{{ route('account.store.products.update', $product) }}" 
                                       method="POST" 
                                       enctype="multipart/form-data"
+                                      id="product-edit-form"
                                       novalidate>
                                     @csrf
                                     @method('PUT')
@@ -98,7 +102,14 @@
                                                            name="name" 
                                                            value="{{ old('name', $product->name) }}" 
                                                            placeholder="Введите название товара"
+                                                           maxlength="255"
                                                            required>
+                                                    <div class="d-flex justify-content-between align-items-start mt-1">
+                                                        <small class="text-muted">Рекомендуемая длина — 35 символов. Более длинные названия могут обрезаться в каталоге</small>
+                                                        <small class="ms-2">
+                                                            <span id="name-counter" class="fw-500">{{ strlen(old('name', $product->name)) }}</span>/255
+                                                        </small>
+                                                    </div>
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -183,7 +194,7 @@
                                                                        id="active-yes"
                                                                        {{ old('is_active', $product->is_active) == '1' ? 'checked' : '' }}>
                                                                 <label for="active-yes">
-                                                                    <span class="radio-text">Активен</span>
+                                                                    <span class="radio-text">Опубликован</span>
                                                                 </label>
                                                             </div>
                                                             <div class="radio-theme-default custom-radio">
@@ -194,7 +205,7 @@
                                                                        id="active-no"
                                                                        {{ old('is_active', $product->is_active) == '0' ? 'checked' : '' }}>
                                                                 <label for="active-no">
-                                                                    <span class="radio-text">Неактивен</span>
+                                                                    <span class="radio-text">Снят с публикации</span>
                                                                 </label>
                                                             </div>
                                                         </div>
@@ -721,6 +732,33 @@ $(document).ready(function() {
             document.getElementById('upload-images').files = dataTransfer.files;
         }
     }
+    
+    // Счетчик символов для названия товара
+    $('#name').on('input', function() {
+        const length = $(this).val().length;
+        const counter = $('#name-counter');
+        
+        counter.text(length);
+        
+        // Меняем цвет на красный при превышении 35 символов
+        if (length > 35) {
+            counter.addClass('text-danger').removeClass('text-success');
+        } else {
+            counter.addClass('text-success').removeClass('text-danger');
+        }
+    });
+
+    // Инициализация цвета счетчика при загрузке страницы
+    $(document).ready(function() {
+        const initialLength = $('#name').val().length;
+        const counter = $('#name-counter');
+        
+        if (initialLength > 35) {
+            counter.addClass('text-danger');
+        } else if (initialLength > 0) {
+            counter.addClass('text-success');
+        }
+    });
 });
 </script>
 

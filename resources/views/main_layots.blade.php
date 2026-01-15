@@ -15,7 +15,210 @@
     <link rel="stylesheet" href="{{ asset('css/cabinet.css') }}"> 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
+    <style>
+        .icon-shop {
+        background-image: url("{{ asset('img/icon-ship.png') }}");
+        background-repeat: no-repeat;
+        height: 20px;
+        width: 20px;
+        background-size: contain;
+    }
+    @media (max-width: 767px) {
 
+
+        /* УМЕНЬШАЕМ ОТСТУПЫ COLLECTION-LIST */
+        .collection-list,
+        .product-collection-grid {
+            padding-left: 1px !important;
+            padding-right: 1px !important;
+        }    
+    
+    /* СКРЫВАЕМ TOPBAR */
+        .topbar {
+            display: none !important;
+        }
+        
+        /* СКРЫВАЕМ ПЕРЕКЛЮЧАТЕЛЬ ВИДА (GRID/LIST) */
+        .view-mode {
+            display: none !important;
+        }
+        /* Основная структура */
+        .product-item.col-xs-6 {
+            width: 50% !important;
+            float: left !important;
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .product-collection-grid .row {
+            margin-left: -5px !important;
+            margin-right: -5px !important;
+        }
+        
+        /* Внутренний контейнер */
+        .product-item .product-inner {
+            margin-bottom: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        /* Внутренние отступы карточки */
+        .product-item .pd-bd {
+            padding: 5px !important;
+            overflow: hidden !important;
+        }
+        
+        /* Изображение товара - скругление верхних углов */
+        .product-item .product-img {
+            margin-bottom: 5px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+        
+        .product-item .product-img img {
+            border-radius: 8px 8px 0 0 !important;
+        }
+        
+        /* Лента со скидкой - УМЕНЬШЕННАЯ И СМЕЩЕННАЯ ВНУТРЬ */
+        .product-item .ribbon-price {
+            font-size: 8px !important;
+            padding: 0 !important;
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            min-height: 32px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            top: 5px !important;
+            right: 5px !important;
+            left: auto !important;
+        }
+        
+        .product-item .ribbon-price span {
+            font-size: 8px !important;
+            font-weight: bold !important;
+        }
+        
+        /* Блок информации */
+        .product-item .product-info {
+            padding: 5px !important;
+            overflow: hidden !important;
+        }
+        
+        /* Скрываем группу цветов */
+        .product-item .color-group {
+            display: none !important;
+        }
+        
+        /* Скрываем список характеристик */
+        .product-item .element-list-left,
+        .product-item .desc-list {
+            display: none !important;
+        }
+        
+        /* Контейнер основного содержимого */
+        .product-item .element-list-middle {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        /* Скрываем рейтинг */
+        .product-item .product-rating,
+        .product-item .bd-rating {
+            display: none !important;
+        }
+        
+        /* Название магазина */
+        .product-item .product-cate {
+            font-size: 10px !important;
+            margin-bottom: 3px !important;
+            line-height: 1.2 !important;
+        }
+        
+        /* Заголовок товара */
+        .product-item .product-title {
+            font-size: 12px !important;
+            line-height: 1.2 !important;
+            margin-bottom: 5px !important;
+        }
+        
+        .product-item .product-title a {
+            font-size: 12px !important;
+        }
+        
+        /* Блок с ценой и кнопкой просмотра */
+        .product-item .product-bottom {
+            margin-top: 5px !important;
+            margin-bottom: 5px !important;
+            padding: 0 !important;
+        }
+        
+        /* Цена */
+        .product-item .product-price {
+            font-size: 13px !important;
+            margin-bottom: 0 !important;
+        }
+        
+        .product-item .product-price span {
+            font-size: 13px !important;
+        }
+        
+        .product-item .product-price .old {
+            font-size: 11px !important;
+        }
+        
+        /* Кнопка просмотра */
+        .product-item .btn-view {
+            width: 25px !important;
+            height: 25px !important;
+            padding: 2px !important;
+        }
+        
+        .product-item .btn-view .icon-bg {
+            width: 16px !important;
+            height: 16px !important;
+            background-size: contain !important;
+        }
+        
+        /* Скрываем product-bottom-group */
+        .product-item .product-bottom-group {
+            display: none !important;
+        }
+        
+        /* Раскидываем иконки по всей ширине карточки */
+        .product-item .product-button-group {
+            margin: 5px 0 0 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            gap: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .product-item .product-button-group .btn-icon {
+            width: 26px !important;
+            height: 26px !important;
+            padding: 3px !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        .product-item .product-button-group .icon-bg {
+            width: 14px !important;
+            height: 14px !important;
+            background-size: contain !important;
+        }
+    }
+    </style>
 </head>
 
 <body>
@@ -445,6 +648,7 @@
 </div>
 <!-- /// -->
 </div>
+
     <!-- кнопка перемотки наверх страницы -->  
     <a href="#" class="btn-gradient scroll_top"><i class="ion-ios-arrow-up"></i></a>
 

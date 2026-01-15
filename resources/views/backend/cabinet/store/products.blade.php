@@ -101,12 +101,24 @@
                                                             <div class="product-item">
                                                                 {{-- ИЗОБРАЖЕНИЕ ТОВАРА --}}
                                                                 <div class="product-item__image">
-                                                                    {{-- VIP бейдж --}}
-                                                                    @if($product->is_vip)
-                                                                        <span class="badge-vip">
-                                                                            <i class="uil uil-star"></i> VIP
-                                                                        </span>
-                                                                    @endif
+                                                                    {{-- Статусы: VIP и Активность --}}
+                                                                    <div class="position-absolute top-0 start-0 m-2 d-flex gap-2">
+                                                                        @if($product->is_vip)
+                                                                            <span class="badge badge-round badge-danger badge-lg" style="font-size: 11px; font-weight: 600;">
+                                                                                <i class="uil uil-star"></i> VIP
+                                                                            </span>
+                                                                        @endif
+                                                                        
+                                                                        @if($product->is_active)
+                                                                            <span class="badge badge-round badge-success badge-lg" style="font-size: 11px; font-weight: 600;">
+                                                                                <i class="uil uil-check"></i> Опубликован
+                                                                            </span>
+                                                                        @else
+                                                                            <span class="badge badge-round badge-light badge-lg badge-outlined" style="font-size: 11px; font-weight: 600; background-color: #f8f9fa; color: #000; border-color: #dee2e6;">
+                                                                                <i class="uil uil-pause"></i> Снят с публикации
+                                                                            </span>
+                                                                        @endif
+                                                                    </div>
                                                                     
                                                                     <a href="{{ route('account.store.products.show', $product->id) }}">
                                                                         @if($product->images->where('is_main', true)->first())
@@ -140,92 +152,108 @@
                                                                             </small>
                                                                         @endif
 
-                                                                        {{-- Статус активности --}}
-                                                                        <div class="mb-2">
-                                                                            <div class="d-flex align-items-center flex-wrap gap-2">
-                                                                                @if($product->is_active)
-                                                                                    <span class="dm-tag tag-success tag-transparented">
-                                                                                        <i class="uil uil-check"></i> Активен
+                                                                        {{-- Дата последнего поднятия --}}
+                                                                        @if($product->push_at)
+                                                                            <small class="text-muted d-block mb-2">
+                                                                                <i class="uil uil-clock"></i> Обновлено: {{ $product->push_at->format('d.m.Y в H:i') }}
+                                                                            </small>
+                                                                        @endif
+
+                                                                        {{-- ЦЕНА --}}
+                                                                        <div class="product-item__footer mb-3">
+                                                                            <div class="d-flex align-items-center flex-wrap">
+                                                                                @if($product->lowprice && $product->lowprice > 0)
+                                                                                    {{-- Старая цена ЗАЧЕРКНУТАЯ (обычная цена) --}}
+                                                                                    <span class="product-desc-price">{{ number_format($product->lowprice, 0) }} ₽</span>
+                                                                                    {{-- Новая АКЦИОННАЯ цена (красная, жирная) --}}
+                                                                                    <span class="product-price">{{ number_format($product->price, 0) }} ₽</span>
+                                                                                    {{-- Процент скидки --}}
+                                                                                    <span class="product-discount">
+                                                                                        -{{ round((($product->price - $product->lowprice) / $product->price) * 100) }}%
                                                                                     </span>
-                                                                                    {{-- Кнопка деактивации --}}
+                                                                                @else
+                                                                                    {{-- Обычная цена БЕЗ зачеркивания --}}
+                                                                                    <span class="product-desc-price">{{ number_format($product->price, 0) }} ₽</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {{-- Кнопки действий --}}
+                                                                        <div class="mb-3">
+                                                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                                                {{-- Кнопка Поднять --}}
+                                                                                @if($product->is_active)
+                                                                                    <form action="{{ route('account.store.products.push-up', $product->id) }}" 
+                                                                                          method="POST" 
+                                                                                          class="push-up-form m-0 flex-fill"
+                                                                                          data-product-name="{{ $product->name }}"
+                                                                                          data-push-at="{{ $product->push_at ? $product->push_at->format('d.m.Y H:i') : '' }}">
+                                                                                        @csrf
+                                                                                        <button type="button" 
+                                                                                                class="btn {{ $product->push_at && $product->push_at->addHours(24)->isFuture() ? 'btn-light' : 'btn-sm btn-primary btn-transparent-primary' }} btn-default btn-squared push-up-btn w-100"
+                                                                                                @if($product->push_at && $product->push_at->addHours(24)->isFuture())
+                                                                                                    disabled
+                                                                                                    title="Доступно {{ $product->push_at->addHours(24)->format('d.m.Y в H:i') }}"
+                                                                                                @endif>
+                                                                                            <i class="uil uil-arrow-up"></i> Поднять
+                                                                                        </button>
+                                                                                    </form>
+                                                                                @endif
+
+                                                                                {{-- Кнопка Опубликовать/Снять --}}
+                                                                                @if($product->is_active)
                                                                                     <form action="{{ route('account.store.products.deactivate', $product->id) }}" 
                                                                                           method="POST" 
-                                                                                          class="status-change-form"
+                                                                                          class="status-change-form m-0 flex-fill"
                                                                                           data-action="deactivate"
                                                                                           data-product-name="{{ $product->name }}">
                                                                                         @csrf
                                                                                         @method('PATCH')
                                                                                         <button type="button" 
-                                                                                                class="btn btn-xs btn-outline-warning status-change-btn px-2 py-1"
-                                                                                                style="font-size: 11px; line-height: 1.2;">
-                                                                                            <i class="uil uil-pause" style="font-size: 12px;"></i> Остановить
+                                                                                                class="btn btn-sm btn-warning btn-default btn-squared btn-transparent-warning status-change-btn w-100">
+                                                                                            <i class="uil uil-pause"></i> Стоп
                                                                                         </button>
                                                                                     </form>
                                                                                 @else
-                                                                                    <span class="dm-tag tag-danger tag-transparented">
-                                                                                        <i class="uil uil-pause"></i> Неактивен
-                                                                                    </span>
-                                                                                    {{-- Кнопка активации --}}
                                                                                     <form action="{{ route('account.store.products.activate', $product->id) }}" 
                                                                                           method="POST" 
-                                                                                          class="status-change-form"
+                                                                                          class="status-change-form m-0 flex-fill"
                                                                                           data-action="activate"
                                                                                           data-product-name="{{ $product->name }}">
                                                                                         @csrf
                                                                                         @method('PATCH')
                                                                                         <button type="button" 
-                                                                                                class="btn btn-xs btn-success status-change-btn px-2 py-1"
-                                                                                                style="font-size: 11px; line-height: 1.2;">
-                                                                                            <i class="uil uil-play" style="font-size: 12px;"></i> Активировать
+                                                                                                class="btn btn-sm btn-success btn-default btn-squared btn-transparent-success status-change-btn w-100">
+                                                                                            <i class="uil uil-check"></i> Опубликовать
                                                                                         </button>
                                                                                     </form>
                                                                                 @endif
                                                                             </div>
                                                                         </div>
-                                                                    </div>
 
-                                                                    {{-- ЦЕНА --}}
-                                                                    <div class="product-item__footer">
-                                                                        <div class="d-flex align-items-center flex-wrap">
-                                                                            @if($product->lowprice && $product->lowprice > 0)
-                                                                                {{-- Старая цена ЗАЧЕРКНУТАЯ (обычная цена) --}}
-                                                                                <span class="product-desc-price">{{ number_format($product->lowprice, 0) }} ₽</span>
-                                                                                {{-- Новая АКЦИОННАЯ цена (красная, жирная) --}}
-                                                                                <span class="product-price">{{ number_format($product->price, 0) }} ₽</span>
-                                                                                {{-- Процент скидки --}}
-                                                                                <span class="product-discount">
-                                                                                    -{{ round((($product->price - $product->lowprice) / $product->price) * 100) }}%
-                                                                                </span>
-                                                                            @else
-                                                                                {{-- Обычная цена БЕЗ зачеркивания --}}
-                                                                                <span class="product-desc-price">{{ number_format($product->price, 0) }} ₽</span>
-                                                                            @endif
+                                                                        {{-- КНОПКИ УДАЛИТЬ И ИЗМЕНИТЬ --}}
+                                                                        <div class="d-flex mt-20 flex-wrap gap-2">
+                                                                            {{-- Кнопка Удалить --}}
+                                                                            <form action="{{ route('account.store.products.destroy', $product->id) }}" 
+                                                                                  method="POST" 
+                                                                                  class="delete-product-form flex-fill"
+                                                                                  data-product-name="{{ $product->name }}">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="button" 
+                                                                                        class="btn btn-default btn-squared color-light btn-outline-light delete-product-btn w-100">
+                                                                                     Удалить
+                                                                                </button>
+                                                                            </form>
+
+                                                                            {{-- Кнопка Изменить --}}
+                                                                            <a href="{{ route('account.store.products.edit', $product->id) }}" 
+                                                                               class="btn btn-primary btn-default btn-squared border-0 flex-fill">
+                                                                                Изменить
+                                                                            </a>
                                                                         </div>
                                                                     </div>
 
-                                                                    {{-- КНОПКИ ДЕЙСТВИЙ --}}
-                                                                    <div class="product-item__button d-flex mt-20 flex-wrap gap-2">
-                                                                        {{-- Кнопка Удалить --}}
-                                                                        <form action="{{ route('account.store.products.destroy', $product->id) }}" 
-                                                                              method="POST" 
-                                                                              class="delete-product-form"
-                                                                              data-product-name="{{ $product->name }}">
-                                                                            @csrf
-                                                                            @method('DELETE')
-                                                                            <button type="button" 
-                                                                                    class="btn btn-default btn-squared color-light btn-outline-light px-20 delete-product-btn">
-                                                                                 Удалить
-                                                                            </button>
-                                                                        </form>
-
-                                                                        {{-- Кнопка Изменить --}}
-                                                                        <a href="{{ route('account.store.products.edit', $product->id) }}" 
-                                                                           class="btn btn-primary btn-default btn-squared border-0 px-25">
-                                                                            Изменить
-                                                                        </a>
-
- 
-                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -277,7 +305,8 @@
 <style>
 /* Placeholder для товаров без изображения */
 .no-image-placeholder {
-    height: 250px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     background: #f8f9fa;
     display: flex;
     flex-direction: column;
@@ -288,20 +317,6 @@
 .no-image-placeholder i {
     font-size: 48px;
     margin-bottom: 10px;
-}
-
-/* VIP бейдж */
-.badge-vip {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #ffc107;
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 1;
 }
 
 /* Отступы между кнопками */
@@ -371,15 +386,15 @@ $(document).ready(function() {
         let title, text, icon, confirmText;
         
         if (action === 'activate') {
-            title = 'Активировать товар?';
-            text = `Товар "${productName}" будет активирован и станет доступен для покупателей`;
+            title = 'Опубликовать товар?';
+            text = `Товар "${productName}" будет опубликован и станет доступен для покупателей`;
             icon = 'question';
-            confirmText = '<i class="uil uil-play me-1"></i> Да, активировать';
+            confirmText = '<i class="uil uil-play me-1"></i> Да, опубликовать';
         } else {
-            title = 'Остановить товар?';
-            text = `Товар "${productName}" будет деактивирован и скрыт от покупателей`;
+            title = 'Снять с публикации товар?';
+            text = `Товар "${productName}" будет снят с публикации и скрыт от покупателей`;
             icon = 'warning';
-            confirmText = '<i class="uil uil-pause me-1"></i> Да, остановить';
+            confirmText = '<i class="uil uil-pause me-1"></i> Да, снять с публикации';
         }
         
         Swal.fire({
@@ -394,7 +409,6 @@ $(document).ready(function() {
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                
                 // Отправляем AJAX запрос
                 $.ajax({
                     url: form.attr('action'),
@@ -405,73 +419,19 @@ $(document).ready(function() {
                         'Accept': 'application/json'
                     },
                     success: function(response) {
-                        console.log('Success response:', response);
-                        
-                        // Находим контейнер со статусом
-                        const statusContainer = form.parent();
-                        const newAction = action === 'activate' ? 'deactivate' : 'activate';
-                        const newUrl = form.attr('action').replace(action, newAction);
-                        
-                        // Создаем новый HTML в зависимости от действия
-                        let newHtml = '';
-                        if (action === 'activate') {
-                            // Товар стал активным
-                            newHtml = `
-                                <span class="dm-tag tag-success tag-transparented">
-                                    <i class="uil uil-check"></i> Активен
-                                </span>
-                                <form action="${newUrl}" 
-                                      method="POST" 
-                                      class="status-change-form"
-                                      data-action="deactivate"
-                                      data-product-name="${productName}">
-                                    <input type="hidden" name="_token" value="${form.find('input[name="_token"]').val()}">
-                                    <input type="hidden" name="_method" value="PATCH">
-                                    <button type="button" 
-                                            class="btn btn-xs btn-outline-warning status-change-btn px-2 py-1"
-                                            style="font-size: 11px; line-height: 1.2;">
-                                        <i class="uil uil-pause" style="font-size: 12px;"></i> Остановить
-                                    </button>
-                                </form>
-                            `;
-                        } else {
-                            // Товар стал неактивным
-                            newHtml = `
-                                <span class="dm-tag tag-danger tag-transparented">
-                                    <i class="uil uil-pause"></i> Неактивен
-                                </span>
-                                <form action="${newUrl}" 
-                                      method="POST" 
-                                      class="status-change-form"
-                                      data-action="activate"
-                                      data-product-name="${productName}">
-                                    <input type="hidden" name="_token" value="${form.find('input[name="_token"]').val()}">
-                                    <input type="hidden" name="_method" value="PATCH">
-                                    <button type="button" 
-                                            class="btn btn-xs btn-success status-change-btn px-2 py-1"
-                                            style="font-size: 11px; line-height: 1.2;">
-                                        <i class="uil uil-play" style="font-size: 12px;"></i> Активировать
-                                    </button>
-                                </form>
-                            `;
-                        }
-                        
-                        // Заменяем содержимое контейнера
-                        statusContainer.html(newHtml);
-                        
-                        // Показываем уведомление об успехе
+                        // Просто перезагружаем страницу
                         Swal.fire({
                             icon: 'success',
                             title: 'Выполнено',
                             text: response.message,
                             timer: 1500,
                             showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
                         });
                     },
                     error: function(xhr) {
                         console.log('Error response:', xhr);
-                        
-                        Swal.close();
                         
                         let errorMessage = 'Произошла ошибка';
                         
@@ -494,6 +454,51 @@ $(document).ready(function() {
             }
         });
     });
+// Обработчик поднятия товара
+$(document).on('click', '.push-up-btn', function(e) {
+    e.preventDefault();
+    const form = $(this).closest('.push-up-form');
+    const productName = form.data('product-name');
+    const pushAt = form.data('push-at');
+    
+    Swal.fire({
+        title: 'Поднять товар?',
+        html: `<p>Товар "<strong>${productName}</strong>" окажется на первых позициях в поиске и каталоге, как будто вы только что его добавили. Покупатели увидят его первым, но использовать эту возможность можно только один раз в день.</p>
+               ${pushAt ? `<small class="text-muted">Последнее поднятие: ${pushAt}</small>` : ''}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#5F63F2',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Да, поднять',
+        cancelButtonText: 'Отмена'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: form.attr('action'),
+                method: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Готово!',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Ошибка',
+                        text: xhr.responseJSON?.error || 'Не удалось поднять товар'
+                    });
+                }
+            });
+        }
+    });
 });
+}); 
 </script>
 @endpush
