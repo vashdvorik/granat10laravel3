@@ -443,7 +443,7 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    const existingImagesCount = {{ $product->images->count() }};
+    let existingImagesCount = {{ $product->images->count() }}; // ✅ let вместо const
     const maxFiles = 5;
     const maxFileSize = 5 * 1024 * 1024; // 5 MB
     let selectedFiles = [];
@@ -474,6 +474,7 @@ $(document).ready(function() {
                     success: function(response) {
                         card.fadeOut(300, function() {
                             $(this).remove();
+                            existingImagesCount--; // ✅ УМЕНЬШАЕМ СЧЕТЧИК
                             updateImageCount();
                         });
                         
@@ -489,7 +490,7 @@ $(document).ready(function() {
                         Swal.fire({
                             icon: 'error',
                             title: 'Ошибка',
-                            text: xhr.responseJSON?.message || 'Не удалось удалить изображение'
+                            text: xhr.responseJSON?.error || xhr.responseJSON?.message || 'Не удалось удалить изображение'
                         });
                     }
                 });
@@ -538,16 +539,6 @@ $(document).ready(function() {
                 // Убираем кнопку "Сделать главным" у текущего изображения
                 button.remove();
                 
-                // Показываем уведомление
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Готово!',
-                    text: 'Главное изображение обновлено',
-                    timer: 1500,
-                    showConfirmButton: false,
-                    toast: true,
-                    position: 'top-end'
-                });
             },
             error: function(xhr) {
                 // Восстанавливаем кнопку
@@ -565,6 +556,7 @@ $(document).ready(function() {
     // Обновление счетчика изображений
     function updateImageCount() {
         const count = $('.existing-images .upload-product-media[data-image-id]').length;
+        existingImagesCount = count; // ✅ СИНХРОНИЗИРУЕМ СЧЕТЧИК С DOM
         $('.badge-light').text(count + '/5');
         
         if (count < 5 && $('.new-images-upload').length === 0) {
@@ -602,18 +594,33 @@ $(document).ready(function() {
         
         function handleFiles(files) {
             const filesArray = Array.from(files);
+            // ✅ Перепроверяем через DOM для надежности
+            const currentExistingImages = $('.existing-images .upload-product-media[data-image-id]').length;
+            existingImagesCount = currentExistingImages; // Синхронизируем
             const currentTotal = existingImagesCount + selectedFiles.length;
             
             // Check total count
             if (currentTotal + filesArray.length > maxFiles) {
-                alert(`Можно загрузить ещё ${maxFiles - currentTotal} изображений`);
+                const available = maxFiles - currentTotal;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Превышен лимит',
+                    text: `Можно загрузить ещё ${available} ${available === 1 ? 'изображение' : 'изображений'}`,
+                    confirmButtonText: 'Понятно',
+                    confirmButtonColor: '#5F63F2'
+                });
                 return;
             }
             
             filesArray.forEach((file, arrayIndex) => {
                 // Validate file size
                 if (file.size > maxFileSize) {
-                    alert(`Файл ${file.name} слишком большой (макс. 5 МБ)`);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Файл слишком большой. Пожалуйста, выберите файл поменьше или уменьшите его.',
+                        html: `<strong>${file.name}</strong><br>Максимальный размер: 5 МБ`,
+                        confirmButtonColor: '#5F63F2'
+                    });
                     return;
                 }
                 
@@ -639,7 +646,9 @@ $(document).ready(function() {
         }
         
         function addPreview(file, src, index) {
-            const isMain = existingImagesCount === 0 && index === 0;
+            // ✅ Используем реальный счетчик из DOM
+            const currentExistingImages = $('.existing-images .upload-product-media[data-image-id]').length;
+            const isMain = currentExistingImages === 0 && index === 0;
             const sizeKB = (file.size / 1024).toFixed(1);
             
             const previewHtml = `
@@ -687,15 +696,18 @@ $(document).ready(function() {
         });
         
         function updatePreviews() {
+            // ✅ Проверяем реальное количество существующих изображений
+            const currentExistingImages = $('.existing-images .upload-product-media[data-image-id]').length;
+            
             $('#upload-preview-area .upload-product-media[data-file-index]').each(function(index) {
                 $(this).attr('data-file-index', index);
                 $(this).find('.btn-remove-image').attr('data-file-index', index);
                 
                 // Remove all main badges first
-                $(this).find('.badge-primary, .btn-squared:contains("Главное"), .btn-squared:contains("Главное")').remove();
+                $(this).find('.badge-primary, .btn-squared:contains("Главное")').remove();
                 
                 // Add main badge to first item only if no existing images
-                if (existingImagesCount === 0 && index === 0) {
+                if (currentExistingImages === 0 && index === 0) {
                     $(this).find('.upload-media-area__title > div').append(
                         '<span class="btn btn-light btn-default btn-squared ms-2">Главное</span>'
                     );

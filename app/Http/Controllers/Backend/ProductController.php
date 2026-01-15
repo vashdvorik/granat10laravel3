@@ -133,6 +133,11 @@ class ProductController extends Controller
         
         // Если товар неактивен, лимиты не проверяем
         if ($isActive) {
+            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
+            if (!$request->hasFile('images') || count($request->file('images')) === 0) {
+                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "неактивен".');
+            }
+            
             // Проверяем лимит активных товаров
             $activeCheck = $seller->canActivateProduct();
             if (!$activeCheck['allowed']) {
@@ -196,6 +201,11 @@ class ProductController extends Controller
                 // Сохраняем оригинал (большое изображение - макс. 1200px)
                 $image->resize(1200, null, function ($constraint) {
                     $constraint->aspectRatio();
+                    $constraint->upsize();
+                })->encode('webp', 85);
+                
+                // Обрезаем и сохраняем изображение (квадрат 800x800px)
+                $image->fit(800, 800, function ($constraint) {
                     $constraint->upsize();
                 })->encode('webp', 85);
                 
@@ -315,6 +325,12 @@ class ProductController extends Controller
 
         // Если товар активен, проверяем лимиты (исключая текущий товар)
         if ($isActive) {
+            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
+            $hasImages = $product->images()->exists();
+            if (!$hasImages && (!$request->hasFile('images') || count($request->file('images')) === 0)) {
+                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото.');
+            }
+            
             // Проверяем лимит активных товаров
             $activeCheck = $product->seller->canActivateProduct($product->id);
             if (!$activeCheck['allowed']) {
@@ -368,6 +384,9 @@ class ProductController extends Controller
                     ->withInput();
             }
             
+            // ✅ ПРОВЕРЯЕМ НАЛИЧИЕ ГЛАВНОГО ИЗОБРАЖЕНИЯ ОДИН РАЗ
+            $hasMainImage = $product->images()->where('is_main', true)->exists();
+            
             foreach ($request->file('images') as $index => $file) {
                 // Генерируем уникальное имя
                 $filename = Str::uuid() . '.webp';
@@ -382,15 +401,19 @@ class ProductController extends Controller
                     $constraint->upsize();
                 })->encode('webp', 85);
                 
+                // Обрезаем и сохраняем изображение (квадрат 800x800px)
+                $image->fit(800, 800, function ($constraint) {
+                    $constraint->upsize();
+                })->encode('webp', 85);
+                
                 $fullPath = $path . '/' . $filename;
                 Storage::disk('public')->put($fullPath, (string) $image);
                 
-                // Создаем запись в БД
-                // Если нет главного изображения - делаем первое загружаемое главным
+                // ✅ ИСПРАВЛЕНО: Если нет главного изображения - делаем первое загружаемое главным
                 ProductImage::create([
                     'product_id' => $product->id,
                     'path' => $fullPath,
-                    'is_main' => $existingCount === 0 && $index === 0,
+                    'is_main' => !$hasMainImage && $index === 0,
                 ]);
             }
         }
@@ -428,6 +451,17 @@ class ProductController extends Controller
     {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
+        }
+
+        // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
+        if (!$product->images()->exists()) {
+            $errorMessage = 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "неактивен".';
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => $errorMessage
+                ], 422);
+            }
+            return redirect()->back()->with('error', $errorMessage);
         }
 
         // Проверяем лимит активных товаров
@@ -496,6 +530,17 @@ class ProductController extends Controller
         
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
+        }
+
+        // ✅ ПРОВЕРКА: Если товар активен и это последнее фото - запретить удаление
+        if ($product->is_active && $product->images()->count() === 1) {
+            $errorMessage = 'Нельзя удалить последнее изображение активного товара. Сначала деактивируйте товар или загрузите новое фото.';
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => $errorMessage
+                ], 422);
+            }
+            return redirect()->back()->with('error', $errorMessage);
         }
 
         // Удаляем файл из хранилища

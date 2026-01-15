@@ -394,16 +394,6 @@ $(document).ready(function() {
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Показываем индикатор загрузки
-                Swal.fire({
-                    title: action === 'activate' ? 'Активация...' : 'Деактивация...',
-                    text: 'Пожалуйста, подождите',
-                    allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
                 
                 // Отправляем AJAX запрос
                 $.ajax({

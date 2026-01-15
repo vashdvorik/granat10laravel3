@@ -423,20 +423,36 @@ $(document).ready(function() {
         
         // Check total count
         if (selectedFiles.length + filesArray.length > maxFiles) {
-            alert(`Можно загрузить максимум ${maxFiles} изображений`);
+            Swal.fire({
+            icon: 'warning',
+            title: 'Превышен лимит',
+            text: `Можно загрузить максимум ${maxFiles} изображений`,
+            confirmButtonText: 'Понятно',
+            confirmButtonColor: '#5F63F2'
+        });
             return;
         }
         
         filesArray.forEach((file, arrayIndex) => {
             // Validate file size
             if (file.size > maxFileSize) {
-                alert(`Файл ${file.name} слишком большой (макс. 5 МБ)`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Файл слишком большой',
+                    html: `<strong>${file.name}</strong><br>Максимальный размер: 5 МБ`,
+                    confirmButtonColor: '#5F63F2'
+                });
                 return;
             }
             
             // Validate file type
             if (!file.type.match('image.*')) {
-                alert(`Файл ${file.name} не является изображением`);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Неверный тип файла',
+                    html: `<strong>${file.name}</strong><br>Поддерживаются только изображения (JPG, PNG, WebP)`,
+                    confirmButtonColor: '#5F63F2'
+                });
                 return;
             }
             
@@ -508,7 +524,8 @@ $(document).ready(function() {
             $(this).attr('data-file-index', index);
             $(this).find('.btn-remove-image').attr('data-file-index', index);
             
-            // Remove all main badges first
+            // Удаляем ВСЕ бейджи "Главное" (по классу и тексту)
+            $(this).find('.btn-squared:contains("Главное")').remove();
             $(this).find('.badge-primary').remove();
             
             // Add main badge to first item
