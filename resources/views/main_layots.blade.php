@@ -15,8 +15,40 @@
     <link rel="stylesheet" href="{{ asset('css/cabinet.css') }}"> 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
-
-   
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    @if(Request::is('catalog/*') || Request::is('catalog'))
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Главная",
+          "item": "{{ url('/') }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Каталог",
+          "item": "{{ route('catalog.index') }}"
+        }
+        @if(isset($breadcrumbs) && $breadcrumbs->count() > 0)
+          @foreach($breadcrumbs as $index => $crumb)
+          ,{
+            "@type": "ListItem",
+            "position": {{ $index + 3 }},
+            "name": "{{ $crumb->name }}",
+            "item": "{{ route('catalog.show', $crumb->alias) }}"
+          }
+          @endforeach
+        @endif
+      ]
+    }
+    </script>
+    @endif
     <style>
         .icon-shop {
         background-image: url("{{ asset('img/icon-ship.png') }}");
@@ -27,7 +59,21 @@
     }
     @media (max-width: 767px) {
 
+        /* баннер отступает вниз*/
+        .pd-banner {
+            margin-top: 20px !important; 
+        }
+        /* Скрываем хлебные крошки */
+        .breadcrumb, 
+        .breadcrumbs, 
+        [aria-label="breadcrumb"] {
+            display: none !important;
+        }
 
+        /* Скрываем слово каталог и надпись*/
+        .pd-top {
+                display: none !important;
+            }
         /* Отступы для сетки товаров */
         .product-collection-grid {
             padding-left: 1px !important;
@@ -219,7 +265,98 @@
             background-size: contain !important;
         }
     }
+
+@media (max-width: 767px) {
+    .mobile-categories-wrapper {
+        display: block !important;
+        margin: 15px 0;
+    }
+    
+    .mobile-categories-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    
+    .mobile-category-card {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .mobile-category-card:active {
+        transform: scale(0.95);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    
+    .mobile-category-card a {
+        display: block;
+        text-decoration: none;
+        color: #333;
+    }
+    
+    .mobile-category-image {
+        width: 100%;
+        padding-top: 100%;
+        position: relative;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-category-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .mobile-category-image i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 32px;
+        color: #fff;
+    }
+    
+    .mobile-category-name {
+        padding: 8px 6px;
+        font-size: 11px;
+        line-height: 1.3;
+        text-align: center;
+        font-weight: 500;
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Кнопка назад */
+    .mobile-category-card.back-card .mobile-category-image {
+        background: linear-gradient(135deg, #54f0ff 0%, #c26af5 100%);
+    }
+    
+    .mobile-category-card.back-card .mobile-category-name {
+        font-weight: 600;
+    }
+}
+
     </style>
+
+    {{-- Open Graph для соцсетей --}}
+    <meta property="og:title" content="@yield('title', 'Маркетплейс ПМР')">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="Маркетплейс ПМР">
+
+    {{-- Canonical URL --}}
+    <link rel="canonical" href="{{ url()->current() }}">
 </head>
 
 <body>
@@ -303,7 +440,7 @@
  <!-- подключаем шапку сайта-->
 <header id="header" class="header-v1">
     <!--Баннер вверху страницы  -->
-    <!--   <div class="header-top-banner">
+    <!--   <div class="header-top-banner>
         <a href="#"><img src="img/banner-top2.jpg" alt="" class="img-reponsive"></a>
         </div>-->
 
@@ -342,7 +479,7 @@
                         <div class="element hidden-xs hidden-sm">
                             <a href="#"><img src="{{ asset('img/icon-phone.png') }}" alt=""><span>Скачать приложение</span></a>
                         </div>
-                <!--    <div class="element element-currency">
+                <!--    <div class="element element-currency>
                             <a id="label3" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             
                             <span>RUP</span>
@@ -629,13 +766,17 @@
 <!-- МОБИЛЬНОЕ МЕНЮ ВНИЗУ (Bottom Navbar) -->
 <div class="mobile-bottom-navbar hidden-md hidden-lg">
     <div class="mobile-navbar-wrapper">
-        <a href="#" class="mobile-nav-item js-push-menu icon-pushmenu" title="Меню">
-            <i class="fa fa-bars f-18"></i>
-            <span class="mobile-nav-label">Каталог</span>
+        <a href="{{ route('account.index') }}" class="mobile-nav-item " title="Меню">
+            <i class="fa fa-user f-18"></i>
+            <span class="mobile-nav-label">Кабинет</span>
         </a>
         <a href="#" class="mobile-nav-item" title="Избранное">
             <i class="fa fa-heart f-18"></i>
-            <span class="mobile-nav-label">Понравившиеся</span>
+            <span class="mobile-nav-label">Избранное</span>
+        </a>
+        <a href="{{ route('catalog.index') }}" class="mobile-nav-item " title="Меню">
+            <i class="fa fa-th f-18"></i>
+            <span class="mobile-nav-label">Каталог</span>
         </a>
         <a href="{{ route('catalog.sale') }}" class="mobile-nav-item" title="Распродажи">
             <img src="{{ asset('img/skidka-logo.png') }}" alt="Распродажи" style="width:20px; height:20px;">

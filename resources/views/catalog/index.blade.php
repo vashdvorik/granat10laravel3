@@ -3,13 +3,13 @@
 
 <style>
     @media (max-width: 767px) {
-        /* Отступы для списка коллекций, применяется только на странице каталога */
+        /* Отступы для списка коллекций, применяется только на странице каталога  
         .collection-list {
             padding-left: 1px !important;
             padding-right: 1px !important;
-        }
+        }*/
     }
-</style>
+</style> 
 
 @section('content')
 <div class="container container-240 shop-collection">
@@ -19,8 +19,8 @@
     </ul>
 <!--<div class="filter-collection-left hidden-lg hidden-md">
       <a class="btn">Filter</a>
-    </div>
-    <div class="row shop-colect"> -->
+    </div>-->
+    <div class="row shop-colect"> 
     <!--СИТИБАР СЛЕВА  -->
         <div class="col-md-3 col-sm-3 col-xs-12 col-left collection-sidebar" id="filter-sidebar">
             <div class="close-sidebar-collection hidden-lg hidden-md">
@@ -315,6 +315,37 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Мобильная версия: карточки категорий 3x3 -->
+                <div class="mobile-categories-wrapper hidden-md hidden-lg">
+                    <div class="mobile-categories-grid">
+                        @foreach ($categories as $subcategory)
+                            <div class="mobile-category-card">
+                                <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                                    <div class="mobile-category-image" 
+                                        style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
+                                        @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
+                                            <!-- Font Awesome иконка -->
+                                            <i class="fas {{ $subcategory->icon }}" 
+                                            style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                                        @elseif($subcategory->icon)
+                                            <!-- Загруженное изображение -->
+                                            <img src="{{ asset('storage/' . $subcategory->icon) }}" 
+                                                alt="{{ $subcategory->name }}">
+                                        @else
+                                            <!-- Иконка по умолчанию -->
+                                            <i class="fas fa-folder" 
+                                            style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                                        @endif
+                                    </div>
+                                    <div class="mobile-category-name">{{ $subcategory->name }}</div>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <!-- / МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ -->
+
                 <div class="product-collection-grid product-grid">
                     <div class="row">
                         {{-- КАРТОЧКА ТОВАРА --}} 
@@ -323,192 +354,6 @@
                         @empty
                             <p>Нет товаров в этой категории.</p>
                         @endforelse
-{{--    <!--                       
-                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="img/test/1.jpg" alt="" class="img-reponsive"></a>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group">
-                                        <a href="#" class="circle black"></a>
-                                        <a href="#" class="circle red"></a>
-                                        <a href="#" class="circle gray"></a>                                                
-                                    </div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин:Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Контрастное Кружевное Платье...</a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price"><span>280 руб.</span></div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>          
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="img/test/2.jpg" alt="" class="img-reponsive"></a>
-                                    <div class="ribbon-price red"><span>- 30% </span></div>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group"></div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин: Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Платье с V-образным вырезом ...</a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price">
-                                                <span class="red">450 руб.</span>
-                                                <span class="old">650 руб.</span>
-                                            </div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>     
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="img/test/3.jpg" alt="" class="img-reponsive"></a>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group"></div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин: Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Платье с квадратным вырезом ... </a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price"><span>840 руб.</span></div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>          
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
---> --}}
  
                         
                     </div>
@@ -557,4 +402,5 @@
         </div>
     </div>
 </div>
+
 @endsection

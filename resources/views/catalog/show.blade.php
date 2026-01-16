@@ -276,9 +276,9 @@
             <!--/ТОП ТОВАРЫ  -->
 
             <!--РЕКЛАМНЫЙ БАННЕР 320*384-->
-            <div class="banner">
+        {{--    <div class="banner">
                 <a class="image-bd hover-images" href=""><img src="{{ asset('img/o-banner3.jpg') }}" alt="" class="img-reponsive"></a>
-            </div>
+            </div>--}}  
         </div>
     <!--// СИТИБАР СЛЕВА  -->
 
@@ -302,7 +302,7 @@
                         <div class="filter-sort">
                             <div class="dropdown">
                               <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="dropdown-label">Default sorting</span>
+                                    <span class="dropdown-label">Выберите район или рынок</span>
                               </button>
                               <ul class="dropdown-menu">
                                   <li><a href="manual">Featured</a></li>   
@@ -319,7 +319,7 @@
                         <div class="filter-show">
                             <div class="dropdown">
                                   <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                      Show
+                                      Сортировать по
                                         <span class="dropdown-label">12</span>
                                   </button>
                                   <ul class="dropdown-menu">
@@ -332,6 +332,92 @@
                         </div>
                     </div>
                 </div>
+                {{--
+                <!-- МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ (только мобильные/планшеты) -->
+                <div class="mobile-categories-wrapper" style="display: none;">
+                    <div class="mobile-categories-grid">
+                        
+                        <div class="mobile-category-card back-card">
+                            @if($category->parent)
+                                <a href="{{ route('catalog.show', $category->parent->alias) }}">
+                                    <div class="mobile-category-image">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </div>
+                                    <div class="mobile-category-name">
+                                        Назад
+                                    </div>
+                                </a>
+                            @else
+                                <a href="{{ route('catalog.index') }}">
+                                    <div class="mobile-category-image">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </div>
+                                    <div class="mobile-category-name">
+                                        В каталог
+                                    </div>
+                                </a>
+                            @endif
+                        </div>
+                        
+                        
+                        @foreach ($categories as $subcategory)
+                        <div class="mobile-category-card">
+                            <a href="{{ route('catalog.show', $subcategory->alias) }}">
+                                <div class="mobile-category-image">
+                                    @if(isset($subcategory->image) && $subcategory->image)
+                                        <img src="{{ asset('storage/' . $subcategory->image) }}" alt="{{ $subcategory->name }}">
+                                    @else
+                                        <i class="fas fa-folder"></i>
+                                    @endif
+                                </div>
+                                <div class="mobile-category-name">
+                                    {{ $subcategory->name }}
+                                </div>
+                            </a>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                --}}
+                <!-- / МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ /-->
+                <!-- Мобильная версия: карточки категорий 3x3 -->
+<div class="mobile-categories-wrapper hidden-md hidden-lg">
+    <div class="mobile-categories-grid">
+        <!-- Кнопка "Назад" -->
+        <div class="mobile-category-card back-card">
+            <a href="@if($category->parent){{ route('catalog.show', $category->parent->alias ?? $category->parent->id) }}@else{{ route('catalog.index') }}@endif">
+                <div class="mobile-category-image" 
+                     style="background: linear-gradient(135deg, #e1f6fc 0%, #e7c4fc 100%);">
+                    <i class="fas fa-arrow-left" style="color: #555555;"></i>
+                </div>
+                <div class="mobile-category-name">Назад</div>
+            </a>
+        </div>
+
+        <!-- Карточки подкатегорий -->
+        @foreach ($categories as $subcategory)
+            <div class="mobile-category-card">
+                <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                    <div class="mobile-category-image" 
+                         style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
+                        @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
+                            <i class="fas {{ $subcategory->icon }}" 
+                               style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                        @elseif($subcategory->icon)
+                            <img src="{{ asset('storage/' . $subcategory->icon) }}" 
+                                 alt="{{ $subcategory->name }}">
+                        @else
+                            <i class="fas fa-folder" 
+                               style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                        @endif
+                    </div>
+                    <div class="mobile-category-name">{{ $subcategory->name }}</div>
+                </a>
+            </div>
+        @endforeach
+    </div>
+</div>
+<!-- Карточки подкатегорий -->
                 <div class="product-collection-grid product-grid">
                     <div class="row">
                         {{-- КАРТОЧКА ТОВАРА --}}                      
@@ -340,193 +426,7 @@
                         @empty
                             <p>Нет товаров в этой категории.</p>
                         @endforelse
-<!--
-                         <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="{{ asset('img/test/2.jpg') }}" alt="" class="img-reponsive"></a>
-                                    <div class="ribbon-price red"><span>- 30% </span></div>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group"></div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин: Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Платье с V-образным вырезом ...</a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price">
-                                                <span class="red">450 руб.</span> // выводим переменную $product->lowprice
-                                                <span class="old">650 руб.</span> // выводим переменную $product->price
-                                            </div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>     
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
--->
-
-<!--
-                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="{{ asset('img/test/1.jpg') }}" alt="" class="img-reponsive"></a>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group">
-                                        <a href="#" class="circle black"></a>
-                                        <a href="#" class="circle red"></a>
-                                        <a href="#" class="circle gray"></a>                                                
-                                    </div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин:Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Контрастное Кружевное Платье...</a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price"><span>280 руб.</span></div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>          
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item">
-                            <div class="pd-bd product-inner">
-                                <div class="product-img">
-                                    <a href="#"><img src="{{ asset('img/test/3.jpg') }}" alt="" class="img-reponsive"></a>
-                                </div>
-                                <div class="product-info">
-                                    <div class="color-group"></div>
-                                    <div class="element-list element-list-left">
-                                        <ul class="desc-list">
-                                           <li>Connects directly to Bluetooth</li> 
-                                           <li>Battery Indicator light</li> 
-                                           <li>DPI Selection:2600/2000/1600/1200/800</li> 
-                                           <li>Computers running Windows</li> 
-                                        </ul>
-                                    </div>
-                                    <div class="element-list element-list-middle">
-                                        <div class="product-rating bd-rating">
-                                            <span class="star star-5"></span>
-                                            <span class="star star-4"></span>
-                                            <span class="star star-3"></span>
-                                            <span class="star star-2"></span>
-                                            <span class="star star-1"></span>
-                                            <div class="number-rating">( 896 reviews )</div>
-                                        </div>
-                                        <p class="product-cate">Магазин: Nord (800 метров)</p>
-                                        <h3 class="product-title"><a href="#">Платье с квадратным вырезом ... </a></h3>
-                                        <div class="product-bottom">
-                                            <div class="product-price"><span>840 руб.</span></div>
-                                            <a href="#" class="btn-icon btn-view">
-                                                <span class="icon-bg icon-view"></span>
-                                            </a>
-                                        </div>    
-                                        <div class="product-bottom-group">
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-cart"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-wishlist"></span>
-                                            </a>
-                                            <a href="#" class="btn-icon">
-                                                <span class="icon-bg icon-compare"></span>
-                                            </a>
-                                        </div>
-                                    </div>          
-                                    <div class="product-button-group">
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-cart"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-wishlist"></span>
-                                        </a>
-                                        <a href="#" class="btn-icon">
-                                            <span class="icon-bg icon-compare"></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>-->
+                        {{-- /// КАРТОЧКА ТОВАРА ///--}}
                         
                     </div>
                 </div>
@@ -573,5 +473,6 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 @endsection

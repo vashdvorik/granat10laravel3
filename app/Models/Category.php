@@ -17,6 +17,9 @@ class Category extends Model
         'alias',
         'number',
         'desc',
+        'icon',
+        'icon_color',
+        'bg_color',
         'parent_id',
     ];
 
