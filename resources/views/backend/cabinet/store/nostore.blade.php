@@ -1,3 +1,28 @@
+<style>
+         /* Фикс для мобильной прокрутки */
+         @media (max-width: 767px) {
+            /* Более агрессивный фикс */
+            .banner-feature--14 .banner-feature__shape,
+            .banner-feature--15 .banner-feature__shape {
+                  pointer-events: none !important;
+            }
+            
+            .banner-feature--14 .banner-feature__shape *,
+            .banner-feature--15 .banner-feature__shape * {
+                  pointer-events: none !important;
+                  touch-action: none !important;
+            }
+            
+            /* Основной контейнер должен прокручиваться */
+            body,
+            .contents,
+            .container-fluid {
+                  overflow-y: auto !important;
+                  -webkit-overflow-scrolling: touch !important;
+            }
+         }
+      </style>
+
                   {{-- вверхний  --}}
                   <div class="col-12">
                      <div class="breadcrumb-main">
