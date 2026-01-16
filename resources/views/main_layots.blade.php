@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="{{ asset('css/cabinet.css') }}"> 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
+
+   
     <style>
         .icon-shop {
         background-image: url("{{ asset('img/icon-ship.png') }}");
@@ -26,12 +28,11 @@
     @media (max-width: 767px) {
 
 
-        /* УМЕНЬШАЕМ ОТСТУПЫ COLLECTION-LIST */
-        .collection-list,
+        /* Отступы для сетки товаров */
         .product-collection-grid {
             padding-left: 1px !important;
             padding-right: 1px !important;
-        }    
+        }
     
     /* СКРЫВАЕМ TOPBAR */
         .topbar {

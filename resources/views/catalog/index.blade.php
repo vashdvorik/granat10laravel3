@@ -1,6 +1,16 @@
 @extends('main_layots')
 @section('title', 'Каталог товара | Маркетплейс ПМР')
 
+<style>
+    @media (max-width: 767px) {
+        /* Отступы для списка коллекций, применяется только на странице каталога */
+        .collection-list {
+            padding-left: 1px !important;
+            padding-right: 1px !important;
+        }
+    }
+</style>
+
 @section('content')
 <div class="container container-240 shop-collection">
     <ul class="breadcrumb">
