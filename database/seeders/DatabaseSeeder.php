@@ -21,8 +21,7 @@ class DatabaseSeeder extends Seeder
             SellersTableSeeder::class,
             ProductsTableSeeder::class,
             ImagesTableSeeder::class,
-            SellerPackagesTableSeeder::class,
-            CategoriesJsonSeeder::class
+            SellerPackagesTableSeeder::class
         ]);
     }
 }
