@@ -266,7 +266,7 @@
         }
     }
 
-@media (max-width: 767px) {
+@media (max-width: 1024px) {
     .mobile-categories-wrapper {
         display: block !important;
         margin: 15px 0;

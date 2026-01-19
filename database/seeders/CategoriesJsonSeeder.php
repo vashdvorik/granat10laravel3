@@ -32,7 +32,8 @@ class CategoriesJsonSeeder extends Seeder
             return;
         }
 
-        $categories = json_decode(file_get_contents($jsonPath), true);
+        $json = file_get_contents($jsonPath);
+        $categories = json_decode($json, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->command->error("❌ Ошибка JSON: " . json_last_error_msg());
@@ -44,65 +45,64 @@ class CategoriesJsonSeeder extends Seeder
         DB::beginTransaction();
         
         try {
-            // Шаг 1: Создаем/обновляем все категории БЕЗ parent_id
-            $this->command->info("⏳ Шаг 1/3: Создание/обновление категорий...");
-            $created = 0;
-            $updated = 0;
+            $this->processCategories($categories);
             
-            foreach ($categories as $categoryData) {
-                $exists = Category::where('id', $categoryData['id'])->exists();
-                
-                Category::updateOrCreate(
-                    ['id' => $categoryData['id']], // Ключ для поиска
-                    [
-                        'name' => $categoryData['name'],
-                        'alias' => $categoryData['alias'],
-                        'number' => $categoryData['number'],
-                        'desc' => $categoryData['desc'] ?? null,
-                        'is_active' => $categoryData['is_active'] ?? true,
-                        'parent_id' => null, // Временно NULL
-                    ]
-                );
-                
-                $exists ? $updated++ : $created++;
-            }
-            
-            $this->command->info("   ✅ Создано: {$created}, обновлено: {$updated}");
-
-            // Шаг 2: Связываем родителей по alias
-            $this->command->info("⏳ Шаг 2/3: Связывание родителей...");
-            $linked = 0;
-            
-            foreach ($categories as $categoryData) {
-                if (!empty($categoryData['parent_alias'])) {
-                    $parent = Category::where('alias', $categoryData['parent_alias'])->first();
-                    
-                    if ($parent) {
-                        Category::where('id', $categoryData['id'])
-                            ->update(['parent_id' => $parent->id]);
-                        $linked++;
-                    } else {
-                        $this->command->warn("   ⚠️  Родитель '{$categoryData['parent_alias']}' не найден для категории ID {$categoryData['id']}");
-                    }
-                }
-            }
-            
-            $this->command->info("   ✅ Связано категорий: {$linked}");
-
-            // Шаг 3: Перестроение Nested Set
-            $this->command->info("⏳ Шаг 3/3: Перестроение Nested Set дерева...");
             Category::fixTree();
-            $this->command->info("   ✅ Дерево перестроено");
+            
+            $this->command->info('✅ Категории успешно импортированы из JSON');
             
             DB::commit();
-            
-            $this->command->info("");
-            $this->command->info("🎉 Успешно! Всего категорий в БД: " . Category::count());
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            $this->command->error("❌ Ошибка: " . $e->getMessage());
-            $this->command->error($e->getTraceAsString());
+            $this->command->error('❌ Ошибка: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+    /*
+    private function processCategories(array $categories, $parentId = null): void
+    {
+        foreach ($categories as $categoryData) {
+            $children = $categoryData['children'] ?? [];
+            unset($categoryData['children']);
+            
+            $exists = Category::where('id', $categoryData['id'])->exists();
+            
+            $category = Category::updateOrCreate(
+                ['id' => $categoryData['id']],
+                array_merge($categoryData, ['parent_id' => $parentId])
+            );
+            
+            $action = $exists ? '♻️  Обновлена' : '✨ Создана';
+            $this->command->info("$action: ID {$category->id} - {$category->name}");
+            
+            if (!empty($children)) {
+                $this->processCategories($children, $category->id);
+            }
+        }
+    }*/
+    private function processCategories(array $categories, $parentId = null): void
+    {
+        foreach ($categories as $categoryData) {
+            $children = $categoryData['children'] ?? [];
+            unset($categoryData['children']);
+            
+            // 1. Принудительно добавляем parent_id в массив данных
+            $categoryData['parent_id'] = $parentId;
+
+            // 2. Используем updateOrCreate, чтобы сохранить фиксированный ID
+            // Но после сохранения МЫ НЕ вызываем fixTree в цикле (это медленно)
+            $category = Category::updateOrCreate(
+                ['id' => $categoryData['id']],
+                $categoryData
+            );
+
+            $action = $category->wasRecentlyCreated ? '✨ Создана' : '♻️ Обновлена';
+            $this->command->info("$action: ID {$category->id} - {$category->name}");
+
+            if (!empty($children)) {
+                // Рекурсивно идем глубже
+                $this->processCategories($children, $category->id);
+            }
         }
     }
 }
