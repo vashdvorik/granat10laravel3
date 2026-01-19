@@ -1,0 +1,1388 @@
+[
+    {
+        "id": 1,
+        "name": "Одежда и обувь",
+        "alias": "clothing-and-footwear",
+        "number": 1,
+        "desc": "Одежда, обувь и аксессуары",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 2,
+        "name": "Дом и сад",
+        "alias": "home-and-garden",
+        "number": 2,
+        "desc": "Товары для дома и сада",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 3,
+        "name": "Строительство",
+        "alias": "construction",
+        "number": 3,
+        "desc": "Материалы и инструменты для строительства",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 4,
+        "name": "Техника и электроника",
+        "alias": "electronics",
+        "number": 4,
+        "desc": "Электроника и бытовая техника",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 5,
+        "name": "Авто и мото",
+        "alias": "auto-and-moto",
+        "number": 5,
+        "desc": "Товары для автомобилей и мотоциклов",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 6,
+        "name": "Красота и здоровье",
+        "alias": "beauty-and-health",
+        "number": 6,
+        "desc": "Товары для красоты и здоровья",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 7,
+        "name": "Товары для детей",
+        "alias": "childrens-goods",
+        "number": 7,
+        "desc": "Товары для детей и мам",
+        "parent_alias": null,
+        "is_active": true
+    },
+    {
+        "id": 8,
+        "name": "Женская одежда",
+        "alias": "womens-clothing",
+        "number": 8,
+        "desc": "Одежда для женщин",
+        "parent_alias": "clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 9,
+        "name": "Мужская одежда",
+        "alias": "mens-clothing",
+        "number": 9,
+        "desc": "Одежда для мужчин",
+        "parent_alias": "clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 10,
+        "name": "Детская одежда",
+        "alias": "childrens-clothing",
+        "number": 10,
+        "desc": "Одежда для детей",
+        "parent_alias": "clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 11,
+        "name": "Обувь",
+        "alias": "footwear",
+        "number": 11,
+        "desc": "Обувь для всех",
+        "parent_alias": "clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 12,
+        "name": "Аксессуары",
+        "alias": "accessories",
+        "number": 12,
+        "desc": "Аксессуары для одежды",
+        "parent_alias": "clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 13,
+        "name": "Верхняя одежда",
+        "alias": "womens-outerwear",
+        "number": 13,
+        "desc": "куртки, пальто",
+        "parent_alias": "womens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 14,
+        "name": "Нижняя одежда",
+        "alias": "womens-bottoms",
+        "number": 14,
+        "desc": "брюки, юбки",
+        "parent_alias": "womens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 15,
+        "name": "Платья и сарафаны",
+        "alias": "dresses-and-sundresses",
+        "number": 15,
+        "desc": "Платья и сарафаны",
+        "parent_alias": "womens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 16,
+        "name": "Белье и купальники",
+        "alias": "lingerie-and-swimwear",
+        "number": 16,
+        "desc": "Белье и купальники",
+        "parent_alias": "womens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 17,
+        "name": "Спортивная одежда",
+        "alias": "womens-sportswear",
+        "number": 17,
+        "desc": "Спортивная одежда для женщин",
+        "parent_alias": "womens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 18,
+        "name": "Верхняя одежда",
+        "alias": "mens-outerwear",
+        "number": 18,
+        "desc": "куртки, рубашки",
+        "parent_alias": "mens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 19,
+        "name": "Нижняя одежда",
+        "alias": "mens-bottoms",
+        "number": 19,
+        "desc": "брюки, шорты",
+        "parent_alias": "mens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 20,
+        "name": "Костюмы и галстуки",
+        "alias": "suits-and-ties",
+        "number": 20,
+        "desc": "Костюмы и галстуки",
+        "parent_alias": "mens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 21,
+        "name": "Белье и носки",
+        "alias": "underwear-and-socks",
+        "number": 21,
+        "desc": "Белье и носки",
+        "parent_alias": "mens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 22,
+        "name": "Спортивная одежда",
+        "alias": "mens-sportswear",
+        "number": 22,
+        "desc": "Спортивная одежда для мужчин",
+        "parent_alias": "mens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 23,
+        "name": "Для девочек",
+        "alias": "girls-clothing",
+        "number": 23,
+        "desc": "Одежда для девочек",
+        "parent_alias": "childrens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 24,
+        "name": "Для мальчиков",
+        "alias": "boys-clothing",
+        "number": 24,
+        "desc": "Одежда для мальчиков",
+        "parent_alias": "childrens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 25,
+        "name": "Для младенцев",
+        "alias": "infant-clothing",
+        "number": 25,
+        "desc": "Одежда для младенцев",
+        "parent_alias": "childrens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 26,
+        "name": "Школьная форма",
+        "alias": "school-uniforms",
+        "number": 26,
+        "desc": "Школьная форма",
+        "parent_alias": "childrens-clothing",
+        "is_active": true
+    },
+    {
+        "id": 27,
+        "name": "Женская",
+        "alias": "womens-footwear",
+        "number": 27,
+        "desc": "туфли, сапоги, кроссовки",
+        "parent_alias": "footwear",
+        "is_active": true
+    },
+    {
+        "id": 28,
+        "name": "Мужская",
+        "alias": "mens-footwear",
+        "number": 28,
+        "desc": "ботинки, сандалии",
+        "parent_alias": "footwear",
+        "is_active": true
+    },
+    {
+        "id": 29,
+        "name": "Детская",
+        "alias": "childrens-footwear",
+        "number": 29,
+        "desc": "Детская обувь",
+        "parent_alias": "footwear",
+        "is_active": true
+    },
+    {
+        "id": 30,
+        "name": "Спортивная обувь",
+        "alias": "sports-footwear",
+        "number": 30,
+        "desc": "Спортивная обувь",
+        "parent_alias": "footwear",
+        "is_active": true
+    },
+    {
+        "id": 31,
+        "name": "Сумки и рюкзаки",
+        "alias": "bags-and-backpacks",
+        "number": 31,
+        "desc": "Сумки и рюкзаки",
+        "parent_alias": "accessories",
+        "is_active": true
+    },
+    {
+        "id": 32,
+        "name": "Украшения и бижутерия",
+        "alias": "jewelry-and-costume-jewelry",
+        "number": 32,
+        "desc": "Украшения и бижутерия",
+        "parent_alias": "accessories",
+        "is_active": true
+    },
+    {
+        "id": 33,
+        "name": "Головные уборы",
+        "alias": "headwear",
+        "number": 33,
+        "desc": "Головные уборы",
+        "parent_alias": "accessories",
+        "is_active": true
+    },
+    {
+        "id": 34,
+        "name": "Ремни и шарфы",
+        "alias": "belts-and-scarves",
+        "number": 34,
+        "desc": "Ремни и шарфы",
+        "parent_alias": "accessories",
+        "is_active": true
+    },
+    {
+        "id": 35,
+        "name": "Мебель",
+        "alias": "furniture",
+        "number": 35,
+        "desc": "Мебель для дома",
+        "parent_alias": "home-and-garden",
+        "is_active": true
+    },
+    {
+        "id": 36,
+        "name": "Декор и текстиль",
+        "alias": "decor-and-textiles",
+        "number": 36,
+        "desc": "Декор и текстиль",
+        "parent_alias": "home-and-garden",
+        "is_active": true
+    },
+    {
+        "id": 37,
+        "name": "Кухонные принадлежности",
+        "alias": "kitchen-utensils",
+        "number": 37,
+        "desc": "Принадлежности для кухни",
+        "parent_alias": "home-and-garden",
+        "is_active": true
+    },
+    {
+        "id": 38,
+        "name": "Сад и огород",
+        "alias": "garden-and-vegetable-garden",
+        "number": 38,
+        "desc": "Товары для сада",
+        "parent_alias": "home-and-garden",
+        "is_active": true
+    },
+    {
+        "id": 39,
+        "name": "Бытовая химия",
+        "alias": "household-chemicals",
+        "number": 39,
+        "desc": "Средства для уборки",
+        "parent_alias": "home-and-garden",
+        "is_active": true
+    },
+    {
+        "id": 40,
+        "name": "Для гостиной",
+        "alias": "living-room-furniture",
+        "number": 40,
+        "desc": "диваны, кресла",
+        "parent_alias": "furniture",
+        "is_active": true
+    },
+    {
+        "id": 41,
+        "name": "Для спальни",
+        "alias": "bedroom-furniture",
+        "number": 41,
+        "desc": "кровати, шкафы",
+        "parent_alias": "furniture",
+        "is_active": true
+    },
+    {
+        "id": 42,
+        "name": "Для кухни",
+        "alias": "kitchen-furniture",
+        "number": 42,
+        "desc": "столы, стулья",
+        "parent_alias": "furniture",
+        "is_active": true
+    },
+    {
+        "id": 43,
+        "name": "Офисная мебель",
+        "alias": "office-furniture",
+        "number": 43,
+        "desc": "Офисная мебель",
+        "parent_alias": "furniture",
+        "is_active": true
+    },
+    {
+        "id": 44,
+        "name": "Постельное белье",
+        "alias": "bedding",
+        "number": 44,
+        "desc": "Постельное белье",
+        "parent_alias": "decor-and-textiles",
+        "is_active": true
+    },
+    {
+        "id": 45,
+        "name": "Шторы и ковры",
+        "alias": "curtains-and-carpets",
+        "number": 45,
+        "desc": "Шторы и ковры",
+        "parent_alias": "decor-and-textiles",
+        "is_active": true
+    },
+    {
+        "id": 46,
+        "name": "Освещение",
+        "alias": "lighting",
+        "number": 46,
+        "desc": "лампы, люстры",
+        "parent_alias": "decor-and-textiles",
+        "is_active": true
+    },
+    {
+        "id": 47,
+        "name": "Декоративные элементы",
+        "alias": "decorative-elements",
+        "number": 47,
+        "desc": "картины, вазы",
+        "parent_alias": "decor-and-textiles",
+        "is_active": true
+    },
+    {
+        "id": 48,
+        "name": "Посуда и столовые приборы",
+        "alias": "dishes-and-cutlery",
+        "number": 48,
+        "desc": "Посуда и столовые приборы",
+        "parent_alias": "kitchen-utensils",
+        "is_active": true
+    },
+    {
+        "id": 49,
+        "name": "Кухонная утварь",
+        "alias": "kitchen-tools",
+        "number": 49,
+        "desc": "ножи, доски",
+        "parent_alias": "kitchen-utensils",
+        "is_active": true
+    },
+    {
+        "id": 50,
+        "name": "Хранение продуктов",
+        "alias": "food-storage",
+        "number": 50,
+        "desc": "Хранение продуктов",
+        "parent_alias": "kitchen-utensils",
+        "is_active": true
+    },
+    {
+        "id": 51,
+        "name": "Инструменты для сада",
+        "alias": "garden-tools",
+        "number": 51,
+        "desc": "лопаты, грабли",
+        "parent_alias": "garden-and-vegetable-garden",
+        "is_active": true
+    },
+    {
+        "id": 52,
+        "name": "Растения и семена",
+        "alias": "plants-and-seeds",
+        "number": 52,
+        "desc": "Растения и семена",
+        "parent_alias": "garden-and-vegetable-garden",
+        "is_active": true
+    },
+    {
+        "id": 53,
+        "name": "Мебель для сада",
+        "alias": "garden-furniture",
+        "number": 53,
+        "desc": "скамейки, гамаки",
+        "parent_alias": "garden-and-vegetable-garden",
+        "is_active": true
+    },
+    {
+        "id": 54,
+        "name": "Полив и уход",
+        "alias": "irrigation-and-care",
+        "number": 54,
+        "desc": "Полив и уход",
+        "parent_alias": "garden-and-vegetable-garden",
+        "is_active": true
+    },
+    {
+        "id": 55,
+        "name": "Средства для уборки",
+        "alias": "cleaning-products",
+        "number": 55,
+        "desc": "Средства для уборки",
+        "parent_alias": "household-chemicals",
+        "is_active": true
+    },
+    {
+        "id": 56,
+        "name": "Стиральные порошки",
+        "alias": "laundry-detergents",
+        "number": 56,
+        "desc": "Стиральные порошки",
+        "parent_alias": "household-chemicals",
+        "is_active": true
+    },
+    {
+        "id": 57,
+        "name": "Инструменты",
+        "alias": "tools",
+        "number": 57,
+        "desc": "Инструменты для строительства",
+        "parent_alias": "construction",
+        "is_active": true
+    },
+    {
+        "id": 58,
+        "name": "Строительные материалы",
+        "alias": "building-materials",
+        "number": 58,
+        "desc": "Материалы для строительства",
+        "parent_alias": "construction",
+        "is_active": true
+    },
+    {
+        "id": 59,
+        "name": "Сантехника",
+        "alias": "plumbing",
+        "number": 59,
+        "desc": "Сантехника",
+        "parent_alias": "construction",
+        "is_active": true
+    },
+    {
+        "id": 60,
+        "name": "Электрика",
+        "alias": "electrical",
+        "number": 60,
+        "desc": "Электрика",
+        "parent_alias": "construction",
+        "is_active": true
+    },
+    {
+        "id": 61,
+        "name": "Отделочные материалы",
+        "alias": "finishing-materials",
+        "number": 61,
+        "desc": "Отделочные материалы",
+        "parent_alias": "construction",
+        "is_active": true
+    },
+    {
+        "id": 62,
+        "name": "Электроинструменты",
+        "alias": "power-tools",
+        "number": 62,
+        "desc": "дрели, пилы",
+        "parent_alias": "tools",
+        "is_active": true
+    },
+    {
+        "id": 63,
+        "name": "Ручные инструменты",
+        "alias": "hand-tools",
+        "number": 63,
+        "desc": "молотки, отвертки",
+        "parent_alias": "tools",
+        "is_active": true
+    },
+    {
+        "id": 64,
+        "name": "Измерительные приборы",
+        "alias": "measuring-instruments",
+        "number": 64,
+        "desc": "Измерительные приборы",
+        "parent_alias": "tools",
+        "is_active": true
+    },
+    {
+        "id": 65,
+        "name": "Краски и лаки",
+        "alias": "paints-and-varnishes",
+        "number": 65,
+        "desc": "Краски и лаки",
+        "parent_alias": "building-materials",
+        "is_active": true
+    },
+    {
+        "id": 66,
+        "name": "Кирпич и бетон",
+        "alias": "bricks-and-concrete",
+        "number": 66,
+        "desc": "Кирпич и бетон",
+        "parent_alias": "building-materials",
+        "is_active": true
+    },
+    {
+        "id": 67,
+        "name": "Дерево и пиломатериалы",
+        "alias": "wood-and-lumber",
+        "number": 67,
+        "desc": "Дерево и пиломатериалы",
+        "parent_alias": "building-materials",
+        "is_active": true
+    },
+    {
+        "id": 68,
+        "name": "Металлопрокат",
+        "alias": "metal-products",
+        "number": 68,
+        "desc": "Металлопрокат",
+        "parent_alias": "building-materials",
+        "is_active": true
+    },
+    {
+        "id": 69,
+        "name": "Смесители и краны",
+        "alias": "faucets-and-taps",
+        "number": 69,
+        "desc": "Смесители и краны",
+        "parent_alias": "plumbing",
+        "is_active": true
+    },
+    {
+        "id": 70,
+        "name": "Ванны и душевые",
+        "alias": "baths-and-showers",
+        "number": 70,
+        "desc": "Ванны и душевые",
+        "parent_alias": "plumbing",
+        "is_active": true
+    },
+    {
+        "id": 71,
+        "name": "Трубы и фитинги",
+        "alias": "pipes-and-fittings",
+        "number": 71,
+        "desc": "Трубы и фитинги",
+        "parent_alias": "plumbing",
+        "is_active": true
+    },
+    {
+        "id": 72,
+        "name": "Кабели и провода",
+        "alias": "cables-and-wires",
+        "number": 72,
+        "desc": "Кабели и провода",
+        "parent_alias": "electrical",
+        "is_active": true
+    },
+    {
+        "id": 73,
+        "name": "Розетки и выключатели",
+        "alias": "sockets-and-switches",
+        "number": 73,
+        "desc": "Розетки и выключатели",
+        "parent_alias": "electrical",
+        "is_active": true
+    },
+    {
+        "id": 74,
+        "name": "Осветительные приборы",
+        "alias": "lighting-fixtures",
+        "number": 74,
+        "desc": "Осветительные приборы",
+        "parent_alias": "electrical",
+        "is_active": true
+    },
+    {
+        "id": 75,
+        "name": "Обои и плитка",
+        "alias": "wallpapers-and-tiles",
+        "number": 75,
+        "desc": "Обои и плитка",
+        "parent_alias": "finishing-materials",
+        "is_active": true
+    },
+    {
+        "id": 76,
+        "name": "Полы",
+        "alias": "floors",
+        "number": 76,
+        "desc": "ламинат, линолеум",
+        "parent_alias": "finishing-materials",
+        "is_active": true
+    },
+    {
+        "id": 77,
+        "name": "Двери и окна",
+        "alias": "doors-and-windows",
+        "number": 77,
+        "desc": "Двери и окна",
+        "parent_alias": "finishing-materials",
+        "is_active": true
+    },
+    {
+        "id": 78,
+        "name": "Смартфоны и гаджеты",
+        "alias": "smartphones-and-gadgets",
+        "number": 78,
+        "desc": "Смартфоны и гаджеты",
+        "parent_alias": "electronics",
+        "is_active": true
+    },
+    {
+        "id": 79,
+        "name": "Компьютеры и периферия",
+        "alias": "computers-and-peripherals",
+        "number": 79,
+        "desc": "Компьютеры и периферия",
+        "parent_alias": "electronics",
+        "is_active": true
+    },
+    {
+        "id": 80,
+        "name": "Бытовая техника",
+        "alias": "household-appliances",
+        "number": 80,
+        "desc": "Бытовая техника",
+        "parent_alias": "electronics",
+        "is_active": true
+    },
+    {
+        "id": 81,
+        "name": "Аудио и видео",
+        "alias": "audio-and-video",
+        "number": 81,
+        "desc": "Аудио и видео",
+        "parent_alias": "electronics",
+        "is_active": true
+    },
+    {
+        "id": 82,
+        "name": "Умный дом",
+        "alias": "smart-home",
+        "number": 82,
+        "desc": "Умный дом",
+        "parent_alias": "electronics",
+        "is_active": true
+    },
+    {
+        "id": 83,
+        "name": "Мобильные телефоны",
+        "alias": "mobile-phones",
+        "number": 83,
+        "desc": "Мобильные телефоны",
+        "parent_alias": "smartphones-and-gadgets",
+        "is_active": true
+    },
+    {
+        "id": 84,
+        "name": "Аксессуары",
+        "alias": "phone-accessories",
+        "number": 84,
+        "desc": "чехлы, зарядки",
+        "parent_alias": "smartphones-and-gadgets",
+        "is_active": true
+    },
+    {
+        "id": 85,
+        "name": "Смарт-часы",
+        "alias": "smart-watches",
+        "number": 85,
+        "desc": "Смарт-часы",
+        "parent_alias": "smartphones-and-gadgets",
+        "is_active": true
+    },
+    {
+        "id": 86,
+        "name": "Ноутбуки и ПК",
+        "alias": "laptops-and-pcs",
+        "number": 86,
+        "desc": "Ноутбуки и ПК",
+        "parent_alias": "computers-and-peripherals",
+        "is_active": true
+    },
+    {
+        "id": 87,
+        "name": "Мониторы",
+        "alias": "monitors",
+        "number": 87,
+        "desc": "Мониторы",
+        "parent_alias": "computers-and-peripherals",
+        "is_active": true
+    },
+    {
+        "id": 88,
+        "name": "Клавиатуры и мыши",
+        "alias": "keyboards-and-mice",
+        "number": 88,
+        "desc": "Клавиатуры и мыши",
+        "parent_alias": "computers-and-peripherals",
+        "is_active": true
+    },
+    {
+        "id": 89,
+        "name": "Принтеры",
+        "alias": "printers",
+        "number": 89,
+        "desc": "Принтеры",
+        "parent_alias": "computers-and-peripherals",
+        "is_active": true
+    },
+    {
+        "id": 90,
+        "name": "Холодильники и морозильники",
+        "alias": "refrigerators-and-freezers",
+        "number": 90,
+        "desc": "Холодильники и морозильники",
+        "parent_alias": "household-appliances",
+        "is_active": true
+    },
+    {
+        "id": 91,
+        "name": "Стиральные машины",
+        "alias": "washing-machines",
+        "number": 91,
+        "desc": "Стиральные машины",
+        "parent_alias": "household-appliances",
+        "is_active": true
+    },
+    {
+        "id": 92,
+        "name": "Пылесосы",
+        "alias": "vacuum-cleaners",
+        "number": 92,
+        "desc": "Пылесосы",
+        "parent_alias": "household-appliances",
+        "is_active": true
+    },
+    {
+        "id": 93,
+        "name": "Микроволновки",
+        "alias": "microwaves",
+        "number": 93,
+        "desc": "Микроволновки",
+        "parent_alias": "household-appliances",
+        "is_active": true
+    },
+    {
+        "id": 94,
+        "name": "Телевизоры",
+        "alias": "televisions",
+        "number": 94,
+        "desc": "Телевизоры",
+        "parent_alias": "audio-and-video",
+        "is_active": true
+    },
+    {
+        "id": 95,
+        "name": "Наушники и колонки",
+        "alias": "headphones-and-speakers",
+        "number": 95,
+        "desc": "Наушники и колонки",
+        "parent_alias": "audio-and-video",
+        "is_active": true
+    },
+    {
+        "id": 96,
+        "name": "Фото- и видеокамеры",
+        "alias": "photo-and-video-cameras",
+        "number": 96,
+        "desc": "Фото- и видеокамеры",
+        "parent_alias": "audio-and-video",
+        "is_active": true
+    },
+    {
+        "id": 97,
+        "name": "Камеры видеонаблюдения",
+        "alias": "surveillance-cameras",
+        "number": 97,
+        "desc": "Камеры видеонаблюдения",
+        "parent_alias": "smart-home",
+        "is_active": true
+    },
+    {
+        "id": 98,
+        "name": "Умные лампы",
+        "alias": "smart-bulbs",
+        "number": 98,
+        "desc": "Умные лампы",
+        "parent_alias": "smart-home",
+        "is_active": true
+    },
+    {
+        "id": 99,
+        "name": "Роботы-пылесосы",
+        "alias": "robot-vacuums",
+        "number": 99,
+        "desc": "Роботы-пылесосы",
+        "parent_alias": "smart-home",
+        "is_active": true
+    },
+    {
+        "id": 100,
+        "name": "Запчасти для авто",
+        "alias": "auto-parts",
+        "number": 100,
+        "desc": "Запчасти для авто",
+        "parent_alias": "auto-and-moto",
+        "is_active": true
+    },
+    {
+        "id": 101,
+        "name": "Аксессуары для авто",
+        "alias": "auto-accessories",
+        "number": 101,
+        "desc": "Аксессуары для авто",
+        "parent_alias": "auto-and-moto",
+        "is_active": true
+    },
+    {
+        "id": 102,
+        "name": "Шины и диски",
+        "alias": "tires-and-wheels",
+        "number": 102,
+        "desc": "Шины и диски",
+        "parent_alias": "auto-and-moto",
+        "is_active": true
+    },
+    {
+        "id": 103,
+        "name": "Мотоциклы и аксессуары",
+        "alias": "motorcycles-and-accessories",
+        "number": 103,
+        "desc": "Мотоциклы и аксессуары",
+        "parent_alias": "auto-and-moto",
+        "is_active": true
+    },
+    {
+        "id": 104,
+        "name": "Инструменты и уход",
+        "alias": "auto-tools-and-care",
+        "number": 104,
+        "desc": "Инструменты и уход за авто",
+        "parent_alias": "auto-and-moto",
+        "is_active": true
+    },
+    {
+        "id": 105,
+        "name": "Двигатель и трансмиссия",
+        "alias": "engine-and-transmission",
+        "number": 105,
+        "desc": "Двигатель и трансмиссия",
+        "parent_alias": "auto-parts",
+        "is_active": true
+    },
+    {
+        "id": 106,
+        "name": "Тормозная система",
+        "alias": "brake-system",
+        "number": 106,
+        "desc": "Тормозная система",
+        "parent_alias": "auto-parts",
+        "is_active": true
+    },
+    {
+        "id": 107,
+        "name": "Подвеска",
+        "alias": "suspension",
+        "number": 107,
+        "desc": "Подвеска",
+        "parent_alias": "auto-parts",
+        "is_active": true
+    },
+    {
+        "id": 108,
+        "name": "Коврики и чехлы",
+        "alias": "mats-and-covers",
+        "number": 108,
+        "desc": "Коврики и чехлы",
+        "parent_alias": "auto-accessories",
+        "is_active": true
+    },
+    {
+        "id": 109,
+        "name": "Автоэлектроника",
+        "alias": "auto-electronics",
+        "number": 109,
+        "desc": "навигаторы, регистраторы",
+        "parent_alias": "auto-accessories",
+        "is_active": true
+    },
+    {
+        "id": 110,
+        "name": "Освещение",
+        "alias": "auto-lighting",
+        "number": 110,
+        "desc": "Освещение",
+        "parent_alias": "auto-accessories",
+        "is_active": true
+    },
+    {
+        "id": 111,
+        "name": "Летние шины",
+        "alias": "summer-tires",
+        "number": 111,
+        "desc": "Летние шины",
+        "parent_alias": "tires-and-wheels",
+        "is_active": true
+    },
+    {
+        "id": 112,
+        "name": "Зимние шины",
+        "alias": "winter-tires",
+        "number": 112,
+        "desc": "Зимние шины",
+        "parent_alias": "tires-and-wheels",
+        "is_active": true
+    },
+    {
+        "id": 113,
+        "name": "Диски",
+        "alias": "wheels",
+        "number": 113,
+        "desc": "Диски",
+        "parent_alias": "tires-and-wheels",
+        "is_active": true
+    },
+    {
+        "id": 114,
+        "name": "Запчасти для мото",
+        "alias": "moto-parts",
+        "number": 114,
+        "desc": "Запчасти для мото",
+        "parent_alias": "motorcycles-and-accessories",
+        "is_active": true
+    },
+    {
+        "id": 115,
+        "name": "Экипировка",
+        "alias": "moto-gear",
+        "number": 115,
+        "desc": "шлемы, перчатки",
+        "parent_alias": "motorcycles-and-accessories",
+        "is_active": true
+    },
+    {
+        "id": 116,
+        "name": "Автохимия",
+        "alias": "auto-chemicals",
+        "number": 116,
+        "desc": "Автохимия",
+        "parent_alias": "auto-tools-and-care",
+        "is_active": true
+    },
+    {
+        "id": 117,
+        "name": "Инструменты для ремонта",
+        "alias": "repair-tools",
+        "number": 117,
+        "desc": "Инструменты для ремонта",
+        "parent_alias": "auto-tools-and-care",
+        "is_active": true
+    },
+    {
+        "id": 118,
+        "name": "Косметика",
+        "alias": "cosmetics",
+        "number": 118,
+        "desc": "Косметика",
+        "parent_alias": "beauty-and-health",
+        "is_active": true
+    },
+    {
+        "id": 119,
+        "name": "Уход за волосами",
+        "alias": "hair-care",
+        "number": 119,
+        "desc": "Уход за волосами",
+        "parent_alias": "beauty-and-health",
+        "is_active": true
+    },
+    {
+        "id": 120,
+        "name": "Здоровье и медицина",
+        "alias": "health-and-medicine",
+        "number": 120,
+        "desc": "Здоровье и медицина",
+        "parent_alias": "beauty-and-health",
+        "is_active": true
+    },
+    {
+        "id": 121,
+        "name": "Фитнес и спорт",
+        "alias": "fitness-and-sports",
+        "number": 121,
+        "desc": "Фитнес и спорт (без дубликатов с одеждой)",
+        "parent_alias": "beauty-and-health",
+        "is_active": true
+    },
+    {
+        "id": 122,
+        "name": "Парфюмерия",
+        "alias": "perfumery",
+        "number": 122,
+        "desc": "Парфюмерия",
+        "parent_alias": "beauty-and-health",
+        "is_active": true
+    },
+    {
+        "id": 123,
+        "name": "Для лица",
+        "alias": "face-cosmetics",
+        "number": 123,
+        "desc": "крема, маски",
+        "parent_alias": "cosmetics",
+        "is_active": true
+    },
+    {
+        "id": 124,
+        "name": "Для тела",
+        "alias": "body-cosmetics",
+        "number": 124,
+        "desc": "Для тела",
+        "parent_alias": "cosmetics",
+        "is_active": true
+    },
+    {
+        "id": 125,
+        "name": "Декоративная",
+        "alias": "decorative-cosmetics",
+        "number": 125,
+        "desc": "помады, тени",
+        "parent_alias": "cosmetics",
+        "is_active": true
+    },
+    {
+        "id": 126,
+        "name": "Шампуни и кондиционеры",
+        "alias": "shampoos-and-conditioners",
+        "number": 126,
+        "desc": "Шампуни и кондиционеры",
+        "parent_alias": "hair-care",
+        "is_active": true
+    },
+    {
+        "id": 127,
+        "name": "Краски для волос",
+        "alias": "hair-dyes",
+        "number": 127,
+        "desc": "Краски для волос",
+        "parent_alias": "hair-care",
+        "is_active": true
+    },
+    {
+        "id": 128,
+        "name": "Инструменты",
+        "alias": "hair-tools",
+        "number": 128,
+        "desc": "фены, утюжки",
+        "parent_alias": "hair-care",
+        "is_active": true
+    },
+    {
+        "id": 129,
+        "name": "Витамины и БАДы",
+        "alias": "vitamins-and-supplements",
+        "number": 129,
+        "desc": "Витамины и БАДы",
+        "parent_alias": "health-and-medicine",
+        "is_active": true
+    },
+    {
+        "id": 130,
+        "name": "Медицинские приборы",
+        "alias": "medical-devices",
+        "number": 130,
+        "desc": "тонометры",
+        "parent_alias": "health-and-medicine",
+        "is_active": true
+    },
+    {
+        "id": 131,
+        "name": "Ортопедия",
+        "alias": "orthopedics",
+        "number": 131,
+        "desc": "Ортопедия",
+        "parent_alias": "health-and-medicine",
+        "is_active": true
+    },
+    {
+        "id": 132,
+        "name": "Тренажеры",
+        "alias": "exercise-equipment",
+        "number": 132,
+        "desc": "Тренажеры",
+        "parent_alias": "fitness-and-sports",
+        "is_active": true
+    },
+    {
+        "id": 133,
+        "name": "Спортивная одежда",
+        "alias": "sportswear",
+        "number": 133,
+        "desc": "Спортивная одежда (без дубликатов с \"Одежда\")",
+        "parent_alias": "fitness-and-sports",
+        "is_active": true
+    },
+    {
+        "id": 134,
+        "name": "Аксессуары",
+        "alias": "fitness-accessories",
+        "number": 134,
+        "desc": "гантели, коврики",
+        "parent_alias": "fitness-and-sports",
+        "is_active": true
+    },
+    {
+        "id": 135,
+        "name": "Духи и туалетная вода",
+        "alias": "perfumes-and-eau-de-toilette",
+        "number": 135,
+        "desc": "Духи и туалетная вода",
+        "parent_alias": "perfumery",
+        "is_active": true
+    },
+    {
+        "id": 136,
+        "name": "Игрушки и игры",
+        "alias": "toys-and-games",
+        "number": 136,
+        "desc": "Игрушки и игры",
+        "parent_alias": "childrens-goods",
+        "is_active": true
+    },
+    {
+        "id": 137,
+        "name": "Одежда и обувь для детей",
+        "alias": "childrens-clothing-and-footwear",
+        "number": 137,
+        "desc": "Одежда и обувь для детей (ссылка на \"Одежда\" для избежания дубликатов)",
+        "parent_alias": "childrens-goods",
+        "is_active": true
+    },
+    {
+        "id": 138,
+        "name": "Питание и уход",
+        "alias": "nutrition-and-care",
+        "number": 138,
+        "desc": "Питание и уход",
+        "parent_alias": "childrens-goods",
+        "is_active": true
+    },
+    {
+        "id": 139,
+        "name": "Товары для мам",
+        "alias": "moms-goods",
+        "number": 139,
+        "desc": "Товары для мам",
+        "parent_alias": "childrens-goods",
+        "is_active": true
+    },
+    {
+        "id": 140,
+        "name": "Образование и творчество",
+        "alias": "education-and-creativity",
+        "number": 140,
+        "desc": "Образование и творчество",
+        "parent_alias": "childrens-goods",
+        "is_active": true
+    },
+    {
+        "id": 141,
+        "name": "Конструкторы",
+        "alias": "construction-sets",
+        "number": 141,
+        "desc": "Конструкторы",
+        "parent_alias": "toys-and-games",
+        "is_active": true
+    },
+    {
+        "id": 142,
+        "name": "Куклы и фигурки",
+        "alias": "dolls-and-figures",
+        "number": 142,
+        "desc": "Куклы и фигурки",
+        "parent_alias": "toys-and-games",
+        "is_active": true
+    },
+    {
+        "id": 143,
+        "name": "Настольные игры",
+        "alias": "board-games",
+        "number": 143,
+        "desc": "Настольные игры",
+        "parent_alias": "toys-and-games",
+        "is_active": true
+    },
+    {
+        "id": 144,
+        "name": "Развивающие игрушки",
+        "alias": "educational-toys",
+        "number": 144,
+        "desc": "Развивающие игрушки",
+        "parent_alias": "toys-and-games",
+        "is_active": true
+    },
+    {
+        "id": 145,
+        "name": "Для новорожденных",
+        "alias": "newborn-clothing",
+        "number": 145,
+        "desc": "Для новорожденных",
+        "parent_alias": "childrens-clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 146,
+        "name": "Для дошкольников",
+        "alias": "preschool-clothing",
+        "number": 146,
+        "desc": "Для дошкольников",
+        "parent_alias": "childrens-clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 147,
+        "name": "Школьная",
+        "alias": "school-clothing",
+        "number": 147,
+        "desc": "Школьная",
+        "parent_alias": "childrens-clothing-and-footwear",
+        "is_active": true
+    },
+    {
+        "id": 148,
+        "name": "Детское питание",
+        "alias": "baby-food",
+        "number": 148,
+        "desc": "Детское питание",
+        "parent_alias": "nutrition-and-care",
+        "is_active": true
+    },
+    {
+        "id": 149,
+        "name": "Подгузники",
+        "alias": "diapers",
+        "number": 149,
+        "desc": "Подгузники",
+        "parent_alias": "nutrition-and-care",
+        "is_active": true
+    },
+    {
+        "id": 150,
+        "name": "Средства гигиены",
+        "alias": "hygiene-products",
+        "number": 150,
+        "desc": "Средства гигиены",
+        "parent_alias": "nutrition-and-care",
+        "is_active": true
+    },
+    {
+        "id": 151,
+        "name": "Коляски и автокресла",
+        "alias": "strollers-and-car-seats",
+        "number": 151,
+        "desc": "Коляски и автокресла",
+        "parent_alias": "moms-goods",
+        "is_active": true
+    },
+    {
+        "id": 152,
+        "name": "Мебель для детской",
+        "alias": "childrens-furniture",
+        "number": 152,
+        "desc": "кроватки",
+        "parent_alias": "moms-goods",
+        "is_active": true
+    },
+    {
+        "id": 153,
+        "name": "Книги и раскраски",
+        "alias": "books-and-coloring-books",
+        "number": 153,
+        "desc": "Книги и раскраски",
+        "parent_alias": "education-and-creativity",
+        "is_active": true
+    },
+    {
+        "id": 154,
+        "name": "Школьные принадлежности",
+        "alias": "school-supplies",
+        "number": 154,
+        "desc": "Школьные принадлежности",
+        "parent_alias": "education-and-creativity",
+        "is_active": true
+    }
+]

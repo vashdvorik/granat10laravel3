@@ -21,38 +21,32 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-/*    public function boot(): void
-    {
-        $categories = Category::whereNull('parent_id')->with('children')->get();
-
-        View::share('categories', $categories);
-        View::share('menuRootCategories', $categories); // <-- для push-меню
-    }*/
-    
-
     public function boot(): void
     {
         Schema::defaultStringLength(191);
 
         if (Schema::hasTable('categories')) {
-            $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
+            // 🆕 NESTED SET: Дерево категорий для меню
+            $categories = \App\Models\Category::whereIsRoot()
+                ->where('is_active', true)
+                ->defaultOrder()
+                ->get()
+                ->toTree();
+                
             View::share('categories', $categories);
-            View::share('menuRootCategories', $categories); // <-- для push-меню
+            View::share('menuRootCategories', $categories);
         }
 
-        // Динамические переменные $seller и $user для кабинета
+        // Динамические переменные для кабинета
         View::composer([
             'backend.*',
             'backend.cabinet.*',
             'backend.cabinet.store.*',
             'backend.cabinet.user.*',
-            // добавьте другие подпапки, если есть
         ], function ($view) {
             $user = Auth::user();
             $seller = $user ? $user->seller : null;
             $view->with('user', $user)->with('seller', $seller);
         });
-
-
     }
 }

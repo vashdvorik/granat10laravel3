@@ -15,12 +15,14 @@ class DatabaseSeeder extends Seeder
             VoyagerDatabaseSeeder::class,
             AdminRoleSeeder::class,
             UsersTableSeeder::class,
-            CategoriesTableSeeder::class,
+            //CategoriesTableSeeder::class,
+            CategoriesJsonSeeder::class,
             PackagesTableSeeder::class,
             SellersTableSeeder::class,
             ProductsTableSeeder::class,
             ImagesTableSeeder::class,
             SellerPackagesTableSeeder::class,
+            CategoriesJsonSeeder::class
         ]);
     }
 }

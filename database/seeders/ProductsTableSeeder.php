@@ -19,7 +19,7 @@ class ProductsTableSeeder extends Seeder
         DB::table('products')->insert([
             [
                 'name' => 'Футболка белая',
-                'category_id' => 6, // Футболки
+                'category_id' => 8, // Футболки
                 'seller_id' => 1,
                 'price' => 799,
                 'lowprice' => null,
@@ -38,7 +38,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Футболка синяя',
-                'category_id' => 6, // Футболки
+                'category_id' => 8, // Футболки
                 'seller_id' => 1,
                 'price' => 899,
                 'lowprice' => 799,
@@ -57,7 +57,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Футболка с принтом',
-                'category_id' => 6, // Футболки
+                'category_id' => 8, // Футболки
                 'seller_id' => 2,
                 'price' => 999,
                 'lowprice' => null,
@@ -76,7 +76,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Футболка черная',
-                'category_id' => 6, // Футболки
+                'category_id' => 8, // Футболки
                 'seller_id' => 1,
                 'price' => 799,
                 'lowprice' => 699,
@@ -95,7 +95,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Ботильоны женские',
-                'category_id' => 7, // Ботильоны
+                'category_id' => 27, // Ботильоны
                 'seller_id' => 2,
                 'price' => 4999,
                 'lowprice' => 3999,
@@ -114,7 +114,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Ботильоны замшевые',
-                'category_id' => 7, // Ботильоны
+                'category_id' => 27, // Ботильоны
                 'seller_id' => 2,
                 'price' => 5499,
                 'lowprice' => null,
@@ -133,7 +133,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Ботильоны демисезонные',
-                'category_id' => 7, // Ботильоны
+                'category_id' => 27, // Ботильоны
                 'seller_id' => 1,
                 'price' => 3999,
                 'lowprice' => null,
@@ -152,7 +152,7 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'name' => 'Ботильоны на платформе',
-                'category_id' => 7, // Ботильоны
+                'category_id' => 27, // Ботильоны
                 'seller_id' => 2,
                 'price' => 5999,
                 'lowprice' => 4999,

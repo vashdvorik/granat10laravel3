@@ -1744,5 +1744,9 @@ class CategoriesTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]); 
+        // 🆕 Пересобрать Nested Set дерево
+        \App\Models\Category::fixTree();
+        
+        $this->command->info('✓ Category tree built with Nested Set!');
     }
 }
