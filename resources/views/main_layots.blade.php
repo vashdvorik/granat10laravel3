@@ -802,6 +802,27 @@
     <script src="{{ asset('js/countdown.js') }}"></script>
     <script src="{{ asset('js/bootstrap-slider.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
+    <script>
+    // Список страниц, где нужно сохранять позицию скролла
+    const preserveScrollPages = ['catalog.index', 'catalog.show'];
+    const currentRoute = '{{ Route::currentRouteName() }}';
+    
+    if (preserveScrollPages.includes(currentRoute)) {
+        // Сохраняем позицию скролла перед уходом со страницы
+        window.addEventListener('beforeunload', function() {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        });
+
+        // Восстанавливаем позицию скролла после загрузки
+        window.addEventListener('load', function() {
+            const scrollPosition = sessionStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, parseInt(scrollPosition));
+                sessionStorage.removeItem('scrollPosition');
+            }
+        });
+    }
+</script>
 </body>
 
 </html>
