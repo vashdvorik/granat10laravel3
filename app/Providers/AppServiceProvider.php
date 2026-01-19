@@ -26,15 +26,21 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         if (Schema::hasTable('categories')) {
-            // 🆕 NESTED SET: Дерево категорий для меню
-            $categories = \App\Models\Category::whereIsRoot()
-                ->where('is_active', true)
-                ->defaultOrder()
-                ->get()
-                ->toTree();
-                
-            View::share('categories', $categories);
-            View::share('menuRootCategories', $categories);
+            try {
+                // 🆕 NESTED SET: Дерево категорий для меню
+                $categories = \App\Models\Category::whereIsRoot()
+                    ->where('is_active', true)
+                    ->defaultOrder()
+                    ->get()
+                    ->toTree();
+                    
+                View::share('categories', $categories);
+                View::share('menuRootCategories', $categories);
+            } catch (\Exception $e) {
+                // Игнорируем ошибки при миграциях
+                View::share('categories', collect());
+                View::share('menuRootCategories', collect());
+            }
         }
 
         // Динамические переменные для кабинета
