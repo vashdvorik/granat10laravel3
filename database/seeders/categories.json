@@ -150,80 +150,80 @@
       {
         "id": 2000,"name": "Мужская","alias": "men-apparel","icon": "fa-solid fa-person","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
         "children": [
-          { "id": 2010, "name": "Рубашки и поло", "alias": "shirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 2020, "name": "Брюки, джинсы, чиносы", "alias": "pants-jeans-chinos", "icon": "fa-solid fa-person-pants", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 2030, "name": "Футболки и лонгсливы", "alias": "t-shirts-long-sleeves", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 2040, "name": "Свитеры, худи, толстовки", "alias": "sweaters-hoodies", "icon": "fa-solid fa-sweater", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 2050, "name": "Верхняя одежда", "alias": "outerwear-men", "icon": "fa-solid fa-coat-hanger", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true,
+          { "id": 2100, "name": "Рубашки и поло", "alias": "shirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+          { "id": 2150, "name": "Брюки, джинсы, чиносы", "alias": "pants-jeans-chinos", "icon": "fa-solid fa-person-pants", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+          { "id": 2200, "name": "Футболки и лонгсливы", "alias": "t-shirts-long-sleeves", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
+          { "id": 2250, "name": "Свитеры, худи, толстовки", "alias": "sweaters-hoodies", "icon": "fa-solid fa-sweater", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+          { "id": 2300, "name": "Верхняя одежда", "alias": "outerwear-men", "icon": "fa-solid fa-coat-hanger", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true,
             "children": [
-              { "id": 2051, "name": "Куртки и бомберы", "alias": "jackets-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
-              { "id": 2052, "name": "Пальто и парки", "alias": "coats-parka", "icon": "fa-solid fa-coat", "icon_color": "#0277BD", "bg_color": "#E3F2FD", "is_active": true }
+              { "id": 2301, "name": "Куртки и бомберы", "alias": "jackets-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+              { "id": 2302, "name": "Пальто и парки", "alias": "coats-parka", "icon": "fa-solid fa-coat", "icon_color": "#0277BD", "bg_color": "#E3F2FD", "is_active": true }
             ]
           },
-          { "id": 2060, "name": "Костюмы и пиджаки", "alias": "suits-blazers", "icon": "fa-solid fa-suitcase", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true }
+          { "id": 2360, "name": "Костюмы и пиджаки", "alias": "suits-blazers", "icon": "fa-solid fa-suitcase", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true }
         ]
       },
       {
         
-        "id": 1300,"name": "Детям","alias": "kids-apparel","icon": "fa-solid fa-child-reaching","icon_color": "#4CAF50","bg_color": "#E8F5E9","is_active": true,
+        "id": 2200,"name": "Детям","alias": "kids-apparel","icon": "fa-solid fa-child-reaching","icon_color": "#4CAF50","bg_color": "#E8F5E9","is_active": true,
         "children": [
-          { "id": 1310, "name": "Новорожденным (0–12 мес)", "alias": "newborn-0-12m", "icon": "fa-solid fa-baby", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true },
-          { "id": 1320, "name": "Малышам (1–3 года)", "alias": "toddlers-1-3y", "icon": "fa-solid fa-child", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 1330, "name": "Детям 3–7 лет", "alias": "kids-3-7y", "icon": "fa-solid fa-child-reaching", "icon_color": "#4CAF50", "bg_color": "#C8E6C9", "is_active": true },
-          { "id": 1340, "name": "Школьникам (7–14 лет)", "alias": "school-kids-7-14y", "icon": "fa-solid fa-school", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 1350, "name": "Подросткам (14+)", "alias": "teens-apparel", "icon": "fa-solid fa-user-teen", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true }
+          { "id": 2210, "name": "Новорожденным (0–12 мес)", "alias": "newborn-0-12m", "icon": "fa-solid fa-baby", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true },
+          { "id": 2220, "name": "Малышам (1–3 года)", "alias": "toddlers-1-3y", "icon": "fa-solid fa-child", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true },
+          { "id": 2230, "name": "Детям 3–7 лет", "alias": "kids-3-7y", "icon": "fa-solid fa-child-reaching", "icon_color": "#4CAF50", "bg_color": "#C8E6C9", "is_active": true },
+          { "id": 2240, "name": "Школьникам (7–14 лет)", "alias": "school-kids-7-14y", "icon": "fa-solid fa-school", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true },
+          { "id": 2250, "name": "Подросткам (14+)", "alias": "teens-apparel", "icon": "fa-solid fa-user-teen", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true }
         ]
       },
       {
         
-        "id": 1400,"name": "Обувь","alias": "shoes-all","icon": "fa-solid fa-shoe-prints","icon_color": "#795548","bg_color": "#EFEBE9","is_active": true,
+        "id": 2400,"name": "Обувь","alias": "shoes-all","icon": "fa-solid fa-shoe-prints","icon_color": "#795548","bg_color": "#EFEBE9","is_active": true,
         "children": [
-          { "id": 1410, "name": "Женская обувь", "alias": "women-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#6D4C41", "bg_color": "#D7CCC8", "is_active": true,
+          { "id": 2410, "name": "Женская обувь", "alias": "women-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#6D4C41", "bg_color": "#D7CCC8", "is_active": true,
             "children": [
-              { "id": 1411, "name": "Туфли и лодочки", "alias": "heels-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
-              { "id": 1412, "name": "Ботинки и сапоги", "alias": "boots-women", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
-              { "id": 1413, "name": "Кроссовки и кеды", "alias": "sneakers-women", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true }
+              { "id": 2411, "name": "Туфли и лодочки", "alias": "heels-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+              { "id": 2412, "name": "Ботинки и сапоги", "alias": "boots-women", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+              { "id": 2413, "name": "Кроссовки и кеды", "alias": "sneakers-women", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true }
             ]
           },
-          { "id": 1420, "name": "Мужская обувь", "alias": "men-shoes", "icon": "fa-solid fa-person", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
+          { "id": 2420, "name": "Мужская обувь", "alias": "men-shoes", "icon": "fa-solid fa-person", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
             "children": [
-              { "id": 1421, "name": "Кроссовки и кеды", "alias": "sneakers-men", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
-              { "id": 1422, "name": "Ботинки и полуботинки", "alias": "boots-men", "icon": "fa-solid fa-boot", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
-              { "id": 1423, "name": "Туфли классические", "alias": "classic-shoes-men", "icon": "fa-solid fa-shoe-formal", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true }
+              { "id": 2421, "name": "Кроссовки и кеды", "alias": "sneakers-men", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+              { "id": 2422, "name": "Ботинки и полуботинки", "alias": "boots-men", "icon": "fa-solid fa-boot", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
+              { "id": 2423, "name": "Туфли классические", "alias": "classic-shoes-men", "icon": "fa-solid fa-shoe-formal", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true }
             ]
           },
-          { "id": 1430, "name": "Детская обувь", "alias": "kids-shoes", "icon": "fa-solid fa-child", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 1440, "name": "Спортивная обувь", "alias": "sport-shoes", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true }
+          { "id": 2430, "name": "Детская обувь", "alias": "kids-shoes", "icon": "fa-solid fa-child", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
+          { "id": 2440, "name": "Спортивная обувь", "alias": "sport-shoes", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true }
         ]
       },
       {
         
-        "id": 1500, "name": "Аксессуары","alias": "apparel-accessories","icon": "fa-solid fa-hat-cowboy","icon_color": "#FF9800","bg_color": "#FFF3E0","is_active": true,
+        "id": 2500, "name": "Аксессуары","alias": "apparel-accessories","icon": "fa-solid fa-hat-cowboy","icon_color": "#FF9800","bg_color": "#FFF3E0","is_active": true,
         "children": [
-          { "id": 1510, "name": "Сумки и рюкзаки", "alias": "bags-backpacks", "icon": "fa-solid fa-bag-shopping", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
-          { "id": 1520, "name": "Головные уборы", "alias": "hats-caps", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
-          { "id": 1530, "name": "Шарфы, платки, перчатки", "alias": "scarves-gloves", "icon": "fa-solid fa-scarf", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
-          { "id": 1540, "name": "Ремни и галстуки", "alias": "belts-ties", "icon": "fa-solid fa-tie", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
-          { "id": 1550, "name": "Украшения и бижутерия", "alias": "jewelry-accessories", "icon": "fa-solid fa-gem", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
+          { "id": 2510, "name": "Сумки и рюкзаки", "alias": "bags-backpacks", "icon": "fa-solid fa-bag-shopping", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+          { "id": 2520, "name": "Головные уборы", "alias": "hats-caps", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
+          { "id": 2530, "name": "Шарфы, платки, перчатки", "alias": "scarves-gloves", "icon": "fa-solid fa-scarf", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+          { "id": 2540, "name": "Ремни и галстуки", "alias": "belts-ties", "icon": "fa-solid fa-tie", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+          { "id": 2550, "name": "Украшения и бижутерия", "alias": "jewelry-accessories", "icon": "fa-solid fa-gem", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
         ]
       },
       {
         
-        "id": 1600,"name": "Спортивная одежда","alias": "sportswear","icon": "fa-solid fa-person-running","icon_color": "#FF5722","bg_color": "#FFEBEE","is_active": true,
+        "id": 2600,"name": "Спортивная одежда","alias": "sportswear","icon": "fa-solid fa-person-running","icon_color": "#FF5722","bg_color": "#FFEBEE","is_active": true,
         "children": [
-          { "id": 1610, "name": "Для фитнеса и тренировок", "alias": "fitness-sportswear", "icon": "fa-solid fa-dumbbell", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true },
-          { "id": 1620, "name": "Для бега и активного отдыха", "alias": "running-outdoor", "icon": "fa-solid fa-person-running", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true },
-          { "id": 1630, "name": "Термобельё и компрессионное", "alias": "thermal-compression", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#BF360C", "bg_color": "#FFCCBC", "is_active": true }
+          { "id": 2610, "name": "Для фитнеса и тренировок", "alias": "fitness-sportswear", "icon": "fa-solid fa-dumbbell", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true },
+          { "id": 2620, "name": "Для бега и активного отдыха", "alias": "running-outdoor", "icon": "fa-solid fa-person-running", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true },
+          { "id": 2630, "name": "Термобельё и компрессионное", "alias": "thermal-compression", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#BF360C", "bg_color": "#FFCCBC", "is_active": true }
         ]
       },
       {
         
-        "id": 1700,"name": "Нижнее бельё и купальники","alias": "underwear-swimwear","icon": "fa-solid fa-shirt-tank-top","icon_color": "#9C27B0","bg_color": "#F3E5F5","is_active": true,
+        "id": 2700,"name": "Нижнее бельё и купальники","alias": "underwear-swimwear","icon": "fa-solid fa-shirt-tank-top","icon_color": "#9C27B0","bg_color": "#F3E5F5","is_active": true,
         "children": [
-          { "id": 1710, "name": "Женское нижнее бельё", "alias": "women-underwear", "icon": "fa-solid fa-person-dress", "icon_color": "#7B1FA2", "bg_color": "#E1BEE7", "is_active": true },
-          { "id": 1720, "name": "Мужское нижнее бельё", "alias": "men-underwear", "icon": "fa-solid fa-person", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
-          { "id": 1730, "name": "Купальники и плавки", "alias": "swimwear", "icon": "fa-solid fa-swimmer", "icon_color": "#8E24AA", "bg_color": "#F3E5F5", "is_active": true },
-          { "id": 1740, "name": "Корректирующее бельё", "alias": "shapewear", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#E1BEE7", "is_active": true }
+          { "id": 2710, "name": "Женское нижнее бельё", "alias": "women-underwear", "icon": "fa-solid fa-person-dress", "icon_color": "#7B1FA2", "bg_color": "#E1BEE7", "is_active": true },
+          { "id": 2720, "name": "Мужское нижнее бельё", "alias": "men-underwear", "icon": "fa-solid fa-person", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
+          { "id": 2730, "name": "Купальники и плавки", "alias": "swimwear", "icon": "fa-solid fa-swimmer", "icon_color": "#8E24AA", "bg_color": "#F3E5F5", "is_active": true },
+          { "id": 2740, "name": "Корректирующее бельё", "alias": "shapewear", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#E1BEE7", "is_active": true }
         ]
       }
     ]
@@ -231,7 +231,7 @@
 
   
   {
-    "id": 2,
+    "id": 3,
     "name": "Электроника",
     "alias": "electronics",
     "number": 2,
@@ -240,19 +240,19 @@
     "icon_color": "#007AFF",
     "bg_color": "#E5F1FF",
     "children": [
-      { "id": 2100, "name": "Смартфоны", "alias": "smartphones-gadgets", "icon": "fa-solid fa-mobile-retro", "icon_color": "#1C1C1E", "bg_color": "#F2F2F7", "is_active": true },
-      { "id": 2200, "name": "Ноутбуки и ПК", "alias": "laptops-computers", "icon": "fa-solid fa-laptop", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
-      { "id": 2300, "name": "Аудио", "alias": "audio-equipment", "icon": "fa-solid fa-headphones", "icon_color": "#34C759", "bg_color": "#E8F9EC", "is_active": true },
-      { "id": 2400, "name": "Телевизоры и проекторы", "alias": "tv-projectors", "icon": "fa-solid fa-tv", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
-      { "id": 2500, "name": "Игровые консоли и аксессуары", "alias": "gaming-consoles", "icon": "fa-solid fa-gamepad", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
-      { "id": 2600, "name": "Фото и видео", "alias": "photo-video", "icon": "fa-solid fa-camera", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
-      { "id": 2700, "name": "Умный дом", "alias": "smart-home", "icon": "fa-solid fa-home-lg", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true }
+      { "id": 3100, "name": "Смартфоны", "alias": "smartphones-gadgets", "icon": "fa-solid fa-mobile-retro", "icon_color": "#1C1C1E", "bg_color": "#F2F2F7", "is_active": true },
+      { "id": 3200, "name": "Ноутбуки и ПК", "alias": "laptops-computers", "icon": "fa-solid fa-laptop", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
+      { "id": 3300, "name": "Аудио", "alias": "audio-equipment", "icon": "fa-solid fa-headphones", "icon_color": "#34C759", "bg_color": "#E8F9EC", "is_active": true },
+      { "id": 3400, "name": "Телевизоры и проекторы", "alias": "tv-projectors", "icon": "fa-solid fa-tv", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
+      { "id": 3500, "name": "Игровые консоли и аксессуары", "alias": "gaming-consoles", "icon": "fa-solid fa-gamepad", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+      { "id": 3600, "name": "Фото и видео", "alias": "photo-video", "icon": "fa-solid fa-camera", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+      { "id": 3700, "name": "Умный дом", "alias": "smart-home", "icon": "fa-solid fa-home-lg", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true }
     ]
   },
 
 
   {
-    "id": 3,
+    "id": 6,
     "name": "Бытовая техника",
     "alias": "home-appliances",
     "number": 3,
@@ -261,16 +261,16 @@
     "icon_color": "#FF2D55",
     "bg_color": "#FFF0F3",
     "children": [
-      { "id": 3100, "name": "Крупная техника", "alias": "large-appliances", "icon": "fa-solid fa-refrigerator", "icon_color": "#8E8E93", "bg_color": "#F2F2F7", "is_active": true },
-      { "id": 3200, "name": "Техника для кухни", "alias": "kitchen-appliances", "icon": "fa-solid fa-sink", "icon_color": "#FF9500", "bg_color": "#FFF5E5", "is_active": true },
-      { "id": 3300, "name": "Уход за одеждой", "alias": "laundry-care", "icon": "fa-solid fa-washing-machine", "icon_color": "#2196F3", "bg_color": "#E3F2FD", "is_active": true },
-      { "id": 3400, "name": "Климатическая техника", "alias": "climate-control", "icon": "fa-solid fa-fan", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
-      { "id": 3500, "name": "Техника для уборки", "alias": "cleaning-appliances", "icon": "fa-solid fa-broom", "icon_color": "#607D8B", "bg_color": "#ECEFF1", "is_active": true }
+      { "id": 6100, "name": "Крупная техника", "alias": "large-appliances", "icon": "fa-solid fa-refrigerator", "icon_color": "#8E8E93", "bg_color": "#F2F2F7", "is_active": true },
+      { "id": 6200, "name": "Техника для кухни", "alias": "kitchen-appliances", "icon": "fa-solid fa-sink", "icon_color": "#FF9500", "bg_color": "#FFF5E5", "is_active": true },
+      { "id": 6300, "name": "Уход за одеждой", "alias": "laundry-care", "icon": "fa-solid fa-washing-machine", "icon_color": "#2196F3", "bg_color": "#E3F2FD", "is_active": true },
+      { "id": 6400, "name": "Климатическая техника", "alias": "climate-control", "icon": "fa-solid fa-fan", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
+      { "id": 6500, "name": "Техника для уборки", "alias": "cleaning-appliances", "icon": "fa-solid fa-broom", "icon_color": "#607D8B", "bg_color": "#ECEFF1", "is_active": true }
     ]
   },
 
   {
-    "id": 4,
+    "id": 9,
     "name": "Дом и интерьер",
     "alias": "home-and-interior",
     "number": 4,
@@ -279,13 +279,13 @@
     "icon_color": "#2E7D32",
     "bg_color": "#E8F5E9",
     "children": [
-      { "id": 4100, "name": "Мебель", "alias": "home-furniture", "icon": "fa-solid fa-couch", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true },
-      { "id": 4200, "name": "Текстиль", "alias": "home-textiles", "icon": "fa-solid fa-bed", "icon_color": "#009688", "bg_color": "#E0F2F1", "is_active": true },
-      { "id": 4300, "name": "Посуда", "alias": "kitchen-tableware", "icon": "fa-solid fa-utensils", "icon_color": "#D84315", "bg_color": "#FBE9E7", "is_active": true }
+      { "id": 9100, "name": "Мебель", "alias": "home-furniture", "icon": "fa-solid fa-couch", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true },
+      { "id": 9200, "name": "Текстиль", "alias": "home-textiles", "icon": "fa-solid fa-bed", "icon_color": "#009688", "bg_color": "#E0F2F1", "is_active": true },
+      { "id": 9300, "name": "Посуда", "alias": "kitchen-tableware", "icon": "fa-solid fa-utensils", "icon_color": "#D84315", "bg_color": "#FBE9E7", "is_active": true }
     ]
   },
   {
-    "id": 5,
+    "id": 11,
     "name": "Строительство и ремонт",
     "alias": "construction-repair",
     "number": 5,
@@ -294,12 +294,12 @@
     "icon_color": "#F57C00",
     "bg_color": "#FFF3E0",
     "children": [
-      { "id": 5100, "name": "Инструменты", "alias": "power-tools", "icon": "fa-solid fa-hammer", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true },
-      { "id": 5200, "name": "Сантехника", "alias": "plumbing-fixtures", "icon": "fa-solid fa-faucet", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true }
+      { "id": 11100, "name": "Инструменты", "alias": "power-tools", "icon": "fa-solid fa-hammer", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true },
+      { "id": 11200, "name": "Сантехника", "alias": "plumbing-fixtures", "icon": "fa-solid fa-faucet", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true }
     ]
   },
   {
-    "id": 6,
+    "id": 13,
     "name": "Красота и здоровье",
     "alias": "beauty-and-health",
     "number": 6,
@@ -308,14 +308,14 @@
     "icon_color": "#9C27B0",
     "bg_color": "#F3E5F5",
     "children": [
-      { "id": 6100, "name": "Косметика и уход", "alias": "cosmetics-care", "icon": "fa-solid fa-eye-dropper", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
-      { "id": 6200, "name": "Парфюмерия", "alias": "perfumes-all", "icon": "fa-solid fa-bottle-droplet", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true },
-      { "id": 6300, "name": "Аптека и витамины", "alias": "pharmacy-vitamins", "icon": "fa-solid fa-pills", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
-      { "id": 6400, "name": "Гигиена", "alias": "personal-hygiene", "icon": "fa-solid fa-pump-soap", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true }
+      { "id": 13100, "name": "Косметика и уход", "alias": "cosmetics-care", "icon": "fa-solid fa-eye-dropper", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+      { "id": 13200, "name": "Парфюмерия", "alias": "perfumes-all", "icon": "fa-solid fa-bottle-droplet", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true },
+      { "id": 13300, "name": "Аптека и витамины", "alias": "pharmacy-vitamins", "icon": "fa-solid fa-pills", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
+      { "id": 13400, "name": "Гигиена", "alias": "personal-hygiene", "icon": "fa-solid fa-pump-soap", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true }
     ]
   },
   {
-    "id": 7,
+    "id": 15,
     "name": "Детские товары",
     "alias": "kids-products-main",
     "number": 7,
@@ -324,13 +324,13 @@
     "icon_color": "#FFC107",
     "bg_color": "#FFF8E1",
     "children": [
-      { "id": 7100, "name": "Игрушки", "alias": "kids-toys", "icon": "fa-solid fa-puzzle-piece", "icon_color": "#FF5722", "bg_color": "#FBE9E7", "is_active": true },
-      { "id": 7200, "name": "Питание", "alias": "baby-feeding-food", "icon": "fa-solid fa-baby-bottle", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
-      { "id": 7300, "name": "Коляски и автокресла", "alias": "strollers-carseats", "icon": "fa-solid fa-stroller", "icon_color": "#03A9F4", "bg_color": "#E1F5FE", "is_active": true }
+      { "id": 15100, "name": "Игрушки", "alias": "kids-toys", "icon": "fa-solid fa-puzzle-piece", "icon_color": "#FF5722", "bg_color": "#FBE9E7", "is_active": true },
+      { "id": 15200, "name": "Питание", "alias": "baby-feeding-food", "icon": "fa-solid fa-baby-bottle", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
+      { "id": 15300, "name": "Коляски и автокресла", "alias": "strollers-carseats", "icon": "fa-solid fa-stroller", "icon_color": "#03A9F4", "bg_color": "#E1F5FE", "is_active": true }
     ]
   },
   {
-    "id": 8,
+    "id": 18,
     "name": "Спорт и отдых",
     "alias": "sports-outdoor",
     "number": 8,
@@ -339,12 +339,12 @@
     "icon_color": "#E67E22",
     "bg_color": "#FEF5E7",
     "children": [
-      { "id": 8100, "name": "Фитнес", "alias": "fitness-training", "icon": "fa-solid fa-dumbbell", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true },
-      { "id": 8200, "name": "Туризм", "alias": "camping-tourism", "icon": "fa-solid fa-tent", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true }
+      { "id": 18100, "name": "Фитнес", "alias": "fitness-training", "icon": "fa-solid fa-dumbbell", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true },
+      { "id": 18200, "name": "Туризм", "alias": "camping-tourism", "icon": "fa-solid fa-tent", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true }
     ]
   },
   {
-    "id": 9,
+    "id": 20,
     "name": "Автотовары",
     "alias": "automotive-goods",
     "number": 9,
@@ -353,12 +353,12 @@
     "icon_color": "#34495E",
     "bg_color": "#EBEDEF",
     "children": [
-      { "id": 9100, "name": "Запчасти", "alias": "car-parts", "icon": "fa-solid fa-gears", "icon_color": "#7F8C8D", "bg_color": "#F2F4F4", "is_active": true },
-      { "id": 9200, "name": "Автохимия", "alias": "car-chemistry", "icon": "fa-solid fa-oil-can", "icon_color": "#D35400", "bg_color": "#FBEEE6", "is_active": true }
+      { "id": 20100, "name": "Запчасти", "alias": "car-parts", "icon": "fa-solid fa-gears", "icon_color": "#7F8C8D", "bg_color": "#F2F4F4", "is_active": true },
+      { "id": 20200, "name": "Автохимия", "alias": "car-chemistry", "icon": "fa-solid fa-oil-can", "icon_color": "#D35400", "bg_color": "#FBEEE6", "is_active": true }
     ]
   },
   {
-    "id": 10,
+    "id": 22,
     "name": "Зоотовары",
     "alias": "pet-supplies-store",
     "number": 10,
@@ -367,12 +367,12 @@
     "icon_color": "#6D4C41",
     "bg_color": "#EFEBE9",
     "children": [
-      { "id": 10100, "name": "Кошкам", "alias": "pet-cats", "icon": "fa-solid fa-cat", "icon_color": "#8D6E63", "bg_color": "#D7CCC8", "is_active": true },
-      { "id": 10200, "name": "Собакам", "alias": "pet-dogs", "icon": "fa-solid fa-dog", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true }
+      { "id": 22100, "name": "Кошкам", "alias": "pet-cats", "icon": "fa-solid fa-cat", "icon_color": "#8D6E63", "bg_color": "#D7CCC8", "is_active": true },
+      { "id": 22200, "name": "Собакам", "alias": "pet-dogs", "icon": "fa-solid fa-dog", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true }
     ]
   },
   {
-    "id": 11,
+    "id": 24,
     "name": "Книги и канцтовары",
     "alias": "books-and-hobbies",
     "number": 11,
@@ -381,12 +381,12 @@
     "icon_color": "#795548",
     "bg_color": "#EFEBE9",
     "children": [
-      { "id": 11100, "name": "Книги", "alias": "reading-books", "icon": "fa-solid fa-book", "icon_color": "#5D4037", "bg_color": "#D7CCC8", "is_active": true },
-      { "id": 11200, "name": "Канцтовары", "alias": "office-stationery", "icon": "fa-solid fa-pen-nib", "icon_color": "#3F51B5", "bg_color": "#E8EAF6", "is_active": true }
+      { "id": 24100, "name": "Книги", "alias": "reading-books", "icon": "fa-solid fa-book", "icon_color": "#5D4037", "bg_color": "#D7CCC8", "is_active": true },
+      { "id": 24200, "name": "Канцтовары", "alias": "office-stationery", "icon": "fa-solid fa-pen-nib", "icon_color": "#3F51B5", "bg_color": "#E8EAF6", "is_active": true }
     ]
   },
   {
-    "id": 12,
+    "id": 26,
     "name": "Продукты",
     "alias": "grocery-food",
     "number": 12,
@@ -395,12 +395,12 @@
     "icon_color": "#FF3B30",
     "bg_color": "#FFEBEA",
     "children": [
-      { "id": 12100, "name": "Напитки", "alias": "food-drinks", "icon": "fa-solid fa-wine-glass", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
-      { "id": 12200, "name": "Бакалея", "alias": "food-pantry", "icon": "fa-solid fa-wheat-awn", "icon_color": "#FBC02D", "bg_color": "#FFF9C4", "is_active": true }
+      { "id": 26100, "name": "Напитки", "alias": "food-drinks", "icon": "fa-solid fa-wine-glass", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
+      { "id": 26200, "name": "Бакалея", "alias": "food-pantry", "icon": "fa-solid fa-wheat-awn", "icon_color": "#FBC02D", "bg_color": "#FFF9C4", "is_active": true }
     ]
   },
   {
-    "id": 13,
+    "id": 28,
     "name": "Дача и сад",
     "alias": "garden-and-outdoor",
     "number": 13,
@@ -409,12 +409,12 @@
     "icon_color": "#2E7D32",
     "bg_color": "#E8F5E9",
     "children": [
-      { "id": 13100, "name": "Садовая техника", "alias": "garden-machinery", "icon": "fa-solid fa-tractor", "icon_color": "#689F38", "bg_color": "#F1F8E9", "is_active": true },
-      { "id": 13200, "name": "Семена", "alias": "garden-seeds", "icon": "fa-solid fa-clover", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true }
+      { "id": 28100, "name": "Садовая техника", "alias": "garden-machinery", "icon": "fa-solid fa-tractor", "icon_color": "#689F38", "bg_color": "#F1F8E9", "is_active": true },
+      { "id": 28200, "name": "Семена", "alias": "garden-seeds", "icon": "fa-solid fa-clover", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true }
     ]
   },
   {
-    "id": 14,
+    "id": 30,
     "name": "Ювелирные изделия и часы",
     "alias": "jewelry-watches",
     "number": 14,
@@ -423,30 +423,14 @@
     "icon_color": "#9C27B0",
     "bg_color": "#F3E5F5",
     "children": [
-      { "id": 14100, "name": "Ювелирные украшения", "alias": "jewelry", "icon": "fa-solid fa-ring", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
-      { "id": 14200, "name": "Часы", "alias": "watches", "icon": "fa-solid fa-clock", "icon_color": "#3F51B5", "bg_color": "#E8EAF6", "is_active": true },
-      { "id": 14300, "name": "Бижутерия", "alias": "costume-jewelry", "icon": "fa-solid fa-gem", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true }
+      { "id": 30100, "name": "Ювелирные украшения", "alias": "jewelry", "icon": "fa-solid fa-ring", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+      { "id": 30200, "name": "Часы", "alias": "watches", "icon": "fa-solid fa-clock", "icon_color": "#3F51B5", "bg_color": "#E8EAF6", "is_active": true },
+      { "id": 30300, "name": "Бижутерия", "alias": "costume-jewelry", "icon": "fa-solid fa-gem", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true }
     ]
   },
 
   {
-    "id": 15,
-    "name": "Товары для взрослых 18+",
-    "alias": "adult-products",
-    "number": 15,
-    "is_active": true,
-    "icon": "fa-solid fa-heart",
-    "icon_color": "#F44336",
-    "bg_color": "#FFEBEE",
-    "children": [
-      { "id": 15100, "name": "Эротические товары", "alias": "erotic-toys", "icon": "fa-solid fa-egg", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
-      { "id": 15200, "name": "Бельё и костюмы", "alias": "sexy-lingerie", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
-      { "id": 15300, "name": "Смазки и аксессуары", "alias": "lubricants-accessories", "icon": "fa-solid fa-bottle-droplet", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true }
-    ]
-  },
-
-  {
-    "id": 16,
+    "id": 32,
     "name": "Подарки и сувениры",
     "alias": "gifts-souvenirs",
     "number": 16,
@@ -455,9 +439,9 @@
     "icon_color": "#FF5722",
     "bg_color": "#FFEBEE",
     "children": [
-      { "id": 16100, "name": "Подарочные наборы", "alias": "gift-sets", "icon": "fa-solid fa-gift", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
-      { "id": 16200, "name": "Сувениры и декор", "alias": "souvenirs-decor", "icon": "fa-solid fa-star", "icon_color": "#FFC107", "bg_color": "#FFF8E1", "is_active": true },
-      { "id": 16300, "name": "Для праздников", "alias": "party-supplies", "icon": "fa-solid fa-party-horn", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true }
+      { "id": 32100, "name": "Подарочные наборы", "alias": "gift-sets", "icon": "fa-solid fa-gift", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+      { "id": 32200, "name": "Сувениры и декор", "alias": "souvenirs-decor", "icon": "fa-solid fa-star", "icon_color": "#FFC107", "bg_color": "#FFF8E1", "is_active": true },
+      { "id": 32300, "name": "Для праздников", "alias": "party-supplies", "icon": "fa-solid fa-party-horn", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true }
     ]
   }
 ]
