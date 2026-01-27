@@ -5,37 +5,162 @@
     "children": [
       {
         
-        "id": 1100, "name": "Женщинам", "alias": "women-apparel",  "icon": "fa-solid fa-person-dress","icon_color": "#E91E63", "bg_color": "#FCE4EC","is_active": true,
+        "id": 1100, "name": "Женская", "alias": "women-apparel",  "icon": "fa-solid fa-person-dress","icon_color": "#E91E63", "bg_color": "#FCE4EC","is_active": true,
         "children": [
-          { "id": 1110, "name": "Платья и сарафаны", "alias": "dresses-sarafans", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
-          { "id": 1120, "name": "Блузки, топы и рубашки", "alias": "blouses-tops-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true },
-          { "id": 1130, "name": "Юбки и шорты", "alias": "skirts-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
-          { "id": 1140, "name": "Брюки, джинсы, леггинсы", "alias": "pants-jeans-leggings", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
-          { "id": 1150, "name": "Джемперы, свитеры, кардиганы", "alias": "sweaters-cardigans", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
-          { "id": 1160, "name": "Верхняя одежда", "alias": "outerwear-women", "icon": "fa-solid fa-coat-hanger", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true,
+          { "id": 1110, "name": "Платья и сарафаны", "alias": "dresses-sarafans", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true,
             "children": [
-              { "id": 1161, "name": "Пальто и тренчи", "alias": "coats-trench", "icon": "fa-solid fa-coat", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
-              { "id": 1162, "name": "Куртки и пуховики", "alias": "jackets-down-jackets", "icon": "fa-solid fa-jacket", "icon_color": "#7B1FA2", "bg_color": "#F3E5F5", "is_active": true }
+              {"id":1111,"name":"Повседневные платья","alias":"casual-dresses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1112,"name":"Платья миди и макси","alias":"midi-maxi-dresses","icon":"fa-solid fa-ruler-vertical","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1113,"name":"Платья мини","alias":"mini-dresses","icon":"fa-solid fa-person-dress","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1114,"name":"Коктейльные платья","alias":"cocktail-dresses","icon":"fa-solid fa-glass-cheers","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1115,"name":"Платья-рубашки","alias":"shirt-dresses","icon":"fa-solid fa-shirt","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1116,"name":"Платья с разрезом","alias":"slit-dresses","icon":"fa-solid fa-scissors","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1117,"name":"Платья с открытыми плечами / off-shoulder","alias":"off-shoulder-dresses","icon":"fa-solid fa-shirt","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1118,"name":"Платья с объёмными рукавами","alias":"puff-sleeve-dresses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1119,"name":"Платья больших размеров","alias":"plus-size-dresses","icon":"fa-solid fa-person-dress","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1120,"name":"Трикотажные платья","alias":"knit-dresses-women","icon":"fa-solid fa-sweater","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1121,"name":"Вечерние платья","alias":"evening-dresses","icon":"fa-solid fa-person-dress","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1122,"name":"Свадебное платье","alias":"wedding-dresses","icon":"fa-solid fa-ring","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1123,"name":"Сарафаны","alias":"sarafans","icon":"fa-solid fa-shirt-tank-top","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true}
+            ] },
+          { "id": 1150, "name": "Блузки и рубашки", "alias": "blouses-tops-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true,
+            "children": [
+              {"id":1151,"name":"Классические","alias":"office-classic-shirts","icon":"fa-solid fa-shirt","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
+              {"id":1152,"name":"Белые","alias":"white-shirts-women","icon":"fa-solid fa-shirt","icon_color":"#FFFFFF","bg_color":"#F5F5F5","is_active":true},
+              {"id":1153,"name":"С объёмными рукавами","alias":"puff-sleeve-blouses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1154,"name":"Летние / лёгкие","alias":"summer-light-blouses","icon":"fa-solid fa-shirt-tank-top","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
+              {"id":1155,"name":"С кружевом / прозрачные","alias":"lace-sheer-blouses","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1156,"name":"В клетку / принт","alias":"check-pattern-shirts","icon":"fa-solid fa-shirt","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true},
+              {"id":1157,"name":"Джинсовые","alias":"denim-shirts-women","icon":"fa-solid fa-shirt","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
+              {"id":1158,"name":"Оверсайз / свободные","alias":"oversize-blouses","icon":"fa-solid fa-shirt","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1159,"name":"С бантом / завязками","alias":"bow-tie-blouses","icon":"fa-solid fa-shirt","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
+            ] },
+          {"id":1200,"name":"Футболки, топы, майки","alias":"tshirts-tops-women","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true,
+            "children":[
+              {"id":1201,"name":"Женские футболки","alias":"women-tshirts","icon":"fa-solid fa-shirt","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1202,"name":"Футболки оверсайз","alias":"women-oversize-tshirts","icon":"fa-solid fa-shirt","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1203,"name":"Лонгсливы","alias":"women-long-sleeve-tshirts","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1204,"name":"Топы и майки","alias":"women-tops-tanks","icon":"fa-solid fa-shirt-tank-top","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1205,"name":"Укороченные","alias":"women-crop-tops","icon":"fa-solid fa-shirt-tank-top","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1206,"name":"На бретелях","alias":"women-spaghetti-strap-tops","icon":"fa-solid fa-shirt-tank-top","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1207,"name":"Большие размеры","alias":"plus-size-tops-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true}
+            ] },
+          {"id": 1250,"name": "Женские боди","alias": "bodysuits-women","icon": "fa-solid fa-shirt-tank-top","icon_color": "#AD1457","bg_color": "#FCE4EC","is_active": true,
+            "children": [
+              {"id":1251,"name":"С коротким рукавом","alias":"women-bodysuits","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1252,"name":"С длинным рукавом","alias":"women-long-sleeve-bodysuits","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1253,"name":"Кружевные / сексуальные","alias":"women-lace-bodysuits","icon":"fa-solid fa-shirt-tank-top","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1254,"name":"Большие размеры","alias":"plus-size-bodysuits-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true}
+            ] },
+          { "id": 1300, "name": "Юбки и шорты", "alias": "skirts-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true,
+            "children": [
+              {"id":1301,"name":"Юбки миди и макси","alias":"midi-maxi-skirts","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1302,"name":"Мини-юбки","alias":"mini-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1303,"name":"Джинсовые юбки","alias":"denim-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
+              {"id":1304,"name":"Юбки-карандаш","alias":"pencil-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1305,"name":"Плиссированные юбки","alias":"pleated-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1306,"name":"Юбки А-силуэта","alias":"a-line-flared-skirts","icon":"fa-solid fa-scissors","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1307,"name":"Кожаные юбки","alias":"leather-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#455A64","bg_color":"#ECEFF1","is_active":true},
+              {"id":1308,"name":"Большие размеры","alias":"plus-size-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1309,"name":"Женские шорты","alias":"women-shorts","icon":"fa-solid fa-scissors","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1310,"name":"Джинсовые шорты","alias":"women-denim-shorts","icon":"fa-solid fa-scissors","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
+              {"id":1311,"name":"Бермуды / удлинённые","alias":"bermuda-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#D84315","bg_color":"#FFEBEE","is_active":true},
+              {"id":1312,"name":"Шорты с высокой талией","alias":"high-waist-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1313,"name":"Велосипедки / шорты для спорта","alias":"bike-shorts-women","icon":"fa-solid fa-person-running","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1314,"name":"Шорты больших размеров","alias":"plus-size-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
+            ] },
+          { "id": 1400, "name": "Брюки и джинсы", "alias": "pants-jeans-leggings", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true,
+            "children": [
+              {"id":1401,"name":"Джинсы классические / прямые","alias":"straight-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
+              {"id":1402,"name":"Джинсы мом / бойфренд","alias":"mom-boyfriend-jeans","icon":"fa-solid fa-person-pants","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true},
+              {"id":1403,"name":"Джинсы скинни / облегающие","alias":"skinny-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#5D4037","bg_color":"#BCAAA4","is_active":true},
+              {"id":1404,"name":"Джинсы широкие / клёш","alias":"wide-flared-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#3E2723","bg_color":"#D7CCC8","is_active":true},
+              {"id":1405,"name":"Джинсы высокая талия","alias":"high-waist-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
+              {"id":1406,"name":"Джинсы больших размеров","alias":"plus-size-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#6D4C41","bg_color":"#EFEBE9","is_active":true},
+              {"id":1407,"name":"Брюки классические / офисные","alias":"classic-office-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
+              {"id":1408,"name":"Брюки чинос / карго","alias":"chinos-cargo-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#1976D2","bg_color":"#E3F2FD","is_active":true},
+              {"id":1409,"name":"Брюки палаццо / широкие","alias":"palazzo-wide-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#0288D1","bg_color":"#E1F5FE","is_active":true},
+              {"id":1410,"name":"Брюки с высокой талией","alias":"high-waist-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#0D47A1","bg_color":"#E3F2FD","is_active":true},
+              {"id":1411,"name":"Леггинсы / джоггеры","alias":"leggings-joggers-women","icon":"fa-solid fa-person-pants","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1412,"name":"Брюки больших размеров","alias":"plus-size-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1413,"name":"Брюки укороченные / 7/8","alias":"cropped-ankle-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1414,"name":"Брюки-кюлоты","alias":"culottes-women","icon":"fa-solid fa-person-pants","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true}
+            ] },
+          { "id": 1450, "name": "Тёплая одежда", "alias": "warm-knitwear", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true,
+            "children": [
+                {"id":1451,"name":"Свитеры","alias":"sweaters","icon":"fa-solid fa-sweater","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+                {"id":1452,"name":"Пуловеры и лонгсливы","alias":"pullovers-long-sleeves","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+                {"id":1453,"name":"Толстовки и свитшоты","alias":"hoodies-sweatshirts","icon":"fa-solid fa-hoodie","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+                {"id":1454,"name":"Кардиганы","alias":"cardigans","icon":"fa-solid fa-sweater","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+                {"id":1455,"name":"Трикотажные жилеты","alias":"knit-vests","icon":"fa-solid fa-vest","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+                {"id":1456,"name":"Пончо и накидки","alias":"ponchos-capes","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+                {"id":1457,"name":"Водолазки и гольфы","alias":"turtlenecks","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+                {"id":1458,"name":"Тёплые кофты на молнии","alias":"zip-up-sweaters","icon":"fa-solid fa-jacket","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true}
+              ]
+          },
+          { "id": 1500, "name": "Верхняя одежда", "alias": "outerwear-women", "icon": "fa-solid fa-coat-hanger", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true,
+            "children": [
+              {"id":1501,"name":"Куртки","alias":"women-jackets","icon":"fa-solid fa-jacket","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
+              {"id":1502,"name":"Пальто","alias":"women-coats","icon":"fa-solid fa-coat","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
+              {"id":1503,"name":"Одежда из меха","alias":"women-fur-vests","icon":"fa-solid fa-vest","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
+              {"id":1504,"name":"Шубы","alias":"women-fur-coats","icon":"fa-solid fa-paw","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1505,"name":"Жилеты и безрукавки","alias":"women-vests-sleeveless","icon":"fa-solid fa-vest","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
+              {"id":1506,"name":"Плащи","alias":"women-raincoats","icon":"fa-solid fa-umbrella","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
+              {"id":1507,"name":"Пуховики","alias":"women-down-jackets","icon":"fa-solid fa-jacket","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
+              {"id":1508,"name":"Ветровки","alias":"women-shearling-coats","icon":"fa-solid fa-coat","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1509,"name":"Кожаные куртки","alias":"leather-jackets-bikers","icon":"fa-solid fa-motorcycle","icon_color":"#6A1B9A","bg_color":"#F3E5F5","is_active":true}
             ]
           },
-          { "id": 1170, "name": "Домашняя и трикотажная одежда", "alias": "homewear-loungewear", "icon": "fa-solid fa-pajamas", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
+          {"id":1550,"name":"Домашняя и трикотажная одежда", "alias": "homewear-loungewear", "icon": "fa-solid fa-pajamas", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true,
+            "children": [
+              {"id":1551,"name":"Пижамы женские","alias":"women-pajamas","icon":"fa-solid fa-pajamas","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1552,"name":"Пижамы хлопковые / летние","alias":"cotton-summer-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1553,"name":"Пижамы тёплые / флис / велюр","alias":"warm-fleece-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1554,"name":"Пижамы больших размеров","alias":"plus-size-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1555,"name":"Халаты женские","alias":"women-robes","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1556,"name":"Халаты махровые / вафельные","alias":"terry-waffle-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1557,"name":"Халаты шёлковые / атласные","alias":"silk-satin-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1558,"name":"Халаты больших размеров","alias":"plus-size-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1559,"name":"Домашние костюмы / комплекты","alias":"women-home-sets","icon":"fa-solid fa-shirt-tank-top","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1560,"name":"Трикотажные костюмы / худи + штаны","alias":"knit-hoodie-pants-sets-women","icon":"fa-solid fa-hoodie","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1561,"name":"Домашние костюмы больших размеров","alias":"plus-size-home-sets-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1562,"name":"Футболки и лонгсливы домашние","alias":"home-tshirts-long-sleeves-women","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
+              {"id":1563,"name":"Штаны и леггинсы домашние","alias":"home-pants-leggings-women","icon":"fa-solid fa-person-pants","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1564,"name":"Носки, гольфы, колготки домашние","alias":"home-socks-tights-women","icon":"fa-solid fa-socks","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true}
+              
+            ] },
+          {"id":1600,"name":"Комплекты и костюмы","alias":"sets-costumes-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true,
+          "children":[
+              {"id":1601,"name":"Женские комплекты","alias":"women-sets","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1602,"name":"Женские костюмы (офисные, повседневные)","alias":"women-office-casual-suits","icon":"fa-solid fa-suitcase","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
+              {"id":1603,"name":"Женские костюмы для косплея","alias":"women-cosplay-costumes","icon":"fa-solid fa-mask","icon_color":"#673AB7","bg_color":"#EDE7F6","is_active":true}
+            ]
+          },
+          {"id":1650,"name":"Спортивно-повседневная одежда","alias":"sport-casual-women","icon":"fa-solid fa-person-running","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true,
+          "children":[{
+            "id":1651,"name":"Женская спортивно-повседневная одежда","alias":"women-sport-casual","icon":"fa-solid fa-person-running","icon_color":"#E64A19","bg_color":"#FFCCBC","is_active":true},
+            {"id":1652,"name":"Спортивные толстовки","alias":"sport-hoodies-women","icon":"fa-solid fa-hoodie","icon_color":"#D84315","bg_color":"#FFEBEE","is_active":true}]},
+          {"id":1700,"name":"Комбинезоны","alias":"overalls-women","icon":"fa-solid fa-person-overalls","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
+          {"id":1750,"name":"Одежда для беременных","alias":"maternity-wear","icon":"fa-solid fa-baby","icon_color":"#4CAF50","bg_color":"#E8F5E9","is_active":true},
+          {"id":1800,"name":"Пиджаки и жакеты","alias":"blazers-women","icon":"fa-solid fa-suitcase","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
+          {"id":1850,"name":"Национальная одежда","alias":"traditional-cultural-women","icon":"fa-solid fa-globe","icon_color":"#673AB7","bg_color":"#EDE7F6","is_active":true},
+          {"id":1900,"name":"Униформа и рабочая","alias":"uniform-workwear-women","icon":"fa-solid fa-hard-hat","icon_color":"#455A64","bg_color":"#ECEFF1","is_active":true}
         ]
       },
       {
-        
-        "id": 1200,"name": "Мужчинам","alias": "men-apparel","icon": "fa-solid fa-person","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
+        "id": 2000,"name": "Мужская","alias": "men-apparel","icon": "fa-solid fa-person","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
         "children": [
-          { "id": 1210, "name": "Рубашки и поло", "alias": "shirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 1220, "name": "Брюки, джинсы, чиносы", "alias": "pants-jeans-chinos", "icon": "fa-solid fa-person-pants", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 1230, "name": "Футболки и лонгсливы", "alias": "t-shirts-long-sleeves", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 1240, "name": "Свитеры, худи, толстовки", "alias": "sweaters-hoodies", "icon": "fa-solid fa-sweater", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 1250, "name": "Верхняя одежда", "alias": "outerwear-men", "icon": "fa-solid fa-coat-hanger", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true,
+          { "id": 2010, "name": "Рубашки и поло", "alias": "shirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+          { "id": 2020, "name": "Брюки, джинсы, чиносы", "alias": "pants-jeans-chinos", "icon": "fa-solid fa-person-pants", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+          { "id": 2030, "name": "Футболки и лонгсливы", "alias": "t-shirts-long-sleeves", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
+          { "id": 2040, "name": "Свитеры, худи, толстовки", "alias": "sweaters-hoodies", "icon": "fa-solid fa-sweater", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+          { "id": 2050, "name": "Верхняя одежда", "alias": "outerwear-men", "icon": "fa-solid fa-coat-hanger", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true,
             "children": [
-              { "id": 1251, "name": "Куртки и бомберы", "alias": "jackets-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
-              { "id": 1252, "name": "Пальто и парки", "alias": "coats-parka", "icon": "fa-solid fa-coat", "icon_color": "#0277BD", "bg_color": "#E3F2FD", "is_active": true }
+              { "id": 2051, "name": "Куртки и бомберы", "alias": "jackets-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+              { "id": 2052, "name": "Пальто и парки", "alias": "coats-parka", "icon": "fa-solid fa-coat", "icon_color": "#0277BD", "bg_color": "#E3F2FD", "is_active": true }
             ]
           },
-          { "id": 1260, "name": "Костюмы и пиджаки", "alias": "suits-blazers", "icon": "fa-solid fa-suitcase", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true }
+          { "id": 2060, "name": "Костюмы и пиджаки", "alias": "suits-blazers", "icon": "fa-solid fa-suitcase", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true }
         ]
       },
       {
