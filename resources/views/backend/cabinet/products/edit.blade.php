@@ -117,25 +117,16 @@
 
                                                 {{-- Категория --}}
                                                 <div class="form-group">
-                                                    <label for="category_id">Категория <span class="text-danger">*</span></label>
-                                                    <select class="form-control @error('category_id') is-invalid @enderror" 
-                                                            id="category_id" 
-                                                            name="category_id" 
-                                                            required>
-                                                        <option value="">Выберите категорию</option>
-                                                        @foreach($categories as $category)
-                                                            <optgroup label="{{ $category->name }}">
-                                                                @foreach($category->children as $child)
-                                                                    <option value="{{ $child->id }}" 
-                                                                            {{ old('category_id', $product->category_id) == $child->id ? 'selected' : '' }}>
-                                                                        {{ $child->name }}
-                                                                    </option>
-                                                                @endforeach
-                                                            </optgroup>
-                                                        @endforeach
-                                                    </select>
+                                                    <label>Категория <span class="text-danger">*</span></label>
+                                                    <div id="category-selectors">
+                                                        {{-- Будет заполнено через JS --}}
+                                                    </div>
+                                                    
+                                                    <input type="hidden" name="category_id" id="category_id" value="{{ old('category_id', $product->category_id) }}">
+                                                    
+                                                    <small class="text-muted">Выберите категорию. Если есть подкатегории, появятся дополнительные списки.</small>
                                                     @error('category_id')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror
                                                 </div>
 
@@ -209,7 +200,6 @@
                                                                 </label>
                                                             </div>
                                                         </div>
-                                                    </div>
                                                     
                                                     {{-- ⚠️ Ошибка лимита АКТИВНЫХ товаров --}}
                                                     @error('is_active')
@@ -453,6 +443,102 @@
 
 @push('scripts')
 <script>
+    // === ДИНАМИЧЕСКИЙ ВЫБОР КАТЕГОРИЙ ===
+const categoryContainer = document.getElementById('category-selectors');
+const categoryHiddenInput = document.getElementById('category_id');
+const selectedPath = @json($selectedPath ?? []);
+
+// Инициализация с предзаполнением
+initializeCategorySelectors();
+
+async function initializeCategorySelectors() {
+    // Загружаем корневые категории
+    await loadCategoryLevel(null, 0, selectedPath[0] || null);
+    
+    // Загружаем остальные уровни
+    for (let i = 0; i < selectedPath.length; i++) {
+        if (i + 1 < selectedPath.length) {
+            await loadCategoryLevel(selectedPath[i], i + 1, selectedPath[i + 1]);
+        }
+    }
+}
+
+async function loadCategoryLevel(parentId, level, selectedId = null) {
+    const url = parentId 
+        ? `{{ route('account.categories.children') }}?parent_id=${parentId}`
+        : `{{ route('account.categories.children') }}`;
+        
+    const response = await fetch(url);
+    const categories = await response.json();
+    
+    if (categories.length === 0) return;
+    
+    const select = createCategorySelect(level, categories, selectedId);
+    categoryContainer.appendChild(select);
+}
+
+function createCategorySelect(level, categories, selectedId = null) {
+    const select = document.createElement('select');
+    select.className = 'form-control mb-2 category-selector';
+    select.dataset.level = level;
+    
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = level === 0 ? 'Выберите категорию' : 'Выберите подкатегорию';
+    select.appendChild(defaultOption);
+    
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.id;
+        option.textContent = cat.name;
+        if (cat.id == selectedId) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+    
+    return select;
+}
+
+// Обработчик изменения
+categoryContainer.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('category-selector')) return;
+    
+    const categoryId = e.target.value;
+    const currentLevel = parseInt(e.target.dataset.level);
+    
+    // Удаляем все селекты после текущего
+    const selectors = categoryContainer.querySelectorAll('.category-selector');
+    selectors.forEach(selector => {
+        if (parseInt(selector.dataset.level) > currentLevel) {
+            selector.remove();
+        }
+    });
+    
+    if (!categoryId) {
+        categoryHiddenInput.value = '';
+        return;
+    }
+    
+    categoryHiddenInput.value = categoryId;
+    
+    // Загружаем дочерние категории
+    loadCategoryChildren(categoryId, currentLevel + 1);
+});
+
+function loadCategoryChildren(parentId, level) {
+    fetch(`{{ route('account.categories.children') }}?parent_id=${parentId}`)
+        .then(response => response.json())
+        .then(children => {
+            if (children.length === 0) return;
+            
+            const select = createCategorySelect(level, children);
+            categoryContainer.appendChild(select);
+        });
+}
+
+// === КОНЕЦ БЛОКА КАТЕГОРИЙ ===
+
 $(document).ready(function() {
     let existingImagesCount = {{ $product->images->count() }}; // ✅ let вместо const
     const maxFiles = 5;

@@ -17,6 +17,7 @@ use App\Http\Controllers\CabinetController;
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "web" middleware group. Make something great!
 |
+*/
 /*
 ПУБЛИЧНЕЫ РОУТЫ САЙТА
 */
@@ -82,6 +83,10 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     // Главная страница кабинета
     Route::get('/', [CabinetController::class, 'cabinet'])->name('index');
     
+     // Получение дочерних категорий (AJAX)
+    Route::get('categories/children', [App\Http\Controllers\Backend\ProductController::class, 'getChildCategories'])
+        ->name('categories.children');
+
     // === РАЗДЕЛ МАГАЗИНА ===
     Route::prefix('store')->name('store.')->group(function () {
         // Общая информация магазина
@@ -142,4 +147,5 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
 });
 });
+
 

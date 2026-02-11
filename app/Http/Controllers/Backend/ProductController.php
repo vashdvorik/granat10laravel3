@@ -54,8 +54,8 @@ class ProductController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
         
+        // Только корневые категории для первого уровня
         $categories = Category::whereNull('parent_id')
-            ->with('children')
             ->where('is_active', true)
             ->orderBy('number')
             ->get();
@@ -135,7 +135,7 @@ class ProductController extends Controller
         if ($isActive) {
             // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
             if (!$request->hasFile('images') || count($request->file('images')) === 0) {
-                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "неактивен".');
+                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "Снят с публикации".');
             }
             
             // Проверяем лимит активных товаров
@@ -251,13 +251,23 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
         
+        // Только корневые категории для первого уровня
         $categories = Category::whereNull('parent_id')
-            ->with('children')
             ->where('is_active', true)
             ->orderBy('number')
             ->get();
         
-        return view('backend.cabinet.products.edit', compact('product', 'categories'));
+        // Получаем цепочку категорий товара (для предзаполнения)
+        $selectedPath = [];
+        if ($product->category_id) {
+            $category = Category::find($product->category_id);
+            if ($category) {
+                $selectedPath = $category->ancestors->pluck('id')->toArray();
+                $selectedPath[] = $category->id;
+            }
+        }
+        
+        return view('backend.cabinet.products.edit', compact('product', 'categories', 'selectedPath'));
     }
 
     /**
@@ -635,5 +645,35 @@ class ProductController extends Controller
         }
 
         return redirect()->back()->with('success', 'Товар "' . $product->name . '" поднят в списке');
+    }
+
+    /**
+     * Получить дочерние категории по ID родителя
+     */
+    public function getChildCategories(Request $request)
+    {
+        $parentId = $request->get('parent_id');
+        
+        if ($parentId) {
+            $children = Category::where('parent_id', $parentId)
+                ->where('is_active', true)
+                ->orderBy('number')
+                ->get(['id', 'name', 'parent_id']);
+        } else {
+            // Корневые категории
+            $children = Category::whereNull('parent_id')
+                ->where('is_active', true)
+                ->orderBy('number')
+                ->get(['id', 'name', 'parent_id']);
+        }
+        
+        // Проверяем, есть ли у каждой категории дети
+        $children->each(function($category) {
+            $category->has_children = Category::where('parent_id', $category->id)
+                ->where('is_active', true)
+                ->exists();
+        });
+        
+        return response()->json($children);
     }
 }
