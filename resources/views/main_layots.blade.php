@@ -345,6 +345,56 @@
     .mobile-category-card.back-card .mobile-category-name {
         font-weight: 600;
     }
+
+/* Стили для текстовых плиток (без иконок) */
+
+.mobile-categories-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.mobile-category-tile {
+    flex: 0 0 auto;
+    min-width: 50px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+}
+
+.mobile-category-tile:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+
+.mobile-category-tile a {
+    display: block;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Кнопка "Назад" для плиток */
+.mobile-category-tile.back-tile {
+    background: linear-gradient(135deg, #e8f4f8 0%, #e8e4f3 100%);
+    border: 1px solid #d1d1d1;
+}
+
+.mobile-category-tile.back-tile a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #555;
+}
+
+.mobile-category-tile.back-tile i {
+    font-size: 16px;
+}
 }
 
     </style>
@@ -444,6 +494,7 @@
         <a href="#"><img src="img/banner-top2.jpg" alt="" class="img-reponsive"></a>
         </div>-->
 
+
     <!--ПОЛОСКА СЕРОГО ЦВЕТА  -->
     <div class="topbar">
         <div class="container container-240">
@@ -479,7 +530,7 @@
                         <div class="element hidden-xs hidden-sm">
                             <a href="#"><img src="{{ asset('img/icon-phone.png') }}" alt=""><span>Скачать приложение</span></a>
                         </div>
-                <!--    <div class="element element-currency>
+                <!--    <div class="element element-currency">
                             <a id="label3" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                             
                             <span>RUP</span>
@@ -652,7 +703,7 @@
                 </div>    
                 <div class="col-lg-9 widget-left">
                     <div class="flex lr">
-                        <nav class="main-menu" style="margin-left: 20px;>
+                        <nav class="main-menu" style="margin-left: 20px;">
                             <div class="collapse navbar-collapse" id="myNavbar">
                                 <ul class="nav navbar-nav">
                                     <li class="level1"><a href="{{ route('shops') }}"><img src="{{ asset('img/icon-ship.png') }}" alt="">Магазины</a></li>
@@ -809,16 +860,43 @@
     
     if (preserveScrollPages.includes(currentRoute)) {
         // Сохраняем позицию скролла перед уходом со страницы
-        window.addEventListener('beforeunload', function() {
-            sessionStorage.setItem('scrollPosition', window.scrollY);
+        window.addEventListener('beforeunload', function(e) {
+            // Проверяем, был ли клик по ссылке категории
+            const clickedLink = document.activeElement;
+            const isCategoryLink = clickedLink && (
+                clickedLink.closest('.mobile-category-card') ||
+                clickedLink.closest('.mobile-category-tile') ||
+                clickedLink.closest('.filter-cate') ||
+                clickedLink.closest('.back-category')
+            );
+            
+            // Сохраняем скролл только если это НЕ переход по категории
+            if (!isCategoryLink) {
+                sessionStorage.setItem('scrollPosition', window.scrollY);
+            } else {
+                sessionStorage.removeItem('scrollPosition');
+            }
         });
 
         // Восстанавливаем позицию скролла после загрузки
         window.addEventListener('load', function() {
             const scrollPosition = sessionStorage.getItem('scrollPosition');
+            
             if (scrollPosition) {
+                // Восстанавливаем скролл (для возврата с карточки товара и т.д.)
                 window.scrollTo(0, parseInt(scrollPosition));
                 sessionStorage.removeItem('scrollPosition');
+            } else {
+                // Если скролл не сохранен - значит был переход по категории
+                // Плавно скроллим к меню ТОЛЬКО НА МОБИЛЬНЫХ (ширина < 1024px)
+                if (window.innerWidth < 1024) {
+                    const filterSidebar = document.getElementById('filter-sidebar');
+                    if (filterSidebar) {
+                        setTimeout(function() {
+                            filterSidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 100);
+                    }
+                }
             }
         });
     }

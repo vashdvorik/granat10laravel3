@@ -189,7 +189,8 @@ class CatalogController extends Controller
         });
 
         // 🆕 NESTED SET: Подкатегории (только прямые дети)
-        $menuCategories = $category->children->count() > 0
+        $hasChildren = $category->children->count() > 0;
+        $menuCategories = $hasChildren
             ? $category->children
             : ($category->parent ? $category->parent->children : collect());
 
@@ -214,6 +215,7 @@ class CatalogController extends Controller
             'minPrice' => $minPrice,
             'maxPrice' => $maxPrice,
             'categoryProductsCount' => $categoryProductsCount,
+            'hasChildren' => $hasChildren,
         ]);
     }
 

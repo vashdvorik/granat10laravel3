@@ -98,6 +98,31 @@
                 padding-bottom: 70px !important;
             }
         }
+        /* На мобильных устройствах логотип меньше */
+        @media (max-width: 767px) {
+            .logo img {
+                max-height: 35px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            header {
+                min-height: 60px;
+                padding: 10px 20px !important;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            header {
+                min-height: 70px;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            header {
+                padding-bottom: 42px !important;
+            }
+        }
     </style>
   </head>
 <body class="w-screen relative overflow-x-hidden min-h-screen bg-gray-100 scrollbar-hide authentication-sign-in-page dark:bg-[#000]">

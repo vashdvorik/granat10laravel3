@@ -1,24 +1,15 @@
 [
-  
-  {
-    "id": 1, "name": "Одежда и обувь", "alias": "apparel", "number": 1, "is_active": true, "icon": "fa-solid fa-shirt", "icon_color": "#5D3FD3","bg_color": "#F0EEFF",
+  {"id": 1, "name": "Одежда и обувь", "alias": "apparel", "number": 1, "is_active": true, "icon": "fa-solid fa-shirt", "icon_color": "#5D3FD3","bg_color": "#F0EEFF",
     "children": [
-      {
-        
-        "id": 1100, "name": "Женская", "alias": "women-apparel",  "icon": "fa-solid fa-person-dress","icon_color": "#E91E63", "bg_color": "#FCE4EC","is_active": true,
+      {"id": 1100, "name": "Женская одежда", "alias": "women-apparel",  "icon": "fa-solid fa-person-dress","icon_color": "#E91E63", "bg_color": "#FCE4EC","is_active": true,
         "children": [
           { "id": 1110, "name": "Платья и сарафаны", "alias": "dresses-sarafans", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true,
             "children": [
-              {"id":1111,"name":"Повседневные платья","alias":"casual-dresses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
               {"id":1112,"name":"Платья миди и макси","alias":"midi-maxi-dresses","icon":"fa-solid fa-ruler-vertical","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
               {"id":1113,"name":"Платья мини","alias":"mini-dresses","icon":"fa-solid fa-person-dress","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
               {"id":1114,"name":"Коктейльные платья","alias":"cocktail-dresses","icon":"fa-solid fa-glass-cheers","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
               {"id":1115,"name":"Платья-рубашки","alias":"shirt-dresses","icon":"fa-solid fa-shirt","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
-              {"id":1116,"name":"Платья с разрезом","alias":"slit-dresses","icon":"fa-solid fa-scissors","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
-              {"id":1117,"name":"Платья с открытыми плечами / off-shoulder","alias":"off-shoulder-dresses","icon":"fa-solid fa-shirt","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
-              {"id":1118,"name":"Платья с объёмными рукавами","alias":"puff-sleeve-dresses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
-              {"id":1119,"name":"Платья больших размеров","alias":"plus-size-dresses","icon":"fa-solid fa-person-dress","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
-              {"id":1120,"name":"Трикотажные платья","alias":"knit-dresses-women","icon":"fa-solid fa-sweater","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1119,"name":"Больших размеров","alias":"plus-size-dresses","icon":"fa-solid fa-person-dress","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
               {"id":1121,"name":"Вечерние платья","alias":"evening-dresses","icon":"fa-solid fa-person-dress","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
               {"id":1122,"name":"Свадебное платье","alias":"wedding-dresses","icon":"fa-solid fa-ring","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
               {"id":1123,"name":"Сарафаны","alias":"sarafans","icon":"fa-solid fa-shirt-tank-top","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true}
@@ -26,14 +17,12 @@
           { "id": 1150, "name": "Блузки и рубашки", "alias": "blouses-tops-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true,
             "children": [
               {"id":1151,"name":"Классические","alias":"office-classic-shirts","icon":"fa-solid fa-shirt","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
-              {"id":1152,"name":"Белые","alias":"white-shirts-women","icon":"fa-solid fa-shirt","icon_color":"#FFFFFF","bg_color":"#F5F5F5","is_active":true},
               {"id":1153,"name":"С объёмными рукавами","alias":"puff-sleeve-blouses","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
-              {"id":1154,"name":"Летние / лёгкие","alias":"summer-light-blouses","icon":"fa-solid fa-shirt-tank-top","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
               {"id":1155,"name":"С кружевом / прозрачные","alias":"lace-sheer-blouses","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
               {"id":1156,"name":"В клетку / принт","alias":"check-pattern-shirts","icon":"fa-solid fa-shirt","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true},
               {"id":1157,"name":"Джинсовые","alias":"denim-shirts-women","icon":"fa-solid fa-shirt","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
-              {"id":1158,"name":"Оверсайз / свободные","alias":"oversize-blouses","icon":"fa-solid fa-shirt","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
-              {"id":1159,"name":"С бантом / завязками","alias":"bow-tie-blouses","icon":"fa-solid fa-shirt","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
+              {"id":1158,"name":"Оверсайз / батал","alias":"oversize-blouses","icon":"fa-solid fa-shirt","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1159,"name":"С бантом / поясом","alias":"bow-tie-blouses","icon":"fa-solid fa-shirt","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
             ] },
           {"id":1200,"name":"Футболки, топы, майки","alias":"tshirts-tops-women","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true,
             "children":[
@@ -49,7 +38,7 @@
             "children": [
               {"id":1251,"name":"С коротким рукавом","alias":"women-bodysuits","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
               {"id":1252,"name":"С длинным рукавом","alias":"women-long-sleeve-bodysuits","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
-              {"id":1253,"name":"Кружевные / сексуальные","alias":"women-lace-bodysuits","icon":"fa-solid fa-shirt-tank-top","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1253,"name":"Кружевные / прозрачные","alias":"women-lace-bodysuits","icon":"fa-solid fa-shirt-tank-top","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
               {"id":1254,"name":"Большие размеры","alias":"plus-size-bodysuits-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true}
             ] },
           { "id": 1300, "name": "Юбки и шорты", "alias": "skirts-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true,
@@ -57,33 +46,27 @@
               {"id":1301,"name":"Юбки миди и макси","alias":"midi-maxi-skirts","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
               {"id":1302,"name":"Мини-юбки","alias":"mini-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
               {"id":1303,"name":"Джинсовые юбки","alias":"denim-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
-              {"id":1304,"name":"Юбки-карандаш","alias":"pencil-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
-              {"id":1305,"name":"Плиссированные юбки","alias":"pleated-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
-              {"id":1306,"name":"Юбки А-силуэта","alias":"a-line-flared-skirts","icon":"fa-solid fa-scissors","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
               {"id":1307,"name":"Кожаные юбки","alias":"leather-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#455A64","bg_color":"#ECEFF1","is_active":true},
               {"id":1308,"name":"Большие размеры","alias":"plus-size-skirts-women","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
               {"id":1309,"name":"Женские шорты","alias":"women-shorts","icon":"fa-solid fa-scissors","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
               {"id":1310,"name":"Джинсовые шорты","alias":"women-denim-shorts","icon":"fa-solid fa-scissors","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
               {"id":1311,"name":"Бермуды / удлинённые","alias":"bermuda-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#D84315","bg_color":"#FFEBEE","is_active":true},
-              {"id":1312,"name":"Шорты с высокой талией","alias":"high-waist-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
               {"id":1313,"name":"Велосипедки / шорты для спорта","alias":"bike-shorts-women","icon":"fa-solid fa-person-running","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
               {"id":1314,"name":"Шорты больших размеров","alias":"plus-size-shorts-women","icon":"fa-solid fa-scissors","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
             ] },
           { "id": 1400, "name": "Брюки и джинсы", "alias": "pants-jeans-leggings", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true,
             "children": [
-              {"id":1401,"name":"Джинсы классические / прямые","alias":"straight-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
-              {"id":1402,"name":"Джинсы мом / бойфренд","alias":"mom-boyfriend-jeans","icon":"fa-solid fa-person-pants","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true},
+              {"id":1401,"name":"Джинсы классические","alias":"straight-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
               {"id":1403,"name":"Джинсы скинни / облегающие","alias":"skinny-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#5D4037","bg_color":"#BCAAA4","is_active":true},
               {"id":1404,"name":"Джинсы широкие / клёш","alias":"wide-flared-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#3E2723","bg_color":"#D7CCC8","is_active":true},
-              {"id":1405,"name":"Джинсы высокая талия","alias":"high-waist-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#4E342E","bg_color":"#D7CCC8","is_active":true},
               {"id":1406,"name":"Джинсы больших размеров","alias":"plus-size-jeans-women","icon":"fa-solid fa-person-pants","icon_color":"#6D4C41","bg_color":"#EFEBE9","is_active":true},
-              {"id":1407,"name":"Брюки классические / офисные","alias":"classic-office-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
+              {"id":1407,"name":"Брюки классические","alias":"classic-office-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
               {"id":1408,"name":"Брюки чинос / карго","alias":"chinos-cargo-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#1976D2","bg_color":"#E3F2FD","is_active":true},
               {"id":1409,"name":"Брюки палаццо / широкие","alias":"palazzo-wide-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#0288D1","bg_color":"#E1F5FE","is_active":true},
               {"id":1410,"name":"Брюки с высокой талией","alias":"high-waist-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#0D47A1","bg_color":"#E3F2FD","is_active":true},
-              {"id":1411,"name":"Леггинсы / джоггеры","alias":"leggings-joggers-women","icon":"fa-solid fa-person-pants","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
+              {"id":1411,"name":"Леггинсы / лосины","alias":"leggings-joggers-women","icon":"fa-solid fa-person-pants","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true},
               {"id":1412,"name":"Брюки больших размеров","alias":"plus-size-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
-              {"id":1413,"name":"Брюки укороченные / 7/8","alias":"cropped-ankle-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
+              {"id":1413,"name":"Капри","alias":"cropped-ankle-pants-women","icon":"fa-solid fa-person-pants","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
               {"id":1414,"name":"Брюки-кюлоты","alias":"culottes-women","icon":"fa-solid fa-person-pants","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true}
             ] },
           { "id": 1450, "name": "Тёплая одежда", "alias": "warm-knitwear", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true,
@@ -96,136 +79,602 @@
                 {"id":1456,"name":"Пончо и накидки","alias":"ponchos-capes","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
                 {"id":1457,"name":"Водолазки и гольфы","alias":"turtlenecks","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
                 {"id":1458,"name":"Тёплые кофты на молнии","alias":"zip-up-sweaters","icon":"fa-solid fa-jacket","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true}
-              ]
-          },
+            ] },
           { "id": 1500, "name": "Верхняя одежда", "alias": "outerwear-women", "icon": "fa-solid fa-coat-hanger", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true,
             "children": [
               {"id":1501,"name":"Куртки","alias":"women-jackets","icon":"fa-solid fa-jacket","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
-              {"id":1502,"name":"Пальто","alias":"women-coats","icon":"fa-solid fa-coat","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
-              {"id":1503,"name":"Одежда из меха","alias":"women-fur-vests","icon":"fa-solid fa-vest","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
-              {"id":1504,"name":"Шубы","alias":"women-fur-coats","icon":"fa-solid fa-paw","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
-              {"id":1505,"name":"Жилеты и безрукавки","alias":"women-vests-sleeveless","icon":"fa-solid fa-vest","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
-              {"id":1506,"name":"Плащи","alias":"women-raincoats","icon":"fa-solid fa-umbrella","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
-              {"id":1507,"name":"Пуховики","alias":"women-down-jackets","icon":"fa-solid fa-jacket","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
-              {"id":1508,"name":"Ветровки","alias":"women-shearling-coats","icon":"fa-solid fa-coat","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
-              {"id":1509,"name":"Кожаные куртки","alias":"leather-jackets-bikers","icon":"fa-solid fa-motorcycle","icon_color":"#6A1B9A","bg_color":"#F3E5F5","is_active":true}
-            ]
-          },
+              {"id":1502,"name":"Куртки укороченные","alias":"women-jackets-short","icon":"fa-solid fa-jacket","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
+              {"id":1503,"name":"Пальто","alias":"women-coats","icon":"fa-solid fa-coat","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
+              {"id":1504,"name":"Одежда из меха","alias":"women-fur-vests","icon":"fa-solid fa-vest","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
+              {"id":1505,"name":"Шубы","alias":"women-fur-coats","icon":"fa-solid fa-paw","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1506,"name":"Жилеты и безрукавки","alias":"women-vests-sleeveless","icon":"fa-solid fa-vest","icon_color":"#6A1B9A","bg_color":"#EDE7F6","is_active":true},
+              {"id":1507,"name":"Плащи / тренчи","alias":"women-raincoats","icon":"fa-solid fa-umbrella","icon_color":"#7B1FA2","bg_color":"#F3E5F5","is_active":true},
+              {"id":1508,"name":"Пуховики","alias":"women-down-jackets","icon":"fa-solid fa-jacket","icon_color":"#4A148C","bg_color":"#E1BEE7","is_active":true},
+              {"id":1509,"name":"Ветровки","alias":"women-shearling-coats","icon":"fa-solid fa-coat","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1510,"name":"Кожаные куртки","alias":"leather-jackets-bikers","icon":"fa-solid fa-motorcycle","icon_color":"#6A1B9A","bg_color":"#F3E5F5","is_active":true}
+            ] },
           {"id":1550,"name":"Домашняя и трикотажная одежда", "alias": "homewear-loungewear", "icon": "fa-solid fa-pajamas", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true,
             "children": [
-              {"id":1551,"name":"Пижамы женские","alias":"women-pajamas","icon":"fa-solid fa-pajamas","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
-              {"id":1552,"name":"Пижамы хлопковые / летние","alias":"cotton-summer-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
-              {"id":1553,"name":"Пижамы тёплые / флис / велюр","alias":"warm-fleece-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
+              {"id":1551,"name":"Пижамы трикотажные","alias":"women-pajamas","icon":"fa-solid fa-pajamas","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
+              {"id":1552,"name":"Пижамы хлопковые","alias":"cotton-summer-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
+              {"id":1553,"name":"Пижамы тёплые","alias":"warm-fleece-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
               {"id":1554,"name":"Пижамы больших размеров","alias":"plus-size-pajamas-women","icon":"fa-solid fa-pajamas","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
-              {"id":1555,"name":"Халаты женские","alias":"women-robes","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
+              {"id":1555,"name":"Халаты трикотажные","alias":"women-robes","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
               {"id":1556,"name":"Халаты махровые / вафельные","alias":"terry-waffle-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
               {"id":1557,"name":"Халаты шёлковые / атласные","alias":"silk-satin-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#9C27B0","bg_color":"#F3E5F5","is_active":true},
-              {"id":1558,"name":"Халаты больших размеров","alias":"plus-size-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
-              {"id":1559,"name":"Домашние костюмы / комплекты","alias":"women-home-sets","icon":"fa-solid fa-shirt-tank-top","icon_color":"#C2185B","bg_color":"#F8BBD0","is_active":true},
-              {"id":1560,"name":"Трикотажные костюмы / худи + штаны","alias":"knit-hoodie-pants-sets-women","icon":"fa-solid fa-hoodie","icon_color":"#880E4F","bg_color":"#F3E5F5","is_active":true},
-              {"id":1561,"name":"Домашние костюмы больших размеров","alias":"plus-size-home-sets-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
-              {"id":1562,"name":"Футболки и лонгсливы домашние","alias":"home-tshirts-long-sleeves-women","icon":"fa-solid fa-shirt","icon_color":"#E91E63","bg_color":"#FCE4EC","is_active":true},
-              {"id":1563,"name":"Штаны и леггинсы домашние","alias":"home-pants-leggings-women","icon":"fa-solid fa-person-pants","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true},
-              {"id":1564,"name":"Носки, гольфы, колготки домашние","alias":"home-socks-tights-women","icon":"fa-solid fa-socks","icon_color":"#795548","bg_color":"#EFEBE9","is_active":true}
+              {"id":1558,"name":"Халаты больших размеров","alias":"plus-size-robes-women","icon":"fa-solid fa-shirt-long-sleeve","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true}
               
             ] },
           {"id":1600,"name":"Комплекты и костюмы","alias":"sets-costumes-women","icon":"fa-solid fa-shirt-tank-top","icon_color":"#AD1457","bg_color":"#FCE4EC","is_active":true,
           "children":[
-              {"id":1601,"name":"Женские комплекты","alias":"women-sets","icon":"fa-solid fa-shirt-tank-top","icon_color":"#D81B60","bg_color":"#FCE4EC","is_active":true},
-              {"id":1602,"name":"Женские костюмы (офисные, повседневные)","alias":"women-office-casual-suits","icon":"fa-solid fa-suitcase","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
-              {"id":1603,"name":"Женские костюмы для косплея","alias":"women-cosplay-costumes","icon":"fa-solid fa-mask","icon_color":"#673AB7","bg_color":"#EDE7F6","is_active":true}
-            ]
-          },
-          {"id":1650,"name":"Спортивно-повседневная одежда","alias":"sport-casual-women","icon":"fa-solid fa-person-running","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true,
-          "children":[{
-            "id":1651,"name":"Женская спортивно-повседневная одежда","alias":"women-sport-casual","icon":"fa-solid fa-person-running","icon_color":"#E64A19","bg_color":"#FFCCBC","is_active":true},
-            {"id":1652,"name":"Спортивные толстовки","alias":"sport-hoodies-women","icon":"fa-solid fa-hoodie","icon_color":"#D84315","bg_color":"#FFEBEE","is_active":true}]},
-          {"id":1700,"name":"Комбинезоны","alias":"overalls-women","icon":"fa-solid fa-person-overalls","icon_color":"#FF9800","bg_color":"#FFF3E0","is_active":true},
-          {"id":1750,"name":"Одежда для беременных","alias":"maternity-wear","icon":"fa-solid fa-baby","icon_color":"#4CAF50","bg_color":"#E8F5E9","is_active":true},
-          {"id":1800,"name":"Пиджаки и жакеты","alias":"blazers-women","icon":"fa-solid fa-suitcase","icon_color":"#1565C0","bg_color":"#BBDEFB","is_active":true},
-          {"id":1850,"name":"Национальная одежда","alias":"traditional-cultural-women","icon":"fa-solid fa-globe","icon_color":"#673AB7","bg_color":"#EDE7F6","is_active":true},
-          {"id":1900,"name":"Униформа и рабочая","alias":"uniform-workwear-women","icon":"fa-solid fa-hard-hat","icon_color":"#455A64","bg_color":"#ECEFF1","is_active":true}
-        ]
-      },
-      {
-        "id": 2000,"name": "Мужская","alias": "men-apparel","icon": "fa-solid fa-person","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
-        "children": [
-          { "id": 2100, "name": "Рубашки и поло", "alias": "shirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 2150, "name": "Брюки, джинсы, чиносы", "alias": "pants-jeans-chinos", "icon": "fa-solid fa-person-pants", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 2200, "name": "Футболки и лонгсливы", "alias": "t-shirts-long-sleeves", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
-          { "id": 2250, "name": "Свитеры, худи, толстовки", "alias": "sweaters-hoodies", "icon": "fa-solid fa-sweater", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
-          { "id": 2300, "name": "Верхняя одежда", "alias": "outerwear-men", "icon": "fa-solid fa-coat-hanger", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true,
+              {"id": 1602, "name": "Деловые и офисные", "alias": "women-office-suits", "icon": "fa-solid fa-briefcase", "icon_color": "#1565C0", "bg_color": "#E3F2FD", "is_active": true},
+              {"id": 1603, "name": "Пиджаки и жакеты", "alias": "women-blazers", "icon": "fa-solid fa-user-tie", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true},
+              {"id": 1604, "name": "Спортивные костюмы", "alias": "women-sport-suits", "icon": "fa-solid fa-person-running", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true},
+              {"id": 1608, "name": "Атласные и шелковые", "alias": "women-knitted-suits", "icon": "fa-solid fa-vest", "icon_color": "#512DA8", "bg_color": "#EDE7F6", "is_active": true},
+              {"id": 1609, "name": "Костюмы с юбкой", "alias": "women-skirt-suits", "icon": "fa-solid fa-person-dress", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true},
+              {"id": 1610, "name": "Костюмы с шортами", "alias": "women-shorts-suits", "icon": "fa-solid fa-socks", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true}
+              
+            ] },
+          {"id":1650,"name":"Специальная одежда","alias":"sport-casual-women","icon":"fa-solid fa-person-running","icon_color":"#FF5722","bg_color":"#FFEBEE","is_active":true,
+            "children":[
+            
+            {"id": 1652, "name": "Медицинская одежда", "alias": "medical-wear-women", "icon": "fa-solid fa-user-nurse", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true},
+            {"id": 1653, "name": "Религиозная одежда", "alias": "modest-wear-women", "icon": "fa-solid fa-kaaba", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true},
+            {"id": 1654, "name": "Военная форма", "alias": "workwear-women", "icon": "fa-solid fa-hard-hat", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true},
+            {"id": 1656, "name": "Карнавальные костюмы и косплей", "alias": "cosplay-costumes-women", "icon": "fa-solid fa-mask", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true},
+            {"id": 1657, "name": "Сценическая / костюмы для танцев", "alias": "dance-stage-wear", "icon": "fa-solid fa-sparkles", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true}
+            ] }
+      ] },
+      {"id": 2100, "name": "Мужская одежда", "alias": "men-clothes", "icon": "fa-solid fa-person", "icon_color": "#1565C0", "bg_color": "#E3F2FD", "is_active": true, "children": [
+        { "id": 2110, "name": "Рубашки", "alias": "men-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true,
             "children": [
-              { "id": 2301, "name": "Куртки и бомберы", "alias": "jackets-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
-              { "id": 2302, "name": "Пальто и парки", "alias": "coats-parka", "icon": "fa-solid fa-coat", "icon_color": "#0277BD", "bg_color": "#E3F2FD", "is_active": true }
+              {"id": 2111, "name": "Классические / офисные", "alias": "men-classic-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#E3F2FD", "is_active": true},
+              {"id": 2112, "name": "Повседневные (Casual)", "alias": "men-casual-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true},
+              {"id": 2113, "name": "В клетку", "alias": "men-checked-shirts", "icon": "fa-solid fa-border-all", "icon_color": "#5D4037", "bg_color": "#EFEBE9", "is_active": true},
+              {"id": 2114, "name": "Джинсовые рубашки", "alias": "men-denim-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#283593", "bg_color": "#C5CAE9", "is_active": true}
+          ] 
+        },
+        { "id": 2150, "name": "Футболки, поло, майки", "alias": "men-tshirts-polo", "icon": "fa-solid fa-shirt", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true,
+          "children": [
+            {"id": 2151, "name": "Базовые футболки", "alias": "men-basic-tshirts", "icon": "fa-solid fa-shirt", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 2152, "name": "Футболки Поло", "alias": "men-polo-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true},
+            {"id": 2153, "name": "С принтами", "alias": "men-oversize-tshirts", "icon": "fa-solid fa-shirt", "icon_color": "#1B5E20", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 2155, "name": "Майки", "alias": "men-tanks", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#689F38", "bg_color": "#F1F8E9", "is_active": true}
+          ]
+        },
+        { "id": 2200, "name": "Брюки и джинсы", "alias": "men-pants-jeans", "icon": "fa-solid fa-person-pants", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true,
+          "children": [
+            {"id": 2201, "name": "Джинсы (все фасоны)", "alias": "men-jeans", "icon": "fa-solid fa-person-pants", "icon_color": "#283593", "bg_color": "#C5CAE9", "is_active": true},
+            {"id": 2202, "name": "Классические брюки", "alias": "men-classic-pants", "icon": "fa-solid fa-person-pants", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true},
+            {"id": 2205, "name": "Джоггеры / спортивные штаны", "alias": "men-joggers", "icon": "fa-solid fa-person-running", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true},
+            {"id": 2206, "name": "Шорты", "alias": "men-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#EF6C00", "bg_color": "#FFF3E0", "is_active": true}
+          ]
+        },
+        { "id": 2250, "name": "Тёплая одежда", "alias": "men-knitwear", "icon": "fa-solid fa-sweater", "icon_color": "#455A64", "bg_color": "#CFD8DC", "is_active": true,
+          "children": [
+            {"id": 2251, "name": "Худи и толстовки", "alias": "men-hoodies", "icon": "fa-solid fa-hoodie", "icon_color": "#C62828", "bg_color": "#FFEBEE", "is_active": true},
+            {"id": 2253, "name": "Свитеры и пуловеры", "alias": "men-sweaters", "icon": "fa-solid fa-sweater", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true},
+            {"id": 2254, "name": "Кардиганы / кофты на пуговицах", "alias": "men-cardigans", "icon": "fa-solid fa-sweater", "icon_color": "#546E7A", "bg_color": "#F5F5F5", "is_active": true},
+            {"id": 2255, "name": "Водолазки / лонгсливы", "alias": "men-turtlenecks", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#263238", "bg_color": "#ECEFF1", "is_active": true}
+          ]
+        },
+        { "id": 2300, "name": "Верхняя одежда", "alias": "men-outerwear", "icon": "fa-solid fa-coat-hanger", "icon_color": "#212121", "bg_color": "#F5F5F5", "is_active": true,
+          "children": [
+            
+            {"id": 2302, "name": "Пуховики и зимние куртки", "alias": "men-winter-jackets", "icon": "fa-solid fa-snowflake", "icon_color": "#0277BD", "bg_color": "#E1F5FE", "is_active": true},
+            {"id": 2303, "name": "Пальто и плащи", "alias": "men-coats", "icon": "fa-solid fa-coat", "icon_color": "#4E342E", "bg_color": "#EFEBE9", "is_active": true},
+            {"id": 2304, "name": "Кожаные куртки / косухи", "alias": "men-leather-jackets", "icon": "fa-solid fa-motorcycle", "icon_color": "#212121", "bg_color": "#ECEFF1", "is_active": true},
+            {"id": 2305, "name": "Бомберы и ветровки", "alias": "men-bombers", "icon": "fa-solid fa-jacket", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 2306, "name": "Жилеты утепленные", "alias": "men-vests", "icon": "fa-solid fa-vest", "icon_color": "#FF6F00", "bg_color": "#FFF3E0", "is_active": true}
+          ]
+        },
+        { "id": 2350, "name": "Костюмы и пиджаки", "alias": "men-suits", "icon": "fa-solid fa-user-tie", "icon_color": "#1A237E", "bg_color": "#E8EAF6", "is_active": true,
+          "children": [
+            {"id": 2351, "name": "Деловые костюмы", "alias": "men-business-suits", "icon": "fa-solid fa-briefcase", "icon_color": "#1A237E", "bg_color": "#E8EAF6", "is_active": true},
+            {"id": 2352, "name": "Пиджаки и блейзеры", "alias": "men-blazers", "icon": "fa-solid fa-user-tie", "icon_color": "#283593", "bg_color": "#E8EAF6", "is_active": true},
+            {"id": 2353, "name": "Спортивные костюмы", "alias": "men-tracksuits", "icon": "fa-solid fa-person-running", "icon_color": "#C62828", "bg_color": "#FFEBEE", "is_active": true},
+            {"id": 2355, "name": "Свадебные костюмы / смокинги", "alias": "men-wedding-suits", "icon": "fa-solid fa-gem", "icon_color": "#1A237E", "bg_color": "#E8EAF6", "is_active": true}
+          ]
+        },
+        { "id": 2400, "name": "Белье и домашняя одежда", "alias": "men-underwear-home", "icon": "fa-solid fa-pajamas", "icon_color": "#5D4037", "bg_color": "#EFEBE9", "is_active": true,
+          "children": [
+            {"id": 2401, "name": "Трусы", "alias": "men-boxers-briefs", "icon": "fa-solid fa-leaf", "icon_color": "#5D4037", "bg_color": "#EFEBE9", "is_active": true},
+            {"id": 2402, "name": "Носки и гольфы", "alias": "men-socks", "icon": "fa-solid fa-socks", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true},
+            {"id": 2403, "name": "Пижамы и одежда для сна", "alias": "men-pajamas", "icon": "fa-solid fa-bed", "icon_color": "#3E2723", "bg_color": "#BCAAA4", "is_active": true},
+            {"id": 2404, "name": "Халаты", "alias": "men-robes", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#5D4037", "bg_color": "#EFEBE9", "is_active": true},
+            {"id": 2405, "name": "Термобелье", "alias": "men-thermal-underwear", "icon": "fa-solid fa-temperature-low", "icon_color": "#0277BD", "bg_color": "#E1F5FE", "is_active": true}
+          ]
+        },
+        { "id": 2450, "name": "Специальная одежда", "alias": "men-special-wear", "icon": "fa-solid fa-hard-hat", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true,
+          "children": [
+            {"id": 2451, "name": "Спецодежда и рабочая форма", "alias": "men-workwear", "icon": "fa-solid fa-hard-hat", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true},
+            {"id": 2452, "name": "Медицинская одежда", "alias": "men-medical-wear", "icon": "fa-solid fa-user-nurse", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true},
+            {"id": 2453, "name": "Экипировка для охоты и рыбалки", "alias": "men-outdoor-tactical", "icon": "fa-solid fa-fish", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 2454, "name": "Военная форма", "alias": "men-military", "icon": "fa-solid fa-fish", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true}
+            
+          ]
+        }
+      ] },
+      {"id": 3000,"name": "Детская одежда","alias": "kids-apparel","icon": "fa-solid fa-child-reaching","icon_color": "#4CAF50","bg_color": "#E8F5E9","is_active": true,
+        "children": [
+          { "id": 3100, "name": "Новорожденным", "alias": "newborn", "icon": "fa-solid fa-baby", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true,
+            "children": [ 
+            {"id": 3110, "name": "Боди и слипы", "alias": "newborn-bodies-onesies", "icon": "fa-solid fa-tshirt", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3120, "name": "Человечки и комбинезоны", "alias": "newborn-rompers", "icon": "fa-solid fa-baby", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3130, "name": "Распашонки и кофточки", "alias": "newborn-blouses-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3140, "name": "Штанишки и ползунки", "alias": "newborn-pants-crawlers", "icon": "fa-solid fa-socks", "icon_color": "#66BB6A", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3150, "name": "Комплекты одежды", "alias": "newborn-sets", "icon": "fa-solid fa-layer-group", "icon_color": "#81C784", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3160, "name": "Шапочки, чепчики, косынки", "alias": "newborn-hats-caps", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#A5D6A7", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3170, "name": "Носочки, антицарапки, пинетки", "alias": "newborn-socks-mittens", "icon": "fa-solid fa-socks", "icon_color": "#C8E6C9", "bg_color": "#E8F5E9", "is_active": true},
+            {"id": 3180, "name": "Пеленки, уголки, пледы", "alias": "newborn-swaddles-blankets", "icon": "fa-solid fa-blanket", "icon_color": "#66BB6A", "bg_color": "#E8F5E9", "is_active": true}
             ]
           },
-          { "id": 2360, "name": "Костюмы и пиджаки", "alias": "suits-blazers", "icon": "fa-solid fa-suitcase", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true }
-        ]
-      },
-      {
-        
-        "id": 2200,"name": "Детям","alias": "kids-apparel","icon": "fa-solid fa-child-reaching","icon_color": "#4CAF50","bg_color": "#E8F5E9","is_active": true,
-        "children": [
-          { "id": 2210, "name": "Новорожденным (0–12 мес)", "alias": "newborn-0-12m", "icon": "fa-solid fa-baby", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true },
-          { "id": 2220, "name": "Малышам (1–3 года)", "alias": "toddlers-1-3y", "icon": "fa-solid fa-child", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 2230, "name": "Детям 3–7 лет", "alias": "kids-3-7y", "icon": "fa-solid fa-child-reaching", "icon_color": "#4CAF50", "bg_color": "#C8E6C9", "is_active": true },
-          { "id": 2240, "name": "Школьникам (7–14 лет)", "alias": "school-kids-7-14y", "icon": "fa-solid fa-school", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 2250, "name": "Подросткам (14+)", "alias": "teens-apparel", "icon": "fa-solid fa-user-teen", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true }
-        ]
-      },
-      {
-        
-        "id": 2400,"name": "Обувь","alias": "shoes-all","icon": "fa-solid fa-shoe-prints","icon_color": "#795548","bg_color": "#EFEBE9","is_active": true,
-        "children": [
-          { "id": 2410, "name": "Женская обувь", "alias": "women-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#6D4C41", "bg_color": "#D7CCC8", "is_active": true,
+          { "id": 3200, "name": "Девочкам", "alias": "girls-clothes", "icon": "fa-solid fa-baby", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true,
+           "children": [ 
+            { "id": 3250, "name": "Малышам (1–3 года)", "alias": "toddlers-clothes", "icon": "fa-solid fa-child", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true,
+              "children": [ 
+              { "id": 3260, "name": "Платья", "alias": "girls-toddler-dresses-one", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3261, "name": "Сарафаны", "alias": "girls-toddler-sundresses-one", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3262, "name": "Юбки", "alias": "girls-toddler-skirts", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3263, "name": "Футболки и топы", "alias": "girls-toddler-tshirts-one", "icon": "fa-solid fa-shirt", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3264, "name": "Блузки и рубашки", "alias": "girls-toddler-blouses-one", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3265, "name": "Брюки и джинсы", "alias": "girls-toddler-pants-one", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3266, "name": "Леггинсы", "alias": "girls-toddler-leggings-one", "icon": "fa-solid fa-person-pants", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3267, "name": "Шорты", "alias": "girls-toddler-shorts-one", "icon": "fa-solid fa-scissors", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3268, "name": "Толстовки и свитшоты", "alias": "girls-toddler-hoodies-one", "icon": "fa-solid fa-hoodie", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3269, "name": "Свитера и кардиганы", "alias": "girls-toddler-sweaters-one", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3270, "name": "Куртки и ветровки", "alias": "girls-toddler-jackets-one", "icon": "fa-solid fa-jacket", "icon_color": "#7B1FA2", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3271, "name": "Пальто и пуховики", "alias": "girls-toddler-coats-one", "icon": "fa-solid fa-coat", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
+              { "id": 3272, "name": "Комбинезоны", "alias": "girls-toddler-overalls-one", "icon": "fa-solid fa-person-pants", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+              { "id": 3273, "name": "Пижамы и одежда для сна", "alias": "girls-toddler-sleepwear-one", "icon": "fa-solid fa-bed", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3274, "name": "Нижнее белье и носки", "alias": "girls-toddler-underwear-one", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3275, "name": "Спортивная одежда", "alias": "girls-toddler-activewear-one", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3276, "name": "Нарядные платья", "alias": "girls-toddler-formal-one", "icon": "fa-solid fa-person-dress", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3277, "name": "Купальники", "alias": "girls-toddler-swimwear-one", "icon": "fa-solid fa-person-swimming", "icon_color": "#00BCD4", "bg_color": "#E0F2F1", "is_active": true },
+              { "id": 3278, "name": "Головные уборы", "alias": "girls-toddler-hats-one", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+              ]
+             },
+            { "id": 3300, "name": "Детям 3–7 лет", "alias": "kids-3-7", "icon": "fa-solid fa-child-reaching", "icon_color": "#4CAF50", "bg_color": "#C8E6C9", "is_active": true,
+              "children": [ 
+              { "id": 3301, "name": "Платья", "alias": "girls-toddler-dresses-seven", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3302, "name": "Сарафаны", "alias": "girls-toddler-sundresses-seven", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3303, "name": "Юбки", "alias": "girls-toddler-skirts-seven", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3304, "name": "Футболки и топы", "alias": "girls-toddler-tshirts-seven", "icon": "fa-solid fa-shirt", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3305, "name": "Блузки и рубашки", "alias": "girls-toddler-blouses-seven", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3306, "name": "Брюки и джинсы", "alias": "girls-toddler-pants-seven", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3307, "name": "Леггинсы", "alias": "girls-toddler-leggings-seven", "icon": "fa-solid fa-person-pants", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3308, "name": "Шорты", "alias": "girls-toddler-shorts-seven", "icon": "fa-solid fa-scissors", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3309, "name": "Толстовки и свитшоты", "alias": "girls-toddler-hoodies-seven", "icon": "fa-solid fa-hoodie", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3310, "name": "Свитера и кардиганы", "alias": "girls-toddler-sweaters-seven", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3311, "name": "Куртки и ветровки", "alias": "girls-toddler-jackets-seven", "icon": "fa-solid fa-jacket", "icon_color": "#7B1FA2", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3312, "name": "Пальто и пуховики", "alias": "girls-toddler-coats-seven", "icon": "fa-solid fa-coat", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
+              { "id": 3313, "name": "Комбинезоны", "alias": "girls-toddler-overalls-seven", "icon": "fa-solid fa-person-pants", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+              { "id": 3314, "name": "Пижамы и одежда для сна", "alias": "girls-toddler-sleepwear-seven", "icon": "fa-solid fa-bed", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3316, "name": "Спортивная одежда", "alias": "girls-toddler-activewear-seven", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3317, "name": "Нарядные платья", "alias": "girls-toddler-formal-seven", "icon": "fa-solid fa-person-dress", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3319, "name": "Головные уборы", "alias": "girls-toddler-hats-seven", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+              ]
+               },
+            { "id": 3400, "name": "Школьницам (7–14 лет)", "alias": "school-kids-clothes", "icon": "fa-solid fa-school", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true,
+              "children": [ 
+              { "id": 3401, "name": "Платья", "alias": "girls-toddler-dresses-school", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3402, "name": "Сарафаны", "alias": "girls-toddler-sundresses-school", "icon": "fa-solid fa-person-dress", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3403, "name": "Юбки", "alias": "girls-toddler-skirts-school", "icon": "fa-solid fa-scissors", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3404, "name": "Футболки и топы", "alias": "girls-toddler-tshirts-school", "icon": "fa-solid fa-shirt", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3405, "name": "Блузки и рубашки", "alias": "girls-toddler-blouses-school", "icon": "fa-solid fa-shirt", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3406, "name": "Брюки и джинсы", "alias": "girls-toddler-pants-school", "icon": "fa-solid fa-person-pants", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3407, "name": "Леггинсы", "alias": "girls-toddler-leggings-school", "icon": "fa-solid fa-person-pants", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3408, "name": "Шорты", "alias": "girls-toddler-shorts-school", "icon": "fa-solid fa-scissors", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3409, "name": "Толстовки и свитшоты", "alias": "girls-toddler-hoodies-school", "icon": "fa-solid fa-hoodie", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3410, "name": "Свитера и кардиганы", "alias": "girls-toddler-sweaters-school", "icon": "fa-solid fa-sweater", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+              { "id": 3411, "name": "Куртки и ветровки", "alias": "girls-toddler-jackets-school", "icon": "fa-solid fa-jacket", "icon_color": "#7B1FA2", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3412, "name": "Пальто и пуховики", "alias": "girls-toddler-coats-school", "icon": "fa-solid fa-coat", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
+              { "id": 3413, "name": "Комбинезоны", "alias": "girls-toddler-overalls-school", "icon": "fa-solid fa-person-pants", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+              { "id": 3414, "name": "Пижамы и одежда для сна", "alias": "girls-toddler-sleepwear-school", "icon": "fa-solid fa-bed", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3415, "name": "Нижнее белье и носки", "alias": "girls-toddler-underwear-school", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 3416, "name": "Спортивная одежда", "alias": "girls-toddler-activewear-school", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 3417, "name": "Нарядные платья", "alias": "girls-toddler-formal-school", "icon": "fa-solid fa-person-dress", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 3418, "name": "Купальники", "alias": "girls-toddler-swimwear-school", "icon": "fa-solid fa-person-swimming", "icon_color": "#00BCD4", "bg_color": "#E0F2F1", "is_active": true },
+              { "id": 3419, "name": "Головные уборы", "alias": "girls-toddler-hats-school", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+              ]
+            }
+           ]
+          },
+          { "id": 4000, "name": "Мальчикам", "alias": "boys", "icon": "fa-solid fa-child", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true,
+           "children": [
+            {"id": 4100,"name": "Малышам (1–3 года)","alias": "boys-clothes-1-3y","icon": "fa-solid fa-child","icon_color": "#0288D1","bg_color": "#E1F5FE","is_active": true,
+              "children": [
+                { "id": 4110, "name": "Футболки и поло", "alias": "boys-toddler-tshirts", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4111, "name": "Рубашки", "alias": "boys-toddler-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                { "id": 4112, "name": "Джемперы и свитшоты", "alias": "boys-toddler-sweatshirts", "icon": "fa-solid fa-sweater", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                { "id": 4113, "name": "Брюки и джинсы", "alias": "boys-toddler-pants", "icon": "fa-solid fa-person-pants", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4114, "name": "Шорты", "alias": "boys-toddler-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+                { "id": 4115, "name": "Куртки и ветровки", "alias": "boys-toddler-jackets", "icon": "fa-solid fa-jacket", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4116, "name": "Пальто и пуховики", "alias": "boys-toddler-coats", "icon": "fa-solid fa-coat", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                { "id": 4117, "name": "Комбинезоны", "alias": "boys-toddler-overalls", "icon": "fa-solid fa-person-pants", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                { "id": 4118, "name": "Пижамы и одежда для сна", "alias": "boys-toddler-sleepwear", "icon": "fa-solid fa-bed", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4120, "name": "Спортивная одежда", "alias": "boys-toddler-activewear", "icon": "fa-solid fa-person-running", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+                { "id": 4122, "name": "Головные уборы", "alias": "boys-toddler-hats", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+              ]
+            },
+            {"id": 4200,"name": "Детям 3–7 лет","alias": "boys-3-7","icon": "fa-solid fa-child-reaching","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
             "children": [
-              { "id": 2411, "name": "Туфли и лодочки", "alias": "heels-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
-              { "id": 2412, "name": "Ботинки и сапоги", "alias": "boots-women", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
-              { "id": 2413, "name": "Кроссовки и кеды", "alias": "sneakers-women", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true }
+              { "id": 4210, "name": "Футболки и поло", "alias": "boys-kids-tshirts", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+              { "id": 4211, "name": "Рубашки", "alias": "boys-kids-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+              { "id": 4212, "name": "Джемперы и свитшоты", "alias": "boys-kids-sweatshirts", "icon": "fa-solid fa-sweater", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+              { "id": 4213, "name": "Брюки и джинсы", "alias": "boys-kids-pants", "icon": "fa-solid fa-person-pants", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+              { "id": 4214, "name": "Шорты", "alias": "boys-kids-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+              { "id": 4215, "name": "Куртки и ветровки", "alias": "boys-kids-jackets", "icon": "fa-solid fa-jacket", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+              { "id": 4216, "name": "Пальто и пуховики", "alias": "boys-kids-coats", "icon": "fa-solid fa-coat", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+              { "id": 4217, "name": "Комбинезоны", "alias": "boys-kids-overalls", "icon": "fa-solid fa-person-pants", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+              { "id": 4218, "name": "Пижамы и одежда для сна", "alias": "boys-kids-sleepwear", "icon": "fa-solid fa-bed", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+              { "id": 4220, "name": "Спортивная одежда", "alias": "boys-kids-activewear", "icon": "fa-solid fa-person-running", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+              { "id": 4222, "name": "Головные уборы", "alias": "boys-kids-hats", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
             ]
-          },
-          { "id": 2420, "name": "Мужская обувь", "alias": "men-shoes", "icon": "fa-solid fa-person", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
+            },
+            {"id": 4300,"name": "Школьникам (7–14 лет)","alias": "boys-school-7-14y","icon": "fa-solid fa-school","icon_color": "#1976D2","bg_color": "#E3F2FD","is_active": true,
+              "children": [
+                { "id": 4310, "name": "Футболки и поло", "alias": "boys-school-tshirts", "icon": "fa-solid fa-shirt", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4311, "name": "Рубашки", "alias": "boys-school-shirts", "icon": "fa-solid fa-shirt", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                { "id": 4312, "name": "Джемперы и свитшоты", "alias": "boys-school-sweatshirts", "icon": "fa-solid fa-sweater", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                { "id": 4313, "name": "Брюки и джинсы", "alias": "boys-school-pants", "icon": "fa-solid fa-person-pants", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4314, "name": "Шорты", "alias": "boys-school-shorts", "icon": "fa-solid fa-scissors", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+                { "id": 4315, "name": "Куртки и ветровки", "alias": "boys-school-jackets", "icon": "fa-solid fa-jacket", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4316, "name": "Пальто и пуховики", "alias": "boys-school-coats", "icon": "fa-solid fa-coat", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                { "id": 4317, "name": "Комбинезоны", "alias": "boys-school-overalls", "icon": "fa-solid fa-person-pants", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                { "id": 4318, "name": "Пижамы и одежда для сна", "alias": "boys-school-sleepwear", "icon": "fa-solid fa-bed", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                { "id": 4320, "name": "Спортивная одежда", "alias": "boys-school-activewear", "icon": "fa-solid fa-person-running", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+                { "id": 4322, "name": "Головные уборы", "alias": "boys-school-hats", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+              ]
+            }
+            ]
+          }
+      ] },
+      {"id": 5000,"name": "Обувь","alias": "shoes-all","icon": "fa-solid fa-shoe-prints","icon_color": "#795548","bg_color": "#EFEBE9","is_active": true,
+        "children": [
+          { "id": 5010, "name": "Женская обувь", "alias": "women-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#6D4C41", "bg_color": "#D7CCC8", "is_active": true,
             "children": [
-              { "id": 2421, "name": "Кроссовки и кеды", "alias": "sneakers-men", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
-              { "id": 2422, "name": "Ботинки и полуботинки", "alias": "boots-men", "icon": "fa-solid fa-boot", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
-              { "id": 2423, "name": "Туфли классические", "alias": "classic-shoes-men", "icon": "fa-solid fa-shoe-formal", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true }
+              { "id": 5050, "name": "Туфли", "alias": "women-heels-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
+                "children": [
+                  { "id": 5051, "name": "На шпильке", "alias": "women-stiletto-heels", "icon": "fa-solid fa-shoe-heels", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5052, "name": "На каблуке", "alias": "women-high-heels", "icon": "fa-solid fa-shoe-heels", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+                  { "id": 5053, "name": "На платформе", "alias": "women-platform-shoes", "icon": "fa-solid fa-shoe-heels", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5054, "name": "На низком каблуке", "alias": "women-low-heels", "icon": "fa-solid fa-shoe-heels", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5055, "name": "Лодочки", "alias": "women-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#D81B60", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5056, "name": "С открытым носком", "alias": "women-open-toe-heels", "icon": "fa-solid fa-shoe-heels", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5057, "name": "Свадебные туфли", "alias": "women-wedding-shoes", "icon": "fa-solid fa-ring", "icon_color": "#F8BBD0", "bg_color": "#FCE4EC", "is_active": true }
+                ]
+              },
+              { "id": 5100, "name": "Ботинки и сапоги", "alias": "women-boots", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true,
+                "children": [
+                  { "id": 5101, "name": "Ботильоны", "alias": "women-ankle-boots", "icon": "fa-solid fa-boot", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5102, "name": "Сапоги до колена", "alias": "women-knee-boots", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5103, "name": "Высокие сапоги", "alias": "women-over-knee-boots", "icon": "fa-solid fa-boot", "icon_color": "#3E2723", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5104, "name": "Ботинки на шнуровке", "alias": "women-lace-up-boots", "icon": "fa-solid fa-boot", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5105, "name": "Челси", "alias": "women-chelsea-boots", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5106, "name": "Казаки", "alias": "women-cowboy-boots", "icon": "fa-solid fa-boot", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5107, "name": "Зимние сапоги", "alias": "women-winter-boots", "icon": "fa-solid fa-snowflake", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                  { "id": 5108, "name": "Угги", "alias": "women-ugg-boots", "icon": "fa-solid fa-boot", "icon_color": "#8D6E63", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5109, "name": "Резиновые сапоги", "alias": "women-rain-boots", "icon": "fa-solid fa-umbrella", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true }
+                ]
+              },
+              { "id": 5150, "name": "Кроссовки и кеды", "alias": "women-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true,
+                "children": [
+                  { "id": 5151, "name": "Кроссовки для бега", "alias": "women-running-shoes", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true },
+                  { "id": 5152, "name": "Кроссовки для фитнеса", "alias": "women-training-shoes", "icon": "fa-solid fa-dumbbell", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true },
+                  { "id": 5153, "name": "Модные кроссовки", "alias": "women-fashion-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5154, "name": "Кеды", "alias": "women-canvas-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5155, "name": "Слипоны", "alias": "women-slip-on-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5156, "name": "На платформе", "alias": "women-platform-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true }
+                ]
+              },
+              { "id": 5200, "name": "Балетки и лоферы", "alias": "women-flats", "icon": "fa-solid fa-shoe-prints", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true,
+                "children": [
+                  { "id": 5201, "name": "Балетки классические", "alias": "women-ballet-flats", "icon": "fa-solid fa-shoe-prints", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+                  { "id": 5202, "name": "Лоферы", "alias": "women-loafers", "icon": "fa-solid fa-shoe-prints", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5203, "name": "Мокасины", "alias": "women-moccasins", "icon": "fa-solid fa-shoe-prints", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5204, "name": "Оксфорды", "alias": "women-oxford-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true }
+                ]
+              },
+              { "id": 5250, "name": "Босоножки и сандалии", "alias": "women-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true,
+                "children": [
+                  { "id": 5251, "name": "Босоножки на каблуке", "alias": "women-heeled-sandals", "icon": "fa-solid fa-shoe-heels", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+                  { "id": 5252, "name": "Босоножки на платформе", "alias": "women-platform-sandals", "icon": "fa-solid fa-shoe-heels", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
+                  { "id": 5253, "name": "Сандалии на плоской подошве", "alias": "women-flat-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+                  { "id": 5254, "name": "Гладиаторы", "alias": "women-gladiator-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5255, "name": "Вьетнамки", "alias": "women-flip-flops", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
+                  { "id": 5256, "name": "Эспадрильи", "alias": "women-espadrilles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#8BC34A", "bg_color": "#F1F8E9", "is_active": true }
+                ]
+              },
+              { "id": 5300, "name": "Домашняя обувь", "alias": "women-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true,
+                "children": [
+                  { "id": 5301, "name": "Тапочки закрытые", "alias": "women-closed-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#7B1FA2", "bg_color": "#E1BEE7", "is_active": true },
+                  { "id": 5302, "name": "Тапочки открытые", "alias": "women-open-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#8E24AA", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5303, "name": "Угги домашние", "alias": "women-home-boots", "icon": "fa-solid fa-boot", "icon_color": "#9C27B0", "bg_color": "#E1BEE7", "is_active": true }
+                ]
+              },
+              { "id": 5350, "name": "Резиновая обувь", "alias": "women-rubber-shoes", "icon": "fa-solid fa-water", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true,
+                "children": [
+                  { "id": 5351, "name": "Сабо и кроксы", "alias": "women-clogs-crocs", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00ACC1", "bg_color": "#B2EBF2", "is_active": true },
+                  { "id": 5352, "name": "Пляжная обувь", "alias": "women-beach-shoes", "icon": "fa-solid fa-umbrella-beach", "icon_color": "#0097A7", "bg_color": "#E0F7FA", "is_active": true },
+                  { "id": 5353, "name": "Галоши", "alias": "women-overshoes", "icon": "fa-solid fa-umbrella", "icon_color": "#006064", "bg_color": "#E0F2F1", "is_active": true }
+                ]
+              }
             ]
           },
-          { "id": 2430, "name": "Детская обувь", "alias": "kids-shoes", "icon": "fa-solid fa-child", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
-          { "id": 2440, "name": "Спортивная обувь", "alias": "sport-shoes", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true }
+          { "id": 5020, "name": "Мужская обувь", "alias": "men-shoes", "icon": "fa-solid fa-person", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
+            "children": [
+              { "id": 5450, "name": "Кроссовки и кеды", "alias": "men-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true,
+                "children": [
+                  { "id": 5454, "name": "Повседневные кроссовки", "alias": "men-casual-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5455, "name": "Кеды", "alias": "men-canvas-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true },
+                  { "id": 5456, "name": "Слипоны", "alias": "men-slip-on-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true }
+                ]
+              },
+              { "id": 5500, "name": "Ботинки и полуботинки", "alias": "men-boots", "icon": "fa-solid fa-boot", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true,
+                "children": [
+                  { "id": 5501, "name": "Ботинки классические", "alias": "men-classic-boots", "icon": "fa-solid fa-boot", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5502, "name": "Ботинки на шнуровке", "alias": "men-lace-up-boots", "icon": "fa-solid fa-boot", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5503, "name": "Челси", "alias": "men-chelsea-boots", "icon": "fa-solid fa-boot", "icon_color": "#3E2723", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5504, "name": "Дезерты", "alias": "men-desert-boots", "icon": "fa-solid fa-boot", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5506, "name": "Зимние ботинки", "alias": "men-winter-boots", "icon": "fa-solid fa-snowflake", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                  { "id": 5507, "name": "Резиновые сапоги", "alias": "men-rain-boots", "icon": "fa-solid fa-umbrella", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 5508, "name": "Трекинговые ботинки", "alias": "men-hiking-boots", "icon": "fa-solid fa-mountain", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true }
+                ]
+              },
+              { "id": 5550, "name": "Туфли классические", "alias": "men-classic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true,
+                "children": [
+                  { "id": 5551, "name": "Оксфорды", "alias": "men-oxford-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#3E2723", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5552, "name": "Дерби", "alias": "men-derby-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#4E342E", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 5553, "name": "Броги", "alias": "men-brogue-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#5D4037", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 5554, "name": "Монки", "alias": "men-monk-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#6D4C41", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5555, "name": "Лоферы", "alias": "men-loafers", "icon": "fa-solid fa-shoe-prints", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 5556, "name": "Мокасины", "alias": "men-moccasins", "icon": "fa-solid fa-shoe-prints", "icon_color": "#8D6E63", "bg_color": "#D7CCC8", "is_active": true }
+                ]
+              },
+              { "id": 5600, "name": "Сандалии и шлепанцы", "alias": "men-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true,
+                "children": [
+                  { "id": 5601, "name": "Сандалии спортивные", "alias": "men-sport-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+                  { "id": 5602, "name": "Сандалии классические", "alias": "men-classic-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
+                  { "id": 5603, "name": "Вьетнамки", "alias": "men-flip-flops", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
+                  { "id": 5604, "name": "Шлепанцы", "alias": "men-slides", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00ACC1", "bg_color": "#B2EBF2", "is_active": true },
+                  { "id": 5605, "name": "Пляжная обувь", "alias": "men-beach-shoes", "icon": "fa-solid fa-umbrella-beach", "icon_color": "#0097A7", "bg_color": "#E0F7FA", "is_active": true }
+                ]
+              },
+              { "id": 5650, "name": "Домашняя обувь", "alias": "men-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true,
+                "children": [
+                  { "id": 5651, "name": "Тапочки закрытые", "alias": "men-closed-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                  { "id": 5652, "name": "Тапочки открытые", "alias": "men-open-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5653, "name": "Угги домашние", "alias": "men-home-boots", "icon": "fa-solid fa-boot", "icon_color": "#283593", "bg_color": "#C5CAE9", "is_active": true }
+                ]
+              },
+              { "id": 5670, "name": "Резиновая обувь", "alias": "men-rubber-shoes", "icon": "fa-solid fa-water", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true,
+                "children": [
+                  { "id": 5671, "name": "Сабо и кроксы", "alias": "men-clogs-crocs", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00ACC1", "bg_color": "#B2EBF2", "is_active": true },
+                  { "id": 5672, "name": "Галоши", "alias": "men-overshoes", "icon": "fa-solid fa-umbrella", "icon_color": "#006064", "bg_color": "#E0F2F1", "is_active": true }
+                ]
+              }
+              
+            ]
+          },
+          { "id": 5700, "name": "Детская обувь", "alias": "kids-shoes", "icon": "fa-solid fa-child", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true,
+            "children": [
+              { "id": 5710, "name": "Для малышей (0-2 года)", "alias": "baby-shoes", "icon": "fa-solid fa-baby", "icon_color": "#81C784", "bg_color": "#E8F5E9", "is_active": true,
+                "children": [
+                  { "id": 5711, "name": "Пинетки", "alias": "baby-booties", "icon": "fa-solid fa-baby", "icon_color": "#66BB6A", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 5712, "name": "Первая обувь", "alias": "baby-first-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true },
+                  { "id": 5713, "name": "Сандалии для малышей", "alias": "baby-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#81C784", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 5714, "name": "Ботиночки", "alias": "baby-boots", "icon": "fa-solid fa-boot", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true }
+                ]
+              },
+              { "id": 5720, "name": "Для девочек", "alias": "girls-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true,
+                "children": [
+                  { "id": 5721, "name": "Туфли", "alias": "girls-dress-shoes", "icon": "fa-solid fa-shoe-heels", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+                  { "id": 5722, "name": "Балетки", "alias": "girls-ballet-flats", "icon": "fa-solid fa-shoe-prints", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5723, "name": "Босоножки и сандалии", "alias": "girls-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5724, "name": "Ботинки и полуботинки", "alias": "girls-boots", "icon": "fa-solid fa-boot", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5725, "name": "Сапоги", "alias": "girls-tall-boots", "icon": "fa-solid fa-boot", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+                  { "id": 5726, "name": "Зимняя обувь", "alias": "girls-winter-shoes", "icon": "fa-solid fa-snowflake", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                  { "id": 5727, "name": "Кроссовки и кеды", "alias": "girls-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5728, "name": "Резиновые сапоги", "alias": "girls-rain-boots", "icon": "fa-solid fa-umbrella", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5729, "name": "Нарядная обувь", "alias": "girls-party-shoes", "icon": "fa-solid fa-star", "icon_color": "#FF69B4", "bg_color": "#FFF0F6", "is_active": true },
+                  { "id": 5730, "name": "Домашняя обувь", "alias": "girls-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
+                ]
+              },
+              { "id": 5740, "name": "Для мальчиков", "alias": "boys-shoes", "icon": "fa-solid fa-child", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true,
+                "children": [
+                  { "id": 5741, "name": "Туфли классические", "alias": "boys-dress-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                  { "id": 5742, "name": "Ботинки и полуботинки", "alias": "boys-boots", "icon": "fa-solid fa-boot", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5743, "name": "Сандалии", "alias": "boys-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5744, "name": "Кроссовки и кеды", "alias": "boys-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#2196F3", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 5745, "name": "Зимняя обувь", "alias": "boys-winter-shoes", "icon": "fa-solid fa-snowflake", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true },
+                  { "id": 5746, "name": "Резиновые сапоги", "alias": "boys-rain-boots", "icon": "fa-solid fa-umbrella", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 5747, "name": "Мокасины и лоферы", "alias": "boys-loafers", "icon": "fa-solid fa-shoe-prints", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true },
+                  { "id": 5748, "name": "Домашняя обувь", "alias": "boys-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true }
+                ]
+              },
+              { "id": 5760, "name": "Подростковая обувь", "alias": "teen-shoes", "icon": "fa-solid fa-child-reaching", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true,
+                "children": [
+                  { "id": 5761, "name": "Кроссовки для подростков", "alias": "teen-sneakers", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+                  { "id": 5762, "name": "Ботинки для подростков", "alias": "teen-boots", "icon": "fa-solid fa-boot", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
+                  { "id": 5763, "name": "Туфли для подростков", "alias": "teen-dress-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#E65100", "bg_color": "#FFF3E0", "is_active": true }
+                ]
+              },
+              { "id": 5840, "name": "Резиновая обувь", "alias": "kids-rubber-shoes", "icon": "fa-solid fa-water", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true,
+                "children": [
+                  { "id": 5841, "name": "Кроксы и сабо", "alias": "kids-crocs", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00ACC1", "bg_color": "#B2EBF2", "is_active": true },
+                  { "id": 5842, "name": "Пляжная обувь", "alias": "kids-beach-shoes", "icon": "fa-solid fa-umbrella-beach", "icon_color": "#0097A7", "bg_color": "#E0F7FA", "is_active": true }
+                ]
+              }
+            ]
+          },
+          { "id": 5900, "name": "Спортивная обувь", "alias": "sport-shoes", "icon": "fa-solid fa-person-running", "icon_color": "#FF5722", "bg_color": "#FFEBEE", "is_active": true,
+            "children": [
+              { "id": 5910, "name": "Для бега", "alias": "running-shoes-all", "icon": "fa-solid fa-person-running", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true,
+                "children": [
+                  { "id": 5911, "name": "Для бега по асфальту", "alias": "road-running-shoes", "icon": "fa-solid fa-road", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true },
+                  { "id": 5912, "name": "Для трейлраннинга", "alias": "trail-running-shoes", "icon": "fa-solid fa-mountain", "icon_color": "#BF360C", "bg_color": "#FFCCBC", "is_active": true },
+                  { "id": 5914, "name": "С амортизацией", "alias": "cushioned-running-shoes", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true }
+                ]
+              },
+              { "id": 5920, "name": "Для фитнеса и тренировок", "alias": "training-shoes-all", "icon": "fa-solid fa-dumbbell", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true
+              },
+              { "id": 5930, "name": "Футбольная обувь", "alias": "football-shoes-all", "icon": "fa-solid fa-futbol", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true,
+                "children": [
+                  { "id": 5931, "name": "Бутсы для газона", "alias": "firm-ground-boots", "icon": "fa-solid fa-futbol", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true },
+                  { "id": 5932, "name": "Бутсы для искусственного покрытия", "alias": "artificial-ground-boots", "icon": "fa-solid fa-futbol", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 5933, "name": "Футзалки", "alias": "indoor-football-shoes", "icon": "fa-solid fa-futbol", "icon_color": "#1B5E20", "bg_color": "#E8F5E9", "is_active": true },
+                  { "id": 5934, "name": "Сороконожки", "alias": "turf-football-shoes", "icon": "fa-solid fa-futbol", "icon_color": "#4CAF50", "bg_color": "#E8F5E9", "is_active": true }
+                ]
+              },
+              { "id": 5975, "name": "Для танцев", "alias": "dance-shoes-sport", "icon": "fa-solid fa-music", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true,
+                "children": [
+                  { "id": 5976, "name": "Для бальных танцев", "alias": "ballroom-dance-shoes", "icon": "fa-solid fa-music", "icon_color": "#C2185B", "bg_color": "#F8BBD0", "is_active": true },
+                  { "id": 5977, "name": "Для латины", "alias": "latin-dance-shoes", "icon": "fa-solid fa-music", "icon_color": "#AD1457", "bg_color": "#FCE4EC", "is_active": true },
+                  { "id": 5978, "name": "Джазовки", "alias": "jazz-dance-shoes", "icon": "fa-solid fa-music", "icon_color": "#880E4F", "bg_color": "#F3E5F5", "is_active": true },
+                  { "id": 5979, "name": "Чешки", "alias": "ballet-slippers", "icon": "fa-solid fa-music", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true }
+                ]
+              },
+              { "id": 5980, "name": "Для зимних видов спорта", "alias": "winter-sport-shoes", "icon": "fa-solid fa-snowflake", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true,
+                "children": [
+                  { "id": 5981, "name": "Ботинки для сноуборда", "alias": "snowboard-boots", "icon": "fa-solid fa-snowflake", "icon_color": "#0277BD", "bg_color": "#B3E5FC", "is_active": true },
+                  { "id": 5982, "name": "Ботинки для лыж", "alias": "ski-boots", "icon": "fa-solid fa-person-skiing", "icon_color": "#01579B", "bg_color": "#E1F5FE", "is_active": true },
+                  { "id": 5983, "name": "Коньки", "alias": "ice-skates", "icon": "fa-solid fa-skating", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true }
+                ]
+              },
+              { "id": 5985, "name": "Для туризма и трекинга", "alias": "hiking-trekking-shoes", "icon": "fa-solid fa-mountain", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true,
+                "children": [
+                  { "id": 5986, "name": "Трекинговые ботинки", "alias": "trekking-boots", "icon": "fa-solid fa-mountain", "icon_color": "#1B5E20", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 5987, "name": "Легкие походные кроссовки", "alias": "hiking-shoes", "icon": "fa-solid fa-mountain", "icon_color": "#388E3C", "bg_color": "#E8F5E9", "is_active": true },
+                  { "id": 5988, "name": "Альпинистские ботинки", "alias": "mountaineering-boots", "icon": "fa-solid fa-mountain", "icon_color": "#2E7D32", "bg_color": "#C8E6C9", "is_active": true }
+                ]
+              },
+              { "id": 5995, "name": "Универсальная спортивная обувь", "alias": "universal-sport-shoes", "icon": "fa-solid fa-shoe-sneakers", "icon_color": "#607D8B", "bg_color": "#ECEFF1", "is_active": true }
+            ]
+          },
+          { "id": 6000, "name": "Ортопедическая обувь", "alias": "orthopedic-shoes-all", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true,
+            "children": [
+              { "id": 6010, "name": "Женская ортопедическая", "alias": "women-orthopedic-shoes", "icon": "fa-solid fa-person-dress", "icon_color": "#00897B", "bg_color": "#B2DFDB", "is_active": true,
+                "children": [
+                  { "id": 6011, "name": "Туфли ортопедические", "alias": "women-orthopedic-pumps", "icon": "fa-solid fa-shoe-heels", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6012, "name": "Босоножки ортопедические", "alias": "women-orthopedic-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#004D40", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6013, "name": "Ботинки ортопедические", "alias": "women-orthopedic-boots", "icon": "fa-solid fa-boot", "icon_color": "#00796B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6014, "name": "Домашняя ортопедическая", "alias": "women-orthopedic-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#00897B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6015, "name": "С высоким берцем", "alias": "women-orthopedic-high-ankle", "icon": "fa-solid fa-boot", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6016, "name": "Для диабетиков", "alias": "women-diabetic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6017, "name": "Для плоскостопия", "alias": "women-flatfoot-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6018, "name": "Послеоперационная", "alias": "women-postop-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00897B", "bg_color": "#B2DFDB", "is_active": true }
+                ]
+              },
+              { "id": 6020, "name": "Мужская ортопедическая", "alias": "orthopedic-shoes", "icon": "fa-solid fa-person", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true,
+                "children": [
+                  { "id": 6021, "name": "Туфли ортопедические", "alias": "men-orthopedic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#004D40", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6022, "name": "Ботинки ортопедические", "alias": "men-orthopedic-boots", "icon": "fa-solid fa-boot", "icon_color": "#00796B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6023, "name": "Сандалии ортопедические", "alias": "men-orthopedic-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00897B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6024, "name": "Домашняя ортопедическая", "alias": "men-orthopedic-slippers", "icon": "fa-solid fa-house-chimney", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6025, "name": "С высоким берцем", "alias": "men-orthopedic-high-ankle", "icon": "fa-solid fa-boot", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6026, "name": "Для диабетиков", "alias": "men-diabetic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6027, "name": "Для плоскостопия", "alias": "men-flatfoot-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00897B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6028, "name": "Послеоперационная", "alias": "men-postop-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true }
+                ]
+              },
+              { "id": 6030, "name": "Детская ортопедическая", "alias": "kids-orthopedic", "icon": "fa-solid fa-child", "icon_color": "#00897B", "bg_color": "#E0F2F1", "is_active": true,
+                "children": [
+                  { "id": 6031, "name": "Первые шаги", "alias": "kids-first-step-orthopedic", "icon": "fa-solid fa-baby", "icon_color": "#00796B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6032, "name": "Сандалии ортопедические", "alias": "kids-orthopedic-sandals", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6033, "name": "Ботинки ортопедические", "alias": "kids-orthopedic-boots", "icon": "fa-solid fa-boot", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6034, "name": "Туфли ортопедические", "alias": "kids-orthopedic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00897B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6035, "name": "Профилактическая", "alias": "kids-preventive-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6036, "name": "Для вальгусной деформации", "alias": "kids-valgus-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6037, "name": "Для варусной деформации", "alias": "kids-varus-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6038, "name": "С жестким задником", "alias": "kids-rigid-heel-shoes", "icon": "fa-solid fa-boot", "icon_color": "#00897B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6039, "name": "Со съемными стельками", "alias": "kids-removable-insole-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#B2DFDB", "is_active": true }
+                ]
+              },
+              { "id": 6050, "name": "Ортопедические стельки", "alias": "orthopedic-insoles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true,
+                "children": [
+                  { "id": 6051, "name": "При плоскостопии", "alias": "flatfoot-insoles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6052, "name": "Для пяточной шпоры", "alias": "heel-spur-insoles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6053, "name": "С амортизацией", "alias": "cushioned-insoles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00897B", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6054, "name": "Полустельки", "alias": "half-insoles", "icon": "fa-solid fa-shoe-prints", "icon_color": "#00695C", "bg_color": "#E0F2F1", "is_active": true },
+                  { "id": 6055, "name": "Детские стельки", "alias": "kids-insoles", "icon": "fa-solid fa-child", "icon_color": "#004D40", "bg_color": "#B2DFDB", "is_active": true },
+                  { "id": 6056, "name": "Зимние стельки", "alias": "winter-insoles", "icon": "fa-solid fa-snowflake", "icon_color": "#00796B", "bg_color": "#E0F2F1", "is_active": true }
+                ]
+              },
+              { "id": 6060, "name": "Специальная медицинская обувь", "alias": "medical-special-shoes", "icon": "fa-solid fa-user-nurse", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true,
+                "children": [
+                  { "id": 6061, "name": "При разной длине ног", "alias": "leg-length-difference-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1565C0", "bg_color": "#BBDEFB", "is_active": true },
+                  { "id": 6062, "name": "При артрите", "alias": "arthritis-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#0D47A1", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 6063, "name": "При подагре", "alias": "gout-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1976D2", "bg_color": "#BBDEFB", "is_active": true },
+                  { "id": 6064, "name": "При отеках", "alias": "edema-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1565C0", "bg_color": "#E3F2FD", "is_active": true },
+                  { "id": 6065, "name": "С регулируемой полнотой", "alias": "adjustable-width-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#0D47A1", "bg_color": "#BBDEFB", "is_active": true },
+                  { "id": 6066, "name": "Сложная ортопедия", "alias": "complex-orthopedic-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1976D2", "bg_color": "#E3F2FD", "is_active": true }
+                ]
+              },
+              { "id": 6070, "name": "Комфортная обувь", "alias": "comfort-shoes-all", "icon": "fa-solid fa-shoe-prints", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true,
+                "children": [
+                  { "id": 6071, "name": "Для пожилых людей", "alias": "elderly-comfort-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#388E3C", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 6072, "name": "Анатомическая обувь", "alias": "anatomical-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#2E7D32", "bg_color": "#E8F5E9", "is_active": true },
+                  { "id": 6073, "name": "С широким мыском", "alias": "wide-toe-box-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#1B5E20", "bg_color": "#C8E6C9", "is_active": true },
+                  { "id": 6074, "name": "На липучках", "alias": "velcro-closure-shoes", "icon": "fa-solid fa-shoe-prints", "icon_color": "#43A047", "bg_color": "#E8F5E9", "is_active": true }
+                ]
+              },
+              { "id": 6080, "name": "Ортопедические аксессуары", "alias": "orthopedic-accessories", "icon": "fa-solid fa-shoe-prints", "icon_color": "#795548", "bg_color": "#EFEBE9", "is_active": true,
+                "children": [
+                  { "id": 6081, "name": "Подпяточники", "alias": "heel-cushions", "icon": "fa-solid fa-shoe-prints", "icon_color": "#6D4C41", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 6082, "name": "Супинаторы", "alias": "arch-supports", "icon": "fa-solid fa-shoe-prints", "icon_color": "#5D4037", "bg_color": "#BCAAA4", "is_active": true },
+                  { "id": 6083, "name": "Корректоры стопы", "alias": "foot-correctors", "icon": "fa-solid fa-shoe-prints", "icon_color": "#4E342E", "bg_color": "#D7CCC8", "is_active": true },
+                  { "id": 6084, "name": "Межпальцевые перегородки", "alias": "toe-separators", "icon": "fa-solid fa-shoe-prints", "icon_color": "#3E2723", "bg_color": "#EFEBE9", "is_active": true },
+                  { "id": 6085, "name": "Вкладыши для обуви", "alias": "shoe-inserts", "icon": "fa-solid fa-shoe-prints", "icon_color": "#795548", "bg_color": "#D7CCC8", "is_active": true }
+                ]
+              }
+            ]
+          }
+      ] },
+      {"id": 6000, "name": "Аксессуары","alias": "apparel-accessories","icon": "fa-solid fa-hat-cowboy","icon_color": "#FF9800","bg_color": "#FFF3E0","is_active": true,
+        "children": [
+          { "id": 6100, "name": "Сумки и рюкзаки", "alias": "bags-backpacks", "icon": "fa-solid fa-bag-shopping", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true,
+          "children": [
+              { "id": 6110, "name": "Женские сумки", "alias": "women-bags", "bg_color": "#FCE4EC", "is_active": true },
+              { "id": 6120, "name": "Мужские сумки", "alias": "men-bags", "bg_color": "#E3F2FD", "is_active": true },
+              { "id": 6130, "name": "Рюкзаки", "alias": "backpacks", "bg_color": "#E8F5E9", "is_active": true },
+              { "id": 6140, "name": "Детские рюкзаки", "alias": "kids-backpacks", "bg_color": "#FFF3E0", "is_active": true },
+              { "id": 6150, "name": "Поясные сумки", "alias": "waist-bags", "bg_color": "#EFEBE9", "is_active": true },
+              { "id": 6160, "name": "Дорожные сумки", "alias": "travel-bags", "bg_color": "#F3E5F5", "is_active": true },
+              { "id": 6170, "name": "Спортивные сумки", "alias": "sport-bags", "bg_color": "#FFEBEE", "is_active": true },
+              { "id": 6190, "name": "Чемоданы", "alias": "suitcases", "bg_color": "#C8E6C9", "is_active": true }
+            ] 
+          },
+          { "id": 6200, "name": "Головные уборы", "alias": "hats-caps", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
+          { "id": 6300, "name": "Шарфы, платки, перчатки", "alias": "scarves-gloves", "icon": "fa-solid fa-scarf", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+          { "id": 6400, "name": "Ремни и галстуки", "alias": "belts-ties", "icon": "fa-solid fa-tie", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
+          { "id": 6500, "name": "Украшения и бижутерия", "alias": "jewelry-accessories", "icon": "fa-solid fa-gem", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
         ]
       },
-      {
-        
-        "id": 2500, "name": "Аксессуары","alias": "apparel-accessories","icon": "fa-solid fa-hat-cowboy","icon_color": "#FF9800","bg_color": "#FFF3E0","is_active": true,
+      {"id": 7000,"name": "Спортивная одежда","alias": "sportswear","icon": "fa-solid fa-person-running","icon_color": "#FF5722","bg_color": "#FFEBEE","is_active": true,
         "children": [
-          { "id": 2510, "name": "Сумки и рюкзаки", "alias": "bags-backpacks", "icon": "fa-solid fa-bag-shopping", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
-          { "id": 2520, "name": "Головные уборы", "alias": "hats-caps", "icon": "fa-solid fa-hat-cowboy", "icon_color": "#EF6C00", "bg_color": "#FFCC80", "is_active": true },
-          { "id": 2530, "name": "Шарфы, платки, перчатки", "alias": "scarves-gloves", "icon": "fa-solid fa-scarf", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
-          { "id": 2540, "name": "Ремни и галстуки", "alias": "belts-ties", "icon": "fa-solid fa-tie", "icon_color": "#F57C00", "bg_color": "#FFE0B2", "is_active": true },
-          { "id": 2550, "name": "Украшения и бижутерия", "alias": "jewelry-accessories", "icon": "fa-solid fa-gem", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true }
+          { "id": 7100, "name": "Для фитнеса и тренировок", "alias": "fitness-sportswear", "icon": "fa-solid fa-dumbbell", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true },
+          { "id": 7200, "name": "Для бега и активного отдыха", "alias": "running-outdoor", "icon": "fa-solid fa-person-running", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true },
+          { "id": 7300, "name": "Термобельё и компрессионное", "alias": "thermal-compression", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#BF360C", "bg_color": "#FFCCBC", "is_active": true }
         ]
       },
-      {
-        
-        "id": 2600,"name": "Спортивная одежда","alias": "sportswear","icon": "fa-solid fa-person-running","icon_color": "#FF5722","bg_color": "#FFEBEE","is_active": true,
+      {"id": 8000,"name": "Нижнее бельё и купальники","alias": "underwear-swimwear","icon": "fa-solid fa-shirt-tank-top","icon_color": "#9C27B0","bg_color": "#F3E5F5","is_active": true,
         "children": [
-          { "id": 2610, "name": "Для фитнеса и тренировок", "alias": "fitness-sportswear", "icon": "fa-solid fa-dumbbell", "icon_color": "#E64A19", "bg_color": "#FFCCBC", "is_active": true },
-          { "id": 2620, "name": "Для бега и активного отдыха", "alias": "running-outdoor", "icon": "fa-solid fa-person-running", "icon_color": "#D84315", "bg_color": "#FFEBEE", "is_active": true },
-          { "id": 2630, "name": "Термобельё и компрессионное", "alias": "thermal-compression", "icon": "fa-solid fa-shirt-long-sleeve", "icon_color": "#BF360C", "bg_color": "#FFCCBC", "is_active": true }
+          { "id": 8100, "name": "Женское нижнее бельё", "alias": "women-underwear", "icon": "fa-solid fa-person-dress", "icon_color": "#7B1FA2", "bg_color": "#E1BEE7", "is_active": true },
+          { "id": 8200, "name": "Мужское нижнее бельё", "alias": "men-underwear", "icon": "fa-solid fa-person", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
+          { "id": 8300, "name": "Купальники и плавки", "alias": "swimwear", "icon": "fa-solid fa-swimmer", "icon_color": "#8E24AA", "bg_color": "#F3E5F5", "is_active": true },
+          { "id": 8400, "name": "Корректирующее бельё", "alias": "shapewear", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#E1BEE7", "is_active": true }
         ]
       },
-      {
-        
-        "id": 2700,"name": "Нижнее бельё и купальники","alias": "underwear-swimwear","icon": "fa-solid fa-shirt-tank-top","icon_color": "#9C27B0","bg_color": "#F3E5F5","is_active": true,
-        "children": [
-          { "id": 2710, "name": "Женское нижнее бельё", "alias": "women-underwear", "icon": "fa-solid fa-person-dress", "icon_color": "#7B1FA2", "bg_color": "#E1BEE7", "is_active": true },
-          { "id": 2720, "name": "Мужское нижнее бельё", "alias": "men-underwear", "icon": "fa-solid fa-person", "icon_color": "#6A1B9A", "bg_color": "#EDE7F6", "is_active": true },
-          { "id": 2730, "name": "Купальники и плавки", "alias": "swimwear", "icon": "fa-solid fa-swimmer", "icon_color": "#8E24AA", "bg_color": "#F3E5F5", "is_active": true },
-          { "id": 2740, "name": "Корректирующее бельё", "alias": "shapewear", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#E1BEE7", "is_active": true }
-        ]
-      }
+      {"id": 9000,"name": "Для беременных","alias": "maternity","icon": "fa-solid fa-person-pregnant","icon_color": "#FF69B4","bg_color": "#FFF0F6","is_active": true,
+      "children": [
+        { "id": 9100, "name": "Одежда для беременных", "alias": "maternity-clothes", "icon": "fa-solid fa-shirt", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+        { "id": 9200, "name": "Нижнее бельё для беременных", "alias": "maternity-underwear", "icon": "fa-solid fa-shirt-tank-top", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+        { "id": 9300, "name": "Купальники для беременных", "alias": "maternity-swimwear", "icon": "fa-solid fa-person-swimming", "icon_color": "#00BCD4", "bg_color": "#E0F2F1", "is_active": true },
+        { "id": 9400, "name": "Бандажи и поддержка", "alias": "maternity-support", "icon": "fa-solid fa-bandage", "icon_color": "#FF69B4", "bg_color": "#FFF0F6", "is_active": true },
+        { "id": 9500, "name": "Пижамы и домашняя одежда", "alias": "maternity-sleepwear", "icon": "fa-solid fa-bed", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true }
+      ]
+    }
     ]
   },
 
@@ -240,13 +689,13 @@
     "icon_color": "#007AFF",
     "bg_color": "#E5F1FF",
     "children": [
-      { "id": 3100, "name": "Смартфоны", "alias": "smartphones-gadgets", "icon": "fa-solid fa-mobile-retro", "icon_color": "#1C1C1E", "bg_color": "#F2F2F7", "is_active": true },
-      { "id": 3200, "name": "Ноутбуки и ПК", "alias": "laptops-computers", "icon": "fa-solid fa-laptop", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
-      { "id": 3300, "name": "Аудио", "alias": "audio-equipment", "icon": "fa-solid fa-headphones", "icon_color": "#34C759", "bg_color": "#E8F9EC", "is_active": true },
-      { "id": 3400, "name": "Телевизоры и проекторы", "alias": "tv-projectors", "icon": "fa-solid fa-tv", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
-      { "id": 3500, "name": "Игровые консоли и аксессуары", "alias": "gaming-consoles", "icon": "fa-solid fa-gamepad", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
-      { "id": 3600, "name": "Фото и видео", "alias": "photo-video", "icon": "fa-solid fa-camera", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
-      { "id": 3700, "name": "Умный дом", "alias": "smart-home", "icon": "fa-solid fa-home-lg", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true }
+      { "id": 10100, "name": "Смартфоны", "alias": "smartphones-gadgets", "icon": "fa-solid fa-mobile-retro", "icon_color": "#1C1C1E", "bg_color": "#F2F2F7", "is_active": true },
+      { "id": 10200, "name": "Ноутбуки и ПК", "alias": "laptops-computers", "icon": "fa-solid fa-laptop", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true },
+      { "id": 10300, "name": "Аудио", "alias": "audio-equipment", "icon": "fa-solid fa-headphones", "icon_color": "#34C759", "bg_color": "#E8F9EC", "is_active": true },
+      { "id": 10400, "name": "Телевизоры и проекторы", "alias": "tv-projectors", "icon": "fa-solid fa-tv", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
+      { "id": 10500, "name": "Игровые консоли и аксессуары", "alias": "gaming-consoles", "icon": "fa-solid fa-gamepad", "icon_color": "#9C27B0", "bg_color": "#F3E5F5", "is_active": true },
+      { "id": 10600, "name": "Фото и видео", "alias": "photo-video", "icon": "fa-solid fa-camera", "icon_color": "#FF9800", "bg_color": "#FFF3E0", "is_active": true },
+      { "id": 10700, "name": "Умный дом", "alias": "smart-home", "icon": "fa-solid fa-home-lg", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true }
     ]
   },
 
@@ -261,11 +710,11 @@
     "icon_color": "#FF2D55",
     "bg_color": "#FFF0F3",
     "children": [
-      { "id": 6100, "name": "Крупная техника", "alias": "large-appliances", "icon": "fa-solid fa-refrigerator", "icon_color": "#8E8E93", "bg_color": "#F2F2F7", "is_active": true },
-      { "id": 6200, "name": "Техника для кухни", "alias": "kitchen-appliances", "icon": "fa-solid fa-sink", "icon_color": "#FF9500", "bg_color": "#FFF5E5", "is_active": true },
-      { "id": 6300, "name": "Уход за одеждой", "alias": "laundry-care", "icon": "fa-solid fa-washing-machine", "icon_color": "#2196F3", "bg_color": "#E3F2FD", "is_active": true },
-      { "id": 6400, "name": "Климатическая техника", "alias": "climate-control", "icon": "fa-solid fa-fan", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
-      { "id": 6500, "name": "Техника для уборки", "alias": "cleaning-appliances", "icon": "fa-solid fa-broom", "icon_color": "#607D8B", "bg_color": "#ECEFF1", "is_active": true }
+      { "id": 11100, "name": "Крупная техника", "alias": "large-appliances", "icon": "fa-solid fa-refrigerator", "icon_color": "#8E8E93", "bg_color": "#F2F2F7", "is_active": true },
+      { "id": 11200, "name": "Техника для кухни", "alias": "kitchen-appliances", "icon": "fa-solid fa-sink", "icon_color": "#FF9500", "bg_color": "#FFF5E5", "is_active": true },
+      { "id": 11300, "name": "Уход за одеждой", "alias": "laundry-care", "icon": "fa-solid fa-washing-machine", "icon_color": "#2196F3", "bg_color": "#E3F2FD", "is_active": true },
+      { "id": 11400, "name": "Климатическая техника", "alias": "climate-control", "icon": "fa-solid fa-fan", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true },
+      { "id": 11500, "name": "Техника для уборки", "alias": "cleaning-appliances", "icon": "fa-solid fa-broom", "icon_color": "#607D8B", "bg_color": "#ECEFF1", "is_active": true }
     ]
   },
 
@@ -279,9 +728,9 @@
     "icon_color": "#2E7D32",
     "bg_color": "#E8F5E9",
     "children": [
-      { "id": 9100, "name": "Мебель", "alias": "home-furniture", "icon": "fa-solid fa-couch", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true },
-      { "id": 9200, "name": "Текстиль", "alias": "home-textiles", "icon": "fa-solid fa-bed", "icon_color": "#009688", "bg_color": "#E0F2F1", "is_active": true },
-      { "id": 9300, "name": "Посуда", "alias": "kitchen-tableware", "icon": "fa-solid fa-utensils", "icon_color": "#D84315", "bg_color": "#FBE9E7", "is_active": true }
+      { "id": 12100, "name": "Мебель", "alias": "home-furniture", "icon": "fa-solid fa-couch", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true },
+      { "id": 12200, "name": "Текстиль", "alias": "home-textiles", "icon": "fa-solid fa-bed", "icon_color": "#009688", "bg_color": "#E0F2F1", "is_active": true },
+      { "id": 12300, "name": "Посуда", "alias": "kitchen-tableware", "icon": "fa-solid fa-utensils", "icon_color": "#D84315", "bg_color": "#FBE9E7", "is_active": true }
     ]
   },
   {
@@ -294,8 +743,8 @@
     "icon_color": "#F57C00",
     "bg_color": "#FFF3E0",
     "children": [
-      { "id": 11100, "name": "Инструменты", "alias": "power-tools", "icon": "fa-solid fa-hammer", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true },
-      { "id": 11200, "name": "Сантехника", "alias": "plumbing-fixtures", "icon": "fa-solid fa-faucet", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true }
+      { "id": 13100, "name": "Инструменты", "alias": "power-tools", "icon": "fa-solid fa-hammer", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true },
+      { "id": 13200, "name": "Сантехника", "alias": "plumbing-fixtures", "icon": "fa-solid fa-faucet", "icon_color": "#0288D1", "bg_color": "#E1F5FE", "is_active": true }
     ]
   },
   {
@@ -308,10 +757,10 @@
     "icon_color": "#9C27B0",
     "bg_color": "#F3E5F5",
     "children": [
-      { "id": 13100, "name": "Косметика и уход", "alias": "cosmetics-care", "icon": "fa-solid fa-eye-dropper", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
-      { "id": 13200, "name": "Парфюмерия", "alias": "perfumes-all", "icon": "fa-solid fa-bottle-droplet", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true },
-      { "id": 13300, "name": "Аптека и витамины", "alias": "pharmacy-vitamins", "icon": "fa-solid fa-pills", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
-      { "id": 13400, "name": "Гигиена", "alias": "personal-hygiene", "icon": "fa-solid fa-pump-soap", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true }
+      { "id": 14100, "name": "Косметика и уход", "alias": "cosmetics-care", "icon": "fa-solid fa-eye-dropper", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true },
+      { "id": 14200, "name": "Парфюмерия", "alias": "perfumes-all", "icon": "fa-solid fa-bottle-droplet", "icon_color": "#673AB7", "bg_color": "#EDE7F6", "is_active": true },
+      { "id": 14300, "name": "Аптека и витамины", "alias": "pharmacy-vitamins", "icon": "fa-solid fa-pills", "icon_color": "#F44336", "bg_color": "#FFEBEE", "is_active": true },
+      { "id": 14400, "name": "Гигиена", "alias": "personal-hygiene", "icon": "fa-solid fa-pump-soap", "icon_color": "#00BCD4", "bg_color": "#E0F7FA", "is_active": true }
     ]
   },
   {

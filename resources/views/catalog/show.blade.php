@@ -30,23 +30,31 @@
             <!-- МЕНЮ-->
             <div class="filter filter-cate ">
                 <ul class="wiget-content v2">
-                        {{-- Кнопка "Назад" (если есть родитель) --}}
-                    @if($category->parent)
-                        <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
-                            <a href="{{ route('catalog.show', $category->parent->alias) }}" style="display: flex; align-items: center; color: #666;">
-                                <i class="ion-ios-arrow-left" style="margin-right: 8px;"></i>
-                                <strong> Назад</strong>
-                            </a>
-                        </li>
-                    @else
-                        {{-- Кнопка на корневой уровень (каталог) --}}
-                        <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
-                            <a href="{{ route('catalog.index') }}" style="display: flex; align-items: center; color: #666;">
-                                <i class="ion-ios-arrow-left" style="margin-right: 8px;"></i>
-                                <strong> В каталог</strong>
-                            </a>
-                        </li>
-                    @endif
+                    {{-- Кнопка "Назад" с умной логикой --}}
+                    @php
+                        // Используем ту же логику что и для мобильной версии
+                        if ($hasChildren) {
+                            // Есть дети - назад к родителю или каталог
+                            $desktopBackUrl = $category->parent 
+                                ? route('catalog.show', $category->parent->alias ?? $category->parent->id) 
+                                : route('catalog.index');
+                            $backText = $category->parent ? 'Назад' : 'В каталог';
+                        } else {
+                            // Нет детей, показываются братья - назад на 2 уровня вверх
+                            $desktopBackUrl = ($category->parent && $category->parent->parent) 
+                                ? route('catalog.show', $category->parent->parent->alias ?? $category->parent->parent->id)
+                                : route('catalog.index');
+                            $backText = ($category->parent && $category->parent->parent) ? 'Назад' : 'В каталог';
+                        }
+                    @endphp
+                    
+                    <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                        <a href="{{ $desktopBackUrl }}" style="display: flex; align-items: center; color: #666;">
+                            <i class="ion-ios-arrow-left" style="margin-right: 8px;"></i>
+                            <strong> {{ $backText }}</strong>
+                        </a>
+                    </li>
+                    
                     @foreach ($categories as $subcategory)
                      <li class="{{ $subcategory->children->isNotEmpty() ? 'active' : '' }}">
                         <a href="{{ route('catalog.show', $subcategory->alias) }}">
@@ -95,7 +103,7 @@
                          @foreach($sellers as $seller)
                             <li class="{{ request('seller') == $seller->alias ? 'active-filter' : '' }}">
                                 <a href="{{ route('catalog.show', ['alias' => $category->alias, 'seller' => $seller->alias]) }}">
-                                    {{ $seller->name }} <!--<span class="number">({{ $seller->product_count }})</span>-->
+                                    {{ $seller->name }} <!--<span class="number">({{ $seller->product_count }})</span>--> 
                                 </a>
                             </li>
                         @endforeach --}} 
@@ -332,91 +340,88 @@
                         </div>
                     </div>
                 </div>
-                {{--
-                <!-- МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ (только мобильные/планшеты) -->
-                <div class="mobile-categories-wrapper" style="display: none;">
-                    <div class="mobile-categories-grid">
-                        
-                        <div class="mobile-category-card back-card">
-                            @if($category->parent)
-                                <a href="{{ route('catalog.show', $category->parent->alias) }}">
-                                    <div class="mobile-category-image">
-                                        <i class="fas fa-arrow-left"></i>
-                                    </div>
-                                    <div class="mobile-category-name">
-                                        Назад
-                                    </div>
-                                </a>
-                            @else
-                                <a href="{{ route('catalog.index') }}">
-                                    <div class="mobile-category-image">
-                                        <i class="fas fa-arrow-left"></i>
-                                    </div>
-                                    <div class="mobile-category-name">
-                                        В каталог
-                                    </div>
-                                </a>
-                            @endif
-                        </div>
-                        
-                        
-                        @foreach ($categories as $subcategory)
-                        <div class="mobile-category-card">
-                            <a href="{{ route('catalog.show', $subcategory->alias) }}">
-                                <div class="mobile-category-image">
-                                    @if(isset($subcategory->image) && $subcategory->image)
-                                        <img src="{{ asset('storage/' . $subcategory->image) }}" alt="{{ $subcategory->name }}">
-                                    @else
-                                        <i class="fas fa-folder"></i>
-                                    @endif
-                                </div>
-                                <div class="mobile-category-name">
-                                    {{ $subcategory->name }}
-                                </div>
-                            </a>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                --}}
-                <!-- / МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ /-->
-                <!-- Мобильная версия: карточки категорий 3x3 -->
+<!-- МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ /-->
+<!-- Мобильная версия: карточки категорий 3x3 и плитки 3x3  -->
 <div class="mobile-categories-wrapper hidden-md hidden-lg">
-    <div class="mobile-categories-grid">
-        <!-- Кнопка "Назад" -->
-        <div class="mobile-category-card back-card">
-            <a href="@if($category->parent){{ route('catalog.show', $category->parent->alias ?? $category->parent->id) }}@else{{ route('catalog.index') }}@endif">
-                <div class="mobile-category-image" 
-                     style="background: linear-gradient(135deg, #e1f6fc 0%, #e7c4fc 100%);">
-                    <i class="fas fa-arrow-left" style="color: #555555;"></i>
-                </div>
-                <div class="mobile-category-name">Назад</div>
-            </a>
-        </div>
+    @php
+        // Проверяем, есть ли хотя бы одна иконка у категорий
+        $hasIconsCheck = $categories->contains(function($cat) {
+            return !empty($cat->icon);
+        });
+        
+        // Определяем URL для кнопки "Назад"
+        if ($hasChildren) {
+            // Есть дети - назад к родителю или каталог
+            $backUrl = $category->parent 
+                ? route('catalog.show', $category->parent->alias ?? $category->parent->id) 
+                : route('catalog.index');
+        } else {
+            // Нет детей, показываются братья - назад на 2 уровня вверх
+            $backUrl = ($category->parent && $category->parent->parent) 
+                ? route('catalog.show', $category->parent->parent->alias ?? $category->parent->parent->id)
+                : route('catalog.index');
+        }
+    @endphp
 
-        <!-- Карточки подкатегорий -->
-        @foreach ($categories as $subcategory)
-            <div class="mobile-category-card">
-                <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+    @if($hasIconsCheck)
+        {{-- РЕЖИМ С ИКОНКАМИ - карточки --}}
+        <div class="mobile-categories-grid">
+            <!-- Кнопка "Назад" в виде карточки -->
+            <div class="mobile-category-card back-card">
+                <a href="{{ $backUrl }}">
                     <div class="mobile-category-image" 
-                         style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
-                        @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
-                            <i class="fas {{ $subcategory->icon }}" 
-                               style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
-                        @elseif($subcategory->icon)
-                            <img src="{{ asset('storage/' . $subcategory->icon) }}" 
-                                 alt="{{ $subcategory->name }}">
-                        @else
-                            <i class="fas fa-folder" 
-                               style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
-                        @endif
+                         style="background: linear-gradient(135deg, #e1f6fc 0%, #e7c4fc 100%);">
+                        <i class="fas fa-arrow-left" style="color: #555555;"></i>
                     </div>
-                    <div class="mobile-category-name">{{ $subcategory->name }}</div>
+                    <div class="mobile-category-name">Назад</div>
                 </a>
             </div>
-        @endforeach
-    </div>
+
+            <!-- Список категорий с иконками -->
+            @foreach ($categories as $subcategory)
+                <div class="mobile-category-card">
+                    <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                        <div class="mobile-category-image" 
+                             style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
+                            @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
+                                <i class="fas {{ $subcategory->icon }}" 
+                                   style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                            @elseif($subcategory->icon)
+                                <img src="{{ asset('storage/' . $subcategory->icon) }}" 
+                                     alt="{{ $subcategory->name }}">
+                            @else
+                                <i class="fas fa-folder" 
+                                   style="color: {{ $subcategory->icon_color ?? '#ffffff' }};"></i>
+                            @endif
+                        </div>
+                        <div class="mobile-category-name">{{ $subcategory->name }}</div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    @else
+        {{-- РЕЖИМ БЕЗ ИКОНОК - текстовые плитки --}}
+        <div class="mobile-categories-list">
+            <!-- Кнопка "Назад" в виде плитки -->
+            <div class="mobile-category-tile back-tile">
+                <a href="{{ $backUrl }}">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Назад</span>
+                </a>
+            </div>
+
+            <!-- Список категорий текстом -->
+            @foreach ($categories as $subcategory)
+                <div class="mobile-category-tile">
+                    <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                        <span>{{ $subcategory->name }}</span>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    @endif
 </div>
+
 <!-- Карточки подкатегорий -->
                 <div class="product-collection-grid product-grid">
                     <div class="row">

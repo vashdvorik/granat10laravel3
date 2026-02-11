@@ -1,15 +1,6 @@
 @extends('main_layots')
 @section('title', 'Каталог товара | Маркетплейс ПМР')
 
-<style>
-    @media (max-width: 767px) {
-        /* Отступы для списка коллекций, применяется только на странице каталога  
-        .collection-list {
-            padding-left: 1px !important;
-            padding-right: 1px !important;
-        }*/
-    }
-</style> 
 
 @section('content')
 <div class="container container-240 shop-collection">
@@ -281,6 +272,7 @@
                         <a class="grid-icon col2"><img src="img/grid2.png" alt=""></a>
                         <a class="list-icon list"><img src="img/list.png" alt=""></a>
                     </div>
+                    <!-- блокирую 
                     <div class="pd-sort">
                         <div class="filter-sort">
                             <div class="dropdown">
@@ -314,6 +306,7 @@
                             </div>
                         </div>
                     </div>
+                     блокирую -->
                 </div>
 
                 <!-- Мобильная версия: карточки категорий 3x3 -->
