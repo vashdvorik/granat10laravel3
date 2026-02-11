@@ -51,32 +51,29 @@
                                             <h6>Категории</h6>
                                         </div>
                                         <div class="card border-0 shadow-none multi-collapse mt-10 collapse show" id="multiCollapseExample2">
-                                            <div class="product-category limit-list-item">
-                                                <ul>
-                                                    {{-- Получаем категории товаров текущего продавца --}}
-                                                    @php
-                                                        $userCategories = $products->pluck('category')->unique('id')->filter();
-                                                    @endphp
+                                            <div class="product-category">
+                                                <ul class="category-list">
+                                                    {{-- Показать все товары --}}
+                                                    <li>
+                                                        <a href="{{ route('account.store.products.index') }}" 
+                                                           class="d-flex justify-content-between align-items-center category-link {{ !request('category') ? 'active' : '' }}">
+                                                            <span class="category-name">
+                                                                <i class="uil uil-apps"></i> Все товары
+                                                            </span>
+                                                            <span class="item-numbers">{{ $seller->products()->count() }}</span>
+                                                        </a>
+                                                    </li>
                                                     
-                                                    @if($userCategories->count() > 0)
-                                                        @foreach($userCategories as $category)
-                                                            <li>
-                                                                <div class="w-100">
-                                                                    <span class="fs-14 color-gray">
-                                                                        {{ $category->name }}
-                                                                        <span class="item-numbers">
-                                                                            {{ $products->where('category_id', $category->id)->count() }}
-                                                                        </span>
-                                                                    </span>
-                                                                </div>
-                                                            </li>
-                                                        @endforeach
+                                                    @if(isset($categoryTree) && $categoryTree->count() > 0)
+                                                        <li class="separator"></li>
+                                                        @include('components.category-filter-tree', [
+                                                            'items' => $categoryTree,
+                                                            'level' => 1,
+                                                            'seller' => $seller,
+                                                            'sellerCategoryIds' => $sellerCategoryIds
+                                                        ])
                                                     @else
-                                                        <li>
-                                                            <div class="w-100">
-                                                                <span class="fs-14 text-muted">Нет товаров</span>
-                                                            </div>
-                                                        </li>
+                                                        <li class="text-muted text-center py-3">Нет товаров</li>
                                                     @endif
                                                 </ul>
                                             </div>
@@ -323,6 +320,81 @@
 .product-item__button.gap-2 {
     gap: 0.5rem;
 }
+.product-category .category-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.product-category .category-list li {
+    margin-bottom: 5px;
+}
+
+.product-category .category-list .separator {
+    border-bottom: 1px solid #e3e6ef;
+    margin: 10px 0;
+}
+
+.product-category .subcategories {
+    list-style: none;
+    padding: 0;
+    margin: 5px 0 0 0;
+}
+
+.product-category .category-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    color: #525768;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.product-category .category-link:hover {
+    background: rgba(95, 99, 242, 0.05);
+    color: #5F63F2;
+}
+
+.product-category .category-link.active {
+    background: rgba(95, 99, 242, 0.1);
+    color: #5F63F2;
+    font-weight: 600;
+}
+
+.product-category .category-parent {
+    display: block;
+    padding: 5px 10px;
+    color: #8c90a4;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.product-category .category-name {
+    font-size: 14px;
+}
+
+.product-category .item-numbers {
+    background: #f4f5f7;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 25px;
+    text-align: center;
+}
+
+.product-category .category-link.active .item-numbers {
+    background: #5F63F2;
+    color: white;
+}
+
+.product-category .category-link:hover .item-numbers {
+    background: #5F63F2;
+    color: white;
+}
+</style>
 </style>
 @endsection
 

@@ -23,7 +23,7 @@ class ProductController extends Controller
     /**
      * Список товаров продавца
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -33,12 +33,43 @@ class ProductController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
         
-        $products = $seller->products()
-            ->with(['category', 'images'])
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        // Базовый запрос
+        $query = $seller->products()->with(['category', 'images']);
         
-        return view('backend.cabinet.store.products', compact('products', 'seller', 'user'));
+        // Фильтр по категории
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category_id', $request->category);
+        }
+        
+        // Сортировка
+        $query->orderByDesc('created_at');
+        
+        $products = $query->paginate(20)->appends($request->all());
+        
+        // Получаем ID категорий товаров продавца
+        $sellerCategoryIds = $seller->products()->distinct()->pluck('category_id')->toArray();
+        
+        // Получаем все категории с ancestorами для построения дерева
+        $allCategoryIds = [];
+        foreach ($sellerCategoryIds as $catId) {
+            $category = Category::find($catId);
+            if ($category) {
+                // Добавляем категорию и всех предков
+                $allCategoryIds[] = $catId;
+                $ancestors = $category->ancestors()->pluck('id')->toArray();
+                $allCategoryIds = array_merge($allCategoryIds, $ancestors);
+            }
+        }
+        $allCategoryIds = array_unique($allCategoryIds);
+        
+        // Строим дерево используя Nested Set
+        $categoryTree = Category::whereIn('id', $allCategoryIds)
+            ->where('is_active', true)
+            ->defaultOrder()
+            ->get()
+            ->toTree();
+        
+        return view('backend.cabinet.store.products', compact('products', 'seller', 'user', 'categoryTree', 'sellerCategoryIds'));
     }
 
     /**

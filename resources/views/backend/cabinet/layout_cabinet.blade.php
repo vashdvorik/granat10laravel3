@@ -313,9 +313,6 @@
                         <li class="{{ request()->routeIs('account.store.products.create') ? 'active' : '' }}">
                            <a href="{{ route('account.store.products.create') }}">Добавить товар</a>
                         </li>
-                        <li class="{{ request()->routeIs('account.store.edit') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.edit', auth()->user()->seller) }}">О магазине</a>
-                        </li>
                         @if(auth()->check() && auth()->user()->seller)
                         <li class="{{ request()->routeIs('account.packages.index') ? 'active' : '' }}">
                            <a href="{{ route('account.packages.index') }}">Тарифы</a>
@@ -372,7 +369,7 @@
                <div class="row">
                   <div class="col-md-6">
                      <div class="footer-copyright">
-                        <p><span>© 2023</span><a href="#">Sovware</a>
+                        <p><span>Техническая поддержка</span><a href="tel:077993603"> (779)93-603</a>
                         </p>
                      </div>
                   </div>

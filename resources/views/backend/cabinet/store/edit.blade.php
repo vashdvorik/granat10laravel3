@@ -176,7 +176,7 @@
                                         <label for="telegram" class="form-label">
                                             <i class="uil uil-telegram"></i> Telegram
                                             @if(!$hasSocialLinks)
-                                                <span class="badge bg-danger ms-2">Недоступно</span>
+                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
                                             @endif
                                         </label>
                                         <input type="text" 
@@ -196,7 +196,7 @@
                                         <label for="instagram" class="form-label">
                                             <i class="uil uil-instagram"></i> Instagram
                                             @if(!$hasSocialLinks)
-                                                <span class="badge bg-danger ms-2">Недоступно</span>
+                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
                                             @endif
                                         </label>
                                         <input type="text" 
@@ -216,7 +216,7 @@
                                         <label for="viber" class="form-label">
                                             <i class="uil uil-phone-volume"></i> Viber
                                             @if(!$hasSocialLinks)
-                                                <span class="badge bg-danger ms-2">Недоступно</span>
+                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
                                             @endif
                                         </label>
                                         <input type="text" 
