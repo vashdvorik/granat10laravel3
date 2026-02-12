@@ -158,4 +158,29 @@ class CabinetController extends Controller
         
         return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
     }
+
+    /**
+     * Переключить автопродление пакета
+     */
+    public function toggleAutoRenew(Request $request)
+    {
+        $seller = Auth::user()->seller;
+        
+        if (!$seller) {
+            return response()->json(['error' => 'Магазин не найден'], 404);
+        }
+        
+        // обработка чекбокса
+        $autoRenew = $request->input('auto_renew') === '1';
+        
+        $seller->update([
+            'auto_renew' => $autoRenew
+        ]);
+        
+        // Для отладки можно вернуть данные
+        return response()->json([
+            'success' => true,
+            'auto_renew' => $seller->auto_renew
+        ]);
+    }
 }

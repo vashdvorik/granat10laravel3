@@ -13,7 +13,10 @@ class ProductController extends Controller
 {
        public function show($alias)
     {
-        $product = Product::with(['images', 'seller', 'category'])->where('alias', $alias)->firstOrFail();
+        $product = Product::visible()  
+        ->with(['images', 'seller', 'category'])
+        ->where('alias', $alias)
+        ->firstOrFail();
          // Получаем категорию товара
         $category = $product->category;
 

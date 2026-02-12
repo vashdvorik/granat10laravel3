@@ -152,7 +152,7 @@
                                                                         {{-- Дата последнего поднятия --}}
                                                                         @if($product->push_at)
                                                                             <small class="text-muted d-block mb-2">
-                                                                                <i class="uil uil-clock"></i> Обновлено: {{ $product->push_at->format('d.m.Y в H:i') }}
+                                                                                <i class="uil uil-clock"></i> Поднятие: {{ $product->push_at->format('d.m.Y в H:i') }}
                                                                             </small>
                                                                         @endif
 

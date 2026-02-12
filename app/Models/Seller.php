@@ -28,13 +28,23 @@ class Seller extends Model
         'viber',
         'photos',
         'logo',
+        'auto_renew',
         
     ];
     protected $guarded = [
     'id',
-    'balance',      // Только система меняет баланс
     'product_count', // Автоматически считается
     ];
+    
+    protected $casts = [
+    'can_order' => 'boolean',
+    'auto_renew' => 'boolean',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
     
     public function products()
     {
@@ -208,5 +218,169 @@ class Seller extends Model
             'allowed' => empty($errors),
             'errors' => $errors,
         ];
+    }
+
+    // ============================================
+    // УПРАВЛЕНИЕ ПАКЕТАМИ И АВТОПРОДЛЕНИЕ
+    // ============================================
+
+    /**
+     * Проверить, есть ли активный пакет
+     */
+    public function hasActivePackage(): bool
+    {
+        return $this->activePackage() !== null;
+    }
+
+    /**
+     * Проверить возможность автопродления
+     */
+    public function canAutoRenew(): bool
+    {
+        $activePackage = $this->activePackage();
+        
+        if (!$activePackage) {
+            return false;
+        }
+        
+        $package = $activePackage->package;
+        
+        return $this->user->balance >= $package->price;
+    }
+
+    /**
+     * Попробовать продлить пакет автоматически
+     */
+    public function tryAutoRenewPackage(): array
+    {
+        $activePackage = $this->activePackage();
+        
+        if (!$activePackage) {
+            return ['success' => false, 'message' => 'Нет активного пакета'];
+        }
+        
+        $package = $activePackage->package;
+        
+        if ($this->user->balance < $package->price) {
+            return [
+                'success' => false, 
+                'message' => "Недостаточно средств. Нужно: {$package->price} руб, баланс: {$this->user->balance} руб"
+            ];
+        }
+        
+        // Списываем деньги
+        $this->user->decrement('balance', $package->price);
+        
+        // Продлеваем пакет
+        $activePackage->update([
+            'start_date' => now(),
+            'end_date' => now()->addDays($package->duration_days),
+        ]);
+        
+        return [
+            'success' => true,
+            'message' => "Пакет успешно продлен до {$activePackage->end_date->format('d.m.Y')}",
+            'end_date' => $activePackage->end_date,
+        ];
+    }
+
+    /**
+     * Получить статус пакета для отображения в кабинете
+     */
+    public function getPackageStatus(): array
+    {
+        $activePackage = $this->activePackage();
+        
+        if (!$activePackage) {
+            $activeProductsCount = $this->products()->where('is_active', true)->count();
+            
+            return [
+                'has_package' => false,
+                'can_auto_renew' => false,
+                'message' => 'У вас нет активного пакета',
+                'description' => $activeProductsCount > 0 
+                    ? "Ваши товары ({$activeProductsCount} шт.) скрыты от покупателей" 
+                    : "Приобретите пакет для публикации товаров",
+                'alert_type' => 'danger',
+            ];
+        }
+        
+        $package = $activePackage->package;
+        
+        // Бессрочный пакет
+        if (!$activePackage->end_date) {
+            return [
+                'has_package' => true,
+                'package_name' => $package->name,
+                'message' => 'Бессрочный пакет активен',
+                'alert_type' => 'success',
+            ];
+        }
+        
+        $daysLeft = now()->diffInDays($activePackage->end_date, false);
+        $canAutoRenew = $this->user->balance >= $package->price;
+        
+        // Просрочен
+        if ($daysLeft < 0) {
+            return [
+                'has_package' => false,
+                'can_auto_renew' => $canAutoRenew,
+                'message' => 'Пакет просрочен',
+                'description' => 'Ваши товары скрыты от покупателей',
+                'balance' => $this->user->balance,
+                'price' => $package->price,
+                'package_name' => $package->name,
+                'alert_type' => 'danger',
+            ];
+        }
+        
+        // Скоро истекает (меньше 7 дней)
+        if ($daysLeft <= 7) {
+        $message = "Пакет истекает через {$daysLeft} " . $this->getDaysWord($daysLeft);
+        $description = '';
+        
+        if (!$this->auto_renew) {
+            $description = " Автопродление отключено.";
+        } elseif (!$canAutoRenew) {
+            $description = "❌ Недостаточно средств для автопродления. Нужно {$package->price} руб, баланс: {$this->user->balance} руб";
+        } else {
+            $description = "Пакет будет автоматически продлен из вашего баланса. Ваш баланс: {$this->user->balance} руб, стоимость продления: {$package->price} руб";
+        }
+        
+        return [
+            'has_package' => true,
+            'days_left' => $daysLeft,
+            'end_date' => $activePackage->end_date,
+            'can_auto_renew' => $canAutoRenew && $this->auto_renew,
+            'message' => $message,
+            'description' => $description,
+            'balance' => $this->user->balance,
+            'price' => $package->price,
+            'package_name' => $package->name,
+            'alert_type' => $this->auto_renew && $canAutoRenew ? 'warning' : 'danger',
+        ];
+    }
+        
+        // Все хорошо
+        return [
+            'has_package' => true,
+            'days_left' => $daysLeft,
+            'end_date' => $activePackage->end_date,
+            'package_name' => $package->name,
+            'message' => "Пакет \"{$package->name}\" активен",
+            'description' => "Действует до {$activePackage->end_date->format('d.m.Y')} ({$daysLeft} дней)",
+            'alert_type' => 'info',
+        ];
+    }
+
+    /**
+     * Вспомогательный метод для склонения слова "день"
+     */
+    private function getDaysWord(int $days): string
+    {
+        $cases = [2, 0, 1, 1, 1, 2];
+        $titles = ['день', 'дня', 'дней'];
+        
+        return $titles[($days % 100 > 4 && $days % 100 < 20) ? 2 : $cases[min($days % 10, 5)]];
     }
 }

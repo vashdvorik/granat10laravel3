@@ -125,6 +125,9 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
         // Редактирование магазина (ПАРАМЕТРИЗОВАННЫЙ ПУТЬ - В КОНЦЕ!)
         Route::get('{seller}/edit', [App\Http\Controllers\Backend\SellerController::class, 'edit'])->name('edit');
         Route::put('{seller}', [App\Http\Controllers\Backend\SellerController::class, 'update'])->name('update');
+
+        Route::post('toggle-auto-renew', [CabinetController::class, 'toggleAutoRenew'])
+        ->name('toggle-auto-renew');
     });
     
     // === РАЗДЕЛ ПОЛЬЗОВАТЕЛЯ ===
@@ -146,6 +149,44 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::get('/', [App\Http\Controllers\Backend\PackageController::class, 'index'])->name('index');
     Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
 });
+});
+
+// ТЕСТОВЫЙ РОУТ - УДАЛИТЬ ПОСЛЕ ПРОВЕРКИ
+Route::get('/test-package-system', function() {
+    $total = \App\Models\Product::count();
+    $visible = \App\Models\Product::visible()->count();
+    $hidden = $total - $visible;
+    
+    $sellers = \App\Models\Seller::with('sellerPackages')->get();
+    
+    $output = "<h2>Проверка системы пакетов</h2>";
+    $output .= "<p><strong>Всего товаров:</strong> $total</p>";
+    $output .= "<p><strong>Видимых (с активным пакетом):</strong> $visible</p>";
+    $output .= "<p><strong>Скрытых (без пакета):</strong> $hidden</p>";
+    $output .= "<hr>";
+    
+    $output .= "<h3>Продавцы:</h3>";
+    foreach ($sellers as $seller) {
+        $activePackage = $seller->activePackage();
+        $status = $seller->getPackageStatus();
+        
+        $output .= "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
+        $output .= "<p><strong>{$seller->name}</strong> (ID: {$seller->id})</p>";
+        $output .= "<p>Баланс: {$seller->balance} руб | Автопродление: " . ($seller->auto_renew ? 'Вкл' : 'Выкл') . "</p>";
+        $output .= "<p>Товаров активных: " . $seller->products()->where('is_active', true)->count() . "</p>";
+        
+        if ($activePackage) {
+            $output .= "<p style='color:green;'>✅ Активный пакет: {$activePackage->package->name}</p>";
+            $output .= "<p>Срок: " . ($activePackage->end_date ? $activePackage->end_date->format('d.m.Y') : 'Бессрочный') . "</p>";
+        } else {
+            $output .= "<p style='color:red;'>❌ Нет активного пакета</p>";
+        }
+        
+        $output .= "<p><em>{$status['message']}</em></p>";
+        $output .= "</div>";
+    }
+    
+    return $output;
 });
 
 

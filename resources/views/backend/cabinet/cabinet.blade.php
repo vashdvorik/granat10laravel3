@@ -9,10 +9,16 @@
 @if(session('error'))
     <div class="alert alert-danger">{{ session('error') }}</div>
 @endif
+
+
 <div class="contents">
 
    <div class="crm mb-25">
       <div class="container-fluid">
+         
+         
+      
+        
          {{--
          <div class="row">
          
@@ -195,6 +201,10 @@
          <div class="row mt-25">
                {{-- Основная информация --}}
                <div class="col-lg-8">
+                  {{-- Уведомление о статусе пакета --}}
+                  @if($seller)
+                     @include('components.package-status-alert', ['seller' => $seller])
+                  @endif
                   <div class="card mb-25">
                      <div class="card-header">
                            <h6 class="fw-500 mb-0">Основная информация</h6>

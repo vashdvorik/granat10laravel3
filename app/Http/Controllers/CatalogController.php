@@ -55,14 +55,14 @@ class CatalogController extends Controller
         }
 
         // VIP товары
-        $vipProducts = Product::where('is_active', true)
-            ->where('is_vip', true)
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->get();
+        $vipProducts = Product::visible()
+        ->where('is_vip', true)
+        ->orderByDesc('push_at')
+        ->with(['images', 'seller'])
+        ->get();
 
         // Обычные товары
-        $normalProducts = Product::where('is_active', true)
+        $normalProducts = Product::visible()
             ->where('is_vip', false)
             ->orderByDesc('push_at')
             ->with(['images', 'seller'])
@@ -153,7 +153,7 @@ class CatalogController extends Controller
         // 🆕 NESTED SET: Все ID потомков + текущая категория (1 запрос!)
         $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id')->toArray();
         // VIP товары
-        $vipProducts = Product::where('is_active', true)
+        $vipProducts = Product::visible()
             ->where('is_vip', true)
             ->whereIn('category_id', $categoryIds)
             ->orderByDesc('push_at')
@@ -161,7 +161,7 @@ class CatalogController extends Controller
             ->get();
 
         // Обычные товары
-        $normalProducts = Product::where('is_active', true)
+        $normalProducts = Product::visible()
             ->where('is_vip', false)
             ->whereIn('category_id', $categoryIds)
             ->orderByDesc('push_at')
@@ -194,13 +194,20 @@ class CatalogController extends Controller
             ? $category->children
             : ($category->parent ? $category->parent->children : collect());
 
-        // Продавцы
-        $sellers = Seller::select('sellers.*', \DB::raw('COUNT(products.id) as product_count_in_category'))
-            ->leftJoin('products', 'sellers.id', '=', 'products.seller_id')
-            ->whereIn('products.category_id', $categoryIds)
-            ->where('products.is_active', true)
-            ->groupBy('sellers.id')
-            ->orderBy('product_count_in_category', 'desc')
+        // Продавцы - только с активными пакетами и товарами в категории
+        $sellers = Seller::whereHas('sellerPackages', function ($q) {
+                $q->where('is_active', true)
+                    ->where(function($dateQuery) {
+                        $dateQuery->whereNull('end_date')
+                            ->orWhere('end_date', '>=', now());
+                    });
+            })
+            ->withCount(['products as product_count_in_category' => function ($q) use ($categoryIds) {
+                $q->where('is_active', true)
+                    ->whereIn('category_id', $categoryIds);
+            }])
+            ->having('product_count_in_category', '>', 0)
+            ->orderByDesc('product_count_in_category')
             ->get();
 
         // Подсчет товаров
@@ -222,7 +229,7 @@ class CatalogController extends Controller
     public function sale()
     {
         // Получить товары
-        $products = Product::where('is_active', true)
+        $products = Product::visible()
             ->whereNotNull('lowprice') // Только со скидкой
             ->orderByDesc('sale_started_at')
             ->with(['images', 'seller'])
@@ -247,9 +254,9 @@ class CatalogController extends Controller
     private function getCategoryProductsCount($category)
     {
         $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id');
-        return Product::whereIn('category_id', $categoryIds)
-            ->where('is_active', true)
-            ->count();
+    return Product::visible()  // ← Замена здесь
+        ->whereIn('category_id', $categoryIds)
+        ->count();
     }
 
 }

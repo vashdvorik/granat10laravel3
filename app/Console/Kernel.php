@@ -12,7 +12,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Проверка и автопродление пакетов каждый день в 01:00
+        $schedule->command('packages:deactivate-expired --auto-renew')
+            ->dailyAt('01:00')
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/packages-check.log'));
     }
 
     /**
