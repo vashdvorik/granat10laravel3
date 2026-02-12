@@ -312,7 +312,8 @@ class Seller extends Model
             return [
                 'has_package' => true,
                 'package_name' => $package->name,
-                'message' => 'Бессрочный пакет активен',
+                'message' => "Пакет \"{$package->name}\" активен",
+                'description' => 'Ваш пакет бессрочный и не требует автопродления',
                 'alert_type' => 'success',
             ];
         }

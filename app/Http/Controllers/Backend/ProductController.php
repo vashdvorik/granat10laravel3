@@ -162,6 +162,20 @@ class ProductController extends Controller
         $isActive = $request->input('is_active', false);
         $isVip = $request->input('is_vip', false);
         
+        // ===================================================
+        // ШАГ 3.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
+        // ===================================================
+        $category = Category::find($data['category_id']);
+        if ($category && !$category->isLeaf()) {
+            // Сохраняем путь категории для восстановления
+            $selectedPath = $category->ancestors->pluck('id')->toArray();
+            $selectedPath[] = $category->id;
+            session()->put('selectedPath', $selectedPath);
+            
+            return redirect()->back()
+                ->withErrors(['category_id' => 'Пожалуйста, выберите подкатегорию последнего уровня для размещения товара. Нельзя добавлять товары в категории, у которых есть подкатегории.'])
+                ->withInput();
+        }
         // Если товар неактивен, лимиты не проверяем
         if ($isActive) {
             // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
@@ -185,6 +199,14 @@ class ProductController extends Controller
             
             // Если есть ошибки, возвращаем назад
             if ($validator->errors()->any()) {
+                // Сохраняем путь категории для восстановления
+                $category = Category::find($data['category_id']);
+                if ($category) {
+                    $selectedPath = $category->ancestors->pluck('id')->toArray();
+                    $selectedPath[] = $category->id;
+                    session()->put('selectedPath', $selectedPath);
+                }
+                
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -251,7 +273,7 @@ class ProductController extends Controller
                 ]);
             }
         }
-
+        session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар создан');
     }
@@ -357,6 +379,28 @@ class ProductController extends Controller
         $data = $validator->validated();
 
         // ===================================================
+        // ШАГ 2.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
+        // ===================================================
+        $category = Category::find($data['category_id']);
+        if ($category && !$category->isLeaf()) {
+            // 1️⃣ Получаем всех родителей категории
+            $selectedPath = $category->ancestors->pluck('id')->toArray(); 
+            // Результат: [1, 5, 12] (например: Электроника=1, Смартфоны=5, iPhone=12)
+            
+            // 2️⃣ Добавляем саму категорию в конец массива
+            $selectedPath[] = $category->id;
+            // Теперь: [1, 5, 12, 12]
+            
+            // 3️⃣ Сохраняем этот массив в сессию с ключом 'selectedPath'
+            
+            session()->put('selectedPath', $selectedPath); 
+            
+            return redirect()->back()
+                ->withErrors(['category_id' => 'Выберите конечную категорию...'])
+                ->withInput();
+        }
+
+        // ===================================================
         // ШАГ 3: ОБРАБАТЫВАЕМ ЧЕКБОКСЫ И ПРОВЕРЯЕМ ЛИМИТЫ
         // ===================================================
 
@@ -389,8 +433,15 @@ class ProductController extends Controller
                 }
             }
             
-            // Если есть ошибки, возвращаем назад
             if ($validator->errors()->any()) {
+                // Аналогично сохраняем путь категории
+                $category = Category::find($data['category_id']);
+                if ($category) {
+                    $selectedPath = $category->ancestors->pluck('id')->toArray();
+                    $selectedPath[] = $category->id;
+                    session()->put('selectedPath', $selectedPath); // ✅ ПРАВИЛЬНО
+                }
+                
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
@@ -461,7 +512,7 @@ class ProductController extends Controller
                 ]);
             }
         }
-
+        session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар обновлён');
     }

@@ -55,8 +55,8 @@
             @endif
             
         
-        {{-- Управление автопродлением --}}
-        @if($packageStatus['has_package'] ?? false)
+        {{-- Управление автопродлением: только для пакетов с ограниченным сроком --}}
+        @if(($packageStatus['has_package'] ?? false) && isset($packageStatus['end_date']))
             <div class="mt-3">
                 <div class="form-check form-switch d-inline-block">
                     <input class="form-check-input" type="checkbox" 
@@ -69,9 +69,9 @@
                 </div>
                 <small class="text-muted d-block mt-1" id="autoRenewStatus">
                     @if($seller->auto_renew)
-                        При достаточном балансе пакет будет продлен автоматически {{ $packageStatus['end_date']->format('d.m.Y') }}
+                        ✅ При достаточном балансе пакет будет продлен автоматически
                     @else
-                        ⚠️ Пакет будет отключен после  {{ $packageStatus['end_date']->format('d.m.Y') }} и все ваши товары не будут показываться покупателям. 
+                        ⚠️ Пакет будет отключен после {{ $packageStatus['end_date']->format('d.m.Y') }}, и все ваши товары не будут показываться покупателям.
                     @endif
                 </small>
             </div>

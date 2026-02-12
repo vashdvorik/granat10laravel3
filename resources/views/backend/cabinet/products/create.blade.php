@@ -398,6 +398,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('category-selectors');
     const hiddenInput = document.getElementById('category_id');
+    const selectedPath = @json(session('selectedPath', []));
     
     // Обработчик изменения селекта
     container.addEventListener('change', function(e) {
@@ -459,16 +460,82 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Восстановление старых значений при ошибке валидации
-    const oldCategoryId = hiddenInput.value;
-    if (oldCategoryId) {
-        restoreSelection(oldCategoryId);
+    // Восстановление при ошибке валидации
+    if (selectedPath.length > 0) {
+        restoreSelection();
     }
-    
-    async function restoreSelection(categoryId) {
-        // Здесь можно добавить логику восстановления цепочки выбора
-        // Пока просто устанавливаем значение
-        hiddenInput.value = categoryId;
+
+    async function restoreSelection() {
+        // Загружаем первый уровень с выбором
+        const firstSelect = container.querySelector('[data-level="0"]');
+        if (firstSelect && selectedPath[0]) {
+            firstSelect.value = selectedPath[0];
+            hiddenInput.value = selectedPath[selectedPath.length - 1]; // Последний элемент - это конечная категория
+            
+            // Загружаем остальные уровни по цепочке
+            for (let i = 0; i < selectedPath.length - 1; i++) {
+                await loadCategoryLevel(selectedPath[i], i + 1, selectedPath[i + 1]);
+            }
+            
+            // Если последний уровень не конечный - показываем пустой красный селект
+            const hasError = document.querySelector('#category_id').closest('.form-group').querySelector('.invalid-feedback');
+            if (hasError) {
+                // Загружаем детей последней выбранной категории и показываем красный пустой селект
+                const lastCategoryId = selectedPath[selectedPath.length - 1];
+                const response = await fetch(`{{ route('account.categories.children') }}?parent_id=${lastCategoryId}`);
+                const children = await response.json();
+                
+                if (children.length > 0) {
+                    const select = document.createElement('select');
+                    select.className = 'form-control mb-2 category-selector is-invalid';
+                    select.dataset.level = selectedPath.length;
+                    select.required = true;
+                    
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Выберите подкатегорию';
+                    defaultOption.selected = true;
+                    select.appendChild(defaultOption);
+                    
+                    children.forEach(child => {
+                        const option = document.createElement('option');
+                        option.value = child.id;
+                        option.textContent = child.name;
+                        select.appendChild(option);
+                    });
+                    
+                    container.appendChild(select);
+                }
+            }
+        }
+    }
+
+    async function loadCategoryLevel(parentId, level, selectedId) {
+        const response = await fetch(`{{ route('account.categories.children') }}?parent_id=${parentId}`);
+        const categories = await response.json();
+        
+        if (categories.length === 0) return;
+        
+        const select = document.createElement('select');
+        select.className = 'form-control mb-2 category-selector';
+        select.dataset.level = level;
+        
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Выберите подкатегорию';
+        select.appendChild(defaultOption);
+        
+        categories.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+            if (cat.id == selectedId) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+        
+        container.appendChild(select);
     }
 });
 

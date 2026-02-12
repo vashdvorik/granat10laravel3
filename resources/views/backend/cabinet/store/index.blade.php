@@ -35,6 +35,10 @@
             <div class="row">
                 {{-- Основная информация --}}
                 <div class="col-lg-8">
+                {{-- Уведомление о статусе пакета --}}
+                @if($seller)
+                    @include('components.package-status-alert', ['seller' => $seller])
+                @endif
                     <div class="card mb-25">
                         <div class="card-header">
                             <h6 class="fw-500 mb-0">Основная информация</h6>

@@ -36,7 +36,25 @@
 
             <div class="products_page product_page--grid mb-30">
                 <div class="container-fluid">
+                        {{-- Уведомление если товары скрыты от покупателей --}}
+                        @php
+                            $packageStatus = $seller->getPackageStatus();
+                        @endphp
+                        @if(!$packageStatus['has_package'])
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="alert-big alert alert-danger" role="alert">
+                                        <div class="alert-content">
+                                            <h6 class="alert-heading">Ваши товары скрыты от покупателей</h6>
+                                            <p>У вас нет активного пакета. Все товары недоступны для просмотра на сайте. 
+                                            <a href="{{ route('account.packages.index') }}" class="alert-link">Выберите пакет</a>, чтобы ваши товары снова стали видны покупателям.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     <div class="row justify-content-center">
+
                         {{-- БОКОВАЯ ПАНЕЛЬ С КАТЕГОРИЯМИ --}}
                         <div class="columns-1 col-lg-3 col-sm-10 mb-lg-0 mb-30">
                             <div class="widget mb-lg-30 mt-25">  {{-- ДОБАВИЛ mt-25 --}}

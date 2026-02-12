@@ -62,6 +62,27 @@ class PackageController extends Controller
                 throw new \Exception('Недостаточно средств на балансе');
             }
             
+            //  ПРОВЕРКА ЛИМИТОВ: количество активных товаров
+            $activeProductsCount = $seller->getActiveProductsCount();
+            $maxProducts = $package->active_products_limit ?? PHP_INT_MAX; // null = безлимит
+
+            if ($maxProducts !== PHP_INT_MAX && $activeProductsCount > $maxProducts) {
+                $excess = $activeProductsCount - $maxProducts;
+                throw new \Exception("Тариф \"{$package->name}\" позволяет опубликовать не более {$maxProducts} товаров. У вас сейчас активно {$activeProductsCount} товаров. Пожалуйста, отключите {$excess} " . ($excess == 1 ? 'товар' : ($excess < 5 ? 'товара' : 'товаров')) . ", чтобы активировать этот пакет.");
+            }
+
+            //  ПРОВЕРКА ЛИМИТОВ: количество VIP товаров
+            $vipProductsCount = $seller->getVipProductsCount();
+            $maxVipProducts = $package->vip_products_limit ?? PHP_INT_MAX; // null = безлимит
+
+            if ($maxVipProducts !== PHP_INT_MAX && $vipProductsCount > $maxVipProducts) {
+                $excessVip = $vipProductsCount - $maxVipProducts;
+                if ($maxVipProducts == 0) {
+                    throw new \Exception("Тариф \"{$package->name}\" не поддерживает VIP товары. У вас сейчас {$vipProductsCount} VIP " . ($vipProductsCount == 1 ? 'товар' : ($vipProductsCount < 5 ? 'товара' : 'товаров')) . ". Пожалуйста, снимите VIP-статус со всех товаров, чтобы активировать этот пакет.");
+                } else {
+                    throw new \Exception("Тариф \"{$package->name}\" позволяет иметь не более {$maxVipProducts} VIP " . ($maxVipProducts == 1 ? 'товара' : 'товаров') . ". У вас сейчас {$vipProductsCount} VIP " . ($vipProductsCount == 1 ? 'товар' : ($vipProductsCount < 5 ? 'товара' : 'товаров')) . ". Пожалуйста, снимите VIP-статус с {$excessVip} " . ($excessVip == 1 ? 'товара' : ($excessVip < 5 ? 'товара' : 'товаров')) . ", чтобы активировать этот пакет.");
+                }
+            }
             // Деактивируем текущий пакет
             $currentPackage = $seller->activePackage();
             if ($currentPackage) {

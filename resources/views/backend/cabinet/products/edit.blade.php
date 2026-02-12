@@ -446,7 +446,7 @@
     // === ДИНАМИЧЕСКИЙ ВЫБОР КАТЕГОРИЙ ===
 const categoryContainer = document.getElementById('category-selectors');
 const categoryHiddenInput = document.getElementById('category_id');
-const selectedPath = @json($selectedPath ?? []);
+const selectedPath = @json(session('selectedPath', $selectedPath ?? []));
 
 // Инициализация с предзаполнением
 initializeCategorySelectors();
@@ -534,6 +534,49 @@ function loadCategoryChildren(parentId, level) {
             
             const select = createCategorySelect(level, children);
             categoryContainer.appendChild(select);
+        });
+}
+// Восстановление при ошибке валидации
+const oldCategoryId = categoryHiddenInput.value;
+const hasError = document.querySelector('#category_id').closest('.form-group').querySelector('.invalid-feedback');
+
+if (hasError && oldCategoryId) {
+    restoreCategorySelection(oldCategoryId);
+}
+
+async function restoreCategorySelection(categoryId) {
+    // Находим первый выбранный селект (уже загружен через selectedPath)
+    const firstSelect = categoryContainer.querySelector('[data-level="0"]');
+    if (!firstSelect || !firstSelect.value) return;
+    
+    const selectedValue = firstSelect.value;
+    
+    // Загружаем дочерние категории и показываем пустой красный селект
+    fetch(`{{ route('account.categories.children') }}?parent_id=${selectedValue}`)
+        .then(response => response.json())
+        .then(children => {
+            if (children.length > 0) {
+                // Создаем пустой красный селект
+                const select = document.createElement('select');
+                select.className = 'form-control mb-2 category-selector is-invalid';
+                select.dataset.level = 1;
+                select.required = true;
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Выберите подкатегорию';
+                defaultOption.selected = true;
+                select.appendChild(defaultOption);
+                
+                children.forEach(child => {
+                    const option = document.createElement('option');
+                    option.value = child.id;
+                    option.textContent = child.name;
+                    select.appendChild(option);
+                });
+                
+                categoryContainer.appendChild(select);
+            }
         });
 }
 
