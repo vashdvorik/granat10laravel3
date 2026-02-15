@@ -28,9 +28,10 @@ class CatalogController extends Controller
 {
     public function catalog(Request $request)
     {
-        // Получаем минимальную и максимальную цену
-        $minPrice = Product::min('price');
-        $maxPrice = Product::max('price');
+        // Получаем минимальную и максимальную цену (из кеша)
+        $priceRange = $this->getCachedPriceRange();
+        $minPrice = $priceRange['min'];
+        $maxPrice = $priceRange['max'];
 
         // Фильтры из сессии
         $selectedSellerAlias = $request->input('seller');
@@ -74,7 +75,7 @@ class CatalogController extends Controller
         // Применение фильтров
         $products = $allProducts->filter(function ($product) use ($selectedSellerAlias, $priceRange) {
             if ($selectedSellerAlias) {
-                $seller = Seller::where('alias', $selectedSellerAlias)->first();
+                $seller = Seller::getCachedByAlias($selectedSellerAlias);
                 if (!$seller || $product->seller_id != $seller->id) {
                     return false;
                 }
@@ -90,14 +91,10 @@ class CatalogController extends Controller
         });
 
         // 🆕 NESTED SET: Загрузка категорий одним запросом
-        $categories = Category::whereIsRoot()
-            ->where('is_active', true)
-            ->defaultOrder()
-            ->get()
-            ->toTree();
+        $categories = Category::getCachedRootTree();
 
         // Продавцы
-        $sellers = Seller::orderBy('product_count', 'desc')->get();
+        $sellers = Seller::getCachedAll();
         
         // Подсчет товаров (теперь быстрее)
         $categoryProductsCounts = [];
@@ -124,8 +121,9 @@ class CatalogController extends Controller
             ->firstOrFail();
 
         // Фильтры
-        $minPrice = Product::min('price');
-        $maxPrice = Product::max('price');
+        $priceRange = $this->getCachedPriceRange();
+        $minPrice = $priceRange['min'];
+        $maxPrice = $priceRange['max'];
         $selectedSellerAlias = $request->input('seller');
         $priceRange = Session::get('catalog_filters.price', [
             'min' => $minPrice,
@@ -173,7 +171,7 @@ class CatalogController extends Controller
         // Применение фильтров
         $products = $products->filter(function ($product) use ($selectedSellerAlias, $priceRange) {
             if ($selectedSellerAlias) {
-                $seller = Seller::where('alias', $selectedSellerAlias)->first();
+                $seller = Seller::getCachedByAlias($selectedSellerAlias);
                 if (!$seller || $product->seller_id != $seller->id) {
                     return false;
                 }
@@ -255,15 +253,30 @@ class CatalogController extends Controller
         return Category::whereDescendantOrSelf($category->id)->pluck('id')->toArray();
     }
 
-/**
- * 🆕 NESTED SET: Оптимизированный подсчет товаров
- */
+    /**
+    * 🆕 NESTED SET: Оптимизированный подсчет товаров
+    */
     private function getCategoryProductsCount($category)
     {
-        $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id');
-    return Product::visible()  // ← Замена здесь
-        ->whereIn('category_id', $categoryIds)
-        ->count();
+        return Cache::remember('category_products_count:' . $category->id, now()->addMinutes(10), function () use ($category) {
+            $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id');
+            return Product::visible()
+                ->whereIn('category_id', $categoryIds)
+                ->count();
+        });
+    }
+
+    /**
+     * Получить закешированный диапазон цен
+     */
+    private function getCachedPriceRange()
+    {
+        return Cache::remember('product_price_range', now()->addHours(1), function () {
+            return [
+                'min' => Product::min('price') ?? 0,
+                'max' => Product::max('price') ?? 0,
+            ];
+        });
     }
 
 }

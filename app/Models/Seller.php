@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SellerPackage;
+use Illuminate\Support\Facades\Cache; 
+use Illuminate\Support\Facades\DB;
 
 class Seller extends Model
 {
@@ -248,8 +250,9 @@ class Seller extends Model
         return $this->user->balance >= $package->price;
     }
 
-    /**
+        /**
      * Попробовать продлить пакет автоматически
+     * ✅ С ТРАНЗАКЦИЕЙ для защиты от потери денег
      */
     public function tryAutoRenewPackage(): array
     {
@@ -268,20 +271,33 @@ class Seller extends Model
             ];
         }
         
-        // Списываем деньги
-        $this->user->decrement('balance', $package->price);
-        
-        // Продлеваем пакет
-        $activePackage->update([
-            'start_date' => now(),
-            'end_date' => now()->addDays($package->duration_days),
-        ]);
-        
-        return [
-            'success' => true,
-            'message' => "Пакет успешно продлен до {$activePackage->end_date->format('d.m.Y')}",
-            'end_date' => $activePackage->end_date,
-        ];
+        // Используем транзакцию - ВСЕ ИЛИ НИЧЕГО!
+        // Если что-то пойдет не так - откатится автоматически
+        try {
+            DB::transaction(function () use ($activePackage, $package) {
+                // Списываем деньги
+                $this->user->decrement('balance', $package->price);
+                
+                // Продлеваем пакет
+                $activePackage->update([
+                    'start_date' => now(),
+                    'end_date' => now()->addDays($package->duration_days),
+                ]);
+            });
+            
+            return [
+                'success' => true,
+                'message' => "Пакет успешно продлен до {$activePackage->end_date->format('d.m.Y')}",
+                'end_date' => $activePackage->end_date,
+            ];
+            
+        } catch (\Exception $e) {
+            // Если произошла ошибка - деньги НЕ списаны (откатились)
+            return [
+                'success' => false,
+                'message' => 'Ошибка при продлении пакета: ' . $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -383,5 +399,75 @@ class Seller extends Model
         $titles = ['день', 'дня', 'дней'];
         
         return $titles[($days % 100 > 4 && $days % 100 < 20) ? 2 : $cases[min($days % 10, 5)]];
+    }
+
+    // ==========================================
+    // РАБОТА С КЕШЕМ
+    // ==========================================
+
+    /**
+     * Получить закешированный список продавцов
+     */
+    public static function getCachedAll()
+    {
+        return Cache::remember('sellers_list', now()->addMinutes(30), function () {
+            return self::orderBy('product_count', 'desc')->get();
+        });
+    }
+
+    /**
+     * Получить продавца по alias из кеша
+     */
+    public static function getCachedByAlias($alias)
+    {
+        if (!$alias) return null;
+        
+        return Cache::remember('seller_by_alias:' . $alias, now()->addHours(1), function () use ($alias) {
+            return self::where('alias', $alias)->first();
+        });
+    }
+
+    /**
+     * Очистить кеш продавцов
+     */
+    public static function clearSellersCache($sellerInstance = null)
+    {
+        Cache::forget('sellers_list');
+        
+        // Если передан конкретный продавец - очищаем только его кеши
+        if ($sellerInstance) {
+            Cache::forget('seller_by_alias:' . $sellerInstance->alias);
+            
+            // Если alias изменился, очистить старый
+            if ($sellerInstance->isDirty('alias') || $sellerInstance->wasChanged('alias')) {
+                $oldAlias = $sellerInstance->getOriginal('alias');
+                if ($oldAlias) {
+                    Cache::forget('seller_by_alias:' . $oldAlias);
+                }
+            }
+        }
+        // Если не передан - очищаем только общий список (не загружая всех продавцов)
+        // Кеши по alias очистятся при следующем обращении к конкретному продавцу
+    }
+
+    /**
+     * Автоматическая очистка кеша при изменениях
+     */
+    protected static function booted()
+    {
+        // При создании продавца
+        static::created(function ($seller) {
+            self::clearSellersCache($seller);
+        });
+
+        // При обновлении продавца
+        static::updated(function ($seller) {
+            self::clearSellersCache($seller);
+        });
+
+        // При удалении продавца
+        static::deleted(function ($seller) {
+            self::clearSellersCache($seller);
+        });
     }
 }

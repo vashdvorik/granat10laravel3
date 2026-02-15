@@ -85,11 +85,8 @@ class ProductController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
         
-        // Только корневые категории для первого уровня
-        $categories = Category::whereNull('parent_id')
-            ->where('is_active', true)
-            ->orderBy('number')
-            ->get();
+        // Только корневые категории для первого уровня (из кеша)
+        $categories = Category::getCachedRootCategories();
         
         return view('backend.cabinet.products.create', compact('categories', 'seller'));
     }
@@ -304,11 +301,8 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
         
-        // Только корневые категории для первого уровня
-        $categories = Category::whereNull('parent_id')
-            ->where('is_active', true)
-            ->orderBy('number')
-            ->get();
+        // Только корневые категории для первого уровня (из кеша)
+        $categories = Category::getCachedRootCategories();
         
         // Получаем цепочку категорий товара (для предзаполнения)
         $selectedPath = [];

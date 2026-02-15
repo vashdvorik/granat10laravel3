@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\SellerPackage;
+use Illuminate\Support\Facades\DB;
 
 class DeactivateExpiredPackages extends Command
 {
@@ -48,14 +49,17 @@ class DeactivateExpiredPackages extends Command
             // Попытка автопродления
             if ($autoRenew && $seller->auto_renew && $seller->balance >= $package->price) {
                 try {
-                    // Списываем с баланса
-                    $seller->decrement('balance', $package->price);
-                    
-                    // Продлеваем пакет
-                    $sellerPackage->update([
-                        'start_date' => now(),
-                        'end_date' => now()->addDays($package->duration_days),
-                    ]);
+                    // ✅ Используем транзакцию для защиты денег
+                    DB::transaction(function () use ($seller, $sellerPackage, $package) {
+                        // Списываем с баланса
+                        $seller->decrement('balance', $package->price);
+                        
+                        // Продлеваем пакет
+                        $sellerPackage->update([
+                            'start_date' => now(),
+                            'end_date' => now()->addDays($package->duration_days),
+                        ]);
+                    });
                     
                     $this->info("   ✅ Автопродлен до {$sellerPackage->end_date->format('d.m.Y')}");
                     $renewed++;

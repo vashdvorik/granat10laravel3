@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use Kalnoy\Nestedset\NodeTrait;
+use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
 {
@@ -48,34 +49,60 @@ class Category extends Model
         return \App\Models\Product::whereIn('category_id', $categoryIds);
     }
 
-/* ОТКЛЮЧИЛ ПРИ ПЕРЕХОДЕ НА ПАКЕТ NESTED SET
-    public function children()
+    // ==========================================
+    // РАБОТА С КЕШЕМ
+    // ==========================================
+
+    /**
+     * Получить закешированное дерево корневых категорий
+     */
+    public static function getCachedRootTree()
     {
-        return $this->hasMany(Category::class, 'parent_id')->with('children');
+        return Cache::remember('categories_root_tree', now()->addHours(24), function () {
+            return self::whereIsRoot()
+                ->where('is_active', true)
+                ->defaultOrder()
+                ->get()
+                ->toTree();
+        });
     }
 
-    public function parent()
+    /**
+     * Получить закешированные корневые категории (для форм)
+     */
+    public static function getCachedRootCategories()
     {
-        return $this->belongsTo(Category::class, 'parent_id');
-    } 
-
-   
-    public function getBreadcrumbsAttribute()
-    {
-        $breadcrumbs = collect();
-
-        $category = $this;
-        while ($category) {
-            $breadcrumbs->prepend($category); // добавляем в начало коллекции
-            $category = $category->parent;
-        }
-
-        return $breadcrumbs;
+        return Cache::remember('categories_root_list', now()->addHours(24), function () {
+            return self::whereNull('parent_id')
+                ->where('is_active', true)
+                ->orderBy('number')
+                ->get();
+        });
     }
 
-    // Метод для получения товаров из категории
-    public function products()
+    /**
+     * Очистить кеш категорий
+     */
+    public static function clearCategoriesCache()
     {
-    return $this->hasMany(\App\Models\Product::class);
-    } */
+        Cache::forget('categories_root_tree');
+        Cache::forget('categories_root_list');
+        
+    }
+
+    /**
+     * Автоматическая очистка кеша при изменениях
+     */
+    protected static function booted()
+    {
+        static::saved(function ($category) {
+            self::clearCategoriesCache();
+        });
+
+        static::deleted(function ($category) {
+            self::clearCategoriesCache();
+        });
+    }
+
+
 }

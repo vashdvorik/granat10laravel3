@@ -14,8 +14,7 @@ class SellerController extends Controller
     */
         public function shops(): View
     {
-        $sellers = Seller::orderBy('product_count', 'desc')->get();
-
+        $sellers = Seller::getCachedAll();
         return view('sellers', compact('sellers'));
     }
     /*
@@ -24,11 +23,15 @@ class SellerController extends Controller
     в которых есть товары данного продавца, рекурсивно подсчитывает 
     товары во всех подкатегориях. 
     */
-        public function seller(string $alias): View
+    public function seller(string $alias): View
     {
-        $seller = Seller::where('alias', $alias)->firstOrFail();
-        // 1. Получаем все категории 1-го уровня
-        $categories = Category::whereNull('parent_id')->get();
+        $seller = Seller::getCachedByAlias($alias);  
+        if (!$seller) {
+            abort(404);
+        }
+    
+        // Получаем категории из кеша
+        $categories = Category::getCachedRootCategories();
 
         // 2. Создаем функцию для подсчета товаров продавца во всех дочерних категориях
         function countSellerProductsInCategory(Category $category, Seller $seller) {
