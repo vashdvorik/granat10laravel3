@@ -59,7 +59,7 @@
                      <li class="{{ $subcategory->children->isNotEmpty() ? 'active' : '' }}">
                         <a href="{{ route('catalog.show', $subcategory->alias) }}">
                      {{--   {{ $subcategory->name }} <span class="number">(80)</span> --}}
-                        {{ $subcategory->name }} {{--<span class="number">({{ $categoryProductsCount }})</span>--}}
+                        {{ $subcategory->name }} <span class="number">({{ $categoryProductsCounts[$subcategory->id] ?? 0 }})</span>
                         </a>
                      </li>
                     @endforeach 

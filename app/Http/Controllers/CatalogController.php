@@ -210,7 +210,13 @@ class CatalogController extends Controller
             ->orderByDesc('product_count_in_category')
             ->get();
 
-        // Подсчет товаров
+        // Подсчет товаров по каждой категории в меню (категория + все потомки)
+        $categoryProductsCounts = [];
+        foreach ($menuCategories as $menuCategory) {
+            $categoryProductsCounts[$menuCategory->id] = $this->getCategoryProductsCount($menuCategory);
+        }
+
+        // Подсчет товаров текущей категории
         $categoryProductsCount = $this->getCategoryProductsCount($category);
 
         return view('catalog.show', [
@@ -222,6 +228,7 @@ class CatalogController extends Controller
             'minPrice' => $minPrice,
             'maxPrice' => $maxPrice,
             'categoryProductsCount' => $categoryProductsCount,
+            'categoryProductsCounts' => $categoryProductsCounts,
             'hasChildren' => $hasChildren,
         ]);
     }
