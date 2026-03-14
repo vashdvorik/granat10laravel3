@@ -1,5 +1,5 @@
 [
-  { "id": 1, "name": "Одежда и обувь", "alias": "apparel", "number": 1, "is_active": true,  "icon": "fa-solid fa-shirt", "icon_color": "#5D3FD3","bg_color": "#F0EEFF",
+  { "id": 1, "name": "Одежда и обувь", "alias": "apparel", "number": 1, "is_active": true,  "icon": "img_category/1.webp", "icon_color": "#007AFF","bg_color": "#F0EEFF",
     "children": [
       {"id": 1100, "name": "Женская одежда", "alias": "women-apparel",  "icon_color": "#E91E63", "bg_color": "#FCE4EC","is_active": true,
         "children": [
@@ -967,7 +967,7 @@
     }
     ]
   },
-  { "id": 3, "name": "Электроника", "alias": "electronics",    "number": 2,    "is_active": true,"icon": "fa-solid fa-mobile-screen-button",    "icon_color": "#007AFF",    "bg_color": "#E5F1FF",
+  { "id": 3, "name": "Электроника", "alias": "electronics",    "number": 2,    "is_active": true,"icon": "img_category/2.webp",    "icon_color": "#007AFF",    "bg_color": "#E5F1FF",
     "children": [
       { "id": 10100, "name": "Смартфоны", "alias": "smartphones-gadgets", "icon_color": "#1C1C1E", "bg_color": "#F2F2F7",  "is_active": true, "children": [
           { "id": 10101, "name": "Apple iPhone", "alias": "apple-iphone", "icon_color": "#000000", "bg_color": "#F5F5F7", "is_active": true },
@@ -1146,7 +1146,7 @@
       }
     ]
   },
-  { "id": 6, "name": "Бытовая техника", "alias": "home-appliances", "number": 3,"is_active": true,    "icon": "fa-solid fa-blender",    "icon_color": "#FF2D55",    "bg_color": "#FFF0F3",
+  { "id": 6, "name": "Бытовая техника", "alias": "home-appliances", "number": 3,"is_active": true,    "icon": "img_category/3.webp",    "icon_color": "#FF2D55",    "bg_color": "#FFF0F3",
     "children": [
       { "id": 11100, "name": "Крупная техника", "alias": "large-appliances", "icon_color": "#8E8E93", "bg_color": "#F2F2F7", "is_active": true,
         "children": [
@@ -1216,7 +1216,7 @@
       }
     ]
   },
-  { "id": 9, "name": "Дом и интерьер", "alias": "home-and-interior", "number": 4, "is_active": true,"icon": "fa-solid fa-house-chimney",    "icon_color": "#2E7D32",    "bg_color": "#E8F5E9",
+  { "id": 9, "name": "Дом и интерьер", "alias": "home-and-interior", "number": 4, "is_active": true,"icon": "img_category/4.webp",    "icon_color": "#2E7D32",    "bg_color": "#E8F5E9",
     "children": [
       { "id": 12100, "name": "Мебель", "alias": "home-furniture", "icon_color": "#8D6E63", "bg_color": "#EFEBE9", "is_active": true,
         "children": [
@@ -1296,7 +1296,7 @@
       }
     ]
   },
-  { "id": 11, "name": "Строительство и ремонт", "alias": "construction-repair",    "number": 5,"is_active": true,    "icon": "fa-solid fa-trowel-bricks",    "icon_color": "#F57C00","bg_color": "#FFF3E0",
+  { "id": 11, "name": "Строительство и ремонт", "alias": "construction-repair",    "number": 5,"is_active": true,    "icon": "img_category/5.webp",    "icon_color": "#F57C00","bg_color": "#FFF3E0",
     "children": [
       { "id": 13100, "name": "Электроинструменты", "alias": "power-tools", "icon_color": "#455A64", "bg_color": "#ECEFF1", "is_active": true,  
         "children": [
@@ -1484,7 +1484,7 @@
       }
     ]
   },
-  { "id": 13, "name": "Красота и здоровье", "alias": "beauty-and-health", "number": 6, "is_active": true,    "icon": "fa-solid fa-spa", "icon_color": "#9C27B0", "bg_color": "#F3E5F5",
+  { "id": 13, "name": "Красота и здоровье", "alias": "beauty-and-health", "number": 6, "is_active": true,    "icon": "img_category/6.webp", "icon_color": "#9C27B0", "bg_color": "#F3E5F5",
     "children": [
       { "id": 14100, "name": "Косметика и уход", "alias": "cosmetics-care", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true,
         "children": [
@@ -1578,7 +1578,7 @@
       }
     ]
   },
-  { "id": 15, "name": "Детские товары", "alias": "kids-products-main", "number": 7, "is_active": true, "icon": "fa-solid fa-face-smile", "icon_color": "#FFC107", "bg_color": "#FFF8E1",
+  { "id": 15, "name": "Детские товары", "alias": "kids-products-main", "number": 7, "is_active": true, "icon": "img_category/7.webp", "icon_color": "#FFC107", "bg_color": "#FFF8E1",
     "children": [
       { "id": 15100, "name": "Игрушки", "alias": "kids-toys", "icon_color": "#FF5722", "bg_color": "#FBE9E7", "is_active": true,
         "children": [
@@ -1666,7 +1666,7 @@
       }
     ]
   },
-  { "id": 18, "name": "Спорт и отдых", "alias": "sports-outdoor", "number": 8, "is_active": true, "icon": "fa-solid fa-basketball", "icon_color": "#E67E22", "bg_color": "#FEF5E7", 
+  { "id": 18, "name": "Спорт и отдых", "alias": "sports-outdoor", "number": 8, "is_active": true, "icon": "img_category/8.webp", "icon_color": "#E67E22", "bg_color": "#FEF5E7", 
     "children": [
       { "id": 18100, "name": "Фитнес", "alias": "fitness-training", "icon_color": "#37474F", "bg_color": "#ECEFF1", "is_active": true,
         "children": [
@@ -1799,7 +1799,7 @@
       }
     ]
   },
-  { "id": 20, "name": "Авто и мото", "alias": "automotive-goods", "number": 9,    "is_active": true,    "icon": "fa-solid fa-car",    "icon_color": "#34495E","bg_color": "#EBEDEF",
+  { "id": 20, "name": "Авто и мото", "alias": "automotive-goods", "number": 9,    "is_active": true,    "icon": "img_category/9.webp",    "icon_color": "#34495E","bg_color": "#EBEDEF",
     "children": [
       { "id": 20100, "name": "Запчасти", "alias": "car-parts", "icon_color": "#7F8C8D", "bg_color": "#F2F4F4", "is_active": true,
         "children": [
@@ -1923,7 +1923,7 @@
       }
     ]
   },
-  { "id": 22, "name": "Зоотовары", "alias": "pet-supplies-store", "number": 10, "is_active": true, "icon": "fa-solid fa-paw", "icon_color": "#6D4C41",  "bg_color": "#EFEBE9",
+  { "id": 22, "name": "Зоотовары", "alias": "pet-supplies-store", "number": 10, "is_active": true, "icon": "img_category/10.webp", "icon_color": "#6D4C41",  "bg_color": "#EFEBE9",
     "children": [
       { "id": 22100, "name": "Для кошек", "alias": "pet-cats", "icon_color": "#8D6E63", "bg_color": "#D7CCC8", "is_active": true,
         "children": [
@@ -1992,7 +1992,7 @@
       }
     ]
   },
-  { "id": 24, "name": "Книги, канцтовары и творчество", "alias": "books-stationery-hobbies", "number": 11, "is_active": true, "icon": "fa-solid fa-book-open",  "icon_color": "#795548", "bg_color": "#EFEBE9",
+  { "id": 24, "name": "Книги, канцтовары и творчество", "alias": "books-stationery-hobbies", "number": 11, "is_active": true, "icon": "img_category/11.webp",  "icon_color": "#795548", "bg_color": "#EFEBE9",
     "children": [
       { "id": 24100, "name": "Книги", "alias": "reading-books", "icon_color": "#5D4037", "bg_color": "#D7CCC8", "is_active": true,
         "children": [
@@ -2063,7 +2063,7 @@
       }
     ]
   },
-  { "id": 26, "name": "Продукты",  "alias": "grocery-food", "number": 12,"is_active": true,   "icon": "fa-solid fa-basket-shopping","icon_color": "#FF3B30",    "bg_color": "#FFEBEA",
+  { "id": 26, "name": "Продукты",  "alias": "grocery-food", "number": 12,"is_active": true,   "icon": "img_category/12.webp","icon_color": "#FF3B30",    "bg_color": "#FFEBEA",
     "children": [
       { "id": 26100, "name": "Напитки", "alias": "food-drinks", "icon_color": "#5856D6", "bg_color": "#EBEBFF", "is_active": true,
         "children": [
@@ -2193,7 +2193,7 @@
       }
     ]
   },
-  { "id": 28, "name": "Дача и сад", "alias": "garden-and-outdoor", "number": 13, "is_active": true, "icon": "fa-solid fa-seedling", "icon_color": "#2E7D32", "bg_color": "#E8F5E9",
+  { "id": 28, "name": "Дача и сад", "alias": "garden-and-outdoor", "number": 13, "is_active": true, "icon": "img_category/13.webp", "icon_color": "#2E7D32", "bg_color": "#E8F5E9",
     "children": [
       { "id": 28100, "name": "Садовая техника и инструменты", "alias": "garden-machinery-tools", "icon_color": "#689F38", "bg_color": "#F1F8E9", "is_active": true,
         "children": [
@@ -2289,7 +2289,7 @@
       }
     ]
   },
-  { "id": 30, "name": "Ювелирные изделия и часы", "alias": "jewelry-watches", "number": 14, "is_active": true,"icon": "fa-solid fa-gem",     "icon_color": "#9C27B0",     "bg_color": "#F3E5F5",
+  { "id": 30, "name": "Ювелирные изделия и часы", "alias": "jewelry-watches", "number": 14, "is_active": true,"icon": "img_category/14.webp",     "icon_color": "#9C27B0",     "bg_color": "#F3E5F5",
     "children": [
       { "id": 30100, "name": "Ювелирные украшения", "alias": "jewelry", "icon_color": "#E91E63", "bg_color": "#FCE4EC", "is_active": true,
         "children": [
@@ -2344,7 +2344,7 @@
       }
     ]
   },
-  { "id": 32, "name": "Подарки и сувениры", "alias": "gifts-souvenirs", "number": 16, "is_active": true, "icon": "fa-solid fa-gift", "icon_color": "#FF5722", "bg_color": "#FFEBEE",
+  { "id": 32, "name": "Подарки и сувениры", "alias": "gifts-souvenirs", "number": 16, "is_active": true, "icon": "img_category/15.webp", "icon_color": "#FF5722", "bg_color": "#FFEBEE",
     "children": [
       {  "id": 32100, "name": "Подарочные наборы", "alias": "gift-sets", "icon_color": "#FF9800", "bg_color": "#FFF3E0",  "is_active": true,
         "children": [
