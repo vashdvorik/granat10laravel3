@@ -32,6 +32,10 @@ Route::get('/catalog/{alias}', [CatalogController::class, 'show'])->name('catalo
 Route::get('/sale', [CatalogController::class, 'sale'])->name('catalog.sale');
 Route::get('/sale/load-more', [CatalogController::class, 'loadMoreSale'])->name('catalog.loadMoreSale');
 
+// Поиск товаров
+Route::get('/search', [CatalogController::class, 'search'])->name('search');
+Route::get('/search/load-more', [CatalogController::class, 'loadMoreSearch'])->name('search.loadMore');
+
 // роутs для карточки товара
 Route::get('product/{alias}', [ProductController::class, 'show'])->name('product.show');
 

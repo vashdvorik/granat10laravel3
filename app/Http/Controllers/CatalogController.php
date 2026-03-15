@@ -389,4 +389,58 @@ class CatalogController extends Controller
         // Возвращаем HTML
         return view('components.products-load-more', compact('products'))->render();
     }
+
+    /**
+     * Поиск товаров по названию и описанию
+     */
+    public function search(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        $products = Product::visible()
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'LIKE', '%' . $q . '%')
+                        ->orWhere('desc', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features1', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features2', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features3', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features4', 'LIKE', '%' . $q . '%');
+                });
+            })
+            ->orderByDesc('is_vip')
+            ->orderByDesc('push_at')
+            ->with(['images', 'seller'])
+            ->paginate(12)
+            ->appends(['q' => $q]);
+
+        return view('search', compact('products', 'q'));
+    }
+
+    /**
+     * AJAX: Загрузка следующей страницы результатов поиска
+     */
+    public function loadMoreSearch(Request $request)
+    {
+        $q = trim($request->input('q', ''));
+
+        $products = Product::visible()
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'LIKE', '%' . $q . '%')
+                        ->orWhere('desc', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features1', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features2', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features3', 'LIKE', '%' . $q . '%')
+                        ->orWhere('features4', 'LIKE', '%' . $q . '%');
+                });
+            })
+            ->orderByDesc('is_vip')
+            ->orderByDesc('push_at')
+            ->with(['images', 'seller'])
+            ->paginate(12)
+            ->appends(['q' => $q]);
+
+        return view('components.products-load-more', compact('products'))->render();
+    }
 }

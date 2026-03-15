@@ -615,7 +615,7 @@
                 <div class="col-lg-7 col-md-7 v-center header-search hidden-xs hidden-sm">
                     <form method="get" class="searchform ajax-search" action="/search" role="search">
                         <input type="hidden" name="type" value="product">
-                        <input type="text" onblur="if (this.value=='') this.value = this.defaultValue" onfocus="if (this.value==this.defaultValue) this.value = ''" name="q" class="form-control" placeholder="Я ищу ...">
+                        <input type="text" onblur="if (this.value=='') this.value = this.defaultValue" onfocus="if (this.value==this.defaultValue) this.value = ''" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}">
                         <ul class="list-product-search hidden-xs hidden-sm">
                             <li>
                                 <a class="flex align-center" href="">
@@ -670,15 +670,20 @@
                             </ul>
                         </div>
                         <span class="input-group-btn">
-                            <button class="button_search" type="button"><i class="ion-ios-search-strong"></i></button>
+                            <button class="button_search" type="submit"><i class="ion-ios-search-strong"></i></button>
                         </span>
                     </form>
                     <div class="tags">
                         <span>Часто ищут:</span>
-                        <a href="#">женское платье</a>
-                        <a href="#">тротуарная плитка</a>
-                        <a href="#">беспроводные наушники</a>
-                        <a href="#">фильтры для аквариума</a>
+                        <a href="/search?q=платье">платье</a>
+                        <a href="/search?q=телефон">телефон</a>
+                        <a href="/search?q=наушники">наушники</a>
+                        <a href="/search?q=обувь">обувь</a>
+                        <a href="/search?q=куртка">куртка</a>
+                        <a href="/search?q=сумка">сумка</a>
+                        <a href="/search?q=ноутбук">ноутбук</a>
+                        <a href="/search?q=мебель">мебель</a>
+                        <a href="/search?q=часы">часы</a>
                     </div>
                 </div>
         <!-- 3 иконки кабинет, лайки, корзина -->
