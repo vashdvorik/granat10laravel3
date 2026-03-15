@@ -466,6 +466,7 @@
     
     {{-- SEO: Pagination meta tags --}}
     @yield('meta')
+    @stack('styles')
 </head>
 
 <body>
@@ -982,6 +983,8 @@
                         container.append(html);
                         // Обновляем состояние сердечек у новых карточек
                         if (typeof initWishlists === 'function') initWishlists();
+                        // Инициализируем поповеры телефона для новых карточек
+                        $(document).trigger('cards:loaded');
                         
                         // Обновляем текущую страницу
                         btn.data('current-page', nextPage);
