@@ -48,14 +48,14 @@
     </div>
     <div class="pd-top">
         <h1 class="title">Магазины</h1>
-        <div class="show-element"><span>Showing 1–15 of 20 results</span></div>
+        <div class="show-element"><span>Показано {{ $sellers->firstItem() }}–{{ $sellers->lastItem() }} из {{ $sellers->total() }} магазинов</span></div>
     </div>
     <div class="pd-middle">
         <div class="pd-sort">
             <div class="filter-sort">
                 <div class="dropdown">
                     <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                        <span class="dropdown-label">Выбрать район</span>
+                        <span class="dropdown-label">Выбрать район или рынок</span>
                     </button>
                     <ul class="dropdown-menu">
                         <li><a href="#">Не выбрано</a></li>   
@@ -67,20 +67,6 @@
                         <li><a href="#">Date, old to new</a></li>
                         <li><a href="#">Date, new to old</a></li>
                     </ul>
-                </div>
-            </div>
-            <div class="filter-show">
-                <div class="dropdown">
-                        <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            Показать
-                            <span class="dropdown-label">12</span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">12</a></li>   
-                            <li><a href="#">24</a></li>
-                            <li><a href="#">36</a></li>
-                            <li><a href="#">48</a></li>
-                        </ul>
                 </div>
             </div>
         </div>
@@ -110,9 +96,6 @@
                         <div class="blog-post-author">
                             <div class="author">
                                 Адрес: <span class="c-black">{{ $seller->address ?? '' }}</span>
-                            </div>
-                            <div class="blog-post-comment">
-                                <span class="c-black"></span>{{ $seller->comments_count ?? 2 }}
                             </div>
                         </div>
                     </div>

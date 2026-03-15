@@ -241,7 +241,7 @@
 
     .contact-detail i {
         font-size: 18px;
-        color: #e91e63;
+        color: #9051b5;
         flex-shrink: 0;
     }
 
@@ -250,7 +250,7 @@
     }
 
     .contact-detail a {
-        color: #e91e63;
+        color: #9051b5;
         text-decoration: none;
     }
 
@@ -296,7 +296,7 @@
     }
 
     .btn-map {
-        background: #26a69a;
+        background: #9051b5;
     }
 
     .btn-map:hover {

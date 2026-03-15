@@ -612,47 +612,6 @@
                     <form method="get" class="searchform ajax-search" action="/search" role="search">
                         <input type="hidden" name="type" value="product">
                         <input type="text" onblur="if (this.value=='') this.value = this.defaultValue" onfocus="if (this.value==this.defaultValue) this.value = ''" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}">
-                        <ul class="list-product-search hidden-xs hidden-sm">
-                            <li>
-                                <a class="flex align-center" href="">
-                                    <div class="product-img">
-                                        <img src="{{ asset('img/product/iphonex.jpg') }}" alt="">
-                                    </div>
-                                    <h3 class="product-title">Notebook Black Spire Smartphone Black 2.0</h3>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="flex align-center" href="">
-                                    <div class="product-img">
-                                        <img src="{{ asset('img/product/sound.jpg') }}" alt="">
-                                    </div>
-                                    <h3 class="product-title">Smartphone 6S 64GB LTE</h3>
-                                </a>
-                            <li>
-                                <a class="flex align-center" href="">
-                                    <div class="product-img">
-                                        <img src="{{ asset('img/product/phone4.jpg') }}" alt="">
-                                    </div>
-                                    <h3 class="product-title">Notebook Black Spire Smartphone Black 2.0</h3>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="flex align-center" href="">
-                                    <div class="product-img">
-                                        <img src="{{ asset('img/product/phone5.jpg') }}" alt="">
-                                    </div>
-                                    <h3 class="product-title">Smartphone 6S 64GB LTE </h3>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="flex align-center" href="">
-                                    <div class="product-img">
-                                        <img src="{{ asset('img/product/phone1.jpg') }}" alt="">
-                                    </div>
-                                    <h3 class="product-title">Notebook Black Spire Smartphone Black 2.0</h3>
-                                </a>
-                            </li>
-                        </ul>
                         <input type="hidden" name="category" id="search-category-input" value="{{ request('category') }}">
                         <div class="search-panel">
                             <a class="dropdown-toggle" data-toggle="dropdown" href='#' id="search-category-label">
@@ -699,6 +658,7 @@
                             <a href="{{ route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
                             
                             <div class="cart">
+                                
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="label5">
                                     <img src="{{ asset('img/icon-cart.png') }}" alt="">
                                     <span class="count cart-count">0</span>
@@ -744,7 +704,7 @@
                                             <a href="#" class="cart-btn e-checkout btn-gradient">Checkout</a>
                                         </div>
                                     </div>
-                                </div>
+                                </div> 
                             </div>
                             
                             <a href="#" class="hidden-md hidden-lg icon-pushmenu js-push-menu">

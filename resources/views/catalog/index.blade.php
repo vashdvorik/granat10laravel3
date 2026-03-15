@@ -47,68 +47,7 @@
             </div>
             <!-- / МЕНЮ-->
 
-            <!--ФИЛЬТРЫ  -->
-            <form action="{{ route('catalog.index') }}" method="GET">
-            <div class="filter filter-group">
-                <h1 class="widget-blog-title">Товарный фильтр</h1>
-    {{--        <div class="filter-price filter-inside">
-                    <h3>Цена</h3>
-                    <div class="filter-content">
-                        <div class="price-range-holder">
-                            <input type="text" class="price-slider" value=""
-                            data-min="{{ $minPrice }}" data-max="{{ $maxPrice }}">
-                            <input type="hidden" id="min_price" name="min_price" value="{{ request('min_price', $minPrice) }}">
-                            <input type="hidden" id="max_price" name="max_price" value="{{ request('max_price', $maxPrice) }}">
-                        </div>
-                        <span class="min-max">
-                            Цена: {{ request('min_price', $minPrice) }} — {{ request('max_price', $maxPrice) }}
-                        </span>
-                        <button type="submit" class="btn-filter e-gradient">Фильтровать</button>
-                    </div>
-                </div> --}}
-                <div class="filter-brand filter-inside">
-    <h3>Продавцы</h3>
-    <ul class="e-filter brand-filter">
-        <li class="{{ request('seller') == null ? 'active-filter' : '' }}">
-            <a href="{{ route('catalog.index') }}">Все продавцы <span class="number"></span></a>
-        </li>
-        @foreach($sellers as $seller)
-            <li class="{{ request('seller') == $seller->alias ? 'active-filter' : '' }}">
-                <a href="{{ route('catalog.index', ['seller' => $seller->alias]) }}">
-                    {{ $seller->name }} <span class="number">({{ $seller->products_count ?? 0 }})</span>
-                </a>
-            </li>
-        @endforeach
-                {{--    @foreach($sellers as $seller)
-                            <li>
-                                <a href="#">{{ $seller->name }} <span class="number">({{ $seller->product_count }})</span></a>
-                            </li>
-                        @endforeach   --}} 
-            <!--        <li><a href="#">Piazza Italia <span class="number">(1)</span></a></li>
-                        <li class="active-filter"><a href="#">Nord <span class="number">(50)</span></a></li>
-                        <li><a href="#">Бум <span class="number">(70)</span></a></li>
-                        <li><a href="#">Стиляги <span class="number">(34)</span></a></li>
-                        <li><a href="#">LUXURY <span class="number">(20)</span></a></li>
-                        <li><a href="#">LO.Ok <span class="number">(15)</span></a></li> -->
-                    </ul>
-                    <a href="#" class="btn-showmore">Больше +</a>
-                </div>
-        {{--    <div class="filter-color filter-brand filter-inside">
-                    <h3>г. Тирасполь</h3>
-                    <ul class="e-filter brand-filter">
-                        <li><a href="#">Не выбрано <span class="number">(10)</span></a></li>
-                        <li><a href="#">Центр <span class="number">(8)</span></a></li>
-                        <li class="active-filter"><a href="#">Балка <span class="number">(15)</span></a></li>
-                        <li><a href="#">Промзона <span class="number">(21)</span></a></li>
-                        <li><a href="#">Бородинка  <span class="number">(104)</span></a></li>
-                        <li><a href="#">Красные казармы  <span class="number">(104)</span></a></li>
-                        <li><a href="#">Западный  <span class="number">(104)</span></a></li>
-                    </ul>
-                    <a href="#" class="btn-showmore">Больше +</a>
-                </div> --}}  
-            </div>
-            </form>
-            <!--/ФИЛЬТРЫ  -->
+
 
             <!--ТОП ТОВАРЫ  -->
             <div class="filter filter-product e-category">
