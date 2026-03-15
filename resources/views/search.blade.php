@@ -13,13 +13,24 @@
 
         <div class="pd-top">
             @if($q)
-                <h1 class="title">Результаты поиска: «{{ $q }}»</h1>
+                <h1 class="title">
+                    Результаты поиска: «{{ $q }}»
+                    @if($selectedCategory)
+                        <small>в категории «{{ $selectedCategory->name }}»</small>
+                    @endif
+                </h1>
                 <div class="show-element">
                     <span>
                         @if($products->total() > 0)
                             Найдено {{ $products->total() }} {{ trans_choice('товар|товара|товаров', $products->total()) }}
+                            @if($selectedCategory)
+                                &nbsp;·&nbsp; <a href="{{ route('search', ['q' => $q]) }}">Искать во всех категориях</a>
+                            @endif
                         @else
                             Ничего не найдено
+                            @if($selectedCategory)
+                                &nbsp;·&nbsp; <a href="{{ route('search', ['q' => $q]) }}">Искать во всех категориях</a>
+                            @endif
                         @endif
                     </span>
                 </div>
@@ -48,7 +59,7 @@
                 @if($products->currentPage() < $products->lastPage())
                     <div class="load-more-wrapper hidden-md hidden-lg text-center">
                         <button class="btn btn-load-more"
-                                data-url="{{ route('search.loadMore') }}?q={{ urlencode($q) }}"
+                                data-url="{{ route('search.loadMore') }}?q={{ urlencode($q) }}&category={{ urlencode($categoryAlias) }}"
                                 data-current-page="{{ $products->currentPage() }}"
                                 data-last-page="{{ $products->lastPage() }}"
                                 data-container="#search-products-grid">

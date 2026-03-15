@@ -657,16 +657,22 @@
                                 </a>
                             </li>
                         </ul>
+                        <input type="hidden" name="category" id="search-category-input" value="{{ request('category') }}">
                         <div class="search-panel">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href='#'>Все категории <span class="fa fa-caret-down"></span></a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" href='#' id="search-category-label">
+                                @if(request('category') && isset($menuRootCategories))
+                                    @php $activeSearchCat = $menuRootCategories->firstWhere('alias', request('category')); @endphp
+                                    {{ $activeSearchCat ? $activeSearchCat->name : 'Все категории' }}
+                                @else
+                                    Все категории
+                                @endif
+                                <span class="fa fa-caret-down"></span>
+                            </a>
                             <ul id="category" class="dropdown-menu dropdown-category">
-                                <li><a href="#">Одежда и обувь</a></li>
-                                <li><a href="#">Спецодежда и военторг</a></li>
-                                <li><a href="#">Дом и сад</a></li>
-                                <li><a href="#">Канцтовары</a></li>
-                                <li><a href="#">Техника и электроника</a></li>
-                                <li><a href="#">Аксесуары и украшения</a></li>
-                                <li><a href="#">Подарки, хобби, книги</a></li>
+                                <li><a href="#" data-alias="" data-name="Все категории">Все категории</a></li>
+                                @foreach($menuRootCategories as $cat)
+                                    <li><a href="#" data-alias="{{ $cat->alias }}" data-name="{{ $cat->name }}">{{ $cat->name }}</a></li>
+                                @endforeach
                             </ul>
                         </div>
                         <span class="input-group-btn">
@@ -938,6 +944,15 @@
             }
         });
     }
+
+    // Выбор категории в поиске
+    $(document).on('click', '#category a', function(e) {
+        e.preventDefault();
+        const alias = $(this).data('alias');
+        const name = $(this).data('name');
+        $('#search-category-input').val(alias);
+        $('#search-category-label').html(name + ' <span class="fa fa-caret-down"></span>');
+    });
 
     // 📱 AJAX: Загрузка дополнительных товаров на мобильных
     $(document).ready(function() {

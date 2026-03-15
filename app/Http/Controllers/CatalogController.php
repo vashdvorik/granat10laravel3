@@ -396,6 +396,16 @@ class CatalogController extends Controller
     public function search(Request $request)
     {
         $q = trim($request->input('q', ''));
+        $categoryAlias = $request->input('category', '');
+
+        $selectedCategory = null;
+        $categoryIds = [];
+        if ($categoryAlias) {
+            $selectedCategory = Category::where('alias', $categoryAlias)->first();
+            if ($selectedCategory) {
+                $categoryIds = $this->collectCategoryIds($selectedCategory);
+            }
+        }
 
         $products = Product::visible()
             ->when($q !== '', function ($query) use ($q) {
@@ -408,13 +418,16 @@ class CatalogController extends Controller
                         ->orWhere('features4', 'LIKE', '%' . $q . '%');
                 });
             })
+            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                $query->whereIn('category_id', $categoryIds);
+            })
             ->orderByDesc('is_vip')
             ->orderByDesc('push_at')
             ->with(['images', 'seller'])
             ->paginate(12)
-            ->appends(['q' => $q]);
+            ->appends(['q' => $q, 'category' => $categoryAlias]);
 
-        return view('search', compact('products', 'q'));
+        return view('search', compact('products', 'q', 'selectedCategory', 'categoryAlias'));
     }
 
     /**
@@ -423,6 +436,15 @@ class CatalogController extends Controller
     public function loadMoreSearch(Request $request)
     {
         $q = trim($request->input('q', ''));
+        $categoryAlias = $request->input('category', '');
+
+        $categoryIds = [];
+        if ($categoryAlias) {
+            $selectedCategory = Category::where('alias', $categoryAlias)->first();
+            if ($selectedCategory) {
+                $categoryIds = $this->collectCategoryIds($selectedCategory);
+            }
+        }
 
         $products = Product::visible()
             ->when($q !== '', function ($query) use ($q) {
@@ -435,11 +457,14 @@ class CatalogController extends Controller
                         ->orWhere('features4', 'LIKE', '%' . $q . '%');
                 });
             })
+            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
+                $query->whereIn('category_id', $categoryIds);
+            })
             ->orderByDesc('is_vip')
             ->orderByDesc('push_at')
             ->with(['images', 'seller'])
             ->paginate(12)
-            ->appends(['q' => $q]);
+            ->appends(['q' => $q, 'category' => $categoryAlias]);
 
         return view('components.products-load-more', compact('products'))->render();
     }

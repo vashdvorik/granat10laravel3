@@ -43,7 +43,7 @@
                     <span class="star star-1"></span>
                     <div class="number-rating">( 896 reviews )</div>
                 </div>
-                <p class="product-cate">Магазин: {{ $product->seller->name }}</p>
+                <p class="product-cate"><a href="{{ route('seller', $product->seller->alias) }}">{{ $product->seller->name }}</a></p>
                 <h3 class="product-title"><a href="{{ route('product.show', $product->alias) }}">{{ $product->name }}</a></h3>
                 <div class="product-bottom">
                     <div class="product-price">
@@ -65,8 +65,8 @@
                     <a href="#" class="btn-icon">
                         <span class="icon-bg icon-wishlist"></span>
                     </a>
-                    <a href="#" class="btn-icon">
-                        <span class="icon-bg icon-compare"></span>
+                    <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="{{ $product->seller->name }}">
+                        <span class="icon-bg icon-shop"></span>
                     </a>
                 </div>
             </div>
@@ -77,7 +77,7 @@
                 <a href="#" class="btn-icon">
                     <span class="icon-bg icon-wishlist"></span>
                 </a>
-                <a href="#" class="btn-icon">
+                <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="{{ $product->seller->name }}">
                     <span class="icon-bg icon-shop"></span>
                 </a>
             </div>
