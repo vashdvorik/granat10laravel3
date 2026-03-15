@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Seller;
+use App\Models\Product;
 use Illuminate\View\View;
 use App\Models\Category;
 
@@ -57,7 +58,32 @@ class SellerController extends Controller
         });
 
 
-        return view('seller', compact('seller', 'categories'));
+        $products = Product::visible()
+            ->where('seller_id', $seller->id)
+            ->with(['images'])
+            ->orderByDesc('created_at')
+            ->paginate(12);
+
+        return view('seller', compact('seller', 'categories', 'products'));
+    }
+
+    /**
+     * 📱 AJAX: Загрузка товаров продавца (для мобильных)
+     */
+    public function loadMoreSellerProducts(string $alias, Request $request)
+    {
+        $seller = Seller::getCachedByAlias($alias);
+        if (!$seller) {
+            abort(404);
+        }
+
+        $products = Product::visible()
+            ->where('seller_id', $seller->id)
+            ->with(['images'])
+            ->orderByDesc('created_at')
+            ->paginate(12);
+
+        return view('components.products-load-more', compact('products'))->render();
     }
 
     /**
