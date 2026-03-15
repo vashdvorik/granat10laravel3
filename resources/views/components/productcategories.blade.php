@@ -62,7 +62,7 @@
                     <a href="#" class="btn-icon">
                         <span class="icon-bg icon-cart"></span>
                     </a>
-                    <a href="#" class="btn-icon">
+                    <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                         <span class="icon-bg icon-wishlist"></span>
                     </a>
                     <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="{{ $product->seller->name }}">
@@ -74,7 +74,7 @@
                 <a href="#" class="btn-icon">
                     <span class="icon-bg icon-cart"></span>
                 </a>
-                <a href="#" class="btn-icon">
+                <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                     <span class="icon-bg icon-wishlist"></span>
                 </a>
                 <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="{{ $product->seller->name }}">

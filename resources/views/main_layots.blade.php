@@ -449,6 +449,10 @@
 }
 }
 
+    /* Избранное — активное сердечко */
+    .icon-wishlist.wishlist-active {
+        filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+    }
     </style>
 
     {{-- Open Graph для соцсетей --}}
@@ -562,15 +566,7 @@
                             <span>г. Тирасполь</span>
                             
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="label1">
-                                <li><a href="#">Не выбрано</a></li>
-                                <li><a href="#">Центр</a></li>
-                                <li><a href="#">Балка</a></li>
-                                <li><a href="#">Промзона</a></li>
-                                <li><a href="#">Бородинка</a></li>
-                                <li><a href="#">Красные казармы</a></li>
-                                <li><a href="#">Западный</a></li>
-                            </ul>
+
                         </div>
                     </div>
                 </div>
@@ -700,7 +696,8 @@
                 <!-- Иконки -->
                         <div class="header-sub-element row">
                             <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
-                            <a href="#"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
+                            <a href="{{ route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
+                            
                             <div class="cart">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="label5">
                                     <img src="{{ asset('img/icon-cart.png') }}" alt="">
@@ -749,6 +746,7 @@
                                     </div>
                                 </div>
                             </div>
+                            
                             <a href="#" class="hidden-md hidden-lg icon-pushmenu js-push-menu">
                                 <i class="fa fa-bars f-15"></i>
                             </a>
@@ -773,7 +771,7 @@
                             <div class="collapse navbar-collapse" id="myNavbar">
                                 <ul class="nav navbar-nav">
                                     <li class="level1"><a href="{{ route('shops') }}"><img src="{{ asset('img/icon-ship.png') }}" alt="">Магазины</a></li>
-                                    <li class="level1"><a href="#"><img src="{{ asset('img/icon-heart3.png') }}" alt="">Понравившиеся</a></li>
+                                    <li class="level1"><a href="{{ route('favorites') }}"><img src="{{ asset('img/icon-heart3.png') }}" alt="">Понравившиеся</a></li>
                                     <li class="level1"><a href="{{ route('catalog.sale') }}"><img src="{{ asset('img/skidka-logo.png') }}" alt="">Распродажи сейчас<span class="h-ribbon h-pos e-red">sale</span></a></li>
                                 </ul>
                             </div>
@@ -887,7 +885,7 @@
             <i class="fa fa-user f-18"></i>
             <span class="mobile-nav-label">Кабинет</span>
         </a>
-        <a href="#" class="mobile-nav-item" title="Избранное">
+        <a href="{{ route('favorites') }}" class="mobile-nav-item" title="Избранное">
             <i class="fa fa-heart f-18"></i>
             <span class="mobile-nav-label">Избранное</span>
         </a>
@@ -945,6 +943,40 @@
         });
     }
 
+    // === ИЗБРАННОЕ (WISHLIST) ===
+    function getFavorites() {
+        try { return JSON.parse(localStorage.getItem('favorites') || '[]'); }
+        catch(e) { return []; }
+    }
+    function saveFavorites(ids) {
+        localStorage.setItem('favorites', JSON.stringify(ids));
+    }
+    function initWishlists() {
+        var favorites = getFavorites();
+        $('.wishlist-btn').each(function() {
+            var productId = parseInt($(this).data('product-id'));
+            $(this).find('.icon-wishlist').toggleClass('wishlist-active', favorites.indexOf(productId) !== -1);
+        });
+    }
+    $(document).ready(function() {
+        initWishlists();
+        $(document).on('click', '.wishlist-btn', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var productId = parseInt($btn.data('product-id'));
+            var favorites = getFavorites();
+            var idx = favorites.indexOf(productId);
+            if (idx === -1) {
+                favorites.push(productId);
+                $btn.find('.icon-wishlist').addClass('wishlist-active');
+            } else {
+                favorites.splice(idx, 1);
+                $btn.find('.icon-wishlist').removeClass('wishlist-active');
+            }
+            saveFavorites(favorites);
+        });
+    });
+
     // Выбор категории в поиске
     $(document).on('click', '#category a', function(e) {
         e.preventDefault();
@@ -988,6 +1020,8 @@
                     success: function(html) {
                         // Добавляем элементы в конец списка
                         container.append(html);
+                        // Обновляем состояние сердечек у новых карточек
+                        if (typeof initWishlists === 'function') initWishlists();
                         
                         // Обновляем текущую страницу
                         btn.data('current-page', nextPage);
@@ -1011,6 +1045,7 @@
         }
     });
 </script>
+@stack('scripts')
 </body>
 
 </html>

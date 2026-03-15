@@ -54,17 +54,38 @@ class Category extends Model
     // ==========================================
 
     /**
-     * Получить закешированное дерево корневых категорий
+     * Получить закешированное дерево корневых категорий (только с товарами)
      */
     public static function getCachedRootTree()
     {
         return Cache::remember('categories_root_tree', now()->addHours(24), function () {
-            return self::whereIsRoot()
-                ->where('is_active', true)
+            $tree = self::where('is_active', true)
                 ->defaultOrder()
                 ->get()
                 ->toTree();
+
+            return static::filterTreeByProducts($tree);
         });
+    }
+
+    /**
+     * Рекурсивно фильтрует дерево категорий — оставляет только те, у которых есть видимые товары
+     */
+    public static function filterTreeByProducts($categories)
+    {
+        return $categories->filter(function ($category) {
+            // Фильтруем детей рекурсивно
+            if ($category->children->isNotEmpty()) {
+                $filteredChildren = static::filterTreeByProducts($category->children);
+                $category->setRelation('children', $filteredChildren);
+            }
+
+            // Проверяем наличие видимых товаров в категории или её потомках
+            $categoryIds = self::descendantsAndSelf($category->id)->pluck('id');
+            return \App\Models\Product::visible()
+                ->whereIn('category_id', $categoryIds)
+                ->exists();
+        })->values();
     }
 
     /**
