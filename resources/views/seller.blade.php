@@ -43,7 +43,7 @@
                         <div class="blog-img">
                             <a href="#" class="hover-images"><img src="{{ asset('img/blog/single-post.jpg') }}" alt="" class="img-reponsive"></a>
                             <div class="blog-post-date e-gradient abs v2">
-                                <span class="b-date">{{ $seller->product_count ?? 'нет' }}</span>
+                                <span class="b-date">{{ $seller->products_count ?? 0 }}</span>
                                 <span class="b-month">ТОВ</span>
                             </div>
                         </div>

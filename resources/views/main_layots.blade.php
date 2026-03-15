@@ -910,7 +910,7 @@
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
     // Сохранение позиции скролла для возврата с карточки товара (только DESKTOP)
-    const preserveScrollPages = ['catalog.index', 'catalog.show'];
+    const preserveScrollPages = ['catalog.index', 'catalog.show', 'catalog.sale'];
     const currentRoute = '{{ Route::currentRouteName() }}';
     const isDesktop = window.innerWidth >= 768;
     

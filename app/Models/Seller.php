@@ -411,7 +411,11 @@ class Seller extends Model
     public static function getCachedAll()
     {
         return Cache::remember('sellers_list', now()->addMinutes(30), function () {
-            return self::orderBy('product_count', 'desc')->get();
+            return self::withCount(['products' => function ($query) {
+                    $query->where('is_active', true);
+                }])
+                ->orderBy('products_count', 'desc')
+                ->get();
         });
     }
 
@@ -423,7 +427,11 @@ class Seller extends Model
         if (!$alias) return null;
         
         return Cache::remember('seller_by_alias:' . $alias, now()->addHours(1), function () use ($alias) {
-            return self::where('alias', $alias)->first();
+            return self::withCount(['products' => function ($query) {
+                    $query->where('is_active', true);
+                }])
+                ->where('alias', $alias)
+                ->first();
         });
     }
 

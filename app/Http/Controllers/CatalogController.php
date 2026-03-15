@@ -213,7 +213,7 @@ class CatalogController extends Controller
             ->whereNotNull('lowprice') // Только со скидкой
             ->orderByDesc('sale_started_at')
             ->with(['images', 'seller'])
-            ->get();
+            ->paginate(12);
 
         return view('salepage', [
             'products' => $products,
@@ -369,6 +369,22 @@ class CatalogController extends Controller
 
         // Пагинация (12 товаров на страницу)
         $products = $query->paginate(12)->appends($request->query());
+
+        // Возвращаем HTML
+        return view('components.products-load-more', compact('products'))->render();
+    }
+
+    /**
+     * 📱 AJAX: Загрузка дополнительных товаров (страница распродаж)
+     */
+    public function loadMoreSale(Request $request)
+    {
+        // Запрос товаров со скидкой (копируем логику из sale())
+        $products = Product::visible()
+            ->whereNotNull('lowprice') // Только со скидкой
+            ->orderByDesc('sale_started_at')
+            ->with(['images', 'seller'])
+            ->paginate(12);
 
         // Возвращаем HTML
         return view('components.products-load-more', compact('products'))->render();

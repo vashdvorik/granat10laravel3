@@ -1,10 +1,23 @@
 @extends('main_layots')
-@section('title', 'Каталог товара | Маркетплейс ПМР')
+@section('title', 'Распродажи | Маркетплейс ПМР')
+
+@section('meta')
+    {{-- SEO: Пагинация для поисковиков --}}
+    @if(isset($products) && $products->hasPages())
+        @if($products->previousPageUrl())
+            <link rel="prev" href="{{ $products->previousPageUrl() }}" />
+        @endif
+        @if($products->nextPageUrl())
+            <link rel="next" href="{{ $products->nextPageUrl() }}" />
+        @endif
+    @endif
+@endsection
 
 @section('content')
 
 <!--content-->
 <div class="container container-240">
+    <div id="catalog-top"></div>
     <div class="e-product">
         <ul class="breadcrumb v4">
             <li><a href="{{ route('home') }}">Главная</a></li>
@@ -1516,12 +1529,27 @@
                 </div>
             </div>
         </div> --}}
-        <div class="pd-middle space-v1">
-            <ul class="pagination">
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="#">2</a></li>
-                <li><a href="#"><i class="ion-ios-arrow-forward"></i></a></li>
-            </ul>
+        
+        {{-- ПАГИНАЦИЯ --}}
+        @if($products->hasPages())
+            {{-- Desktop пагинация --}}
+            <div class="pagination-desktop hidden-xs hidden-sm pd-middle space-v1">
+                {{ $products->links('vendor.pagination.custom') }}
+            </div>
+            
+            {{-- Mobile: кнопка "Загрузить еще" --}}
+            @if($products->currentPage() < $products->lastPage())
+                <div class="load-more-wrapper hidden-md hidden-lg text-center">
+                    <button class="btn btn-load-more" 
+                            data-url="{{ route('catalog.loadMoreSale') }}"
+                            data-current-page="{{ $products->currentPage() }}"
+                            data-last-page="{{ $products->lastPage() }}">
+                        <i class="ion-load-c"></i> Загрузить еще
+                    </button>
+                </div>
+            @endif
+        @endif
+            <!--
             <div class="pd-sort">
                 <div class="filter-sort">
                     <div class="dropdown">
@@ -1554,7 +1582,8 @@
                             </ul>
                     </div>
                 </div>
-            </div>
+            </div> -->
+
         </div>
     </div>
 </div>

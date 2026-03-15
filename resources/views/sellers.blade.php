@@ -2,6 +2,28 @@
 @section('title', 'Продавцы Тирасполя | Маркетплейс ПМР')
 
 @section('content')
+<style>
+    /* Фиксированная высота для описания продавца */
+    .blog-post-desc {
+        min-height: 60px;
+        max-height: 60px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Ограничение в 3 строки */
+        -webkit-box-orient: vertical;
+        line-height: 1.5;
+        margin-bottom: 15px;
+    }
+    
+    /* Одинаковая высота для всех карточек */
+    .blog-post-item {
+        margin-bottom: 30px;
+    }
+    
+    .blog-post-item .blog-info {
+        min-height: 180px;
+    }
+</style>
 <div class="container container-240">
 
     <ul class="breadcrumb v4">
@@ -63,7 +85,7 @@
                             <img src="{{ $seller->image ?? 'img/blog/blog_3.jpg' }}" alt="" class="img-reponsive">
                         </a>
                         <div class="blog-post-date e-gradient abs">
-                            <span class="b-date">{{ $seller->product_count ?? 'нет' }}</span>
+                            <span class="b-date">{{ $seller->products_count ?? 0 }}</span>
                             <span class="b-month">ТОВ</span>
                         </div>
                     </div>
@@ -71,7 +93,7 @@
                         <h3 class="blog-post-title">
                             <a href="{{ route('seller', ['alias' => $seller->alias])}}">{{ $seller->name ?? 'Название продавца' }}</a>
                         </h3>
-                        <p class="blog-post-desc">{{ \Illuminate\Support\Str::limit($seller->description ?? 'Описание продавца...', 125) }}</p>
+                        <p class="blog-post-desc">{{ $seller->description ?? '' }}</p>
                         <div class="blog-post-author">
                             <div class="author">
                                 Адрес: <span class="c-black">{{ $seller->address ?? '' }}</span>

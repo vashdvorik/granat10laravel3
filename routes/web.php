@@ -30,6 +30,7 @@ Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])-
 Route::get('/catalog/{alias}/load-more', [CatalogController::class, 'loadMoreCategory'])->name('catalog.loadMoreCategory');
 Route::get('/catalog/{alias}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/sale', [CatalogController::class, 'sale'])->name('catalog.sale');
+Route::get('/sale/load-more', [CatalogController::class, 'loadMoreSale'])->name('catalog.loadMoreSale');
 
 // роутs для карточки товара
 Route::get('product/{alias}', [ProductController::class, 'show'])->name('product.show');

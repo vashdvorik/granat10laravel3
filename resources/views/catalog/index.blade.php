@@ -75,7 +75,7 @@
         @foreach($sellers as $seller)
             <li class="{{ request('seller') == $seller->alias ? 'active-filter' : '' }}">
                 <a href="{{ route('catalog.index', ['seller' => $seller->alias]) }}">
-                    {{ $seller->name }} <span class="number">({{ $seller->product_count }})</span>
+                    {{ $seller->name }} <span class="number">({{ $seller->products_count ?? 0 }})</span>
                 </a>
             </li>
         @endforeach
