@@ -11,11 +11,17 @@
                 <div class="vertical-wrapper">
                     <ul class="vertical-group">
                         <li class="vertical-item level1 mega-parent"><a href="{{ route('shops') }}">Магазины рядом </a></li>
-                        <li class="vertical-item level1 mega-parent"><a href="#">Товары для Вас <span class="h-ribbon e-red mg-l10">ХИТЫ</span></a></li>
-                        @foreach($categories->take(7) as $category)
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', $category->alias ?? $category->id) }}">{{ $category->name }}</a>
-                        </li>
-                        @endforeach
+                        <li class="vertical-item level1 mega-parent"><a href="{{ route('catalog.sale') }}">Распродажа <span class="h-ribbon e-red mg-l10">SALE</span></a></li>
+                        
+                        <!-- Статичные категории (замените alias на свои) -->
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'apparel') }}">Одежда и обувь</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'electronics') }}">Электроника</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'home-and-interior') }}">Дом и интерьер</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'construction-repair') }}">Строительство</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'automotive-goods') }}">Авто и мото</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'beauty-and-health') }}">Красота и здоровье</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'kids-products-main') }}">Товары для детей</a></li>
+                        
                     <!--
                         <li class="vertical-item level1 vertical-drop"><a href="#">Одежда и обувь</a>
                             <div class="menu-level-1 dropdown-menu vertical-menu v2 tvbg pd2 style1">

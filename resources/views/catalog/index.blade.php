@@ -264,15 +264,16 @@
                 </div>
                 <div class="pd-top">
                     <h1 class="title">Каталог</h1>
-                    <div class="show-element"><span>Showing 1–15 of 20 results</span></div>
+                <!--    <div class="show-element"><span>Showing 1–15 of 20 results</span></div> -->
                 </div>
+                <!-- блокирую 
                 <div class="pd-middle">
                     <div class="view-mode view-group">
                         <a class="grid-icon col active"><img src="img/grid.png" alt=""></a>
                         <a class="grid-icon col2"><img src="img/grid2.png" alt=""></a>
                         <a class="list-icon list"><img src="img/list.png" alt=""></a>
                     </div>
-                    <!-- блокирую 
+                    
                     <div class="pd-sort">
                         <div class="filter-sort">
                             <div class="dropdown">
@@ -306,8 +307,8 @@
                             </div>
                         </div>
                     </div>
-                     блокирую -->
-                </div>
+                     
+                </div>-->
 
                 <!-- Мобильная версия: карточки категорий 3x3 -->
                 <div class="mobile-categories-wrapper hidden-md hidden-lg">
@@ -357,6 +358,7 @@
                         <li><a href="#">2</a></li>
                         <li><a href="#"><i class="ion-ios-arrow-forward"></i></a></li>
                     </ul>
+                    <!-- блокирую
                     <div class="pd-sort">
                         <div class="filter-sort">
                             <div class="dropdown">
@@ -389,7 +391,7 @@
                                   </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>

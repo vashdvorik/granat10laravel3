@@ -27,12 +27,8 @@ class AppServiceProvider extends ServiceProvider
 
         if (Schema::hasTable('categories')) {
             try {
-                // 🆕 NESTED SET: Дерево категорий для меню
-                $categories = \App\Models\Category::whereIsRoot()
-                    ->where('is_active', true)
-                    ->defaultOrder()
-                    ->get()
-                    ->toTree();
+                // 🆕 NESTED SET: Дерево категорий для меню (с кешированием 24 часа)
+                $categories = \App\Models\Category::getCachedRootTree();
                     
                 View::share('categories', $categories);
                 View::share('menuRootCategories', $categories);

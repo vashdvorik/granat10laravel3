@@ -297,15 +297,17 @@
                    <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/shop-banner.jpg') }}" alt="" class="img-reponsive"></a> 
                 </div>
                 <div class="pd-top">
-                    <h1 class="title">Каталог</h1>
-                    <div class="show-element"><span>Showing 1–15 of 20 results</span></div>
+                    <h1 class="title">{{ $category->name }}</h1>
+                    <!-- <div class="show-element"><span>Showing 1–15 of 20 results</span></div> -->
                 </div>
                 <div class="pd-middle">
+                    <!--
                     <div class="view-mode view-group">
                         <a class="grid-icon col active"><img src="{{ asset('img/grid.png') }}" alt=""></a>
                         <a class="grid-icon col2"><img src="{{ asset('img/grid2.png') }}" alt=""></a>
                         <a class="list-icon list"><img src="{{ asset('img/list.png') }}" alt=""></a>
-                    </div>
+                    </div> -->
+                    
                     <div class="pd-sort">
                         <div class="filter-sort">
                             <div class="dropdown">
@@ -339,6 +341,7 @@
                             </div>
                         </div>
                     </div>
+                    
                 </div>
 <!-- МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ /-->
 <!-- Мобильная версия: карточки категорий 3x3 и плитки 3x3  -->
@@ -441,6 +444,7 @@
                         <li><a href="#">2</a></li>
                         <li><a href="#"><i class="ion-ios-arrow-forward"></i></a></li>
                     </ul>
+                    <!--
                     <div class="pd-sort">
                         <div class="filter-sort">
                             <div class="dropdown">
@@ -473,7 +477,7 @@
                                   </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
