@@ -10,20 +10,6 @@ use Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
-/*
-catalog(Request $request) - Отображает главную страницу каталога со всеми
-товарами, фильтрует по продавцам и ценам, сохраняет фильтры в сессии, 
-разделяет VIP и обычные товары, загружает дерево категорий до 8 уровней 
-вложенности.
-
-show($alias, Request $request) - Показывает товары определенной категории 
-по её alias, применяет фильтры по продавцам и ценам, собирает хлебные крошки,
-получает товары из текущей категории и всех подкатегорий, показывает 
-подкатегории или родственные категории.
-
-sale() - Отображает страницу распродажи с товарами, у которых есть скидка 
-(поле lowprice заполнено).
-*/
 class CatalogController extends Controller
 {
     public function catalog(Request $request)
@@ -57,10 +43,10 @@ class CatalogController extends Controller
 
         // VIP товары
         $vipProducts = Product::visible()
-        ->where('is_vip', true)
-        ->orderByDesc('push_at')
-        ->with(['images', 'seller'])
-        ->get();
+            ->where('is_vip', true)
+            ->orderByDesc('push_at')
+            ->with(['images', 'seller'])
+            ->get();
 
         // Обычные товары
         $normalProducts = Product::visible()
@@ -92,6 +78,11 @@ class CatalogController extends Controller
 
         // 🆕 NESTED SET: Загрузка категорий одним запросом
         $categories = Category::getCachedRootTree();
+
+        // 🆕 Фильтруем категории без товаров (если включено в настройках)
+        if (config('categories.hide_empty', true)) {
+            $categories = $this->filterEmptyCategories($categories);
+        }
 
         // Продавцы
         $sellers = Seller::getCachedAll();
@@ -149,7 +140,8 @@ class CatalogController extends Controller
         $breadcrumbs = $category->breadcrumbs;
 
         // 🆕 NESTED SET: Все ID потомков + текущая категория (1 запрос!)
-        $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id')->toArray();
+        $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
+        
         // VIP товары
         $vipProducts = Product::visible()
             ->where('is_vip', true)
@@ -191,6 +183,11 @@ class CatalogController extends Controller
         $menuCategories = $hasChildren
             ? $category->children
             : ($category->parent ? $category->parent->children : collect());
+
+        // 🆕 Фильтруем пустые категории в меню (если включено в настройках)
+        if (config('categories.hide_empty', true)) {
+            $menuCategories = $this->filterEmptyCategories($menuCategories);
+        }
 
         // Продавцы - только с активными пакетами и товарами в категории
         $sellers = Seller::whereHas('sellerPackages', function ($q) {
@@ -245,21 +242,22 @@ class CatalogController extends Controller
         ]);
     }
 
-/**
- * 🆕 NESTED SET: Быстрый сбор ID (заменяет рекурсию)
- */
+    /**
+     * 🆕 NESTED SET: Быстрый сбор ID (заменяет рекурсию)
+     */
     private function collectCategoryIds($category)
     {
-        return Category::whereDescendantOrSelf($category->id)->pluck('id')->toArray();
+        // Используем статический метод с ID категории
+        return Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
     }
 
     /**
-    * 🆕 NESTED SET: Оптимизированный подсчет товаров
-    */
+     * 🆕 NESTED SET: Оптимизированный подсчет товаров
+     */
     private function getCategoryProductsCount($category)
     {
         return Cache::remember('category_products_count:' . $category->id, now()->addMinutes(10), function () use ($category) {
-            $categoryIds = Category::whereDescendantOrSelf($category->id)->pluck('id');
+            $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id');
             return Product::visible()
                 ->whereIn('category_id', $categoryIds)
                 ->count();
@@ -279,4 +277,41 @@ class CatalogController extends Controller
         });
     }
 
+    /**
+     * 🆕 Фильтрует категории без товаров
+     * Рекурсивно проверяет наличие товаров в категории и её детях
+     * 
+     * @param \Illuminate\Support\Collection $categories
+     * @return \Illuminate\Support\Collection
+     */
+    private function filterEmptyCategories($categories)
+    {
+        return $categories->filter(function ($category) {
+            // Рекурсивно фильтруем детей
+            if ($category->children->isNotEmpty()) {
+                $filteredChildren = $this->filterEmptyCategories($category->children);
+                $category->setRelation('children', $filteredChildren);
+            }
+
+            // Проверяем наличие товаров в категории или хотя бы в одном ребёнке
+            return $this->categoryHasProducts($category);
+        });
+    }
+
+    /**
+     * 🆕 Проверяет, есть ли у категории товары (включая в детях)
+     * 
+     * @param Category $category
+     * @return bool
+     */
+    private function categoryHasProducts($category)
+    {
+        // Получаем все ID потомков + текущая категория
+        $categoryIds = $this->collectCategoryIds($category);
+        
+        // Проверяем наличие хотя бы одного товара
+        return Product::visible()
+            ->whereIn('category_id', $categoryIds)
+            ->exists();
+    }
 }
