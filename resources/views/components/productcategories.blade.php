@@ -54,9 +54,6 @@
                             <span>{{ $product->price }} руб.</span>
                         @endif
                     </div>
-                    <a href="#" class="btn-icon btn-view">
-                        <span class="icon-bg icon-view"></span>
-                    </a>
                 </div>
                 <div class="product-bottom-group">
                     <a href="javascript:void(0)" class="btn-icon btn-phone-popover"
