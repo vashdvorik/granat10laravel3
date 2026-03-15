@@ -41,40 +41,29 @@ class CatalogController extends Controller
             ]);
         }
 
-        // VIP товары
-        $vipProducts = Product::visible()
-            ->where('is_vip', true)
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->get();
+        // Запрос товаров с фильтрами
+        $query = Product::visible()
+            ->with(['images', 'seller']);
 
-        // Обычные товары
-        $normalProducts = Product::visible()
-            ->where('is_vip', false)
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->get();
-
-        // Объединение
-        $allProducts = $vipProducts->concat($normalProducts);
-
-        // Применение фильтров
-        $products = $allProducts->filter(function ($product) use ($selectedSellerAlias, $priceRange) {
-            if ($selectedSellerAlias) {
-                $seller = Seller::getCachedByAlias($selectedSellerAlias);
-                if (!$seller || $product->seller_id != $seller->id) {
-                    return false;
-                }
+        // Фильтр по продавцу
+        if ($selectedSellerAlias) {
+            $seller = Seller::getCachedByAlias($selectedSellerAlias);
+            if ($seller) {
+                $query->where('seller_id', $seller->id);
             }
+        }
 
-            if (!empty($priceRange)) {
-                if ($product->price < $priceRange['min'] || $product->price > $priceRange['max']) {
-                    return false;
-                }
-            }
+        // Фильтр по цене
+        if (!empty($priceRange)) {
+            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
+        }
 
-            return true;
-        });
+        // Сортировка: сначала VIP, потом обычные, по push_at
+        $query->orderByDesc('is_vip')
+              ->orderByDesc('push_at');
+
+        // Пагинация (12 товаров на страницу)
+        $products = $query->paginate(12)->appends($request->query());
 
         // 🆕 NESTED SET: Загрузка категорий одним запросом
         $categories = Category::getCachedRootTree();
@@ -142,41 +131,30 @@ class CatalogController extends Controller
         // 🆕 NESTED SET: Все ID потомков + текущая категория (1 запрос!)
         $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
         
-        // VIP товары
-        $vipProducts = Product::visible()
-            ->where('is_vip', true)
+        // Запрос товаров с фильтрами
+        $query = Product::visible()
             ->whereIn('category_id', $categoryIds)
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->get();
+            ->with(['images', 'seller']);
 
-        // Обычные товары
-        $normalProducts = Product::visible()
-            ->where('is_vip', false)
-            ->whereIn('category_id', $categoryIds)
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->get();
-
-        $products = $vipProducts->concat($normalProducts);
-
-        // Применение фильтров
-        $products = $products->filter(function ($product) use ($selectedSellerAlias, $priceRange) {
-            if ($selectedSellerAlias) {
-                $seller = Seller::getCachedByAlias($selectedSellerAlias);
-                if (!$seller || $product->seller_id != $seller->id) {
-                    return false;
-                }
+        // Фильтр по продавцу
+        if ($selectedSellerAlias) {
+            $seller = Seller::getCachedByAlias($selectedSellerAlias);
+            if ($seller) {
+                $query->where('seller_id', $seller->id);
             }
+        }
 
-            if (!empty($priceRange)) {
-                if ($product->price < $priceRange['min'] || $product->price > $priceRange['max']) {
-                    return false;
-                }
-            }
+        // Фильтр по цене
+        if (!empty($priceRange)) {
+            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
+        }
 
-            return true;
-        });
+        // Сортировка: сначала VIP, потом обычные, по push_at
+        $query->orderByDesc('is_vip')
+              ->orderByDesc('push_at');
+
+        // Пагинация (12 товаров на страницу)
+        $products = $query->paginate(12)->appends($request->query());
 
         // 🆕 NESTED SET: Подкатегории (только прямые дети)
         $hasChildren = $category->children->count() > 0;

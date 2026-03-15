@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{ asset('css/cabinet.css') }}"> 
     <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/pagination.css') }}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @if(Request::is('catalog/*') || Request::is('catalog'))
@@ -854,49 +855,26 @@
     <script src="{{ asset('js/bootstrap-slider.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
-    // Список страниц, где нужно сохранять позицию скролла
+    // Сохранение позиции скролла для возврата с карточки товара
     const preserveScrollPages = ['catalog.index', 'catalog.show'];
     const currentRoute = '{{ Route::currentRouteName() }}';
     
     if (preserveScrollPages.includes(currentRoute)) {
-        // Сохраняем позицию скролла перед уходом со страницы
-        window.addEventListener('beforeunload', function(e) {
-            // Проверяем, был ли клик по ссылке категории
-            const clickedLink = document.activeElement;
-            const isCategoryLink = clickedLink && (
-                clickedLink.closest('.mobile-category-card') ||
-                clickedLink.closest('.mobile-category-tile') ||
-                clickedLink.closest('.filter-cate') ||
-                clickedLink.closest('.back-category')
-            );
-            
-            // Сохраняем скролл только если это НЕ переход по категории
-            if (!isCategoryLink) {
-                sessionStorage.setItem('scrollPosition', window.scrollY);
-            } else {
-                sessionStorage.removeItem('scrollPosition');
-            }
+        // Сохраняем позицию скролла перед уходом со страницы каталога
+        window.addEventListener('beforeunload', function() {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
         });
 
-        // Восстанавливаем позицию скролла после загрузки
+        // Восстанавливаем позицию скролла при возврате на страницу каталога
         window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hasPagination = urlParams.has('page');
             const scrollPosition = sessionStorage.getItem('scrollPosition');
             
-            if (scrollPosition) {
-                // Восстанавливаем скролл (для возврата с карточки товара и т.д.)
+            // Восстанавливаем только если НЕТ пагинации и ЕСТЬ сохраненная позиция
+            if (scrollPosition && !hasPagination) {
                 window.scrollTo(0, parseInt(scrollPosition));
                 sessionStorage.removeItem('scrollPosition');
-            } else {
-                // Если скролл не сохранен - значит был переход по категории
-                // Плавно скроллим к меню ТОЛЬКО НА МОБИЛЬНЫХ (ширина < 1024px)
-                if (window.innerWidth < 1024) {
-                    const filterSidebar = document.getElementById('filter-sidebar');
-                    if (filterSidebar) {
-                        setTimeout(function() {
-                            filterSidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 100);
-                    }
-                }
             }
         });
     }

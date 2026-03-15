@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="container container-240 shop-collection">
+    <div id="catalog-top"></div>
     <ul class="breadcrumb">
         <li><a href="{{ route('home') }}">Главная</a></li>
         <li class="active">Каталог</li>
@@ -264,7 +265,9 @@
                 </div>
                 <div class="pd-top">
                     <h1 class="title">Каталог</h1>
-                <!--    <div class="show-element"><span>Showing 1–15 of 20 results</span></div> -->
+                    <div class="show-element">
+                        <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
+                    </div>
                 </div>
                 <!-- блокирую 
                 <div class="pd-middle">
@@ -353,11 +356,9 @@
                     </div>
                 </div>
                 <div class="pd-middle space-v1">
-                    <ul class="pagination">
-                        <li class="active"><a href="#">1</a></li>
-                        <li><a href="#">2</a></li>
-                        <li><a href="#"><i class="ion-ios-arrow-forward"></i></a></li>
-                    </ul>
+                    @if($products->hasPages())
+                        {{ $products->links('vendor.pagination.custom') }}
+                    @endif
                     <!-- блокирую
                     <div class="pd-sort">
                         <div class="filter-sort">
@@ -397,5 +398,24 @@
         </div>
     </div>
 </div>
+
+<script>
+// Автопрокрутка к началу каталога при пагинации
+document.addEventListener('DOMContentLoaded', function() {
+    // Проверяем, есть ли параметр page в URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('page')) {
+        // Прокручиваем к началу каталога
+        const catalogTop = document.getElementById('catalog-top');
+        if (catalogTop) {
+            catalogTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Небольшой отступ сверху (чтобы учесть header)
+            setTimeout(() => {
+                window.scrollBy(0, -100);
+            }, 100);
+        }
+    }
+});
+</script>
 
 @endsection
