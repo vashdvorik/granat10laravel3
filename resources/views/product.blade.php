@@ -257,47 +257,11 @@
             </div>
         <div class="tab-content">
             <div id="desc" class="tab-pane fade in active">
-                <div class="entry-content active">
-                    <div class="e-text">
-                        <div class="entry-inside v4 text-center">
-                            <img src="img/single/simple_icon.png" alt="">
-                            <h1 class="entry-title spc">Multi-Purpose WooCommerce Theme for Electronics Store </h1>
-                        </div>
-                        <div class="entry-inside v3">
-                            
-                                <div class="text-center image-bd">
-                                    <img src="img/single/des_1.jpg" alt="">
-                                </div>
-                            
-                                <div class="row entry-middle">
-                                    <div class="entry-info col-xs-12 col-sm-6 col-md-6">
-                                        <h3>This is demo heading</h3>
-                                        <p>It is a long established fact that a reader will be distracted by the readable content page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using</p>
-                                    </div>
-
-                                    <div class="entry-info col-xs-12 col-sm-6 col-md-6">
-                                        <h3>This is demo heading</h3>
-                                        <p>It is a long established fact that a reader will be distracted by the readable content page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="text-center image-bd img-cal">
-                                    <img src="img/single/des_2.jpg" alt="">
-                                </div>
-                        </div>
-                    </div>
-                    <div class="entry-button text-center abs">
-                        <a href="#" class="btn-show">Show more<i class="ion-chevron-down"></i></a>
-                    </div>
-                </div>
             </div>
             <div id="info" class="tab-pane fade in">
-                
             </div>
             <div id="review" class="tab-pane fade in ">
-                
             </div>
-
         </div>
     </div>
     </div>
