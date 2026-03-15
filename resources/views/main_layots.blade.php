@@ -51,6 +51,12 @@
     </script>
     @endif
     <style>
+        /* Якорь пагинации - отступ от header */
+        #catalog-top {
+            scroll-margin-top: 120px;
+            display: block;
+        }
+        
         .icon-shop {
         background-image: url("{{ asset('img/icon-ship.png') }}");
         background-repeat: no-repeat;
@@ -396,6 +402,51 @@
 .mobile-category-tile.back-tile i {
     font-size: 16px;
 }
+
+/* Стили для кнопки "Загрузить еще" на мобильных */
+.load-more-wrapper {
+    padding: 20px 0;
+    margin-top: 15px;
+}
+
+.btn-load-more {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-load-more:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-load-more:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-load-more i {
+    margin-right: 5px;
+    animation: rotate 1s linear infinite;
+    animation-play-state: paused;
+}
+
+.btn-load-more.loading i {
+    animation-play-state: running;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 }
 
     </style>
@@ -408,6 +459,9 @@
 
     {{-- Canonical URL --}}
     <link rel="canonical" href="{{ url()->current() }}">
+    
+    {{-- SEO: Pagination meta tags --}}
+    @yield('meta')
 </head>
 
 <body>
@@ -855,11 +909,12 @@
     <script src="{{ asset('js/bootstrap-slider.min.js') }}"></script>
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
-    // Сохранение позиции скролла для возврата с карточки товара
+    // Сохранение позиции скролла для возврата с карточки товара (только DESKTOP)
     const preserveScrollPages = ['catalog.index', 'catalog.show'];
     const currentRoute = '{{ Route::currentRouteName() }}';
+    const isDesktop = window.innerWidth >= 768;
     
-    if (preserveScrollPages.includes(currentRoute)) {
+    if (preserveScrollPages.includes(currentRoute) && isDesktop) {
         // Сохраняем позицию скролла перед уходом со страницы каталога
         window.addEventListener('beforeunload', function() {
             sessionStorage.setItem('scrollPosition', window.scrollY);
@@ -878,6 +933,58 @@
             }
         });
     }
+
+    // 📱 AJAX: Загрузка дополнительных товаров на мобильных
+    $(document).ready(function() {
+        // Проверяем, что это мобильное устройство
+        if (window.innerWidth < 768) {
+            $('.btn-load-more').on('click', function() {
+                const btn = $(this);
+                const url = btn.data('url');
+                let currentPage = parseInt(btn.data('current-page'));
+                const lastPage = parseInt(btn.data('last-page'));
+                const seller = btn.data('seller') || '';
+                
+                // Отключаем кнопку и показываем загрузку
+                btn.prop('disabled', true).addClass('loading');
+                btn.find('i').css('animation-play-state', 'running');
+                
+                // Следующая страница
+                const nextPage = currentPage + 1;
+                
+                // AJAX запрос
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {
+                        page: nextPage,
+                        seller: seller
+                    },
+                    success: function(html) {
+                        // Добавляем товары в конец списка
+                        $('.product-collection-grid .row').append(html);
+                        
+                        // Обновляем текущую страницу
+                        btn.data('current-page', nextPage);
+                        
+                        // Если это была последняя страница - скрываем кнопку
+                        if (nextPage >= lastPage) {
+                            btn.parent().fadeOut();
+                        } else {
+                            // Включаем кнопку обратно
+                            btn.prop('disabled', false).removeClass('loading');
+                            btn.find('i').css('animation-play-state', 'paused');
+                        }
+                    },
+                    error: function() {
+                        alert('Ошибка загрузки товаров. Попробуйте еще раз.');
+                        btn.prop('disabled', false).removeClass('loading');
+                        btn.find('i').css('animation-play-state', 'paused');
+                    }
+                });
+            });
+        }
+    });
 </script>
 </body>
 

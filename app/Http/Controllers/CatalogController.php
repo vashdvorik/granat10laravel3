@@ -292,4 +292,85 @@ class CatalogController extends Controller
             ->whereIn('category_id', $categoryIds)
             ->exists();
     }
+
+    /**
+     * 📱 AJAX: Загрузка дополнительных товаров (общий каталог)
+     */
+    public function loadMoreCatalog(Request $request)
+    {
+        $selectedSellerAlias = $request->input('seller');
+        $priceRange = Session::get('catalog_filters.price');
+
+        // Запрос товаров с фильтрами (копируем логику из catalog())
+        $query = Product::visible()
+            ->with(['images', 'seller']);
+
+        // Фильтр по продавцу
+        if ($selectedSellerAlias) {
+            $seller = Seller::getCachedByAlias($selectedSellerAlias);
+            if ($seller) {
+                $query->where('seller_id', $seller->id);
+            }
+        }
+
+        // Фильтр по цене
+        if (!empty($priceRange)) {
+            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
+        }
+
+        // Сортировка: сначала VIP, потом обычные, по push_at
+        $query->orderByDesc('is_vip')
+              ->orderByDesc('push_at');
+
+        // Пагинация (12 товаров на страницу)
+        $products = $query->paginate(12)->appends($request->query());
+
+        // Возвращаем HTML
+        return view('components.products-load-more', compact('products'))->render();
+    }
+
+    /**
+     * 📱 AJAX: Загрузка дополнительных товаров (конкретная категория)
+     */
+    public function loadMoreCategory($alias, Request $request)
+    {
+        // Найти категорию
+        $category = Category::where('alias', $alias)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $selectedSellerAlias = $request->input('seller');
+        $priceRange = Session::get('catalog_filters.price');
+
+        // Все ID потомков + текущая категория
+        $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
+        
+        // Запрос товаров с фильтрами (копируем логику из show())
+        $query = Product::visible()
+            ->whereIn('category_id', $categoryIds)
+            ->with(['images', 'seller']);
+
+        // Фильтр по продавцу
+        if ($selectedSellerAlias) {
+            $seller = Seller::getCachedByAlias($selectedSellerAlias);
+            if ($seller) {
+                $query->where('seller_id', $seller->id);
+            }
+        }
+
+        // Фильтр по цене
+        if (!empty($priceRange)) {
+            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
+        }
+
+        // Сортировка: сначала VIP, потом обычные, по push_at
+        $query->orderByDesc('is_vip')
+              ->orderByDesc('push_at');
+
+        // Пагинация (12 товаров на страницу)
+        $products = $query->paginate(12)->appends($request->query());
+
+        // Возвращаем HTML
+        return view('components.products-load-more', compact('products'))->render();
+    }
 }

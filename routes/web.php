@@ -26,6 +26,8 @@ Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/home', [HomeController::class, 'home'])->name('home');
 
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
+Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
+Route::get('/catalog/{alias}/load-more', [CatalogController::class, 'loadMoreCategory'])->name('catalog.loadMoreCategory');
 Route::get('/catalog/{alias}', [CatalogController::class, 'show'])->name('catalog.show');
 Route::get('/sale', [CatalogController::class, 'sale'])->name('catalog.sale');
 

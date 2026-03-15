@@ -1,6 +1,17 @@
 @extends('main_layots')
 @section('title', 'Каталог товара | Маркетплейс ПМР')
 
+@section('meta')
+    {{-- SEO: Пагинация для поисковиков --}}
+    @if(isset($products) && $products->hasPages())
+        @if($products->previousPageUrl())
+            <link rel="prev" href="{{ $products->previousPageUrl() }}" />
+        @endif
+        @if($products->nextPageUrl())
+            <link rel="next" href="{{ $products->nextPageUrl() }}" />
+        @endif
+    @endif
+@endsection
 
 @section('content')
 <div class="container container-240 shop-collection">
@@ -357,7 +368,23 @@
                 </div>
                 <div class="pd-middle space-v1">
                     @if($products->hasPages())
-                        {{ $products->links('vendor.pagination.custom') }}
+                        <!-- Пагинация для десктопа и SEO -->
+                        <div class="pagination-desktop hidden-xs hidden-sm">
+                            {{ $products->links('vendor.pagination.custom') }}
+                        </div>
+                        
+                        <!-- Кнопка "Загрузить еще" для мобильных -->
+                        <div class="load-more-wrapper hidden-md hidden-lg text-center">
+                            @if($products->currentPage() < $products->lastPage())
+                                <button class="btn btn-load-more" 
+                                        data-url="{{ route('catalog.loadMore') }}"
+                                        data-current-page="{{ $products->currentPage() }}"
+                                        data-last-page="{{ $products->lastPage() }}"
+                                        data-seller="{{ request('seller') }}">
+                                    <i class="ion-ios-reload"></i> Загрузить еще
+                                </button>
+                            @endif
+                        </div>
                     @endif
                     <!-- блокирую
                     <div class="pd-sort">
