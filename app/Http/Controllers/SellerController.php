@@ -14,7 +14,12 @@ class SellerController extends Controller
     */
         public function shops(): View
     {
-        $sellers = Seller::getCachedAll();
+        $sellers = Seller::withCount(['products' => function ($query) {
+                $query->where('is_active', true);
+            }])
+            ->orderBy('products_count', 'desc')
+            ->paginate(12);
+            
         return view('sellers', compact('sellers'));
     }
     /*
@@ -53,5 +58,20 @@ class SellerController extends Controller
 
 
         return view('seller', compact('seller', 'categories'));
+    }
+
+    /**
+     * 📱 AJAX: Загрузка дополнительных продавцов (для мобильных)
+     */
+    public function loadMoreShops(Request $request)
+    {
+        $sellers = Seller::withCount(['products' => function ($query) {
+                $query->where('is_active', true);
+            }])
+            ->orderBy('products_count', 'desc')
+            ->paginate(12);
+
+        // Возвращаем HTML (создадим отдельный partial)
+        return view('components.sellers-load-more', compact('sellers'))->render();
     }
 }

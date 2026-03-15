@@ -1,6 +1,18 @@
 @extends('main_layots')
 @section('title', 'Продавцы Тирасполя | Маркетплейс ПМР')
 
+@section('meta')
+    {{-- SEO: Пагинация для поисковиков --}}
+    @if(isset($sellers) && $sellers->hasPages())
+        @if($sellers->previousPageUrl())
+            <link rel="prev" href="{{ $sellers->previousPageUrl() }}" />
+        @endif
+        @if($sellers->nextPageUrl())
+            <link rel="next" href="{{ $sellers->nextPageUrl() }}" />
+        @endif
+    @endif
+@endsection
+
 @section('content')
 <style>
     /* Фиксированная высота для описания продавца */
@@ -25,6 +37,7 @@
     }
 </style>
 <div class="container container-240">
+    <div id="catalog-top"></div>
 
     <ul class="breadcrumb v4">
         <li><a href="{{ route('home') }}">Главная</a></li>
@@ -127,11 +140,26 @@
                 --}}
             </div>
         </div>
-        <ul class="pagination">
-            <li class="active"><a href="#">1</a></li>
-            <li><a href="#">2</a></li>
-            <li><a href="#"><i class="ion-ios-arrow-forward"></i></a></li>
-        </ul>
+        
+        {{-- ПАГИНАЦИЯ --}}
+        @if($sellers->hasPages())
+            {{-- Desktop пагинация --}}
+            <div class="pagination-desktop hidden-xs hidden-sm">
+                {{ $sellers->links('vendor.pagination.custom') }}
+            </div>
+            
+            {{-- Mobile: кнопка "Загрузить еще" --}}
+            @if($sellers->currentPage() < $sellers->lastPage())
+                <div class="load-more-wrapper hidden-md hidden-lg text-center">
+                    <button class="btn btn-load-more" 
+                            data-url="{{ route('shops.loadMore') }}"
+                            data-current-page="{{ $sellers->currentPage() }}"
+                            data-last-page="{{ $sellers->lastPage() }}">
+                        <i class="ion-load-c"></i> Загрузить еще
+                    </button>
+                </div>
+            @endif
+        @endif
     </div>
 </div>
 

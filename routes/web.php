@@ -37,6 +37,7 @@ Route::get('product/{alias}', [ProductController::class, 'show'])->name('product
 
 // роутs для SellerController
 Route::get('/shops', [SellerController::class, 'shops'])->name('shops');
+Route::get('/shops/load-more', [SellerController::class, 'loadMoreShops'])->name('shops.loadMore');
 Route::get('/shops/{alias}', [SellerController::class, 'seller'])->name('seller');
 // роутs для обычных страниц
 Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');

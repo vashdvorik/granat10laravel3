@@ -910,7 +910,7 @@
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
     // Сохранение позиции скролла для возврата с карточки товара (только DESKTOP)
-    const preserveScrollPages = ['catalog.index', 'catalog.show', 'catalog.sale'];
+    const preserveScrollPages = ['catalog.index', 'catalog.show', 'catalog.sale', 'shops'];
     const currentRoute = '{{ Route::currentRouteName() }}';
     const isDesktop = window.innerWidth >= 768;
     
@@ -952,6 +952,11 @@
                 // Следующая страница
                 const nextPage = currentPage + 1;
                 
+                // Определяем контейнер для добавления элементов
+                const container = $('.product-collection-grid .row').length > 0 
+                    ? $('.product-collection-grid .row') 
+                    : $('.blog-grid .row');
+                
                 // AJAX запрос
                 $.ajax({
                     url: url,
@@ -961,8 +966,8 @@
                         seller: seller
                     },
                     success: function(html) {
-                        // Добавляем товары в конец списка
-                        $('.product-collection-grid .row').append(html);
+                        // Добавляем элементы в конец списка
+                        container.append(html);
                         
                         // Обновляем текущую страницу
                         btn.data('current-page', nextPage);
@@ -977,7 +982,7 @@
                         }
                     },
                     error: function() {
-                        alert('Ошибка загрузки товаров. Попробуйте еще раз.');
+                        alert('Ошибка загрузки. Попробуйте еще раз.');
                         btn.prop('disabled', false).removeClass('loading');
                         btn.find('i').css('animation-play-state', 'paused');
                     }
