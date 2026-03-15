@@ -59,8 +59,8 @@
                     </a>
                 </div>
                 <div class="product-bottom-group">
-                    <a href="#" class="btn-icon">
-                        <span class="icon-bg icon-cart"></span>
+                    <a href="{{ route('product.show', $product->alias) }}" class="btn-icon" title="Позвонить">
+                        <span class="icon-bg icon-call"></span>
                     </a>
                     <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                         <span class="icon-bg icon-wishlist"></span>
@@ -71,8 +71,8 @@
                 </div>
             </div>
             <div class="product-button-group">
-                <a href="#" class="btn-icon">
-                    <span class="icon-bg icon-cart"></span>
+                <a href="{{ route('product.show', $product->alias) }}" class="btn-icon" title="Позвонить">
+                    <span class="icon-bg icon-call"></span>
                 </a>
                 <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                     <span class="icon-bg icon-wishlist"></span>

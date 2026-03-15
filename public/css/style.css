@@ -9371,6 +9371,13 @@ span.star:before {
     background-image: url("../img/cart-w.png");
     opacity: 1; }
 
+.icon-call {
+  background-image: url("../img/icon-phone.png");
+  background-repeat: no-repeat;
+  height: 21px;
+  width: 21px;
+  background-size: contain; }
+
 .icon-wishlist {
   background-image: url("../img/icon-heart2.png");
   background-repeat: no-repeat;
