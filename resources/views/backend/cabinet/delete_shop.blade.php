@@ -21,7 +21,7 @@
                         </div>
                         
                         <p><strong>Магазин:</strong> {{ $user->seller->name }}</p>
-                        <p><strong>Товаров:</strong> {{ $user->seller->product_count ?? 0 }}</p>
+                        <p><strong>Товаров:</strong> {{ $user->seller->products()->count() }}</p>
                         
                         <form method="POST" action="{{ route('account.store.destroy') }}">
                             @csrf

@@ -132,6 +132,9 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const currentPackageName = @json($currentPackage ? $packages->firstWhere('id', $currentPackage->package_id)?->name : null);
+    const currentPackagePrice = @json($currentPackage ? ($packages->firstWhere('id', $currentPackage->package_id)?->price ?? 0) : 0);
+
     // Обработчик для всех кнопок покупки
     document.querySelectorAll('.purchase-btn').forEach(button => {
         button.addEventListener('click', function(e) {
@@ -168,14 +171,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Подтверждение покупки
             const priceText = packagePrice == 0 ? 'бесплатно' : `${packagePrice.toLocaleString()} ₽`;
-            
+            const cancelWarning = (currentPackageName && currentPackagePrice > 0)
+                ? `<p class="mt-3 mb-0" style="font-size:0.9em;color:#856404;background:#fff3cd;border-radius:6px;padding:8px 12px;">⚠️ Ваш текущий тариф <strong>${currentPackageName}</strong> будет аннулирован без возврата средств.</p>`
+                : '';
+
             Swal.fire({
                 title: 'Подтверждение покупки',
                 html: `
                     <p>Вы уверены, что хотите активировать тариф</p>
                     <h4 class="mb-3">${packageName}</h4>
                     <p>Стоимость: <strong>${priceText}</strong></p>
-                    ${packagePrice > 0 ? `<p>Баланс после покупки: <strong>${(userBalance - packagePrice).toLocaleString()} ₽</strong></p>` : ''}
+                    ${cancelWarning}
                 `,
                 icon: 'question',
                 showCancelButton: true,

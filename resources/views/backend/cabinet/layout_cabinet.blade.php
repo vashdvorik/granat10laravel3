@@ -61,7 +61,7 @@
          </div>
          <div class="navbar-right">
             <ul class="navbar-right__menu">
-             
+               <!--
                <li class="nav-notification">
                   <div class="dropdown-custom">
                      <a href="javascript:;" class="nav-item-toggle icon-active">
@@ -146,8 +146,9 @@
                         </div>
                      </div>
                   </div>
-               </li>
-               <!-- ends: .nav-notification -->
+               </li>-->
+
+               <!-- ends: .nav-notification 
                <li class="nav-settings">
                   <div class="dropdown-custom">
                      <a href="javascript:;" class="nav-item-toggle">
@@ -214,8 +215,8 @@
                         </div>
                      </div>
                   </div>
-               </li>
-               <!-- ends: .nav-support -->
+               </li>-->
+               <!-- ends: .nav-support 
                <li class="nav-author">
                   <div class="dropdown-custom">
                      <a href="javascript:;" class="nav-item-toggle"><img src="{{ asset('cabinet/img/author-nav.jpg') }}" alt="" class="rounded-circle">
@@ -267,17 +268,17 @@
                               </ul>
                            </div>
                         </div>
-                        <!-- ends: .dropdown-wrapper -->
+                        
                      </div>
                   </div>
-               </li>
+               </li>-->
                <!-- ends: .nav-author -->
             </ul>
-            <!-- ends: .navbar-right__menu -->
+            <!-- ends: .navbar-right__menu 
             <div class="navbar-right__mobileAction d-md-none">
                <a href="#" class="btn-author-action">
                   <img class="svg" src="{{ asset('cabinet/img/svg/more-vertical.svg') }}" alt="more-vertical"></a>
-            </div>
+            </div>-->
          </div>
          <!-- ends: .navbar-right -->
       </nav>
@@ -344,11 +345,17 @@
 
                      </ul>
                   </li>
+                  <li class="">
+                     <a href="{{ url('/') }}">
+                        <span class="nav-icon uil uil-signin"></span>
+                        <span class="menu-text">Вернуться в маркетплейс</span>
+                     </a>
+                  </li>
                   <!--выйти-->
                   <li class="">
                   <a href="{{ route('logout') }}">
                      <span class="nav-icon uil uil-sign-out-alt"></span>
-                     <span class="menu-text">Выйти</span>
+                     <span class="menu-text">Выйти из аккаунта</span>
                   </a>
                   <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
                      @csrf
