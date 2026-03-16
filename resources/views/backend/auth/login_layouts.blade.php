@@ -97,6 +97,10 @@
             main {
                 padding-bottom: 70px !important;
             }
+
+            #btn-back-store {
+                display: none !important;
+            }
         }
         /* На мобильных устройствах логотип меньше */
         @media (max-width: 767px) {
@@ -131,7 +135,7 @@
     <header class="flex items-center justify-between flex-wrap bg-neutral-bg p-5 gap-5 md:py-6 md:pl-[25px] md:pr-[38px] lg:flex-nowrap dark:bg-dark-neutral-bg lg:gap-0">
         <a class="logo" href="/">
             <img class="md:mr-[100px] lg:mr-[133px]" src="{{ asset('img/logo.png') }}" alt="логотип"></a>
-        <a href="{{ url('/') }}" class="btn btn-primary btn-default btn-rounded self-center">&#8592; Вернуться в магазин</a>
+        <a href="{{ url('/') }}" id="btn-back-store" class="btn btn-primary btn-default btn-rounded self-center">&#8592; Вернуться в магазин</a>
     </header>
 
     <main class="overflow-x-scroll scrollbar-hide flex flex-1 min-h-0 flex-col pt-[42px] px-[23px] pb-[28px]">
