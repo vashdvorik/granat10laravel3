@@ -17,8 +17,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('css/pagination.css') }}">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @if(Request::is('catalog/*') || Request::is('catalog'))
     <script type="application/ld+json">
     {
@@ -454,6 +453,14 @@
     .icon-wishlist.wishlist-active {
         filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
+
+    /* Иконки соцсетей в футере: FA6 не даёт display:inline-block автоматически */
+    .social a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     </style>
 
     {{-- Open Graph для соцсетей --}}
@@ -575,13 +582,10 @@
                 <div class="col-md-6 col-sm-6 col-xs-8 flex-right">
                     <div class="topbar-right">
                         <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('gobuyer') }}">Стать продавцом</a>
+                            <a href="{{ route('gobuyer') }}">Помощь продавцам</a>
                         </div>
                         <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('help') }}">Помощь</a>
-                        </div>
-                        <div class="element hidden-xs hidden-sm">
-                            <a href="#"><img src="{{ asset('img/icon-phone.png') }}" alt=""><span>Скачать приложение</span></a>
+                            <a href="{{ route('account.index') }}"><i class="fa fa-user" style="margin-right:5px;"></i><span>Войти в аккаунт</span></a>
                         </div>
                 <!--    <div class="element element-currency">
                             <a id="label3" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -663,51 +667,20 @@
                                 
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="label5">
                                     <img src="{{ asset('img/icon-cart.png') }}" alt="">
-                                    <span class="count cart-count">0</span>
+                                    
                                 </a>
                                 <div class="dropdown-menu dropdown-cart">
-                                    <ul class="mini-products-list">
-                                        <li class="item-cart">
-                                            <div class="product-img-wrap">
-                                                <a href="#"><img src="{{ asset('img/cart1.jpg') }}" alt="" class="img-reponsive"></a>
-                                            </div>
-                                            <div class="product-details">
-                                                <div class="inner-left">
-                                                    <div class="product-name"><a href="#">Harman Kardon Onyx Studio </a></div>
-                                                    <div class="product-price">
-                                                        $ 60.00 <span>( x2)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <a href="#" class="e-del"><i class="ion-ios-close-empty"></i></a>
-                                        </li>
-                                        <li class="item-cart">
-                                            <div class="product-img-wrap">
-                                                <a href="#"><img src="{{ asset('img/cart1.jpg') }}" alt="" class="img-reponsive"></a>
-                                            </div>
-                                            <div class="product-details">
-                                                <div class="inner-left">
-                                                    <div class="product-name"><a href="#">Harman Kardon Onyx Studio </a></div>
-                                                    <div class="product-price">
-                                                        $ 60.00 <span>( x2)</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <a href="#" class="e-del"><i class="ion-ios-close-empty"></i></a>
-                                        </li>
-                                    </ul>
                                     <div class="bottom-cart">
                                         <div class="cart-price">
-                                            <span>Subtotal</span>
-                                            <span class="price-total">$ 120.00</span>
+                                            <span>Чтобы оформить заказ, свяжитесь с продавцом по телефону.</span>
                                         </div>
                                         <div class="button-cart">
-                                            <a href="#" class="cart-btn btn-viewcart">View Cart</a>
-                                            <a href="#" class="cart-btn e-checkout btn-gradient">Checkout</a>
+                                            <a href="{{ route('shops') }}" class="cart-btn btn-viewcart">Магазины</a>
+                                            <a href="{{ route('catalog.index') }}" class="cart-btn e-checkout btn-gradient">Каталог</a>
                                         </div>
                                     </div>
                                 </div> 
-                            </div>
+                            </div> 
                             
                             <a href="#" class="hidden-md hidden-lg icon-pushmenu js-push-menu">
                                 <i class="fa fa-bars f-15"></i>
@@ -774,10 +747,8 @@
                         </ul>
                         <div class="footer-social social">
                             <h3 class="footer-block-title">Наши социальные сети</h3>
-                            <a href="#" class="fa fa-twitter"></a>
-                            <a href="#" class="fa fa-dribbble"></a>
-                            <a href="#" class="fa fa-behance"></a>
-                            <a href="#" class="fa fa-instagram"></a>
+                            <a href="#"><i class="fab fa-tiktok"></i></a>
+                            <a href="#"><i class="fab fa-instagram"></i></a>
                         </div>
                     </div>
                 </div>
