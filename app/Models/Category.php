@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Facades\Cache;
+use App\Jobs\WarmCategoriesCache;
 
 class Category extends Model
 {
@@ -102,11 +103,14 @@ class Category extends Model
     /**
      * Очистить кеш категорий
      */
-    public static function clearCategoriesCache()
+    public static function clearCategoriesCache(): void
     {
         Cache::forget('categories_root_tree');
         Cache::forget('categories_root_list');
-        
+        Cache::forget('menu_categories');
+
+        // Пересчитываем кеш после отправки ответа — первый посетитель не ждёт
+        dispatch(new WarmCategoriesCache())->afterResponse();
     }
 
     /**

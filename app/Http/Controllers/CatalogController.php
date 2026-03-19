@@ -70,7 +70,8 @@ class CatalogController extends Controller
 
         // 🆕 Фильтруем категории без товаров (если включено в настройках)
         if (config('categories.hide_empty', true)) {
-            $categories = $this->filterEmptyCategories($categories);
+            $categories = Cache::remember('menu_categories', now()->addHours(24),
+                fn () => Category::filterTreeByProducts($categories));
         }
 
         // Продавцы
