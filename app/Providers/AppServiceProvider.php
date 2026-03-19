@@ -29,9 +29,14 @@ class AppServiceProvider extends ServiceProvider
             try {
                 // 🆕 NESTED SET: Дерево категорий для меню (с кешированием 24 часа)
                 $categories = \App\Models\Category::getCachedRootTree();
-                    
-                View::share('categories', $categories);
-                View::share('menuRootCategories', $categories);
+
+                // Фильтруем пустые категории для меню (пуш-меню, футер, поиск), если включено в конфиге
+                $menuCategories = config('categories.hide_empty', true)
+                    ? \App\Models\Category::filterTreeByProducts($categories)
+                    : $categories;
+
+                View::share('categories', $menuCategories);
+                View::share('menuRootCategories', $menuCategories);
             } catch (\Exception $e) {
                 // Игнорируем ошибки при миграциях
                 View::share('categories', collect());
