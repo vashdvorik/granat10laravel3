@@ -59,12 +59,10 @@ class Category extends Model
     public static function getCachedRootTree()
     {
         return Cache::remember('categories_root_tree', now()->addHours(24), function () {
-            $tree = self::where('is_active', true)
+            return self::where('is_active', true)
                 ->defaultOrder()
                 ->get()
                 ->toTree();
-
-            return static::filterTreeByProducts($tree);
         });
     }
 
