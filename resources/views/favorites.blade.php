@@ -29,6 +29,15 @@
             </div>
         </div>
 
+        {{-- Кнопка "Загрузить ещё" --}}
+        <div class="pd-middle space-v1 load-more-wrapper text-center" id="favorites-load-more-wrapper" style="display:none;">
+            <button class="btn btn-load-more" id="favorites-load-more-btn"
+                    data-current-page="1"
+                    data-last-page="1">
+                <i class="ion-ios-reload"></i> Загрузить ещё
+            </button>
+        </div>
+
         {{-- Пустое состояние --}}
         <div class="favorites-empty text-center" id="favorites-empty" style="display:none;">
             <i class="ion-ios-heart-outline favorites-empty-icon"></i>
@@ -75,12 +84,19 @@ $(document).ready(function() {
         favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     } catch(e) { favorites = []; }
 
+    var PER_PAGE   = 12;
+    var currentPage = 1;
+    var lastPage    = 1;
+    var allIds      = [];
+
     var $loading   = $('#favorites-loading');
     var $grid      = $('#favorites-grid');
     var $row       = $('#favorites-products-row');
     var $empty     = $('#favorites-empty');
     var $countWrap = $('#favorites-count-wrapper');
     var $countText = $('#favorites-count-text');
+    var $loadMoreWrap = $('#favorites-load-more-wrapper');
+    var $loadMoreBtn  = $('#favorites-load-more-btn');
 
     if (!favorites || favorites.length === 0) {
         $loading.hide();
@@ -88,32 +104,86 @@ $(document).ready(function() {
         return;
     }
 
+    allIds = favorites;
+
+    // Первичная загрузка (страница 1)
     $.ajax({
         url: '{{ route("favorites.products") }}',
         type: 'GET',
-        data: { ids: favorites.join(',') },
-        success: function(html) {
+        dataType: 'json',
+        data: { ids: allIds.join(',') },
+        success: function(response) {
             $loading.hide();
-            if (!html || $.trim(html) === '') {
+
+            if (!response || !response.html || $.trim(response.html) === '') {
                 $empty.show();
                 return;
             }
-            $row.html(html);
+
+            $row.html(response.html);
             $grid.show();
 
-            var count = $row.find('.product-item').length;
-            if (count > 0) {
-                $countText.text('Сохранено ' + count + ' ' + pluralForm(count, 'товар', 'товара', 'товаров'));
+            lastPage    = response.last_page || 1;
+            currentPage = 1;
+
+            if (response.total > 0) {
+                $countText.text('Сохранено ' + response.total + ' ' + pluralForm(response.total, 'товар', 'товара', 'товаров'));
                 $countWrap.show();
             }
 
-            // Пометить сердечки как активные
+            // Показываем кнопку "Загрузить ещё" если есть следующие страницы
+            if (response.has_more) {
+                $loadMoreBtn
+                    .data('current-page', 1)
+                    .data('last-page', lastPage);
+                $loadMoreWrap.show();
+            }
+
             if (typeof initWishlists === 'function') initWishlists();
         },
         error: function() {
             $loading.hide();
             $empty.show();
         }
+    });
+
+    // Кнопка "Загрузить ещё"
+    $loadMoreBtn.on('click', function() {
+        var btn           = $(this);
+        var curPage       = parseInt(btn.data('current-page'));
+        var maxPage       = parseInt(btn.data('last-page'));
+        var nextPage      = curPage + 1;
+
+        btn.prop('disabled', true).addClass('loading');
+        btn.find('i').css('animation-play-state', 'running');
+
+        $.ajax({
+            url: '{{ route("favorites.loadMore") }}',
+            type: 'GET',
+            data: {
+                ids:  allIds.join(','),
+                page: nextPage
+            },
+            success: function(html) {
+                $row.append(html);
+
+                if (typeof initWishlists === 'function') initWishlists();
+                $(document).trigger('cards:loaded');
+
+                btn.data('current-page', nextPage);
+
+                if (nextPage >= maxPage) {
+                    $loadMoreWrap.fadeOut();
+                } else {
+                    btn.prop('disabled', false).removeClass('loading');
+                    btn.find('i').css('animation-play-state', 'paused');
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).removeClass('loading');
+                btn.find('i').css('animation-play-state', 'paused');
+            }
+        });
     });
 
     function pluralForm(n, one, few, many) {

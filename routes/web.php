@@ -39,6 +39,7 @@ Route::get('/search/load-more', [CatalogController::class, 'loadMoreSearch'])->n
 // Избранные товары
 Route::get('/favorites', [App\Http\Controllers\FavoritesController::class, 'index'])->name('favorites');
 Route::get('/favorites/products', [App\Http\Controllers\FavoritesController::class, 'getProducts'])->name('favorites.products');
+Route::get('/favorites/load-more', [App\Http\Controllers\FavoritesController::class, 'loadMoreFavorites'])->name('favorites.loadMore');
 
 // роутs для карточки товара
 Route::get('product/{alias}', [ProductController::class, 'show'])->name('product.show');

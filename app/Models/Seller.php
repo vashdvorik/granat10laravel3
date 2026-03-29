@@ -29,7 +29,7 @@ class Seller extends Model
         'instagram',
         'viber',
         'photos',
-        'logo',
+        'photo',
         'auto_renew',
         
     ];
@@ -476,6 +476,9 @@ class Seller extends Model
         // При удалении продавца
         static::deleted(function ($seller) {
             self::clearSellersCache($seller);
+            // Товары продавца становятся невидимыми — очищаем кеш цен и меню
+            Cache::forget('product_price_range');
+            Cache::forget('menu_categories');
         });
     }
 }

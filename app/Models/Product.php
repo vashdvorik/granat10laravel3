@@ -86,13 +86,16 @@ class Product extends Model
     {
         // 1. Очистить кеш диапазона цен
         Cache::forget('product_price_range');
-        
-        // 2. Очистить счетчики для текущей категории и всех родителей
+
+        // 2. Очистить меню (видимость категорий зависит от наличия товаров)
+        Cache::forget('menu_categories');
+
+        // 3. Очистить счетчики для текущей категории и всех родителей
         if ($category) {
             self::clearCategoryCountCache($category);
         }
         
-        // 3. Если категория изменилась, очистить и старую категорию
+        // 4. Если категория изменилась, очистить и старую категорию
         if ($oldCategoryId && $oldCategoryId != $category?->id) {
             $oldCategory = \App\Models\Category::find($oldCategoryId);
             if ($oldCategory) {
