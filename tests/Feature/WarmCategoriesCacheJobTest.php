@@ -91,28 +91,29 @@ class WarmCategoriesCacheJobTest extends TestCase
 
     public function test_category_save_dispatches_warm_cache_job(): void
     {
-        // В тесте queue sync — job выполнится сразу, кеш будет заполнен
+        // В CLI (тесты) джоб выполняется синхронно немедленно:
+        // clearCategoriesCache() сбрасывает кеш, затем WarmCategoriesCache его пересобирает.
+        // Проверяем что кеш пересобран (не пустой после сохранения).
         $category = Category::factory()->create();
 
-        // После создания категории booted() вызывает clearCategoriesCache()
-        // который dispatch(new WarmCategoriesCache())->afterResponse()
-        // В тестах afterResponse() не выполняется, но кеш должен быть сброшен
-        $this->assertFalse(
+        $this->assertTrue(
             Cache::has('categories_root_tree'),
-            'Кеш дерева должен быть сброшен после сохранения категории'
+            'Кеш дерева должен быть пересобран джобом после сохранения категории'
         );
     }
 
     public function test_category_delete_clears_categories_cache(): void
     {
         $category = Category::factory()->create();
-        Cache::put('categories_root_tree', collect([]), 3600);
+        // Сбрасываем кеш вручную, чтобы проверить именно эффект delete
+        Cache::forget('categories_root_tree');
 
+        // delete() → clearCategoriesCache() → джоб синхронно пересобирает кеш
         $category->delete();
 
-        $this->assertFalse(
+        $this->assertTrue(
             Cache::has('categories_root_tree'),
-            'Кеш категорий должен быть сброшен при удалении категории'
+            'Кеш категорий должен быть пересобран джобом при удалении категории'
         );
     }
 }

@@ -45,13 +45,23 @@ class CategoriesJsonSeeder extends Seeder
         DB::beginTransaction();
         
         try {
-            $this->processCategories($categories);
-            
-            Category::fixTree();
-            
+            // Отключаем только прогрев кеша на время массовой вставки —
+            // события nestedset должны работать (они ставят _lft/_rgt).
+            Category::$suppressCacheWarming = true;
+
+            try {
+                $this->processCategories($categories);
+                Category::fixTree();
+            } finally {
+                Category::$suppressCacheWarming = false;
+            }
+
             $this->command->info('✅ Категории успешно импортированы из JSON');
-            
+
             DB::commit();
+
+            // Сбрасываем и пересобираем кеш ровно один раз после всех операций
+            Category::clearCategoriesCache();
         } catch (\Exception $e) {
             DB::rollBack();
             $this->command->error('❌ Ошибка: ' . $e->getMessage());

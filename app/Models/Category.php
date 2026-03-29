@@ -13,6 +13,12 @@ class Category extends Model
 {
     use HasFactory, NodeTrait;
 
+    /**
+     * При true — clearCategoriesCache() не диспатчит WarmCategoriesCache.
+     * Используется в сидерах, чтобы не пересчитывать кеш на каждое сохранение.
+     */
+    public static bool $suppressCacheWarming = false;
+
     protected $fillable = [
         'name',
         'alias',
@@ -109,8 +115,16 @@ class Category extends Model
         Cache::forget('categories_root_list');
         Cache::forget('menu_categories');
 
+        if (static::$suppressCacheWarming) {
+            return; // Сидер вызовет вручную после всех операций
+        }
+
         // Пересчитываем кеш после отправки ответа — первый посетитель не ждёт
-        dispatch(new WarmCategoriesCache())->afterResponse();
+        if (app()->runningInConsole()) {
+            dispatch(new WarmCategoriesCache());
+        } else {
+            dispatch(new WarmCategoriesCache())->afterResponse();
+        }
     }
 
     /**
