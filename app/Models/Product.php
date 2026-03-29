@@ -60,7 +60,7 @@ class Product extends Model
             $q->where('is_active', true)
                 ->where(function($dateQuery) {
                     $dateQuery->whereNull('end_date')
-                        ->orWhere('end_date', '>=', now());
+                        ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE, не DATETIME
                 });
         });
     }

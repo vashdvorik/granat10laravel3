@@ -43,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
                 View::share('categories', collect());
                 View::share('menuRootCategories', collect());
             }
+        } else {
+            // Таблица ещё не создана (первая миграция или тестовое окружение)
+            View::share('categories', collect());
+            View::share('menuRootCategories', collect());
         }
 
         // Динамические переменные для кабинета

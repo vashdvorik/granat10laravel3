@@ -173,14 +173,17 @@ class CatalogController extends Controller
                 $q->where('is_active', true)
                     ->where(function($dateQuery) {
                         $dateQuery->whereNull('end_date')
-                            ->orWhere('end_date', '>=', now());
+                            ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE
                     });
+            })
+            ->whereHas('products', function ($q) use ($categoryIds) {   // заменяем HAVING на EXISTS
+                $q->where('is_active', true)
+                    ->whereIn('category_id', $categoryIds);
             })
             ->withCount(['products as product_count_in_category' => function ($q) use ($categoryIds) {
                 $q->where('is_active', true)
                     ->whereIn('category_id', $categoryIds);
             }])
-            ->having('product_count_in_category', '>', 0)
             ->orderByDesc('product_count_in_category')
             ->get();
 

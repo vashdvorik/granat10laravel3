@@ -39,20 +39,20 @@ class SellerController extends Controller
         // Получаем категории из кеша
         $categories = Category::getCachedRootCategories();
 
-        // 2. Создаем функцию для подсчета товаров продавца во всех дочерних категориях
-        function countSellerProductsInCategory(Category $category, Seller $seller) {
+        // 2. Создаем замыкание для подсчета товаров продавца во всех дочерних категориях
+        $countSellerProductsInCategory = function (Category $category, Seller $seller) use (&$countSellerProductsInCategory): int {
             $count = $category->products()->where('seller_id', $seller->id)->count();
 
             foreach ($category->children as $child) {
-                $count += countSellerProductsInCategory($child, $seller);
+                $count += $countSellerProductsInCategory($child, $seller);
             }
 
             return $count;
-        }
+        };
 
         // 3. Фильтруем категории 1-го уровня и добавляем количество товаров
-        $categories = $categories->filter(function ($category) use ($seller, &$countSellerProductsInCategory) {
-            $totalProducts = countSellerProductsInCategory($category, $seller);
+        $categories = $categories->filter(function ($category) use ($seller, $countSellerProductsInCategory) {
+            $totalProducts = $countSellerProductsInCategory($category, $seller);
             $category->total_products = $totalProducts; // Добавляем атрибут total_products к категории
             return $totalProducts > 0;
         });

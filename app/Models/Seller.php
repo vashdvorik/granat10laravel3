@@ -69,8 +69,8 @@ class Seller extends Model
         return $this->sellerPackages()
             ->where('is_active', true)
             ->where(function($query) {
-                $query->whereNull('end_date')              // Бессрочный пакет
-                    ->orWhere('end_date', '>=', now());  // Или срок еще не истек
+                $query->whereNull('end_date')                         // Бессрочный пакет
+                    ->orWhere('end_date', '>=', now()->toDateString()); // Или срок еще не истек (сравниваем DATE с DATE)
             })
             ->with('package')
             ->first();
