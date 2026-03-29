@@ -9,6 +9,8 @@ use App\Models\Seller;
 use App\Models\SellerPackage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class CabinetController extends Controller
 {
@@ -48,12 +50,13 @@ class CabinetController extends Controller
         }
 
         $data = $request->validate([
-            'name' => ['required','string','max:255', Rule::unique('sellers','name')],
-            'phone' => ['nullable','string','max:50'],
-            'town' => ['nullable','string','max:255'],
-            'sellerplace' => ['nullable','string','max:255'],
-            'address' => ['nullable','string'],
-            'description' => ['nullable','string'],
+            'name'        => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')],
+            'phone'       => ['nullable', 'string', 'max:50'],
+            'town'        => ['nullable', 'string', 'max:255'],
+            'sellerplace' => ['nullable', 'string', 'max:255'],
+            'address'     => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ]);
 
         $data['user_id'] = $user->id;
@@ -69,9 +72,24 @@ class CabinetController extends Controller
         }
 
         $data['alias'] = $alias;
+        // Убираем logo из $data — храним в photo отдельно после создания
+        $logoFile = $request->file('logo');
+        unset($data['logo']);
+
         // Создаем магазин
-        
         $seller = Seller::create($data);
+
+        // Загружаем логотип магазина, если файл передан
+        if ($logoFile) {
+            $filename = 'logo_' . Str::uuid() . '.webp';
+            $path = 'sellers/' . $seller->id;
+            $image = Image::make($logoFile)
+                ->orientate()
+                ->fit(400, 400, function ($c) { $c->upsize(); })
+                ->encode('webp', 85);
+            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
+            $seller->update(['photo' => $path . '/' . $filename]);
+        }
 
         // Автоматически присваиваем базовый пакет (ID = 1)
         \App\Models\SellerPackage::create([

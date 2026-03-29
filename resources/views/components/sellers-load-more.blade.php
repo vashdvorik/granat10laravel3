@@ -2,7 +2,7 @@
 <div class="col-md-4 col-sm-6 col-xs-12 blog-post-item">
     <div class="blog-img">
         <a href="{{ route('seller', ['alias' => $seller->alias])}}" class="hover-images">
-            <img src="{{ $seller->image ?? 'img/blog/blog_3.jpg' }}" alt="" class="img-reponsive">
+            <img src="{{ $seller->photo ? Storage::url($seller->photo) : asset('img/blog/blog_3.jpg') }}" alt="{{ $seller->name }}" class="img-reponsive">
         </a>
         <div class="blog-post-date e-gradient abs">
             <span class="b-date">{{ $seller->products_count ?? 0 }}</span>

@@ -34,10 +34,10 @@
                            </div>
                            <div class="account-profile d-flex align-items-center mb-4 ">
                               <div class="ap-img pro_img_wrapper">
-                                 <input id="file-upload" type="file" name="fileUpload" class="d-none">
+                                 <input id="file-upload" type="file" name="logo" accept="image/*" class="d-none">
                                  <!-- Profile picture image-->
                                  <label for="file-upload">
-                                    <img class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="profile">
+                                    <img id="logo-preview" class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="profile">
                                     <span class="cross" id="remove_pro_pic">
                                        <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="camera" class="svg">
                                     </span>
@@ -45,10 +45,13 @@
                               </div>
                               <div class="account-profile__title">
                                  <h6 class="fs-15 ms-20 fw-500 text-capitalize">Добавьте фото</h6>
+                                 @error('logo')
+                                     <div class="text-danger small ms-20">{{ $message }}</div>
+                                 @enderror
                               </div>
                            </div>
                            <div class="edit-profile__body">
-                                <form action="{{ route('account.store.store') }}" method="POST">
+                                <form action="{{ route('account.store.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf    
                                     <div class="form-group mb-25">
                                         <label for="name">Название магазина</label>
@@ -110,4 +113,19 @@
 </div>
 
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('file-upload').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            document.getElementById('logo-preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+@endpush
+
 @endsection

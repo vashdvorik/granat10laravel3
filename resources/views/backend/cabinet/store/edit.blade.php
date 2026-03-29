@@ -40,7 +40,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.store.update', $seller->id) }}" method="POST">
+            <form action="{{ route('account.store.update', $seller->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -237,6 +237,33 @@
 
                     {{-- Боковая панель --}}
                     <div class="col-lg-4">
+                        {{-- Фото / логотип магазина --}}
+                        <div class="card mb-25">
+                            <div class="card-header">
+                                <h6 class="fw-500">Фото магазина</h6>
+                            </div>
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    @if($seller->photo)
+                                        <img id="logo-preview" src="{{ Storage::url($seller->photo) }}"
+                                             class="rounded-circle wh-120 object-fit-cover border"
+                                             alt="Логотип">
+                                    @else
+                                        <img id="logo-preview" src="{{ asset('cabinet/img/author/profile.png') }}"
+                                             class="rounded-circle wh-120 object-fit-cover border"
+                                             alt="Логотип">
+                                    @endif
+                                </div>
+                                <label for="shop-logo-upload" class="btn btn-outline-secondary btn-sm w-100 mb-0">
+                                    <i class="uil uil-upload"></i> Загрузить фото
+                                </label>
+                                <input id="shop-logo-upload" type="file" name="logo" accept="image/*" class="d-none">
+                                <small class="text-muted d-block mt-2">JPEG, PNG, JPG, WebP &mdash; макс. 5&nbsp;МБ</small>
+                                @error('logo')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                         <div class="card mb-25">
                             <div class="card-header">
                                 <h6 class="fw-500">Действия</h6>
@@ -304,3 +331,17 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('shop-logo-upload').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (event) {
+            document.getElementById('logo-preview').src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+</script>
+@endpush
