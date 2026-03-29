@@ -28,47 +28,7 @@
         </div>
         <div class="pd-top">
             <h1 class="title">Акции сейчас</h1>
-            <div class="show-element"><span>Showing 1–15 of 20 results</span></div>
-        </div>
-        <div class="pd-middle">
-            <div class="view-mode view-group">
-                <a class="grid-icon col active"><img src="img/grid.png" alt=""></a>
-                <a class="grid-icon col2"><img src="img/grid2.png" alt=""></a>
-                <a class="list-icon list"><img src="img/list.png" alt=""></a>
-            </div>
-            <div class="pd-sort">
-                <div class="filter-sort">
-                    <div class="dropdown">
-                        <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                            <span class="dropdown-label">Default sorting</span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a href="manual">Featured</a></li>   
-                            <li><a href="best-selling">Best Selling</a></li>
-                            <li><a href="title-ascending">Alphabetically, A-Z</a></li>
-                            <li><a href="title-descending">Alphabetically, A-Z</a></li>
-                            <li><a href="price-descending">Price, high to low</a></li>
-                            <li><a href="price-ascending">Price, low to high</a></li>
-                            <li><a href="created-ascending">Date, old to new</a></li>
-                            <li><a href="created-descending">Date, new to old</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="filter-show">
-                    <div class="dropdown">
-                            <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                Show
-                                <span class="dropdown-label">12</span>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a href="#">12</a></li>   
-                                <li><a href="#">24</a></li>
-                                <li><a href="#">36</a></li>
-                                <li><a href="#">48</a></li>
-                            </ul>
-                    </div>
-                </div>
-            </div>
+            <div class="show-element"><span>Показано {{ $products->firstItem() }}–{{ $products->lastItem() }} из {{ $products->total() }} товаров</span></div>
         </div>
         <div class="product-collection-grid product-grid spc1">
             <div class="row">
