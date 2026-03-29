@@ -40,8 +40,8 @@
             <div class="row">
                 <div class="blog-content col-md-12 col-xs-12">
                     <div class="blog-post-item v2">
-                        <div class="blog-img">
-                            <a href="#" class="hover-images"><img src="{{ asset('img/blog/single-post.jpg') }}" alt="" class="img-reponsive"></a>
+                        <div class="blog-img" style="height:300px;">
+                            <a href="#" class="hover-images"><img src="{{ $seller->photo ? Storage::url($seller->photo) : asset('img/blog/single-post.jpg') }}" alt="{{ $seller->name }}" class="img-reponsive" style="width:100%; height:300px; object-fit:cover; object-position:center;"></a>
                             <div class="blog-post-date e-gradient abs v2">
                                 <span class="b-date">{{ $seller->products_count ?? 0 }}</span>
                                 <span class="b-month">ТОВ</span>
