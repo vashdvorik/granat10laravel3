@@ -99,6 +99,13 @@ class CabinetController extends Controller
             'end_date' => null, // Базовый пакет бессрочный
             'is_active' => true,
         ]);
+
+        activity('sellers')
+            ->causedBy($user)
+            ->performedOn($seller)
+            ->withProperties(['seller_alias' => $seller->alias])
+            ->log('Создан магазин "' . $seller->name . '"');
+
         return redirect()->route('account.index')->with('success', 'Магазин создан');
     }
 
@@ -172,8 +179,14 @@ class CabinetController extends Controller
         }
         
         // Удаляем магазин
+        $sellerName = $seller->name;
         $seller->delete();
-        
+
+        activity('sellers')
+            ->causedBy($user)
+            ->withProperties(['seller_name' => $sellerName])
+            ->log('Удалён магазин "' . $sellerName . '"');
+
         return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
     }
 

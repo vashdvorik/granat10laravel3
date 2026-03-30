@@ -175,5 +175,21 @@ class MenuItemsTableSeeder extends Seeder
                 'order'      => 14,
             ])->save();
         }
+
+        $menuItem = MenuItem::firstOrNew([
+            'menu_id' => $menu->id,
+            'title'   => 'Журнал действий',
+            'url'     => '',
+            'route'   => 'admin.activity-log',
+        ]);
+        if (!$menuItem->exists) {
+            $menuItem->fill([
+                'target'     => '_self',
+                'icon_class' => 'voyager-list',
+                'color'      => null,
+                'parent_id'  => null,
+                'order'      => 99,
+            ])->save();
+        }
     }
 }

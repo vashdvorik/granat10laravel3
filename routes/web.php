@@ -7,6 +7,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CabinetController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +57,7 @@ Route::get('help', [PageController::class, 'help'])->name('help');
 
 // не пропускать страницы, которые не админы и не прописаны в app/Http/Middleware/OnlyMyEmail.php
 Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'only.my.email']], function () {
+    Route::get('activity-log', [ActivityLogController::class, 'index'])->name('admin.activity-log');
     Voyager::routes();
 });
 

@@ -41,6 +41,7 @@ class PackageController extends Controller
     {
         $user = Auth::user();
         $seller = $user->seller;
+        $balanceBefore = $user->balance;
         // Проверка, что магазин существует
         if (!$seller) {
             return redirect()->route('account.store.create')
@@ -108,6 +109,19 @@ class PackageController extends Controller
         });
         
         // ✅ Success - возвращаем ПОСЛЕ успешной транзакции
+        activity('packages')
+            ->causedBy($user)
+            ->performedOn($package)
+            ->withProperties([
+                'seller_id'      => $seller->id,
+                'seller_name'    => $seller->name,
+                'package_name'   => $package->name,
+                'price'          => $package->price,
+                'balance_before' => $balanceBefore,
+                'balance_after'  => $user->fresh()->balance,
+            ])
+            ->log('Активирован тариф "' . $package->name . '"');
+
         return redirect()->route('account.packages.index')
             ->with('success', 'Тариф "' . $package->name . '" успешно активирован!');
             

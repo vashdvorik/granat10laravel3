@@ -5,10 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'price', 'lowprice', 'is_vip', 'is_active', 'category_id', 'seller_id'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('products')
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'Товар создан: "' . $this->name . '"',
+                'updated' => 'Товар обновлён: "' . $this->name . '"',
+                'deleted' => 'Товар удалён: "' . $this->name . '"',
+                default   => $eventName,
+            });
+    }
 
     protected $fillable = [
         'name',

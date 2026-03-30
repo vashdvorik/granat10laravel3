@@ -16,14 +16,22 @@ class ProductsTableSeeder extends Seeder
     {
         DB::table('products')->delete();
 
+        $seller1Id = DB::table('sellers')->where('alias', 'moda')->value('id');
+        $seller2Id = DB::table('sellers')->where('alias', 'technika')->value('id');
+
+        if (!$seller1Id || !$seller2Id) {
+            $this->command->warn('ProductsTableSeeder: продавцы не найдены, пропускаем.');
+            return;
+        }
+
         DB::table('products')->insert([
             [
-                'name' => 'Футболка белая',
-                'category_id' => 1, // Футболки
-                'seller_id' => 1,
+                'name' => 'Красивое платье(пример)',
+                'category_id' => 1112, // платья
+                'seller_id' => $seller1Id,
                 'price' => 799,
-                'lowprice' => null,
-                'desc' => 'Классическая белая футболка из 100% натурального хлопка — базовый элемент гардероба на каждый день. Мягкий и приятный к телу материал обеспечивает комфорт в течение всего дня. Прямой крой подходит для любого типа фигуры, а лаконичный дизайн легко сочетается с джинсами, брюками или шортами. Отличный выбор для повседневной носки, спорта или в качестве нижнего слоя под рубашку или свитер.',
+                'lowprice' => 699,
+                'desc' => 'Классическое белое платье из 100% натурального хлопка — базовый элемент гардероба на каждый день. Мягкий и приятный к телу материал обеспечивает комфорт в течение всего дня. Прямой крой подходит для любого типа фигуры, а лаконичный дизайн легко сочетается с джинсами, брюками или шортами. Отличный выбор для повседневной носки, спорта или в качестве нижнего слоя под рубашку или свитер.',
                 'features1' => '100% хлопок',
                 'features2' => 'Белый цвет',
                 'features3' => 'Размеры S-XL',
@@ -37,18 +45,18 @@ class ProductsTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Футболка синяя',
-                'category_id' => 1, // Футболки
-                'seller_id' => 1,
+                'name' => 'Игровой ноутбук(пример)',
+                'category_id' => 10201, // ноутбуки
+                'seller_id' => $seller1Id,
                 'price' => 899,
                 'lowprice' => 799,
-                'desc' => 'Стильная синяя футболка из хлопка.',
-                'features1' => '100% хлопок',
-                'features2' => 'Синий цвет',
-                'features3' => 'Размеры S-XL',
+                'desc' => 'Мощный игровой ноутбук с высокой производительностью и современным дизайном.',
+                'features1' => 'Процессор Intel i7',
+                'features2' => '16GB RAM',
+                'features3' => '512GB SSD',
                 'features4' => 'Доставка по Тирасполю',
-                'alias' => 'tshirt-blue',
-                'is_vip' => true,
+                'alias' => 'gaming-laptop',
+                'is_vip' => false,
                 'is_active' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -56,12 +64,12 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Футболка с принтом',
-                'category_id' => 1, // Футболки
-                'seller_id' => 2,
+                'name' => 'Холодильник(пример)',
+                'category_id' => 11101, // холодильники
+                'seller_id' => $seller2Id,
                 'price' => 999,
                 'lowprice' => null,
-                'desc' => 'Футболка с ярким принтом.',
+                'desc' => 'Мощный и энергоэффективный холодильник с современным дизайном.',
                 'features1' => '100% хлопок',
                 'features2' => 'Принт',
                 'features3' => null,
@@ -75,12 +83,12 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Футболка черная',
-                'category_id' => 1, // Футболки
-                'seller_id' => 1,
+                'name' => 'Офисное кресло(пример)',
+                'category_id' => 12106, // офисная мебель
+                'seller_id' => $seller1Id,
                 'price' => 799,
                 'lowprice' => 699,
-                'desc' => 'Классическая черная футболка.',
+                'desc' => 'Классическое черное офисное кресло.',
                 'features1' => '100% хлопок',
                 'features2' => 'Черный цвет',
                 'features3' => 'Размеры S-XL',
@@ -94,17 +102,17 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Ботильоны женские',
-                'category_id' => 1, // Ботильоны
-                'seller_id' => 2,
+                'name' => 'Смеситель для ванной(пример)',
+                'category_id' => 13204, // Смесители
+                'seller_id' => $seller2Id,
                 'price' => 4999,
                 'lowprice' => 3999,
-                'desc' => 'Модные женские ботильоны.',
-                'features1' => 'Натуральная кожа',
-                'features2' => 'Черный цвет',
-                'features3' => 'Размеры 36-41',
-                'features4' => 'Черный цвет',
-                'alias' => 'ankle-boots-women',
+                'desc' => 'Модный и функциональный смеситель для ванной.',
+                'features1' => 'Нержавеющая сталь',
+                'features2' => 'Хромированное покрытие',
+                'features3' => 'Современный дизайн',
+                'features4' => 'Легкая установка',
+                'alias' => 'bathroom-faucet',
                 'is_vip' => true,
                 'is_active' => true,
                 'created_at' => now(),
@@ -113,12 +121,12 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Ботильоны замшевые',
-                'category_id' => 1, // Ботильоны
-                'seller_id' => 2,
+                'name' => 'парфюмерная вода(пример)',
+                'category_id' => 14203, // Унисекс ароматы
+                'seller_id' => $seller2Id,
                 'price' => 5499,
                 'lowprice' => null,
-                'desc' => 'Замшевые ботильоны на каблуке.',
+                'desc' => 'Универсальный аромат для мужчин и женщин.',
                 'features1' => 'Натуральная замша',
                 'features2' => 'Бежевый цвет',
                 'features3' => 'Размеры 36-40',
@@ -132,17 +140,18 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Ботильоны демисезонные',
-                'category_id' => 1, // Ботильоны
-                'seller_id' => 1,
+                'name' => 'Коляска прогулочная(пример)',
+                'category_id' => 15301, // Коляски прогулочные
+                'seller_id' => $seller1Id,
                 'price' => 3999,
                 'lowprice' => null,
-                'desc' => 'Демисезонные ботильоны для женщин.',
+                'desc' => 'Прогулочная коляска для детей.',
+
                 'features1' => 'Искусственная кожа',
                 'features2' => 'Коричневый цвет',
                 'features3' => 'Размеры 37-41',
                 'features4' => 'Размеры 37-41',
-                'alias' => 'ankle-boots-demi',
+                'alias' => 'stroller-walking',
                 'is_vip' => true,
                 'is_active' => true,
                 'created_at' => now(),
@@ -151,17 +160,36 @@ class ProductsTableSeeder extends Seeder
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
             [
-                'name' => 'Ботильоны на платформе',
-                'category_id' => 1, // Ботильоны
-                'seller_id' => 2,
+                'name' => 'Электросамокат(пример)',
+                'category_id' => 18305, // Электросамокаты
+                'seller_id' => $seller1Id,
                 'price' => 5999,
                 'lowprice' => 4999,
-                'desc' => 'Ботильоны на высокой платформе.',
+                'desc' => 'Электросамокат для взрослых и детей.',
                 'features1' => 'Натуральная кожа',
                 'features2' => 'Красный цвет',
                 'features3' => null,
                 'features4' => null,
-                'alias' => 'ankle-boots-platform',
+                'alias' => 'electric-scooter',
+                'is_vip' => true,
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'push_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
+                'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
+            ],
+            [
+                'name' => 'Держатель для телефона(пример)',
+                'category_id' => 20405, // Держатели для телефона
+                'seller_id' => $seller1Id,
+                'price' => 5999,
+                'lowprice' => 4999,
+                'desc' => 'Держатель для телефона для автомобилей.',
+                'features1' => 'Натуральная кожа',
+                'features2' => 'Красный цвет',
+                'features3' => null,
+                'features4' => null,
+                'alias' => 'phone-holder',
                 'is_vip' => true,
                 'is_active' => true,
                 'created_at' => now(),

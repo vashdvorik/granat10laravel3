@@ -7,10 +7,27 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\SellerPackage;
 use Illuminate\Support\Facades\Cache; 
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Seller extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['name', 'phone', 'town', 'sellerplace', 'address', 'description'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->useLogName('sellers')
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'Магазин создан: "' . $this->name . '"',
+                'updated' => 'Магазин обновлён: "' . $this->name . '"',
+                'deleted' => 'Магазин удалён: "' . $this->name . '"',
+                default   => $eventName,
+            });
+    }
 
     protected $fillable = [
         'user_id',
