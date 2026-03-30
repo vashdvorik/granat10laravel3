@@ -191,5 +191,21 @@ class MenuItemsTableSeeder extends Seeder
                 'order'      => 99,
             ])->save();
         }
+
+        $menuItem = MenuItem::firstOrNew([
+            'menu_id' => $menu->id,
+            'title'   => 'Дерево категорий',
+            'url'     => '',
+            'route'   => 'admin.category-tree',
+        ]);
+        if (!$menuItem->exists) {
+            $menuItem->fill([
+                'target'     => '_self',
+                'icon_class' => 'voyager-categories',
+                'color'      => null,
+                'parent_id'  => null,
+                'order'      => 100,
+            ])->save();
+        }
     }
 }
