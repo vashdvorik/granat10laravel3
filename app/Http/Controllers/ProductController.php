@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 
 /* show($alias) - Показывает детальную страницу товара по alias,
@@ -17,7 +18,14 @@ class ProductController extends Controller
         ->with(['images', 'seller', 'category'])
         ->where('alias', $alias)
         ->firstOrFail();
-         // Получаем категорию товара
+
+        // Считаем просмотр
+        DB::table('views')->updateOrInsert(
+            ['product_id' => $product->id],
+            ['views' => DB::raw('views + 1')]
+        );
+
+        // Получаем категорию товара
         $category = $product->category;
 
         // Получаем хлебные крошки для категории товара

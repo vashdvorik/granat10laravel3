@@ -345,6 +345,15 @@
 
                      </ul>
                   </li>
+                  <!--статистика-->
+                  @if(auth()->check() && auth()->user()->seller)
+                  <li class="{{ request()->routeIs('account.stats') ? 'active' : '' }}">
+                     <a href="{{ route('account.stats') }}">
+                        <span class="nav-icon uil uil-chart-bar"></span>
+                        <span class="menu-text">Статистика</span>
+                     </a>
+                  </li>
+                  @endif
                   <li class="">
                      <a href="{{ url('/') }}">
                         <span class="nav-icon uil uil-signin"></span>

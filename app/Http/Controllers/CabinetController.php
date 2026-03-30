@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use Illuminate\Support\Str;
@@ -25,7 +26,76 @@ class CabinetController extends Controller
         $seller = $user->seller; // из модели user получили селлер
         return view('backend.cabinet.cabinet', compact('seller'));
     }
-    
+
+    /*
+    Страница статистики: сводная информация по магазину продавца
+    */
+    public function stats()
+    {
+        $user = Auth::user();
+        $seller = $user->seller;
+
+        if (!$seller) {
+            return redirect()->route('account.store.create')
+                ->with('error', 'Сначала создайте магазин');
+        }
+
+        // Все ID товаров продавца (один запрос)
+        $productIds = $seller->products()->pluck('id');
+
+        // Счётчики товаров
+        $totalProducts    = $productIds->count();
+        $activeProducts   = $seller->products()->where('is_active', true)->count();
+        $inactiveProducts = $totalProducts - $activeProducts;
+        $vipProducts      = $seller->products()->where('is_active', true)->where('is_vip', true)->count();
+        $saleProducts     = $seller->products()->where(function ($q) {
+            $q->whereNotNull('lowprice')->where('lowprice', '>', 0);
+        })->count();
+
+        // Просмотры
+        $totalViews = $productIds->isEmpty()
+            ? 0
+            : DB::table('views')->whereIn('product_id', $productIds)->sum('views');
+
+        // Топ-5 товаров по просмотрам
+        $topProducts = $productIds->isEmpty()
+            ? collect()
+            : DB::table('products')
+                ->join('views', 'products.id', '=', 'views.product_id')
+                ->whereIn('products.id', $productIds)
+                ->select('products.id', 'products.name', 'products.is_active', 'views.views')
+                ->orderByDesc('views.views')
+                ->limit(5)
+                ->get();
+
+        // Активный тариф
+        $activePackage = $seller->activePackage();
+        $daysLeft = null;
+        if ($activePackage && $activePackage->end_date) {
+            $daysLeft = (int) now()->diffInDays($activePackage->end_date, false);
+        }
+
+        // Лимиты тарифа
+        $productLimit = $activePackage ? $activePackage->package->active_products_limit : null;
+        $vipLimit     = $activePackage ? $activePackage->package->vip_products_limit : null;
+
+        // История тарифов
+        $packageHistory = $seller->sellerPackages()->with('package')->orderByDesc('id')->get();
+
+        // Баланс
+        $balance = $user->balance;
+
+        return view('backend.cabinet.stats', compact(
+            'seller',
+            'totalProducts', 'activeProducts', 'inactiveProducts',
+            'vipProducts', 'saleProducts',
+            'totalViews', 'topProducts',
+            'activePackage', 'daysLeft',
+            'productLimit', 'vipLimit',
+            'packageHistory', 'balance'
+        ));
+    }
+
     /*
     Показывает форму создания магазина
     (проверяет, что магазин еще не создан)

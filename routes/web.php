@@ -100,8 +100,11 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     
     // Главная страница кабинета
     Route::get('/', [CabinetController::class, 'cabinet'])->name('index');
-    
-     // Получение дочерних категорий (AJAX)
+
+    // Статистика магазина
+    Route::get('stats', [CabinetController::class, 'stats'])->name('stats');
+
+    // Получение дочерних категорий (AJAX)
     Route::get('categories/children', [App\Http\Controllers\Backend\ProductController::class, 'getChildCategories'])
         ->name('categories.children');
 
