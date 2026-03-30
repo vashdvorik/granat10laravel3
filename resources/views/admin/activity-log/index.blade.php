@@ -34,7 +34,7 @@
                         <div class="form-group" style="margin-right: 10px;">
                             <label class="sr-only">Поиск</label>
                             <input type="text" name="search" class="form-control"
-                                placeholder="Поиск по описанию..."
+                                placeholder="Поиск по действию или названию магазина..."
                                 value="{{ request('search') }}">
                         </div>
 
@@ -76,21 +76,21 @@
                         </thead>
                         <tbody>
                             @forelse ($logs as $log)
+                                @php
+                                    $badgeColors = [
+                                        'auth'     => 'primary',
+                                        'products' => 'success',
+                                        'sellers'  => 'warning',
+                                        'packages' => 'danger',
+                                        'users'    => 'info',
+                                        'system'   => 'default',
+                                    ];
+                                    $color = $badgeColors[$log->log_name] ?? 'default';
+                                @endphp
                                 <tr>
                                     <td class="text-muted" style="font-size:12px;">{{ $log->id }}</td>
 
                                     <td>
-                                        @php
-                                            $badgeColors = [
-                                                'auth'     => 'primary',
-                                                'products' => 'success',
-                                                'sellers'  => 'warning',
-                                                'packages' => 'danger',
-                                                'users'    => 'info',
-                                                'system'   => 'default',
-                                            ];
-                                            $color = $badgeColors[$log->log_name] ?? 'default';
-                                        @endphp
                                         <span class="badge badge-{{ $color }}" style="font-size:11px; padding: 4px 8px;">
                                             {{ $log->log_name }}
                                         </span>
@@ -135,75 +135,6 @@
                                         </button>
                                     </td>
                                 </tr>
-
-                                {{-- Модальное окно с деталями --}}
-                                <div class="modal fade" id="log-modal-{{ $log->id }}" tabindex="-1" role="dialog">
-                                    <div class="modal-dialog modal-lg" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                <h4 class="modal-title">
-                                                    Запись #{{ $log->id }} &mdash;
-                                                    <span class="badge badge-{{ $color }}">{{ $log->log_name }}</span>
-                                                </h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <table class="table table-bordered">
-                                                    <tr>
-                                                        <th style="width:160px;">Действие</th>
-                                                        <td>{{ $log->description }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Событие</th>
-                                                        <td>{{ $log->event ?? '—' }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Пользователь</th>
-                                                        <td>
-                                                            @if ($log->causer)
-                                                                {{ $log->causer->name }} ({{ $log->causer->email }})
-                                                                &mdash; ID: {{ $log->causer_id }}
-                                                            @else
-                                                                —
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Объект</th>
-                                                        <td>
-                                                            @if ($log->subject_type)
-                                                                {{ $log->subject_type }} #{{ $log->subject_id }}
-                                                            @else
-                                                                —
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>IP</th>
-                                                        <td>{{ $log->properties->get('ip') ?? '—' }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Свойства</th>
-                                                        <td>
-                                                            @if ($log->properties && $log->properties->isNotEmpty())
-                                                                <pre style="background:#f5f5f5; padding:10px; border-radius:4px; white-space:pre-wrap; word-break:break-all;">{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                                                            @else
-                                                                <span class="text-muted">—</span>
-                                                            @endif
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>Дата</th>
-                                                        <td>{{ $log->created_at->format('d.m.Y H:i:s') }}</td>
-                                                    </tr>
-                                                </table>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center text-muted" style="padding: 40px;">
@@ -218,6 +149,88 @@
             </div>
         </div>
     </div>
+
+    {{-- Модальные окна (вне таблицы!) --}}
+    @foreach ($logs as $log)
+        @php
+            $badgeColors = [
+                'auth'     => 'primary',
+                'products' => 'success',
+                'sellers'  => 'warning',
+                'packages' => 'danger',
+                'users'    => 'info',
+                'system'   => 'default',
+            ];
+            $color = $badgeColors[$log->log_name] ?? 'default';
+        @endphp
+        <div class="modal fade" id="log-modal-{{ $log->id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">
+                            Запись #{{ $log->id }} &mdash;
+                            <span class="badge badge-{{ $color }}">{{ $log->log_name }}</span>
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width:160px;">Действие</th>
+                                <td>{{ $log->description }}</td>
+                            </tr>
+                            <tr>
+                                <th>Событие</th>
+                                <td>{{ $log->event ?? '—' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Пользователь</th>
+                                <td>
+                                    @if ($log->causer)
+                                        {{ $log->causer->name }} ({{ $log->causer->email }})
+                                        &mdash; ID: {{ $log->causer_id }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Объект</th>
+                                <td>
+                                    @if ($log->subject_type)
+                                        {{ $log->subject_type }} #{{ $log->subject_id }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>IP</th>
+                                <td>{{ $log->properties->get('ip') ?? '—' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Свойства</th>
+                                <td>
+                                    @if ($log->properties && $log->properties->isNotEmpty())
+                                        <pre style="background:#f5f5f5; padding:10px; border-radius:4px; white-space:pre-wrap; word-break:break-all;">{{ json_encode($log->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Дата</th>
+                                <td>{{ $log->created_at->format('d.m.Y H:i:s') }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 
     {{-- Пагинация --}}
     @if ($logs->hasPages())

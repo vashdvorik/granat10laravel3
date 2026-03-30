@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Seller;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 
@@ -17,7 +18,16 @@ class ActivityLogController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('description', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+
+            // Ищем пользователей, у которых есть магазин с таким названием
+            $userIdsFromSellers = Seller::where('name', 'like', '%' . $search . '%')
+                ->pluck('user_id');
+
+            $query->where(function ($q) use ($search, $userIdsFromSellers) {
+                $q->where('description', 'like', '%' . $search . '%')
+                  ->orWhereIn('causer_id', $userIdsFromSellers);
+            });
         }
 
         if ($request->filled('causer')) {
