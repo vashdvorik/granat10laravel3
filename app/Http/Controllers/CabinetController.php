@@ -1,287 +1,284 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChangePasswordRequest;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UpdateSellerRequest;
+use App\Services\PackageService;
+use App\Services\SellerService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use App\Models\Seller;
-use App\Models\SellerPackage;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
+/**
+ * Контроллер личного кабинета пользователя
+ */
 class CabinetController extends Controller
 {
-    /* 
-    Отображает главную страницу личного кабинета 
-    пользователя с информацией о магазине 
-    */
+    public function __construct(
+        private UserService $userService,
+        private SellerService $sellerService,
+        private PackageService $packageService
+    ) {
+        $this->middleware('auth');
+    }
 
+    /**
+     * Главная страница кабинета
+     */
     public function cabinet()
     {
-        $user = Auth::user(); 
-        $seller = $user->seller; // из модели user получили селлер
+        $user = Auth::user();
+        $seller = $user->seller;
+
         return view('backend.cabinet.cabinet', compact('seller'));
     }
 
-    /*
-    Страница статистики: сводная информация по магазину продавца
-    */
+    /**
+     * Статистика магазина
+     */
     public function stats()
     {
         $user = Auth::user();
         $seller = $user->seller;
 
-        if (!$seller) {
-            return redirect()->route('account.store.create')
-                ->with('error', 'Сначала создайте магазин');
+        if (! $seller) {
+            return redirect()
+                ->route('account.store.create')
+                ->with('error', __('errors.no_seller_account'));
         }
 
-        // Все ID товаров продавца (один запрос)
-        $productIds = $seller->products()->pluck('id');
+        // Получаем статистику через сервис
+        $stats = $this->sellerService->getSellerStats($seller);
 
-        // Счётчики товаров
-        $totalProducts    = $productIds->count();
-        $activeProducts   = $seller->products()->where('is_active', true)->count();
-        $inactiveProducts = $totalProducts - $activeProducts;
-        $vipProducts      = $seller->products()->where('is_active', true)->where('is_vip', true)->count();
-        $saleProducts     = $seller->products()->where(function ($q) {
-            $q->whereNotNull('lowprice')->where('lowprice', '>', 0);
-        })->count();
+        // Информация о пакете
+        $packageInfo = $this->packageService->getPackageUsageStats($seller);
 
-        // Просмотры
-        $totalViews = $productIds->isEmpty()
-            ? 0
-            : DB::table('views')->whereIn('product_id', $productIds)->sum('views');
-
-        // Топ-5 товаров по просмотрам
-        $topProducts = $productIds->isEmpty()
-            ? collect()
-            : DB::table('products')
-                ->join('views', 'products.id', '=', 'views.product_id')
-                ->whereIn('products.id', $productIds)
-                ->select('products.id', 'products.name', 'products.is_active', 'views.views')
-                ->orderByDesc('views.views')
-                ->limit(5)
-                ->get();
-
-        // Активный тариф
-        $activePackage = $seller->activePackage();
-        $daysLeft = null;
-        if ($activePackage && $activePackage->end_date) {
-            $daysLeft = (int) now()->diffInDays($activePackage->end_date, false);
-        }
-
-        // Лимиты тарифа
-        $productLimit = $activePackage ? $activePackage->package->active_products_limit : null;
-        $vipLimit     = $activePackage ? $activePackage->package->vip_products_limit : null;
-
-        // История тарифов
-        $packageHistory = $seller->sellerPackages()->with('package')->orderByDesc('id')->get();
-
-        // Баланс
-        $balance = $user->balance;
+        // История пакетов
+        $packageHistory = $seller->sellerPackages()
+            ->with('package')
+            ->orderByDesc('id')
+            ->get();
 
         return view('backend.cabinet.stats', compact(
             'seller',
-            'totalProducts', 'activeProducts', 'inactiveProducts',
-            'vipProducts', 'saleProducts',
-            'totalViews', 'topProducts',
-            'activePackage', 'daysLeft',
-            'productLimit', 'vipLimit',
-            'packageHistory', 'balance'
+            'stats',
+            'packageInfo',
+            'packageHistory'
         ));
     }
 
-    /*
-    Показывает форму создания магазина
-    (проверяет, что магазин еще не создан)
-    */
+    /**
+     * Форма создания магазина
+     */
     public function createShop()
     {
         $user = Auth::user();
+
         if ($user->seller) {
-            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
+            return redirect()
+                ->route('account.index')
+                ->with('error', __('errors.shop_already_exists'));
         }
+
         return view('backend.cabinet.create_shop');
     }
-    /* 
-    Сохраняет новый магазин в базе данных
-    генерирует уникальный alias из имени магазина, валидирует данные. 
-    */
-    public function storeShop(Request $request)
+
+    /**
+     * Сохранение нового магазина
+     */
+    public function storeShop(UpdateSellerRequest $request)
     {
         $user = Auth::user();
+
         if ($user->seller) {
-            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
+            return redirect()
+                ->route('account.index')
+                ->with('error', __('errors.shop_already_exists'));
         }
 
-        $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')],
-            'phone'       => ['nullable', 'string', 'max:50'],
-            'town'        => ['nullable', 'string', 'max:255'],
-            'sellerplace' => ['nullable', 'string', 'max:255'],
-            'address'     => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ]);
+        try {
+            // Создание магазина через сервис
+            $seller = $this->sellerService->createSeller($user, $request->validated());
 
-        $data['user_id'] = $user->id;
+            // Обработка логотипа
+            if ($request->hasFile('logo')) {
+                // TODO: вынести в ImageService
+                $this->uploadSellerLogo($seller, $request->file('logo'));
+            }
 
-        $baseAlias = Str::slug($data['name']);
-        $baseAlias = $baseAlias ? Str::limit($baseAlias, 240, '') : Str::lower(Str::random(6));
+            // Активация базового пакета
+            $basicPackage = \App\Models\Package::find(1); // Базовый пакет
+            if ($basicPackage) {
+                $this->packageService->activatePackage($seller, $basicPackage);
+            }
 
-        $alias = $baseAlias;
-        $suffixLength = 4;
-        while (Seller::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . Str::lower(Str::random($suffixLength));
-            $suffixLength++;
+            // Логирование
+            activity('sellers')
+                ->causedBy($user)
+                ->performedOn($seller)
+                ->withProperties(['seller_alias' => $seller->slug])
+                ->log(__('messages.shop_created', ['name' => $seller->name]));
+
+            return redirect()
+                ->route('account.index')
+                ->with('success', __('messages.shop_created'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => __('errors.server_error')]);
         }
-
-        $data['alias'] = $alias;
-        // Убираем logo из $data — храним в photo отдельно после создания
-        $logoFile = $request->file('logo');
-        unset($data['logo']);
-
-        // Создаем магазин
-        $seller = Seller::create($data);
-
-        // Загружаем логотип магазина, если файл передан
-        if ($logoFile) {
-            $filename = 'logo_' . Str::uuid() . '.webp';
-            $path = 'sellers/' . $seller->id;
-            $image = Image::make($logoFile)
-                ->orientate()
-                ->fit(400, 400, function ($c) { $c->upsize(); })
-                ->encode('webp', 85);
-            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
-            $seller->update(['photo' => $path . '/' . $filename]);
-        }
-
-        // Автоматически присваиваем базовый пакет (ID = 1)
-        \App\Models\SellerPackage::create([
-            'seller_id' => $seller->id,
-            'package_id' => 1,
-            'start_date' => now(),
-            'end_date' => null, // Базовый пакет бессрочный
-            'is_active' => true,
-        ]);
-
-        activity('sellers')
-            ->causedBy($user)
-            ->performedOn($seller)
-            ->withProperties(['seller_alias' => $seller->alias])
-            ->log('Создан магазин "' . $seller->name . '"');
-
-        return redirect()->route('account.index')->with('success', 'Магазин создан');
     }
 
-    
-
-    // Изменяет пароль пользователя после проверки текущего пароля
-    public function updatePassword(Request $request)
+    /**
+     * Обновление профиля пользователя
+     */
+    public function updateProfile(UpdateProfileRequest $request)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            $this->userService->updateProfile(Auth::user(), $request->validated());
 
+            return redirect()
+                ->back()
+                ->with('success', __('messages.profile_updated'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => __('errors.server_error')]);
+        }
+    }
+
+    /**
+     * Изменение пароля
+     */
+    public function updatePassword(ChangePasswordRequest $request)
+    {
         $user = Auth::user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->route('account.index')->with('error', 'Текущий пароль неверный.');
+        // Проверяем текущий пароль
+        if (! $this->userService->checkPassword($user, $request->current_password)) {
+            return redirect()
+                ->back()
+                ->withErrors(['current_password' => __('errors.invalid_current_password')]);
         }
 
-        $user->password = Hash::make($request->password);
-        $user->save();
+        try {
+            $this->userService->changePassword($user, $request->password);
 
-        return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
+            return redirect()
+                ->back()
+                ->with('success', __('messages.password_changed'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => __('errors.server_error')]);
+        }
     }
 
-    // Аккаунт. ПОльзователь. Общая информация
+    /**
+     * Страница информации о пользователе
+     */
     public function userIndex()
     {
         $user = Auth::user();
+
         return view('backend.cabinet.user.info', compact('user'));
     }
 
-    // Показывает форму изменения пароля пользователя
+    /**
+     * Форма изменения пароля
+     */
     public function showChangePasswordForm()
     {
         return view('backend.cabinet.user.change_password');
     }
+
     /**
-     * Показывает форму подтверждения удаления магазина
+     * Форма подтверждения удаления магазина
      */
     public function deleteShop()
     {
         $user = Auth::user();
-        
-        if (!$user->seller) {
-            return redirect()->route('account.index')->with('error', 'У вас нет магазина');
+
+        if (! $user->seller) {
+            return redirect()
+                ->route('account.index')
+                ->with('error', __('errors.no_seller_account'));
         }
-        
+
         return view('backend.cabinet.delete_shop', compact('user'));
     }
 
     /**
-     * Удаляет магазин текущего пользователя
+     * Удаление магазина
      */
     public function destroyShop(Request $request)
     {
         $user = Auth::user();
         $seller = $user->seller;
-        
-        if (!$seller) {
-            return redirect()->route('account.index')->with('error', 'Магазин не найден');
+
+        if (! $seller) {
+            return redirect()
+                ->route('account.index')
+                ->with('error', __('errors.seller_not_found'));
         }
-        
-        // Опциональная проверка пароля для безопасности
+
+        // Проверка пароля
         $request->validate([
-            'password' => 'required',
+            'password' => ['required'],
         ]);
-        
-        if (!Hash::check($request->password, $user->password)) {
-            return redirect()->back()->with('error', 'Неверный пароль');
+
+        if (! $this->userService->checkPassword($user, $request->password)) {
+            return redirect()
+                ->back()
+                ->withErrors(['password' => __('errors.invalid_password')]);
         }
-        
-        // Удаляем магазин
-        $sellerName = $seller->name;
-        $seller->delete();
 
-        activity('sellers')
-            ->causedBy($user)
-            ->withProperties(['seller_name' => $sellerName])
-            ->log('Удалён магазин "' . $sellerName . '"');
+        try {
+            // Проверяем через Policy
+            $this->authorize('delete', $seller);
 
-        return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
+            // Удаляем магазин
+            $seller->delete();
+
+            // Логирование
+            activity('sellers')
+                ->causedBy($user)
+                ->withProperties(['seller_name' => $seller->name])
+                ->log(__('messages.shop_deleted'));
+
+            return redirect()
+                ->route('account.index')
+                ->with('success', __('messages.shop_deleted'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => __('errors.server_error')]);
+        }
     }
 
     /**
-     * Переключить автопродление пакета
+     * Загрузка логотипа магазина
+     * TODO: Вынести в ImageService
      */
-    public function toggleAutoRenew(Request $request)
+    private function uploadSellerLogo($seller, $file): void
     {
-        $seller = Auth::user()->seller;
-        
-        if (!$seller) {
-            return response()->json(['error' => 'Магазин не найден'], 404);
-        }
-        
-        // обработка чекбокса
-        $autoRenew = $request->input('auto_renew') === '1';
-        
-        $seller->update([
-            'auto_renew' => $autoRenew
-        ]);
-        
-        // Для отладки можно вернуть данные
-        return response()->json([
-            'success' => true,
-            'auto_renew' => $seller->auto_renew
-        ]);
+        $filename = 'logo_'.uniqid().'.webp';
+        $path = 'sellers/'.$seller->id;
+
+        $image = \Intervention\Image\Facades\Image::make($file)
+            ->orientate()
+            ->fit(400, 400, function ($c) {
+                $c->upsize();
+            })
+            ->encode('webp', 85);
+
+        \Storage::disk('public')->put($path.'/'.$filename, (string) $image);
+        $seller->update(['photo' => $path.'/'.$filename]);
     }
 }

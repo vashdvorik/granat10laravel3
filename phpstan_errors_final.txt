@@ -1,0 +1,67 @@
+﻿php : Note: Using configuration file D:\OSPanel\home\granat10laravel3\phpstan.n
+eon.
+строка:1 знак:1
++ php vendor/bin/phpstan analyse --memory-limit=1G 2>&1 | Out-File -Fil ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Note: Using con...3\phpstan.neon. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  0/96 [>---------------------------]   0%[1G[2K 96/96 [=====================
+=======] 100%
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Services\PackageService.php                                           
+ ------ -------------------------------------------------------------------------- 
+  :76    Access to an undefined property App\Models\Seller::$activePackage.        
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests\Unit\CacheInvalidationUnitTest.php                           
+ ------ ------------------------------------------------------------------- 
+  :34    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :44    Call to an undefined method App\Models\Category::shouldReceive().  
+  :50    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :58    Call to an undefined method App\Models\Category::shouldReceive().  
+  :64    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :75    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :86    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :87    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+ ------ ------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------- 
+  Line   tests\Unit\SellerLimitsUnitTest.php                                         
+ ------ ---------------------------------------------------------------------------- 
+  :242   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::with().            
+  :247   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnSelf().   
+  :248   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnUsing().  
+  :255   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnUsing().  
+ ------ ---------------------------------------------------------------------------- 
+
+ -- ------------------------------------------------------------------------- 
+     Error                                                                    
+ -- ------------------------------------------------------------------------- 
+     Ignored error pattern #Call to an undefined method                       
+     Mockery\\\.+::andReturnUsing\(\)# was not matched in reported errors.    
+     Ignored error pattern #Call to an undefined static method                
+     App\\Models\\Category::fixTree\(\)# was not matched in reported errors.  
+     Ignored error pattern missingType.iterableValue was not matched in       
+     reported errors.                                                         
+     Ignored error pattern missingType.generics was not matched in reported   
+     errors.                                                                  
+ -- ------------------------------------------------------------------------- 
+
+ [ERROR] Found 17 errors                                                       
+

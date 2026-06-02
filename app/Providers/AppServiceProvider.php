@@ -1,13 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
-use App\Models\Category;  
+use App\Services\ImageService;
+use App\Services\PackageService;
+use App\Services\ProductService;
+use App\Services\SellerService;
+use App\Services\UserService;
+use App\Services\CategoryService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,7 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Регистрация сервисов как singleton
+        $this->app->singleton(ImageService::class);
+        $this->app->singleton(ProductService::class);
+        $this->app->singleton(PackageService::class);
+        $this->app->singleton(UserService::class);
+        $this->app->singleton(SellerService::class);
+        $this->app->singleton(CategoryService::class);
     }
 
     /**

@@ -1,14 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Jobs\WarmCategoriesCache;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Category;
-use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Facades\Cache;
-use App\Jobs\WarmCategoriesCache;
+use Kalnoy\Nestedset\NodeTrait;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $alias
+ * @property int|null $number
+ * @property string|null $desc
+ * @property string|null $description
+ * @property string|null $slug
+ * @property string|null $meta_title
+ * @property string|null $meta_description
+ * @property string|null $icon
+ * @property string|null $icon_color
+ * @property string|null $bg_color
+ * @property int|null $parent_id
+ * @property int $_lft
+ * @property int $_rgt
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Category> $children
+ * @property-read \App\Models\Category|null $parent
+ * @property-read array $breadcrumbs
+ */
 class Category extends Model
 {
     use HasFactory, NodeTrait;
@@ -30,13 +56,15 @@ class Category extends Model
         'parent_id',
     ];
 
-    /*ДОБАВИЛ ПРИ ПЕРЕХОДЕ НА ПАКЕТ NESTED SET */
-     /**
+    /* ДОБАВИЛ ПРИ ПЕРЕХОДЕ НА ПАКЕТ NESTED SET */
+    /**
      * Получить breadcrumbs (хлебные крошки) для категории
      */
-    public function getBreadcrumbsAttribute()
+    protected function breadcrumbs(): Attribute
     {
-        return $this->getAncestors()->push($this);
+        return Attribute::make(
+            get: fn () => $this->getAncestors()->push($this),
+        );
     }
 
     /**
@@ -46,13 +74,14 @@ class Category extends Model
     {
         return $this->hasMany(\App\Models\Product::class);
     }
-    
+
     /**
      * Получить все товары включая товары подкатегорий
      */
     public function allProducts()
     {
         $categoryIds = Category::whereDescendantOrSelf($this->id)->pluck('id');
+
         return \App\Models\Product::whereIn('category_id', $categoryIds);
     }
 
@@ -87,6 +116,7 @@ class Category extends Model
 
             // Проверяем наличие видимых товаров в категории или её потомках
             $categoryIds = self::descendantsAndSelf($category->id)->pluck('id');
+
             return \App\Models\Product::visible()
                 ->whereIn('category_id', $categoryIds)
                 ->exists();
@@ -121,9 +151,9 @@ class Category extends Model
 
         // Пересчитываем кеш после отправки ответа — первый посетитель не ждёт
         if (app()->runningInConsole()) {
-            dispatch(new WarmCategoriesCache());
+            dispatch(new WarmCategoriesCache);
         } else {
-            dispatch(new WarmCategoriesCache())->afterResponse();
+            dispatch(new WarmCategoriesCache)->afterResponse();
         }
     }
 
@@ -140,6 +170,4 @@ class Category extends Model
             self::clearCategoriesCache();
         });
     }
-
-
 }

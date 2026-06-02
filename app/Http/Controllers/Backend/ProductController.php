@@ -1,22 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Product;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use App\Http\Requests\UploadImageRequest;
 use App\Models\Category;
+use App\Models\Product;
+use App\Services\ImageService;
+use App\Services\ProductService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Image as ProductImage;
 
+/**
+ * Контроллер управления продуктами продавца
+ */
 class ProductController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct(
+        private ProductService $productService,
+        private ImageService $imageService
+    ) {
         $this->middleware('auth');
     }
 
@@ -27,49 +34,34 @@ class ProductController extends Controller
     {
         $user = Auth::user();
         $seller = $user->seller;
-        
-        if (!$seller) {
-            return redirect()->route('account.store.create')
-                ->with('error', 'Сначала создайте магазин');
+
+        if (! $seller) {
+            return redirect()
+                ->route('account.store.create')
+                ->with('error', __('errors.no_seller_account'));
         }
-        
-        // Базовый запрос
-        $query = $seller->products()->with(['category', 'images']);
-        
-        // Фильтр по категории
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category_id', $request->category);
-        }
-        
-        // Сортировка
-        $query->orderByDesc('created_at');
-        
-        $products = $query->paginate(20)->appends($request->all());
-        
-        // Получаем ID категорий товаров продавца
+
+        // Получение продуктов через сервис
+        $products = $this->productService->getSellerProducts($seller);
+
+        // Получаем ID категорий товаров продавца для фильтра
         $sellerCategoryIds = $seller->products()->distinct()->pluck('category_id')->toArray();
-        
-        // Получаем все категории с ancestorами для построения дерева
-        $allCategoryIds = [];
-        foreach ($sellerCategoryIds as $catId) {
-            $category = Category::find($catId);
-            if ($category) {
-                // Добавляем категорию и всех предков
-                $allCategoryIds[] = $catId;
-                $ancestors = $category->ancestors()->pluck('id')->toArray();
-                $allCategoryIds = array_merge($allCategoryIds, $ancestors);
-            }
-        }
-        $allCategoryIds = array_unique($allCategoryIds);
-        
-        // Строим дерево используя Nested Set
+
+        // Строим дерево категорий
+        $allCategoryIds = $this->getAllCategoryIds($sellerCategoryIds);
         $categoryTree = Category::whereIn('id', $allCategoryIds)
             ->where('is_active', true)
             ->defaultOrder()
             ->get()
             ->toTree();
-        
-        return view('backend.cabinet.store.products', compact('products', 'seller', 'user', 'categoryTree', 'sellerCategoryIds'));
+
+        return view('backend.cabinet.store.products', compact(
+            'products',
+            'seller',
+            'user',
+            'categoryTree',
+            'sellerCategoryIds'
+        ));
     }
 
     /**
@@ -77,218 +69,76 @@ class ProductController extends Controller
      */
     public function create()
     {
-        $user = Auth::user();
-        $seller = $user->seller;
-        
-        if (!$seller) {
-            return redirect()->route('account.store.create')
-                ->with('error', 'Сначала создайте магазин');
+        $seller = Auth::user()->seller;
+
+        if (! $seller) {
+            return redirect()
+                ->route('account.store.create')
+                ->with('error', __('errors.no_seller_account'));
         }
-        
-        // Только корневые категории для первого уровня (из кеша)
+
+        // Проверяем возможность создания через Policy
+        $this->authorize('create', Product::class);
+
         $categories = Category::getCachedRootCategories();
-        
+
         return view('backend.cabinet.products.create', compact('categories', 'seller'));
     }
 
     /**
      * Сохранение нового товара
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $user = Auth::user();
-        $seller = $user->seller;
-        
-        if (!$seller) {
-            return redirect()->route('account.store.create')
-                ->with('error', 'Сначала создайте магазин');
+        $seller = Auth::user()->seller;
+
+        if (! $seller) {
+            return redirect()
+                ->route('account.store.create')
+                ->with('error', __('errors.no_seller_account'));
         }
 
-        // ===================================================
-        // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
-        // ===================================================
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'desc' => ['nullable', 'string'],
-            'features1' => ['nullable', 'string', 'max:255'],
-            'features2' => ['nullable', 'string', 'max:255'],
-            'features3' => ['nullable', 'string', 'max:255'],
-            'features4' => ['nullable', 'string', 'max:255'],
-            'is_vip' => ['boolean'],
-            'is_active' => ['boolean'],
-            'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ], [
-            // Кастомные сообщения
-            'name.required' => 'Поле "Название товара" обязательно для заполнения',
-            'name.max' => 'Название товара не может быть длиннее 255 символов',
-            'price.required' => 'Укажите цену товара',
-            'price.numeric' => 'Цена должна быть числом',
-            'price.min' => 'Цена не может быть отрицательной',
-            'category_id.required' => 'Выберите категорию товара',
-            'category_id.exists' => 'Выбранная категория не существует',
-            'lowprice.numeric' => 'Цена со скидкой должна быть числом',
-            'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
-            'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
-            'images.max' => 'Можно загрузить максимум 5 изображений',
-            'images.*.image' => 'Файл должен быть изображением',
-            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
-            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
-        ]);
-
-        // ===================================================
-        // ШАГ 2: ПРОВЕРЯЕМ БАЗОВУЮ ВАЛИДАЦИЮ (формат полей)
-        // ===================================================
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // ===================================================
-        // ШАГ 3: ПОЛУЧАЕМ ВАЛИДИРОВАННЫЕ ДАННЫЕ
-        // ===================================================
-        $data = $validator->validated();
-
-        // ===================================================
-        // ШАГ 4: ПРОВЕРЯЕМ ЛИМИТЫ ПАКЕТА (бизнес-логика)
-        // ===================================================
-        $isActive = $request->input('is_active', false);
-        $isVip = $request->input('is_vip', false);
-        
-        // ===================================================
-        // ШАГ 3.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
-        // ===================================================
-        $category = Category::find($data['category_id']);
-        if ($category && !$category->isLeaf()) {
-            // Сохраняем путь категории для восстановления
-            $selectedPath = $category->ancestors->pluck('id')->toArray();
-            $selectedPath[] = $category->id;
-            session()->put('selectedPath', $selectedPath);
-            
-            return redirect()->back()
-                ->withErrors(['category_id' => 'Пожалуйста, выберите подкатегорию последнего уровня для размещения товара. Нельзя добавлять товары в категории, у которых есть подкатегории.'])
-                ->withInput();
-        }
-        // Если товар неактивен, лимиты не проверяем
-        if ($isActive) {
-            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
-            if (!$request->hasFile('images') || count($request->file('images')) === 0) {
-                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "Снят с публикации".');
+        try {
+            // Проверяем лимиты пакета
+            if ($request->boolean('is_active') && ! $this->productService->canActivateProduct($seller)) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors(['is_active' => __('errors.product_limit_reached')]);
             }
-            
-            // Проверяем лимит активных товаров
-            $activeCheck = $seller->canActivateProduct();
-            if (!$activeCheck['allowed']) {
-                $validator->errors()->add('is_active', $activeCheck['message']);
-            }
-            
-            // Если товар VIP, проверяем лимит VIP товаров
-            if ($isVip) {
-                $vipCheck = $seller->canActivateVipProduct();
-                if (!$vipCheck['allowed']) {
-                    $validator->errors()->add('is_vip', $vipCheck['message']);
-                }
-            }
-            
-            // Если есть ошибки, возвращаем назад
-            if ($validator->errors()->any()) {
-                // Сохраняем путь категории для восстановления
-                $category = Category::find($data['category_id']);
-                if ($category) {
-                    $selectedPath = $category->ancestors->pluck('id')->toArray();
-                    $selectedPath[] = $category->id;
-                    session()->put('selectedPath', $selectedPath);
-                }
-                
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-        }
 
-        // ===================================================
-        // ШАГ 5: ГЕНЕРАЦИЯ УНИКАЛЬНОГО ALIAS
-        // ===================================================
-        $baseAlias = Str::slug($data['name']);
-        $alias = $baseAlias ?: Str::lower(Str::random(6));
-        
-        $counter = 1;
-        while (Product::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . $counter;
-            $counter++;
-        }
-
-        $data['alias'] = $alias;
-        $data['seller_id'] = $seller->id;
-        $data['push_at'] = now();
-        
-        // ===================================================
-        // ШАГ 6: ОБРАБОТКА СКИДКИ
-        // ===================================================
-        if (isset($data['lowprice']) && $data['lowprice'] > 0) {
-            $data['sale_started_at'] = now();
-        }
-
-        // ===================================================
-        // ШАГ 7: СОЗДАНИЕ ТОВАРА
-        // ===================================================
-        $product = Product::create($data);
-
-        // ШАГ 8: ЗАГРУЗКА И СЖАТИЕ ИЗОБРАЖЕНИЙ
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                // Генерируем уникальное имя
-                $filename = Str::uuid() . '.webp';
-                $path = 'products/' . date('Y/m');
-                
-                // Читаем и обрабатываем изображение
-                $image = Image::make($file)->orientate();
-                
-                // Сохраняем оригинал (большое изображение - макс. 1200px)
-                $image->resize(1200, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                // Обрезаем и сохраняем изображение (квадрат 800x800px)
-                $image->fit(800, 800, function ($constraint) {
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                $fullPath = $path . '/' . $filename;
-                Storage::disk('public')->put($fullPath, (string) $image);
-                
-                // Создаем запись в БД
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'path' => $fullPath,
-                    'is_main' => $index === 0, // Первое изображение - главное
-                ]);
+            if ($request->boolean('is_vip') && ! $this->productService->canActivateVipProduct($seller)) {
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->withErrors(['is_vip' => __('errors.vip_product_limit_reached')]);
             }
+
+            // Создание продукта через сервис
+            $product = $this->productService->createProduct($seller, $request->validated());
+
+            session()->forget('selectedPath');
+
+            return redirect()
+                ->route('account.store.products.index')
+                ->with('success', __('messages.product_created'));
+        } catch (\DomainException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         }
-        session()->forget('selectedPath');
-        return redirect()->route('account.store.products.index')
-            ->with('success', 'Товар создан');
     }
 
     /**
-     * Display the specified resource.
+     * Просмотр товара
      */
     public function show(Product $product)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
-        
-        $product->load(['category', 'seller']);
-        $product->load(['images' => function ($query) {
-            $query->orderByDesc('is_main');
-        }]);
-        
+        $this->authorize('update', $product);
+
+        $product->load(['category', 'seller', 'images']);
+
         return view('backend.cabinet.products.show', compact('product'));
     }
 
@@ -297,218 +147,48 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
-        
-        // Только корневые категории для первого уровня (из кеша)
+        $this->authorize('update', $product);
+
         $categories = Category::getCachedRootCategories();
-        
-        // Получаем цепочку категорий товара (для предзаполнения)
-        $selectedPath = [];
-        if ($product->category_id) {
-            $category = Category::find($product->category_id);
-            if ($category) {
-                $selectedPath = $category->ancestors->pluck('id')->toArray();
-                $selectedPath[] = $category->id;
-            }
-        }
-        
+
+        // Получаем цепочку категорий товара для предзаполнения
+        $selectedPath = $this->getCategoryPath($product->category_id);
+
         return view('backend.cabinet.products.edit', compact('product', 'categories', 'selectedPath'));
     }
 
     /**
      * Обновление товара
      */
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('update', $product);
 
-        // ===================================================
-        // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
-        // ===================================================
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'desc' => ['nullable', 'string'],
-            'features1' => ['nullable', 'string', 'max:255'],
-            'features2' => ['nullable', 'string', 'max:255'],
-            'features3' => ['nullable', 'string', 'max:255'],
-            'features4' => ['nullable', 'string', 'max:255'],
-            'is_vip' => ['boolean'],
-            'is_active' => ['boolean'],
-            'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ], [
-            // Кастомные сообщения
-            'name.required' => 'Поле "Название товара" обязательно для заполнения',
-            'name.max' => 'Название товара не может быть длиннее 255 символов',
-            'price.required' => 'Укажите цену товара',
-            'price.numeric' => 'Цена должна быть числом',
-            'price.min' => 'Цена не может быть отрицательной',
-            'category_id.required' => 'Выберите категорию товара',
-            'category_id.exists' => 'Выбранная категория не существует',
-            'lowprice.numeric' => 'Цена со скидкой должна быть числом',
-            'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
-            'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
-            'images.max' => 'Можно загрузить максимум 5 изображений',
-            'images.*.image' => 'Файл должен быть изображением',
-            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
-            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
-        ]);
-
-        // ===================================================
-        // ШАГ 2: ПРОВЕРЯЕМ БАЗОВУЮ ВАЛИДАЦИЮ
-        // ===================================================
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $data = $validator->validated();
-
-        // ===================================================
-        // ШАГ 2.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
-        // ===================================================
-        $category = Category::find($data['category_id']);
-        if ($category && !$category->isLeaf()) {
-            // 1️⃣ Получаем всех родителей категории
-            $selectedPath = $category->ancestors->pluck('id')->toArray(); 
-            // Результат: [1, 5, 12] (например: Электроника=1, Смартфоны=5, iPhone=12)
-            
-            // 2️⃣ Добавляем саму категорию в конец массива
-            $selectedPath[] = $category->id;
-            // Теперь: [1, 5, 12, 12]
-            
-            // 3️⃣ Сохраняем этот массив в сессию с ключом 'selectedPath'
-            
-            session()->put('selectedPath', $selectedPath); 
-            
-            return redirect()->back()
-                ->withErrors(['category_id' => 'Выберите конечную категорию...'])
-                ->withInput();
-        }
-
-        // ===================================================
-        // ШАГ 3: ОБРАБАТЫВАЕМ ЧЕКБОКСЫ И ПРОВЕРЯЕМ ЛИМИТЫ
-        // ===================================================
-
-        // Обрабатываем радио-кнопки и чекбоксы (конвертируем в boolean)
-        $data['is_active'] = $request->input('is_active', 0) == '1' ? true : false;
-        $data['is_vip'] = $request->input('is_vip', 0) == '1' ? true : false;
-
-        $isActive = $data['is_active'];
-        $isVip = $data['is_vip'];
-
-        // Если товар активен, проверяем лимиты (исключая текущий товар)
-        if ($isActive) {
-            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
-            $hasImages = $product->images()->exists();
-            if (!$hasImages && (!$request->hasFile('images') || count($request->file('images')) === 0)) {
-                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото.');
-            }
-            
-            // Проверяем лимит активных товаров
-            $activeCheck = $product->seller->canActivateProduct($product->id);
-            if (!$activeCheck['allowed']) {
-                $validator->errors()->add('is_active', $activeCheck['message']);
-            }
-            
-            // Если товар VIP, проверяем лимит VIP товаров
-            if ($isVip) {
-                $vipCheck = $product->seller->canActivateVipProduct($product->id);
-                if (!$vipCheck['allowed']) {
-                    $validator->errors()->add('is_vip', $vipCheck['message']);
+        try {
+            // Проверяем лимиты если активируем
+            if ($request->boolean('is_active') && ! $product->is_active) {
+                if (! $this->productService->canActivateProduct($product->seller)) {
+                    return redirect()
+                        ->back()
+                        ->withInput()
+                        ->withErrors(['is_active' => __('errors.product_limit_reached')]);
                 }
             }
-            
-            if ($validator->errors()->any()) {
-                // Аналогично сохраняем путь категории
-                $category = Category::find($data['category_id']);
-                if ($category) {
-                    $selectedPath = $category->ancestors->pluck('id')->toArray();
-                    $selectedPath[] = $category->id;
-                    session()->put('selectedPath', $selectedPath); // ✅ ПРАВИЛЬНО
-                }
-                
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-        }
 
-        // ===================================================
-        // ШАГ 4: ОБРАБОТКА СКИДКИ
-        // ===================================================
-        // Если появилась новая скидка - ставим дату начала
-        if (isset($data['lowprice']) && $data['lowprice'] > 0 && !$product->lowprice) {
-            $data['sale_started_at'] = now();
-        } 
-        // Если скидку убрали - очищаем дату
-        elseif (empty($data['lowprice'])) {
-            $data['sale_started_at'] = null;
-        }
+            // Обновление через сервис
+            $product = $this->productService->updateProduct($product, $request->validated());
 
-        // ===================================================
-        // ШАГ 5: ОБНОВЛЕНИЕ ТОВАРА
-        // ===================================================
-        $product->update($data);
+            session()->forget('selectedPath');
 
-        // ===================================================
-        // ШАГ 6: ЗАГРУЗКА НОВЫХ ИЗОБРАЖЕНИЙ
-        // ===================================================
-        if ($request->hasFile('images')) {
-            $existingCount = $product->images()->count();
-            $newFilesCount = count($request->file('images'));
-            
-            // Проверяем лимит
-            if ($existingCount + $newFilesCount > 5) {
-                return redirect()->back()
-                    ->with('error', 'Превышен лимит изображений. Можно загрузить ещё ' . (5 - $existingCount) . ' фото.')
-                    ->withInput();
-            }
-            
-            // ✅ ПРОВЕРЯЕМ НАЛИЧИЕ ГЛАВНОГО ИЗОБРАЖЕНИЯ ОДИН РАЗ
-            $hasMainImage = $product->images()->where('is_main', true)->exists();
-            
-            foreach ($request->file('images') as $index => $file) {
-                // Генерируем уникальное имя
-                $filename = Str::uuid() . '.webp';
-                $path = 'products/' . date('Y/m');
-                
-                // Читаем и обрабатываем изображение
-                $image = Image::make($file)->orientate();
-                
-                // Сохраняем оригинал (большое изображение - макс. 1200px)
-                $image->resize(1200, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                // Обрезаем и сохраняем изображение (квадрат 800x800px)
-                $image->fit(800, 800, function ($constraint) {
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                $fullPath = $path . '/' . $filename;
-                Storage::disk('public')->put($fullPath, (string) $image);
-                
-                // ✅ ИСПРАВЛЕНО: Если нет главного изображения - делаем первое загружаемое главным
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'path' => $fullPath,
-                    'is_main' => !$hasMainImage && $index === 0,
-                ]);
-            }
+            return redirect()
+                ->route('account.store.products.index')
+                ->with('success', __('messages.product_updated'));
+        } catch (\DomainException $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => $e->getMessage()]);
         }
-        session()->forget('selectedPath');
-        return redirect()->route('account.store.products.index')
-            ->with('success', 'Товар обновлён');
     }
 
     /**
@@ -516,240 +196,111 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
+        $this->authorize('delete', $product);
+
+        try {
+            $this->productService->deleteProduct($product);
+
+            return redirect()
+                ->route('account.store.products.index')
+                ->with('success', __('messages.product_deleted'));
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => __('errors.server_error')]);
         }
-        
-        // Удаляем все изображения из storage
-        foreach ($product->images as $image) {
-            if (Storage::disk('public')->exists($image->path)) {
-                Storage::disk('public')->delete($image->path);
-            }
-        }
-        
-        $product->delete();
-        
-        return redirect()->route('account.store.products.index')
-            ->with('success', 'Товар удалён');
     }
 
     /**
-     * Активация товара
+     * Загрузка изображений (AJAX)
      */
-    public function activate(Product $product)
+    public function uploadImages(UploadImageRequest $request)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        try {
+            $uploadedImages = [];
 
-        // ✅ ПРОВЕРКА: Нельзя опубликовать товар без изображений
-        if (!$product->images()->exists()) {
-            $errorMessage = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "снят с публикации".';
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => $errorMessage
-                ], 422);
+            foreach ($request->file('images') as $file) {
+                $image = $this->imageService->uploadImage($file);
+                $uploadedImages[] = [
+                    'id' => $image->id,
+                    'thumb_url' => asset('storage/'.$image->thumb_path),
+                    'url' => asset('storage/'.$image->original_path),
+                ];
             }
-            return redirect()->back()->with('error', $errorMessage);
-        }
 
-        // Проверяем лимит активных товаров
-        $activeCheck = $product->seller->canActivateProduct($product->id);
-        if (!$activeCheck['allowed']) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => $activeCheck['message']
-                ], 422);
-            }
-            return redirect()->back()->with('error', $activeCheck['message']);
-        }
-
-        // Если товар VIP, проверяем лимит VIP товаров
-        if ($product->is_vip) {
-            $vipCheck = $product->seller->canActivateVipProduct($product->id);
-            if (!$vipCheck['allowed']) {
-                if (request()->ajax()) {
-                    return response()->json([
-                        'error' => $vipCheck['message']
-                    ], 422);
-                }
-                return redirect()->back()->with('error', $vipCheck['message']);
-            }
-        }
-
-        $product->update(['is_active' => true]);
-
-        if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Товар "' . $product->name . '" опубликован'
+                'message' => __('messages.images_uploaded'),
+                'images' => $uploadedImages,
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('errors.server_error'),
+            ], 500);
         }
-
-        return redirect()->back()->with('success', 'Товар "' . $product->name . '" опубликован');
     }
 
     /**
-     * Деактивация товара
+     * Удаление изображения (AJAX)
      */
-    public function deactivate(Product $product)
+    public function deleteImage(Request $request)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $request->validate([
+            'image_id' => ['required', 'integer', 'exists:images,id'],
+        ]);
 
-        $product->update(['is_active' => false]);
+        try {
+            $this->imageService->deleteImages([$request->image_id]);
 
-        if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Товар "' . $product->name . '" снят с публикации'
+                'message' => __('messages.image_deleted'),
             ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => __('errors.server_error'),
+            ], 500);
         }
-
-        return redirect()->back()->with('success', 'Товар "' . $product->name . '" снят с публикации');
     }
 
     /**
-     * Удаление изображения товара
+     * Получение всех ID категорий включая предков
      */
-    public function destroyImage(ProductImage $image)
+    private function getAllCategoryIds(array $categoryIds): array
     {
-        $product = $image->product;
-        
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $allIds = [];
 
-        // ✅ ПРОВЕРКА: Если товар активен и это последнее фото - запретить удаление
-        if ($product->is_active && $product->images()->count() === 1) {
-            $errorMessage = 'Нельзя удалить последнее изображение активного товара. Сначала деактивируйте товар или загрузите новое фото.';
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => $errorMessage
-                ], 422);
-            }
-            return redirect()->back()->with('error', $errorMessage);
-        }
-
-        // Удаляем файл из хранилища
-        if (Storage::disk('public')->exists($image->path)) {
-            Storage::disk('public')->delete($image->path);
-        }
-
-        // Если удаляем главное изображение и есть другие - делаем главным первое
-        $wasMain = $image->is_main;
-        $image->delete();
-
-        if ($wasMain) {
-            $firstImage = $product->images()->first();
-            if ($firstImage) {
-                $firstImage->update(['is_main' => true]);
+        foreach ($categoryIds as $catId) {
+            $category = Category::find($catId);
+            if ($category) {
+                $allIds[] = $catId;
+                $ancestors = $category->ancestors()->pluck('id')->toArray();
+                $allIds = array_merge($allIds, $ancestors);
             }
         }
 
-        if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Изображение удалено'
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Изображение удалено');
+        return array_unique($allIds);
     }
 
     /**
-     * Установить главное изображение
+     * Получение пути категории (хлебные крошки)
      */
-    public function setMainImage(ProductImage $image)
+    private function getCategoryPath(?int $categoryId): array
     {
-        $product = $image->product;
-        
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
+        if (! $categoryId) {
+            return [];
         }
 
-        // Сбрасываем is_main у всех изображений товара
-        $product->images()->update(['is_main' => false]);
-
-        // Устанавливаем текущее как главное
-        $image->update(['is_main' => true]);
-
-        if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Главное изображение обновлено'
-            ]);
+        $category = Category::find($categoryId);
+        if (! $category) {
+            return [];
         }
 
-        return redirect()->back()->with('success', 'Главное изображение обновлено');
-    }
+        $path = $category->ancestors->pluck('id')->toArray();
+        $path[] = $category->id;
 
-    /**
-     * Поднять товар выше в списке
-     */
-    public function pushUp(Product $product)
-    {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
-
-        // Проверяем, прошло ли 24 часа с последнего поднятия
-        if ($product->push_at && $product->push_at->addHours(24)->isFuture()) {
-            $availableAt = $product->push_at->addHours(24);
-            $errorMessage = 'Поднять товар можно только раз в 24 часа. Следующее поднятие доступно: ' . $availableAt->format('d.m.Y в H:i');
-            
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => $errorMessage,
-                    'available_at' => $availableAt->toIso8601String()
-                ], 422);
-            }
-            return redirect()->back()->with('error', $errorMessage);
-        }
-
-        // Обновляем только push_at
-        $product->update(['push_at' => now()]);
-
-        if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Товар "' . $product->name . '" поднят в списке',
-                'push_at' => now()->format('d.m.Y в H:i'),
-                'next_available_at' => now()->addHours(24)->toIso8601String()
-            ]);
-        }
-
-        return redirect()->back()->with('success', 'Товар "' . $product->name . '" поднят в списке');
-    }
-
-    /**
-     * Получить дочерние категории по ID родителя
-     */
-    public function getChildCategories(Request $request)
-    {
-        $parentId = $request->get('parent_id');
-        
-        if ($parentId) {
-            $children = Category::where('parent_id', $parentId)
-                ->where('is_active', true)
-                ->orderBy('number')
-                ->get(['id', 'name', 'parent_id']);
-        } else {
-            // Корневые категории
-            $children = Category::whereNull('parent_id')
-                ->where('is_active', true)
-                ->orderBy('number')
-                ->get(['id', 'name', 'parent_id']);
-        }
-        
-        // Проверяем, есть ли у каждой категории дети
-        $children->each(function($category) {
-            $category->has_children = Category::where('parent_id', $category->id)
-                ->where('is_active', true)
-                ->exists();
-        });
-        
-        return response()->json($children);
+        return $path;
     }
 }

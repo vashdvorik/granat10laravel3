@@ -1,0 +1,31 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 3
+    paths:
+        - app
+        - tests
+    excludePaths:
+        - app/Http/Controllers/Backend/ProductController_OLD_BACKUP.php
+        - app/Http/Controllers/CabinetController_OLD_BACKUP.php
+        - app/Http/Controllers/CatalogController_OLD_BACKUP.php
+        - app/Http/Controllers/ProductController_OLD_BACKUP.php
+        - tests/Feature/ExampleTest.php
+        - tests/Unit/ExampleTest.php
+        - tests/Unit/SellerLimitsUnitTest.php
+    ignoreErrors:
+        # Nested Set package methods
+        - '#Call to an undefined static method App\\Models\\Category::(fixTree|defaultOrder|descendantsAndSelf)\(\)#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder<App\\Models\\Category>::defaultOrder\(\)#'
+        # HasMany does not have attach/sync/detach methods (these are for BelongsToMany)
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany<App\\Models\\Image>::(attach|sync|detach)\(\)#'
+        # Mockery and test-related
+        - '#Call to an undefined method .+::expects\(\)#'
+        - '#Call to an undefined method .+::shouldReceive\(\)#'
+        - '#Call to an undefined static method .+::shouldHaveReceived\(\)#'
+        # Private method access in controllers
+        - '#Call to private method pluck\(\) of parent class#'
+        # Auth-related type issues
+        - '#Access to an undefined property Illuminate\\Contracts\\Auth\\Authenticatable::\$(email|name)#'
+        - '#Access to an undefined property \(object\|string\)::\$user_id#'

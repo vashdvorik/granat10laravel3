@@ -1,0 +1,234 @@
+﻿php : Note: Using configuration file D:\OSPanel\home\granat10laravel3\phpstan.n
+eon.
+строка:1 знак:1
++ php vendor/bin/phpstan analyse --memory-limit=1G 2>&1 | Out-File -Fil ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Note: Using con...3\phpstan.neon. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+тЪая╕П  You're using a deprecated config option checkMissingIterableValueType т
+Ъая╕Пя╕П
+
+It's strongly recommended to remove it from your configuration file
+and add the missing array typehints.
+
+If you want to continue ignoring missing typehints from arrays,
+add missingType.iterableValue error identifier to your ignoreErrors:
+
+parameters:
+	ignoreErrors:
+		-
+			identifier: missingType.iterableValue
+
+тЪая╕П  You're using a deprecated config option checkGenericClassInNonGenericOb
+jectType тЪая╕Пя╕П
+
+It's strongly recommended to remove it from your configuration file
+and add the missing generic typehints.
+
+If you want to continue ignoring missing typehints from generics,
+add missingType.generics error identifier to your ignoreErrors:
+
+parameters:
+	ignoreErrors:
+		-
+			identifier: missingType.generics
+
+  0/96 [>---------------------------]   0%[1G[2K 96/96 [=====================
+=======] 100%
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Console\Commands\DeactivateExpiredPackages.php                        
+ ------ -------------------------------------------------------------------------- 
+  :47    Access to an undefined property App\Models\Seller::$balance.              
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :50    Access to an undefined property App\Models\Seller::$balance.              
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :87    Access to an undefined property App\Models\Seller::$balance.              
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------- 
+  Line   app\Console\Commands\RebuildCategoryTree.php                        
+ ------ -------------------------------------------------------------------- 
+  :18    Call to an undefined static method App\Models\Category::fixTree().  
+ ------ -------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------- 
+  Line   app\Http\Controllers\Admin\CategoryTreeController.php  
+ ------ ------------------------------------------------------- 
+  :12    Call to an undefined static method                     
+         App\Models\Category::defaultOrder().                   
+ ------ ------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   app\Http\Controllers\Backend\ProductController.php                                    
+ ------ -------------------------------------------------------------------------------------- 
+  :52    Call to an undefined method                                                           
+         Illuminate\Database\Eloquent\Builder<App\Models\Category>::defaultOrder().            
+  :279   Call to private method pluck() of parent class                                        
+         Illuminate\Database\Eloquent\Relations\Relation<Illuminate\Database\Eloquent\Model>.  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Http\Controllers\CatalogController.php                                
+ ------ -------------------------------------------------------------------------- 
+  :87    Access to an undefined property App\Models\Category::$meta_title.         
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :88    Access to an undefined property App\Models\Category::$description.        
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :88    Access to an undefined property                                           
+         App\Models\Category::$meta_description.                                   
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Http\Controllers\ProductController.php                                
+ ------ -------------------------------------------------------------------------- 
+  :48    Access to an undefined property App\Models\Product::$meta_title.          
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :49    Access to an undefined property App\Models\Product::$description.         
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :49    Access to an undefined property                                           
+         App\Models\Product::$meta_description.                                    
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Http\Requests\UpdateProductRequest.php                                
+ ------ -------------------------------------------------------------------------- 
+  :23    Access to an undefined property (object|string)::$user_id.                
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Listeners\LogUserRegistered.php                                       
+ ------ -------------------------------------------------------------------------- 
+  :15    Access to an undefined property                                           
+         Illuminate\Contracts\Auth\Authenticatable::$email.                        
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  :16    Access to an undefined property                                           
+         Illuminate\Contracts\Auth\Authenticatable::$name.                         
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------- 
+  Line   app\Models\Category.php                                                     
+ ------ ---------------------------------------------------------------------------- 
+  :94    Call to an undefined method                                                 
+         Illuminate\Database\Eloquent\Builder<App\Models\Category>::defaultOrder().  
+  :114   Call to an undefined static method                                          
+         App\Models\Category::descendantsAndSelf().                                  
+ ------ ---------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   app\Policies\ProductPolicy.php                                        
+ ------ ---------------------------------------------------------------------- 
+  :98    Method App\Policies\ProductPolicy::toggleActive() should return bool  
+         but returns array.                                                    
+  :115   Method App\Policies\ProductPolicy::makeVip() should return bool but   
+         returns array.                                                        
+ ------ ---------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Services\CategoryService.php                                          
+ ------ -------------------------------------------------------------------------- 
+  :96    Access to an undefined property App\Models\Category::$slug.               
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------- 
+  Line   app\Services\ImageService.php                                                
+ ------ ----------------------------------------------------------------------------- 
+  :49    Access to an undefined property App\Models\Image::$size.                     
+         ЁЯТб Learn more:                                                               
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property     
+  :50    Access to an undefined property App\Models\Image::$mime_type.                
+         ЁЯТб Learn more:                                                               
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property     
+  :61    Call to an undefined method                                                  
+         Illuminate\Database\Eloquent\Relations\HasMany<App\Models\Image>::attach().  
+  :78    Call to an undefined method                                                  
+         Illuminate\Database\Eloquent\Relations\HasMany<App\Models\Image>::sync().    
+  :119   Call to an undefined method                                                  
+         Illuminate\Database\Eloquent\Relations\HasMany<App\Models\Image>::detach().  
+ ------ ----------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   app\Services\PackageService.php                                           
+ ------ -------------------------------------------------------------------------- 
+  :31    Property App\Models\SellerPackage::$start_date                            
+         (Illuminate\Support\Carbon) does not accept Carbon\Carbon.                
+  :32    Property App\Models\SellerPackage::$end_date                              
+         (Illuminate\Support\Carbon) does not accept Carbon\Carbon.                
+  :55    Property App\Models\SellerPackage::$end_date                              
+         (Illuminate\Support\Carbon) does not accept Carbon\Carbon.                
+  :76    Access to an undefined property App\Models\Seller::$activePackage.        
+         ЁЯТб Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+ ------ -------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests\Unit\CacheInvalidationUnitTest.php                           
+ ------ ------------------------------------------------------------------- 
+  :34    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :44    Call to an undefined method App\Models\Category::shouldReceive().  
+  :50    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :58    Call to an undefined method App\Models\Category::shouldReceive().  
+  :64    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :75    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :86    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+  :87    Call to an undefined static method                                 
+         Illuminate\Support\Facades\Cache::shouldHaveReceived().            
+ ------ ------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------------- 
+  Line   tests\Unit\SellerLimitsUnitTest.php                                         
+ ------ ---------------------------------------------------------------------------- 
+  :242   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::with().            
+  :247   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnSelf().   
+  :248   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnUsing().  
+  :255   Call to an undefined method                                                 
+         Mockery\ExpectationInterface|Mockery\HigherOrderMessage::andReturnUsing().  
+ ------ ---------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   tests\Unit\Services\ProductServiceTest.php                         
+ ------ ------------------------------------------------------------------- 
+  :37    Call to an undefined method App\Services\ImageService::expects().  
+  :116   Call to an undefined method App\Services\ImageService::expects().  
+ ------ ------------------------------------------------------------------- 
+
+ -- ----------------------------------------------------------------------- 
+     Error                                                                  
+ -- ----------------------------------------------------------------------- 
+     Ignored error pattern #Unsafe usage of new static# was not matched in  
+     reported errors.                                                       
+     Ignored error pattern #PHPDoc tag @var# was not matched in reported    
+     errors.                                                                
+ -- ----------------------------------------------------------------------- 
+
+ [ERROR] Found 46 errors                                                       
+

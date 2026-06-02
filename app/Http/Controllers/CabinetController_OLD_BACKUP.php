@@ -1,0 +1,289 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use App\Models\Seller;
+use App\Models\SellerPackage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
+
+class CabinetController extends Controller
+{
+    /* 
+    Отображает главную страницу личного кабинета 
+    пользователя с информацией о магазине 
+    */
+
+    public function cabinet()
+    {
+        $user = Auth::user(); 
+        $seller = $user->seller; // из модели user получили селлер
+        return view('backend.cabinet.cabinet', compact('seller'));
+    }
+
+    /*
+    Страница статистики: сводная информация по магазину продавца
+    */
+    public function stats()
+    {
+        $user = Auth::user();
+        $seller = $user->seller;
+
+        if (!$seller) {
+            return redirect()->route('account.store.create')
+                ->with('error', 'Сначала создайте магазин');
+        }
+
+        // Все ID товаров продавца (один запрос)
+        $productIds = $seller->products()->pluck('id');
+
+        // Счётчики товаров
+        $totalProducts    = $productIds->count();
+        $activeProducts   = $seller->products()->where('is_active', true)->count();
+        $inactiveProducts = $totalProducts - $activeProducts;
+        $vipProducts      = $seller->products()->where('is_active', true)->where('is_vip', true)->count();
+        $saleProducts     = $seller->products()->where(function ($q) {
+            $q->whereNotNull('lowprice')->where('lowprice', '>', 0);
+        })->count();
+
+        // Просмотры
+        $totalViews = $productIds->isEmpty()
+            ? 0
+            : DB::table('views')->whereIn('product_id', $productIds)->sum('views');
+
+        // Топ-5 товаров по просмотрам
+        $topProducts = $productIds->isEmpty()
+            ? collect()
+            : DB::table('products')
+                ->join('views', 'products.id', '=', 'views.product_id')
+                ->whereIn('products.id', $productIds)
+                ->select('products.id', 'products.name', 'products.is_active', 'views.views')
+                ->orderByDesc('views.views')
+                ->limit(5)
+                ->get();
+
+        // Активный тариф
+        $activePackage = $seller->activePackage();
+        $daysLeft = null;
+        if ($activePackage && $activePackage->end_date) {
+            $daysLeft = (int) now()->diffInDays($activePackage->end_date, false);
+        }
+
+        // Лимиты тарифа
+        $productLimit = $activePackage ? $activePackage->package->active_products_limit : null;
+        $vipLimit     = $activePackage ? $activePackage->package->vip_products_limit : null;
+
+        // История тарифов
+        $packageHistory = $seller->sellerPackages()->with('package')->orderByDesc('id')->get();
+
+        // Баланс
+        $balance = $user->balance;
+
+        return view('backend.cabinet.stats', compact(
+            'seller',
+            'totalProducts', 'activeProducts', 'inactiveProducts',
+            'vipProducts', 'saleProducts',
+            'totalViews', 'topProducts',
+            'activePackage', 'daysLeft',
+            'productLimit', 'vipLimit',
+            'packageHistory', 'balance'
+        ));
+    }
+
+    /*
+    Показывает форму создания магазина
+    (проверяет, что магазин еще не создан)
+    */
+    public function createShop()
+    {
+        $user = Auth::user();
+        if ($user->seller) {
+            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
+        }
+        return view('backend.cabinet.create_shop');
+    }
+    /* 
+    Сохраняет новый магазин в базе данных
+    генерирует уникальный alias из имени магазина, валидирует данные. 
+    */
+    public function storeShop(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->seller) {
+            return redirect()->route('account.index')->with('error', 'Магазин уже создан');
+        }
+
+        $data = $request->validate([
+            'name'        => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')],
+            'phone'       => ['nullable', 'string', 'max:50'],
+            'town'        => ['nullable', 'string', 'max:255'],
+            'sellerplace' => ['nullable', 'string', 'max:255'],
+            'address'     => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
+            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ]);
+
+        $data['user_id'] = $user->id;
+
+        $baseAlias = Str::slug($data['name']);
+        $baseAlias = $baseAlias ? Str::limit($baseAlias, 240, '') : Str::lower(Str::random(6));
+
+        $alias = $baseAlias;
+        $suffixLength = 4;
+        while (Seller::where('alias', $alias)->exists()) {
+            $alias = $baseAlias . '-' . Str::lower(Str::random($suffixLength));
+            $suffixLength++;
+        }
+
+        $data['alias'] = $alias;
+        // Убираем logo из $data — храним в photo отдельно после создания
+        $logoFile = $request->file('logo');
+        unset($data['logo']);
+
+        // Создаем магазин
+        $seller = Seller::create($data);
+
+        // Загружаем логотип магазина, если файл передан
+        if ($logoFile) {
+            $filename = 'logo_' . Str::uuid() . '.webp';
+            $path = 'sellers/' . $seller->id;
+            $image = Image::make($logoFile)
+                ->orientate()
+                ->fit(400, 400, function ($c) { $c->upsize(); })
+                ->encode('webp', 85);
+            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
+            $seller->update(['photo' => $path . '/' . $filename]);
+        }
+
+        // Автоматически присваиваем базовый пакет (ID = 1)
+        \App\Models\SellerPackage::create([
+            'seller_id' => $seller->id,
+            'package_id' => 1,
+            'start_date' => now(),
+            'end_date' => null, // Базовый пакет бессрочный
+            'is_active' => true,
+        ]);
+
+        activity('sellers')
+            ->causedBy($user)
+            ->performedOn($seller)
+            ->withProperties(['seller_alias' => $seller->alias])
+            ->log('Создан магазин "' . $seller->name . '"');
+
+        return redirect()->route('account.index')->with('success', 'Магазин создан');
+    }
+
+    
+
+    // Изменяет пароль пользователя после проверки текущего пароля
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->route('account.index')->with('error', 'Текущий пароль неверный.');
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
+    }
+
+    // Аккаунт. ПОльзователь. Общая информация
+    public function userIndex()
+    {
+        $user = Auth::user();
+        return view('backend.cabinet.user.info', compact('user'));
+    }
+
+    // Показывает форму изменения пароля пользователя
+    public function showChangePasswordForm()
+    {
+        return view('backend.cabinet.user.change_password');
+    }
+    /**
+     * Показывает форму подтверждения удаления магазина
+     */
+    public function deleteShop()
+    {
+        $user = Auth::user();
+        
+        if (!$user->seller) {
+            return redirect()->route('account.index')->with('error', 'У вас нет магазина');
+        }
+        
+        return view('backend.cabinet.delete_shop', compact('user'));
+    }
+
+    /**
+     * Удаляет магазин текущего пользователя
+     */
+    public function destroyShop(Request $request)
+    {
+        $user = Auth::user();
+        $seller = $user->seller;
+        
+        if (!$seller) {
+            return redirect()->route('account.index')->with('error', 'Магазин не найден');
+        }
+        
+        // Опциональная проверка пароля для безопасности
+        $request->validate([
+            'password' => 'required',
+        ]);
+        
+        if (!Hash::check($request->password, $user->password)) {
+            return redirect()->back()->with('error', 'Неверный пароль');
+        }
+        
+        // Удаляем магазин
+        $sellerName = $seller->name;
+        $seller->delete();
+
+        activity('sellers')
+            ->causedBy($user)
+            ->withProperties(['seller_name' => $sellerName])
+            ->log('Удалён магазин "' . $sellerName . '"');
+
+        return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
+    }
+
+    /**
+     * Переключить автопродление пакета
+     */
+    public function toggleAutoRenew(Request $request)
+    {
+        $seller = Auth::user()->seller;
+        
+        if (!$seller) {
+            return response()->json(['error' => 'Магазин не найден'], 404);
+        }
+        
+        // обработка чекбокса
+        $autoRenew = $request->input('auto_renew') === '1';
+        
+        $seller->update([
+            'auto_renew' => $autoRenew
+        ]);
+        
+        // Для отладки можно вернуть данные
+        return response()->json([
+            'success' => true,
+            'auto_renew' => $seller->auto_renew
+        ]);
+    }
+}

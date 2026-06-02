@@ -38,10 +38,12 @@ class ModelStructureTest extends TestCase
         }
     }
 
-    public function test_product_guarded_contains_id(): void
+    public function test_product_fillable_does_not_contain_id(): void
     {
         $product = new Product();
-        $this->assertContains('id', $product->getGuarded());
+        $fillable = $product->getFillable();
+        
+        $this->assertNotContains('id', $fillable, "Product fillable не должен содержать поле 'id' для защиты от mass assignment");
     }
 
     public function test_product_casts_datetime_fields(): void
@@ -67,10 +69,12 @@ class ModelStructureTest extends TestCase
         }
     }
 
-    public function test_seller_product_count_is_guarded(): void
+    public function test_seller_product_count_is_not_fillable(): void
     {
         $seller = new Seller();
-        $this->assertContains('product_count', $seller->getGuarded(), 'product_count должен быть guarded');
+        $fillable = $seller->getFillable();
+        
+        $this->assertNotContains('product_count', $fillable, 'product_count не должен быть в fillable для защиты от mass assignment');
     }
 
     public function test_seller_casts_booleans(): void

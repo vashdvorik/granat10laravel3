@@ -1,14 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-//use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordCustom;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Notifications\ResetPasswordCustom;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string|null $phone
+ * @property string $password
+ * @property string|null $remember_token
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Seller|null $seller
+ */
 class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -24,14 +38,8 @@ class User extends \TCG\Voyager\Models\User
         'phone',
         'password',
     ];
-    protected $guarded = [
-        'id',
-        'balance',
-        'role_id',
-        'remember_token',
-    ];
+
     /**
-     * 
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -53,10 +61,13 @@ class User extends \TCG\Voyager\Models\User
 
     public function sendPasswordResetNotification($token)
     {
-    $this->notify(new ResetPasswordCustom($token));
+        $this->notify(new ResetPasswordCustom($token));
     }
-    
-    public function seller()
+
+    /**
+     * Магазин пользователя
+     */
+    public function seller(): HasOne
     {
         return $this->hasOne(Seller::class);
     }

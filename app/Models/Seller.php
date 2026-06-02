@@ -1,15 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\SellerPackage;
-use Illuminate\Support\Facades\Cache; 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property string|null $phone
+ * @property string|null $town
+ * @property string|null $sellerplace
+ * @property string|null $address
+ * @property string|null $description
+ * @property string $alias
+ * @property string|null $slug
+ * @property int $product_count
+ * @property int|null $region_id
+ * @property string|null $link
+ * @property string|null $link_map
+ * @property string|null $telegram
+ * @property string|null $instagram
+ * @property string|null $viber
+ * @property string|null $photos
+ * @property string|null $photo
+ * @property bool $auto_renew
+ * @property bool $is_active
+ * @property float $balance
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User $user
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SellerPackage> $sellerPackages
+ *
+ * @method \App\Models\SellerPackage|null activePackage()
+ */
 class Seller extends Model
 {
     use HasFactory, LogsActivity;
@@ -21,11 +55,11 @@ class Seller extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('sellers')
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Магазин создан: "' . $this->name . '"',
-                'updated' => 'Магазин обновлён: "' . $this->name . '"',
-                'deleted' => 'Магазин удалён: "' . $this->name . '"',
-                default   => $eventName,
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'created' => 'Магазин создан: "'.$this->name.'"',
+                'updated' => 'Магазин обновлён: "'.$this->name.'"',
+                'deleted' => 'Магазин удалён: "'.$this->name.'"',
+                default => $eventName,
             });
     }
 
@@ -38,6 +72,7 @@ class Seller extends Model
         'address',
         'description',
         'alias',
+        'slug',
         'product_count',
         'region_id',
         'link',
@@ -48,32 +83,34 @@ class Seller extends Model
         'photos',
         'photo',
         'auto_renew',
-        
-    ];
-    protected $guarded = [
-    'id',
-    'product_count', // Автоматически считается
-    ];
-    
-    protected $casts = [
-    'can_order' => 'boolean',
-    'auto_renew' => 'boolean',
+        'is_active',
     ];
 
-    public function user()
+    protected $casts = [
+        'can_order' => 'boolean',
+        'auto_renew' => 'boolean',
+    ];
+
+    /**
+     * Пользователь-владелец магазина
+     */
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(User::class);
     }
-    
-    public function products()
+
+    /**
+     * Товары магазина
+     */
+    public function products(): HasMany
     {
         return $this->hasMany(Product::class);
-    } 
+    }
 
-        /**
+    /**
      * Связь с пакетами через таблицу seller_packages
      */
-    public function sellerPackages()
+    public function sellerPackages(): HasMany
     {
         return $this->hasMany(SellerPackage::class);
     }
@@ -85,7 +122,7 @@ class Seller extends Model
     {
         return $this->sellerPackages()
             ->where('is_active', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('end_date')                         // Бессрочный пакет
                     ->orWhere('end_date', '>=', now()->toDateString()); // Или срок еще не истек (сравниваем DATE с DATE)
             })
@@ -118,15 +155,15 @@ class Seller extends Model
 
     /**
      * Проверить, можно ли активировать товар (обычный)
-     * 
-     * @param int|null $excludeProductId ID товара, который исключаем из подсчета (при редактировании)
+     *
+     * @param  int|null  $excludeProductId  ID товара, который исключаем из подсчета (при редактировании)
      * @return array ['allowed' => bool, 'message' => string, 'current' => int, 'limit' => int]
      */
     public function canActivateProduct(?int $excludeProductId = null): array
     {
         $activePackage = $this->activePackage();
-        
-        if (!$activePackage) {
+
+        if (! $activePackage) {
             return [
                 'allowed' => false,
                 'message' => 'У вас нет активного тарифного пакета',
@@ -134,23 +171,23 @@ class Seller extends Model
                 'limit' => 0,
             ];
         }
-        
+
         $package = $activePackage->package;
         $limit = $package->active_products_limit;
-        
+
         // Подсчитываем текущие активные товары (исключая редактируемый)
         $query = $this->products()->where('is_active', true);
         if ($excludeProductId) {
             $query->where('id', '!=', $excludeProductId);
         }
         $current = $query->count();
-        
+
         $allowed = $current < $limit;
-        
+
         return [
             'allowed' => $allowed,
-            'message' => $allowed 
-                ? 'Можно активировать товар' 
+            'message' => $allowed
+                ? 'Можно активировать товар'
                 : "Достигнут лимит активных товаров ({$current}/{$limit}). Обновите тариф.",
             'current' => $current,
             'limit' => $limit,
@@ -160,15 +197,15 @@ class Seller extends Model
 
     /**
      * Проверить, можно ли активировать VIP товар
-     * 
-     * @param int|null $excludeProductId ID товара, который исключаем из подсчета (при редактировании)
+     *
+     * @param  int|null  $excludeProductId  ID товара, который исключаем из подсчета (при редактировании)
      * @return array ['allowed' => bool, 'message' => string, 'current' => int, 'limit' => int]
      */
     public function canActivateVipProduct(?int $excludeProductId = null): array
     {
         $activePackage = $this->activePackage();
-        
-        if (!$activePackage) {
+
+        if (! $activePackage) {
             return [
                 'allowed' => false,
                 'message' => 'У вас нет активного тарифного пакета',
@@ -176,10 +213,10 @@ class Seller extends Model
                 'limit' => 0,
             ];
         }
-        
+
         $package = $activePackage->package;
         $limit = $package->vip_products_limit;
-        
+
         // Подсчитываем текущие VIP товары (исключая редактируемый)
         $query = $this->products()
             ->where('is_active', true)
@@ -188,13 +225,13 @@ class Seller extends Model
             $query->where('id', '!=', $excludeProductId);
         }
         $current = $query->count();
-        
+
         $allowed = $current < $limit;
-        
+
         return [
             'allowed' => $allowed,
-            'message' => $allowed 
-                ? 'Можно активировать VIP товар' 
+            'message' => $allowed
+                ? 'Можно активировать VIP товар'
                 : "Достигнут лимит VIP товаров ({$current}/{$limit}). Обновите тариф.",
             'current' => $current,
             'limit' => $limit,
@@ -204,35 +241,35 @@ class Seller extends Model
 
     /**
      * Проверить все лимиты для товара
-     * 
-     * @param bool $isActive Будет ли товар активным
-     * @param bool $isVip Будет ли товар VIP
-     * @param int|null $excludeProductId ID редактируемого товара
+     *
+     * @param  bool  $isActive  Будет ли товар активным
+     * @param  bool  $isVip  Будет ли товар VIP
+     * @param  int|null  $excludeProductId  ID редактируемого товара
      * @return array ['allowed' => bool, 'errors' => array]
      */
     public function checkProductLimits(bool $isActive, bool $isVip, ?int $excludeProductId = null): array
     {
         $errors = [];
-        
+
         // Если товар неактивен, можно добавлять сколько угодно
-        if (!$isActive) {
+        if (! $isActive) {
             return ['allowed' => true, 'errors' => []];
         }
-        
+
         // Проверяем лимит активных товаров
         $activeCheck = $this->canActivateProduct($excludeProductId);
-        if (!$activeCheck['allowed']) {
+        if (! $activeCheck['allowed']) {
             $errors[] = $activeCheck['message'];
         }
-        
+
         // Если товар VIP, проверяем лимит VIP товаров
         if ($isVip) {
             $vipCheck = $this->canActivateVipProduct($excludeProductId);
-            if (!$vipCheck['allowed']) {
+            if (! $vipCheck['allowed']) {
                 $errors[] = $vipCheck['message'];
             }
         }
-        
+
         return [
             'allowed' => empty($errors),
             'errors' => $errors,
@@ -257,62 +294,62 @@ class Seller extends Model
     public function canAutoRenew(): bool
     {
         $activePackage = $this->activePackage();
-        
-        if (!$activePackage) {
+
+        if (! $activePackage) {
             return false;
         }
-        
+
         $package = $activePackage->package;
-        
+
         return $this->user->balance >= $package->price;
     }
 
-        /**
+    /**
      * Попробовать продлить пакет автоматически
      * ✅ С ТРАНЗАКЦИЕЙ для защиты от потери денег
      */
     public function tryAutoRenewPackage(): array
     {
         $activePackage = $this->activePackage();
-        
-        if (!$activePackage) {
+
+        if (! $activePackage) {
             return ['success' => false, 'message' => 'Нет активного пакета'];
         }
-        
+
         $package = $activePackage->package;
-        
+
         if ($this->user->balance < $package->price) {
             return [
-                'success' => false, 
-                'message' => "Недостаточно средств. Нужно: {$package->price} руб, баланс: {$this->user->balance} руб"
+                'success' => false,
+                'message' => "Недостаточно средств. Нужно: {$package->price} руб, баланс: {$this->user->balance} руб",
             ];
         }
-        
+
         // Используем транзакцию - ВСЕ ИЛИ НИЧЕГО!
         // Если что-то пойдет не так - откатится автоматически
         try {
             DB::transaction(function () use ($activePackage, $package) {
                 // Списываем деньги
                 $this->user->decrement('balance', $package->price);
-                
+
                 // Продлеваем пакет
                 $activePackage->update([
                     'start_date' => now(),
                     'end_date' => now()->addDays($package->duration_days),
                 ]);
             });
-            
+
             return [
                 'success' => true,
                 'message' => "Пакет успешно продлен до {$activePackage->end_date->format('d.m.Y')}",
                 'end_date' => $activePackage->end_date,
             ];
-            
+
         } catch (\Exception $e) {
             // Если произошла ошибка - деньги НЕ списаны (откатились)
             return [
                 'success' => false,
-                'message' => 'Ошибка при продлении пакета: ' . $e->getMessage()
+                'message' => 'Ошибка при продлении пакета: '.$e->getMessage(),
             ];
         }
     }
@@ -323,25 +360,25 @@ class Seller extends Model
     public function getPackageStatus(): array
     {
         $activePackage = $this->activePackage();
-        
-        if (!$activePackage) {
+
+        if (! $activePackage) {
             $activeProductsCount = $this->products()->where('is_active', true)->count();
-            
+
             return [
                 'has_package' => false,
                 'can_auto_renew' => false,
                 'message' => 'У вас нет активного пакета',
-                'description' => $activeProductsCount > 0 
-                    ? "Ваши товары ({$activeProductsCount} шт.) скрыты от покупателей" 
-                    : "Приобретите пакет для публикации товаров",
+                'description' => $activeProductsCount > 0
+                    ? "Ваши товары ({$activeProductsCount} шт.) скрыты от покупателей"
+                    : 'Приобретите пакет для публикации товаров',
                 'alert_type' => 'danger',
             ];
         }
-        
+
         $package = $activePackage->package;
-        
+
         // Бессрочный пакет
-        if (!$activePackage->end_date) {
+        if (! $activePackage->end_date) {
             return [
                 'has_package' => true,
                 'package_name' => $package->name,
@@ -350,10 +387,10 @@ class Seller extends Model
                 'alert_type' => 'success',
             ];
         }
-        
+
         $daysLeft = now()->diffInDays($activePackage->end_date, false);
         $canAutoRenew = $this->user->balance >= $package->price;
-        
+
         // Просрочен
         if ($daysLeft < 0) {
             return [
@@ -367,34 +404,34 @@ class Seller extends Model
                 'alert_type' => 'danger',
             ];
         }
-        
+
         // Скоро истекает (меньше 7 дней)
         if ($daysLeft <= 7) {
-        $message = "Пакет истекает через {$daysLeft} " . $this->getDaysWord($daysLeft);
-        $description = '';
-        
-        if (!$this->auto_renew) {
-            $description = " Автопродление отключено.";
-        } elseif (!$canAutoRenew) {
-            $description = "❌ Недостаточно средств для автопродления. Нужно {$package->price} руб, баланс: {$this->user->balance} руб";
-        } else {
-            $description = "Пакет будет автоматически продлен из вашего баланса. Ваш баланс: {$this->user->balance} руб, стоимость продления: {$package->price} руб";
+            $message = "Пакет истекает через {$daysLeft} ".$this->getDaysWord($daysLeft);
+            $description = '';
+
+            if (! $this->auto_renew) {
+                $description = ' Автопродление отключено.';
+            } elseif (! $canAutoRenew) {
+                $description = "❌ Недостаточно средств для автопродления. Нужно {$package->price} руб, баланс: {$this->user->balance} руб";
+            } else {
+                $description = "Пакет будет автоматически продлен из вашего баланса. Ваш баланс: {$this->user->balance} руб, стоимость продления: {$package->price} руб";
+            }
+
+            return [
+                'has_package' => true,
+                'days_left' => $daysLeft,
+                'end_date' => $activePackage->end_date,
+                'can_auto_renew' => $canAutoRenew && $this->auto_renew,
+                'message' => $message,
+                'description' => $description,
+                'balance' => $this->user->balance,
+                'price' => $package->price,
+                'package_name' => $package->name,
+                'alert_type' => $this->auto_renew && $canAutoRenew ? 'warning' : 'danger',
+            ];
         }
-        
-        return [
-            'has_package' => true,
-            'days_left' => $daysLeft,
-            'end_date' => $activePackage->end_date,
-            'can_auto_renew' => $canAutoRenew && $this->auto_renew,
-            'message' => $message,
-            'description' => $description,
-            'balance' => $this->user->balance,
-            'price' => $package->price,
-            'package_name' => $package->name,
-            'alert_type' => $this->auto_renew && $canAutoRenew ? 'warning' : 'danger',
-        ];
-    }
-        
+
         // Все хорошо
         return [
             'has_package' => true,
@@ -414,7 +451,7 @@ class Seller extends Model
     {
         $cases = [2, 0, 1, 1, 1, 2];
         $titles = ['день', 'дня', 'дней'];
-        
+
         return $titles[($days % 100 > 4 && $days % 100 < 20) ? 2 : $cases[min($days % 10, 5)]];
     }
 
@@ -429,8 +466,8 @@ class Seller extends Model
     {
         return Cache::remember('sellers_list', now()->addMinutes(30), function () {
             return self::withCount(['products' => function ($query) {
-                    $query->where('is_active', true);
-                }])
+                $query->where('is_active', true);
+            }])
                 ->orderBy('products_count', 'desc')
                 ->get();
         });
@@ -441,12 +478,14 @@ class Seller extends Model
      */
     public static function getCachedByAlias($alias)
     {
-        if (!$alias) return null;
-        
-        return Cache::remember('seller_by_alias:' . $alias, now()->addHours(1), function () use ($alias) {
+        if (! $alias) {
+            return null;
+        }
+
+        return Cache::remember('seller_by_alias:'.$alias, now()->addHours(1), function () use ($alias) {
             return self::withCount(['products' => function ($query) {
-                    $query->where('is_active', true);
-                }])
+                $query->where('is_active', true);
+            }])
                 ->where('alias', $alias)
                 ->first();
         });
@@ -458,16 +497,16 @@ class Seller extends Model
     public static function clearSellersCache($sellerInstance = null)
     {
         Cache::forget('sellers_list');
-        
+
         // Если передан конкретный продавец - очищаем только его кеши
         if ($sellerInstance) {
-            Cache::forget('seller_by_alias:' . $sellerInstance->alias);
-            
+            Cache::forget('seller_by_alias:'.$sellerInstance->alias);
+
             // Если alias изменился, очистить старый
             if ($sellerInstance->isDirty('alias') || $sellerInstance->wasChanged('alias')) {
                 $oldAlias = $sellerInstance->getOriginal('alias');
                 if ($oldAlias) {
-                    Cache::forget('seller_by_alias:' . $oldAlias);
+                    Cache::forget('seller_by_alias:'.$oldAlias);
                 }
             }
         }

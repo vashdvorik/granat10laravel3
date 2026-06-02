@@ -1,13 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property int $seller_id
+ * @property int $category_id
+ * @property string $name
+ * @property float $price
+ * @property float|null $lowprice
+ * @property string|null $desc
+ * @property string|null $description
+ * @property string|null $features1
+ * @property string|null $features2
+ * @property string|null $features3
+ * @property string|null $features4
+ * @property string $alias
+ * @property bool $is_vip
+ * @property bool $is_active
+ * @property int|null $main_image_id
+ * @property string|null $meta_title
+ * @property string|null $meta_description
+ * @property string|null $sale_started_at
+ * @property string|null $push_at
+ * @property int $views_count
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Category $category
+ * @property-read \App\Models\Seller $seller
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Image> $images
+ */
 class Product extends Model
 {
     use HasFactory, LogsActivity;
@@ -19,11 +52,11 @@ class Product extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('products')
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Товар создан: "' . $this->name . '"',
-                'updated' => 'Товар обновлён: "' . $this->name . '"',
-                'deleted' => 'Товар удалён: "' . $this->name . '"',
-                default   => $eventName,
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'created' => 'Товар создан: "'.$this->name.'"',
+                'updated' => 'Товар обновлён: "'.$this->name.'"',
+                'deleted' => 'Товар удалён: "'.$this->name.'"',
+                default => $eventName,
             });
     }
 
@@ -40,33 +73,40 @@ class Product extends Model
         'is_vip',
         'is_active',
         'category_id',
-        'seller_id',      
-        'sale_started_at', 
-        'push_at',        
+        'seller_id',
+        'user_id',
+        'sale_started_at',
+        'push_at',
     ];
-    protected $guarded = [
-    'id',
 
-    ];
     protected $casts = [
         'push_at' => 'datetime',
         'sale_started_at' => 'datetime',
     ];
 
-    public function category()
+    /**
+     * Категория товара
+     */
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Category::class);
+        return $this->belongsTo(Category::class);
     }
 
-    public function seller()
+    /**
+     * Продавец товара
+     */
+    public function seller(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Seller::class);
+        return $this->belongsTo(Seller::class);
     }
-    
-    public function images()
+
+    /**
+     * Изображения товара
+     */
+    public function images(): HasMany
     {
-        return $this->hasMany(\App\Models\Image::class);
-    }   
+        return $this->hasMany(Image::class);
+    }
 
     /**
      * Scope: только товары от продавцов с активными пакетами
@@ -75,7 +115,7 @@ class Product extends Model
     {
         return $query->whereHas('seller.sellerPackages', function ($q) {
             $q->where('is_active', true)
-                ->where(function($dateQuery) {
+                ->where(function ($dateQuery) {
                     $dateQuery->whereNull('end_date')
                         ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE, не DATETIME
                 });
@@ -83,7 +123,7 @@ class Product extends Model
     }
 
     /**
-     * Scope: публичные товары 
+     * Scope: публичные товары
      * (продавец активировал И у продавца есть активный пакет)
      */
     public function scopeVisible($query)
@@ -111,7 +151,7 @@ class Product extends Model
         if ($category) {
             self::clearCategoryCountCache($category);
         }
-        
+
         // 4. Если категория изменилась, очистить и старую категорию
         if ($oldCategoryId && $oldCategoryId != $category?->id) {
             $oldCategory = \App\Models\Category::find($oldCategoryId);
@@ -126,15 +166,17 @@ class Product extends Model
      */
     private static function clearCategoryCountCache($category)
     {
-        if (!$category) return;
-        
+        if (! $category) {
+            return;
+        }
+
         // Очистить кеш для текущей категории
-        Cache::forget('category_products_count:' . $category->id);
-        
+        Cache::forget('category_products_count:'.$category->id);
+
         // Очистить кеш для всех родителей (товар влияет на их count)
         $ancestors = $category->ancestors;
         foreach ($ancestors as $ancestor) {
-            Cache::forget('category_products_count:' . $ancestor->id);
+            Cache::forget('category_products_count:'.$ancestor->id);
         }
     }
 
@@ -143,13 +185,14 @@ class Product extends Model
      */
     public static function getCategoryProductsCount($categoryId)
     {
-        return Cache::remember('category_products_count:' . $categoryId, now()->addMinutes(10), function () use ($categoryId) {
+        return Cache::remember('category_products_count:'.$categoryId, now()->addMinutes(10), function () use ($categoryId) {
             $category = \App\Models\Category::find($categoryId);
-            if (!$category) {
+            if (! $category) {
                 return 0;
             }
-            
+
             $categoryIds = \App\Models\Category::whereDescendantOrSelf($categoryId)->pluck('id');
+
             return self::visible()
                 ->whereIn('category_id', $categoryIds)
                 ->count();
@@ -191,10 +234,10 @@ class Product extends Model
 
         static::updated(function ($product) use (&$oldCategories) {
             $oldCategoryId = $oldCategories[$product->id] ?? null;
-            
+
             // clearProductCaches уже очищает product_price_range, дублирование убрано
             self::clearProductCaches($product->category, $oldCategoryId);
-            
+
             // Передаем экземпляр продавца для точечной очистки
             \App\Models\Seller::clearSellersCache($product->seller);
 
