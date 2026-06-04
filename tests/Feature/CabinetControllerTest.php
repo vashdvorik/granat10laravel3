@@ -3,11 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\Package;
+use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
@@ -173,6 +175,38 @@ class CabinetControllerTest extends TestCase
         $this->assertNotEmpty($seller->alias);
     }
 
+    public function test_stats_page_returns_service_view_data(): void
+    {
+        $user = User::factory()->create(['balance' => 500]);
+        $seller = Seller::factory()->create(['user_id' => $user->id]);
+        $package = Package::factory()->withLimits(5, 1)->create();
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'is_active' => true,
+        ]);
+
+        DB::table('views')->insert([
+            'product_id' => $product->id,
+            'views' => 7,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.stats'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('totalProducts', 1);
+        $response->assertViewHas('activeProducts', 1);
+        $response->assertViewHas('totalViews', 7);
+        $response->assertViewHas('productLimit', 5);
+        $response->assertViewHas('balance', '500.00');
+    }
+
     // =========================================================================
     // Смена пароля
     // =========================================================================
@@ -243,5 +277,105 @@ class CabinetControllerTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors(['password']);
+    }
+
+    public function test_destroy_shop_deletes_current_users_shop(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('Password123'),
+        ]);
+        $seller = Seller::factory()->create(['user_id' => $user->id]);
+        $package = Package::factory()->create();
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+        ]);
+
+        $response = $this->actingAs($user)->delete(route('account.store.destroy'), [
+            'password' => 'Password123',
+        ]);
+
+        $response->assertRedirect(route('account.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('sellers', ['id' => $seller->id]);
+        $this->assertDatabaseMissing('seller_packages', ['seller_id' => $seller->id]);
+    }
+
+    public function test_destroy_shop_rejects_wrong_password(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('Password123'),
+        ]);
+        $seller = Seller::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->delete(route('account.store.destroy'), [
+            'password' => 'WrongPassword',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('sellers', ['id' => $seller->id]);
+    }
+
+    public function test_destroy_shop_requires_password(): void
+    {
+        $user = User::factory()->create();
+        Seller::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->delete(route('account.store.destroy'), [
+            'password' => '',
+        ]);
+
+        $response->assertSessionHasErrors(['password']);
+    }
+
+    public function test_toggle_auto_renew_enables_setting(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'auto_renew' => false,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'), [
+            'auto_renew' => '1',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'auto_renew' => true,
+            ]);
+        $this->assertTrue($seller->fresh()->auto_renew);
+    }
+
+    public function test_toggle_auto_renew_disables_setting_when_value_missing(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'auto_renew' => true,
+        ]);
+
+        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'));
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'auto_renew' => false,
+            ]);
+        $this->assertFalse($seller->fresh()->auto_renew);
+    }
+
+    public function test_toggle_auto_renew_returns_404_without_shop(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'), [
+            'auto_renew' => '1',
+        ]);
+
+        $response->assertNotFound()
+            ->assertJsonStructure(['error']);
     }
 }

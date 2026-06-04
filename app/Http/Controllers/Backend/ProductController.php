@@ -7,11 +7,11 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Models\Category;
+use App\Services\BackendProductService;
 use App\Services\ProductImageService;
 use App\Services\ProductLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Image as ProductImage;
 
@@ -25,7 +25,7 @@ class ProductController extends Controller
     /**
      * Список товаров продавца
      */
-    public function index(Request $request)
+    public function index(Request $request, BackendProductService $backendProductService)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -34,50 +34,17 @@ class ProductController extends Controller
             return redirect()->route('account.store.create')
                 ->with('error', 'Сначала создайте магазин');
         }
-        
-        // Базовый запрос
-        $query = $seller->products()->with(['category', 'images']);
-        
-        // Фильтр по категории
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category_id', $request->category);
-        }
-        
-        // Сортировка
-        $query->orderByDesc('created_at');
-        
-        $products = $query->paginate(20)->appends($request->all());
-        
-        // Получаем ID категорий товаров продавца
-        $sellerCategoryIds = $seller->products()->distinct()->pluck('category_id')->toArray();
-        
-        // Получаем все категории с ancestorами для построения дерева
-        $allCategoryIds = [];
-        foreach ($sellerCategoryIds as $catId) {
-            $category = Category::find($catId);
-            if ($category) {
-                // Добавляем категорию и всех предков
-                $allCategoryIds[] = $catId;
-                $ancestors = $category->ancestors()->pluck('id')->toArray();
-                $allCategoryIds = array_merge($allCategoryIds, $ancestors);
-            }
-        }
-        $allCategoryIds = array_unique($allCategoryIds);
-        
-        // Строим дерево используя Nested Set
-        $categoryTree = Category::whereIn('id', $allCategoryIds)
-            ->where('is_active', true)
-            ->defaultOrder()
-            ->get()
-            ->toTree();
-        
+        return view('backend.cabinet.store.products', array_merge(
+            $backendProductService->getIndexData($seller, $request),
+            compact('seller', 'user')
+        ));
         return view('backend.cabinet.store.products', compact('products', 'seller', 'user', 'categoryTree', 'sellerCategoryIds'));
     }
 
     /**
      * Форма создания товара
      */
-    public function create()
+    public function create(BackendProductService $backendProductService)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -88,7 +55,7 @@ class ProductController extends Controller
         }
         
         // Только корневые категории для первого уровня (из кеша)
-        $categories = Category::getCachedRootCategories();
+        $categories = $backendProductService->getRootCategories();
         
         return view('backend.cabinet.products.create', compact('categories', 'seller'));
     }
@@ -99,7 +66,8 @@ class ProductController extends Controller
     public function store(
         StoreProductRequest $request,
         ProductImageService $productImageService,
-        ProductLimitService $productLimitService
+        ProductLimitService $productLimitService,
+        BackendProductService $backendProductService
     ) {
         $user = Auth::user();
         $seller = $user->seller;
@@ -127,9 +95,7 @@ class ProductController extends Controller
         $category = Category::find($data['category_id']);
         if ($category && !$category->isLeaf()) {
             // Сохраняем путь категории для восстановления
-            $selectedPath = $category->ancestors->pluck('id')->toArray();
-            $selectedPath[] = $category->id;
-            session()->put('selectedPath', $selectedPath);
+            $backendProductService->rememberSelectedPath($category);
             
             return redirect()->back()
                 ->withErrors(['category_id' => 'Пожалуйста, выберите подкатегорию последнего уровня для размещения товара. Нельзя добавлять товары в категории, у которых есть подкатегории.'])
@@ -150,25 +116,14 @@ class ProductController extends Controller
         if ($validator->errors()->any()) {
             $category = Category::find($data['category_id']);
             if ($category) {
-                $selectedPath = $category->ancestors->pluck('id')->toArray();
-                $selectedPath[] = $category->id;
-                session()->put('selectedPath', $selectedPath);
+                $backendProductService->rememberSelectedPath($category);
             }
 
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
-        $baseAlias = Str::slug($data['name']);
-        $alias = $baseAlias ?: Str::lower(Str::random(6));
-        
-        $counter = 1;
-        while (Product::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . $counter;
-            $counter++;
-        }
-
-        $data['alias'] = $alias;
+        $data['alias'] = $backendProductService->generateUniqueAlias($data['name']);
         $data['seller_id'] = $seller->id;
         $data['push_at'] = now();
         
@@ -213,24 +168,17 @@ class ProductController extends Controller
     /**
      * Форма редактирования товара
      */
-    public function edit(Product $product)
+    public function edit(Product $product, BackendProductService $backendProductService)
     {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
         }
         
         // Только корневые категории для первого уровня (из кеша)
-        $categories = Category::getCachedRootCategories();
+        $categories = $backendProductService->getRootCategories();
         
         // Получаем цепочку категорий товара (для предзаполнения)
-        $selectedPath = [];
-        if ($product->category_id) {
-            $category = Category::find($product->category_id);
-            if ($category) {
-                $selectedPath = $category->ancestors->pluck('id')->toArray();
-                $selectedPath[] = $category->id;
-            }
-        }
+        $selectedPath = $backendProductService->getSelectedPath($product->category_id);
         
         return view('backend.cabinet.products.edit', compact('product', 'categories', 'selectedPath'));
     }
@@ -242,7 +190,8 @@ class ProductController extends Controller
         UpdateProductRequest $request,
         Product $product,
         ProductImageService $productImageService,
-        ProductLimitService $productLimitService
+        ProductLimitService $productLimitService,
+        BackendProductService $backendProductService
     ) {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
@@ -256,23 +205,12 @@ class ProductController extends Controller
 
         // ===================================================
         // ШАГ 2.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
-        // ===================================================
         $category = Category::find($data['category_id']);
         if ($category && !$category->isLeaf()) {
-            // 1️⃣ Получаем всех родителей категории
-            $selectedPath = $category->ancestors->pluck('id')->toArray(); 
-            // Результат: [1, 5, 12] (например: Электроника=1, Смартфоны=5, iPhone=12)
-            
-            // 2️⃣ Добавляем саму категорию в конец массива
-            $selectedPath[] = $category->id;
-            // Теперь: [1, 5, 12, 12]
-            
-            // 3️⃣ Сохраняем этот массив в сессию с ключом 'selectedPath'
-            
-            session()->put('selectedPath', $selectedPath); 
-            
+            $backendProductService->rememberSelectedPath($category);
+
             return redirect()->back()
-                ->withErrors(['category_id' => 'Выберите конечную категорию...'])
+                ->withErrors(['category_id' => 'Р’С‹Р±РµСЂРёС‚Рµ РєРѕРЅРµС‡РЅСѓСЋ РєР°С‚РµРіРѕСЂРёСЋ...'])
                 ->withInput();
         }
 
@@ -302,9 +240,7 @@ class ProductController extends Controller
         if ($validator->errors()->any()) {
             $category = Category::find($data['category_id']);
             if ($category) {
-                $selectedPath = $category->ancestors->pluck('id')->toArray();
-                $selectedPath[] = $category->id;
-                session()->put('selectedPath', $selectedPath);
+                $backendProductService->rememberSelectedPath($category);
             }
 
             return redirect()->back()
@@ -512,30 +448,10 @@ class ProductController extends Controller
     /**
      * Получить дочерние категории по ID родителя
      */
-    public function getChildCategories(Request $request)
+    public function getChildCategories(Request $request, BackendProductService $backendProductService)
     {
-        $parentId = $request->get('parent_id');
-        
-        if ($parentId) {
-            $children = Category::where('parent_id', $parentId)
-                ->where('is_active', true)
-                ->orderBy('number')
-                ->get(['id', 'name', 'parent_id']);
-        } else {
-            // Корневые категории
-            $children = Category::whereNull('parent_id')
-                ->where('is_active', true)
-                ->orderBy('number')
-                ->get(['id', 'name', 'parent_id']);
-        }
-        
-        // Проверяем, есть ли у каждой категории дети
-        $children->each(function($category) {
-            $category->has_children = Category::where('parent_id', $category->id)
-                ->where('is_active', true)
-                ->exists();
-        });
-        
-        return response()->json($children);
+        return response()->json(
+            $backendProductService->getChildCategories($request->integer('parent_id') ?: null)
+        );
     }
 }

@@ -2,473 +2,66 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CatalogPageService;
 use Illuminate\Http\Request;
-use App\Models\Category;
-use App\Models\Product;
-use App\Models\Seller;
-use Session;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 
 class CatalogController extends Controller
 {
-    public function catalog(Request $request)
+    public function catalog(Request $request, CatalogPageService $catalogPageService): View
     {
-        // Получаем минимальную и максимальную цену (из кеша)
-        $priceRange = $this->getCachedPriceRange();
-        $minPrice = $priceRange['min'];
-        $maxPrice = $priceRange['max'];
-
-        // Фильтры из сессии
-        $selectedSellerAlias = $request->input('seller');
-        $priceRange = Session::get('catalog_filters.price', [
-            'min' => $minPrice,
-            'max' => $maxPrice,
-        ]);
-
-        // Сохранение фильтров
-        if ($request->has('seller')) {
-            Session::put('catalog_filters.seller', $selectedSellerAlias);
-        } elseif ($request->has('clear_seller')) {
-            Session::forget('catalog_filters.seller');
-            $selectedSellerAlias = null;
-        }
-
-        if ($request->has('min_price') && $request->has('max_price')) {
-            Session::put('catalog_filters.price', [
-                'min' => $request->input('min_price'),
-                'max' => $request->input('max_price'),
-            ]);
-        }
-
-        // Запрос товаров с фильтрами
-        $query = Product::visible()
-            ->with(['images', 'seller']);
-
-        // Фильтр по продавцу
-        if ($selectedSellerAlias) {
-            $seller = Seller::getCachedByAlias($selectedSellerAlias);
-            if ($seller) {
-                $query->where('seller_id', $seller->id);
-            }
-        }
-
-        // Фильтр по цене
-        if (!empty($priceRange)) {
-            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
-        }
-
-        // Сортировка: сначала VIP, потом обычные, по push_at
-        $query->orderByDesc('is_vip')
-              ->orderByDesc('push_at');
-
-        // Пагинация (12 товаров на страницу)
-        $products = $query->paginate(12)->appends($request->query());
-
-        // 🆕 NESTED SET: Загрузка категорий одним запросом
-        $categories = Category::getCachedRootTree();
-
-        // 🆕 Фильтруем категории без товаров (если включено в настройках)
-        if (config('categories.hide_empty', true)) {
-            $categories = Cache::remember('menu_categories', now()->addHours(24),
-                fn () => Category::filterTreeByProducts($categories));
-        }
-
-        // Продавцы
-        $sellers = Seller::getCachedAll();
-        
-        // Подсчет товаров (теперь быстрее)
-        $categoryProductsCounts = [];
-        foreach ($categories as $category) {
-            $categoryProductsCounts[$category->id] = $this->getCategoryProductsCount($category);
-        }
-
-        return view('catalog.index', compact(
-            'categories', 
-            'products', 
-            'sellers', 
-            'minPrice', 
-            'maxPrice', 
-            'categoryProductsCounts'
-        ));
+        return view('catalog.index', $catalogPageService->getCatalogPageData($request));
     }
 
-
-    public function show($alias, Request $request)
+    public function show(string $alias, Request $request, CatalogPageService $catalogPageService): View
     {
-        // Найти категорию
-        $category = Category::where('alias', $alias)
-            ->where('is_active', true)
-            ->firstOrFail();
+        $category = $catalogPageService->findActiveCategoryByAlias($alias);
 
-        // Фильтры
-        $priceRange = $this->getCachedPriceRange();
-        $minPrice = $priceRange['min'];
-        $maxPrice = $priceRange['max'];
-        $selectedSellerAlias = $request->input('seller');
-        $priceRange = Session::get('catalog_filters.price', [
-            'min' => $minPrice,
-            'max' => $maxPrice,
-        ]);
-
-        // Сохранение фильтров
-        if ($request->has('seller')) {
-            Session::put('catalog_filters.seller', $selectedSellerAlias);
-        } elseif ($request->has('clear_seller')) {
-            Session::forget('catalog_filters.seller');
-            $selectedSellerAlias = null;
-        }
-
-        if ($request->has('min_price') && $request->has('max_price')) {
-            Session::put('catalog_filters.price', [
-                'min' => $request->input('min_price'),
-                'max' => $request->input('max_price'),
-            ]);
-        }
-
-        // 🆕 NESTED SET: Хлебные крошки
-        $breadcrumbs = $category->breadcrumbs;
-
-        // 🆕 NESTED SET: Все ID потомков + текущая категория (1 запрос!)
-        $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
-        
-        // Запрос товаров с фильтрами
-        $query = Product::visible()
-            ->whereIn('category_id', $categoryIds)
-            ->with(['images', 'seller']);
-
-        // Фильтр по продавцу
-        if ($selectedSellerAlias) {
-            $seller = Seller::getCachedByAlias($selectedSellerAlias);
-            if ($seller) {
-                $query->where('seller_id', $seller->id);
-            }
-        }
-
-        // Фильтр по цене
-        if (!empty($priceRange)) {
-            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
-        }
-
-        // Сортировка: сначала VIP, потом обычные, по push_at
-        $query->orderByDesc('is_vip')
-              ->orderByDesc('push_at');
-
-        // Пагинация (12 товаров на страницу)
-        $products = $query->paginate(12)->appends($request->query());
-
-        // 🆕 NESTED SET: Подкатегории (только прямые дети)
-        $hasChildren = $category->children->count() > 0;
-        $menuCategories = $hasChildren
-            ? $category->children
-            : ($category->parent ? $category->parent->children : collect());
-
-        // 🆕 Фильтруем пустые категории в меню (если включено в настройках)
-        if (config('categories.hide_empty', true)) {
-            $menuCategories = $this->filterEmptyCategories($menuCategories);
-        }
-
-        // Продавцы - только с активными пакетами и товарами в категории
-        $sellers = Seller::whereHas('sellerPackages', function ($q) {
-                $q->where('is_active', true)
-                    ->where(function($dateQuery) {
-                        $dateQuery->whereNull('end_date')
-                            ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE
-                    });
-            })
-            ->whereHas('products', function ($q) use ($categoryIds) {   // заменяем HAVING на EXISTS
-                $q->where('is_active', true)
-                    ->whereIn('category_id', $categoryIds);
-            })
-            ->withCount(['products as product_count_in_category' => function ($q) use ($categoryIds) {
-                $q->where('is_active', true)
-                    ->whereIn('category_id', $categoryIds);
-            }])
-            ->orderByDesc('product_count_in_category')
-            ->get();
-
-        // Подсчет товаров по каждой категории в меню (категория + все потомки)
-        $categoryProductsCounts = [];
-        foreach ($menuCategories as $menuCategory) {
-            $categoryProductsCounts[$menuCategory->id] = $this->getCategoryProductsCount($menuCategory);
-        }
-
-        // Подсчет товаров текущей категории
-        $categoryProductsCount = $this->getCategoryProductsCount($category);
-
-        return view('catalog.show', [
-            'category' => $category,
-            'categories' => $menuCategories,
-            'breadcrumbs' => $breadcrumbs,
-            'products' => $products,
-            'sellers' => $sellers,
-            'minPrice' => $minPrice,
-            'maxPrice' => $maxPrice,
-            'categoryProductsCount' => $categoryProductsCount,
-            'categoryProductsCounts' => $categoryProductsCounts,
-            'hasChildren' => $hasChildren,
-        ]);
+        return view('catalog.show', $catalogPageService->getCategoryPageData($category, $request));
     }
 
-    public function sale()
+    public function sale(CatalogPageService $catalogPageService): View
     {
-        // Получить товары
-        $products = Product::visible()
-            ->whereNotNull('lowprice') // Только со скидкой
-            ->orderByDesc('sale_started_at')
-            ->with(['images', 'seller'])
-            ->paginate(12);
-
         return view('salepage', [
-            'products' => $products,
+            'products' => $catalogPageService->getSaleProducts(),
         ]);
     }
 
-    /**
-     * 🆕 NESTED SET: Быстрый сбор ID (заменяет рекурсию)
-     */
-    private function collectCategoryIds($category)
+    public function loadMoreCatalog(Request $request, CatalogPageService $catalogPageService): string
     {
-        // Используем статический метод с ID категории
-        return Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
-    }
+        $products = $catalogPageService->getCatalogProducts($request);
 
-    /**
-     * 🆕 NESTED SET: Оптимизированный подсчет товаров
-     */
-    private function getCategoryProductsCount($category)
-    {
-        return Cache::remember('category_products_count:' . $category->id, now()->addMinutes(10), function () use ($category) {
-            $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id');
-            return Product::visible()
-                ->whereIn('category_id', $categoryIds)
-                ->count();
-        });
-    }
-
-    /**
-     * Получить закешированный диапазон цен
-     */
-    private function getCachedPriceRange()
-    {
-        return Cache::remember('product_price_range', now()->addHours(1), function () {
-            return [
-                'min' => Product::min('price') ?? 0,
-                'max' => Product::max('price') ?? 0,
-            ];
-        });
-    }
-
-    /**
-     * 🆕 Фильтрует категории без товаров
-     * Рекурсивно проверяет наличие товаров в категории и её детях
-     * 
-     * @param \Illuminate\Support\Collection $categories
-     * @return \Illuminate\Support\Collection
-     */
-    private function filterEmptyCategories($categories)
-    {
-        return $categories->filter(function ($category) {
-            // Рекурсивно фильтруем детей
-            if ($category->children->isNotEmpty()) {
-                $filteredChildren = $this->filterEmptyCategories($category->children);
-                $category->setRelation('children', $filteredChildren);
-            }
-
-            // Проверяем наличие товаров в категории или хотя бы в одном ребёнке
-            return $this->categoryHasProducts($category);
-        });
-    }
-
-    /**
-     * 🆕 Проверяет, есть ли у категории товары (включая в детях)
-     * 
-     * @param Category $category
-     * @return bool
-     */
-    private function categoryHasProducts($category)
-    {
-        // Получаем все ID потомков + текущая категория
-        $categoryIds = $this->collectCategoryIds($category);
-        
-        // Проверяем наличие хотя бы одного товара
-        return Product::visible()
-            ->whereIn('category_id', $categoryIds)
-            ->exists();
-    }
-
-    /**
-     * 📱 AJAX: Загрузка дополнительных товаров (общий каталог)
-     */
-    public function loadMoreCatalog(Request $request)
-    {
-        $selectedSellerAlias = $request->input('seller');
-        $priceRange = Session::get('catalog_filters.price');
-
-        // Запрос товаров с фильтрами (копируем логику из catalog())
-        $query = Product::visible()
-            ->with(['images', 'seller']);
-
-        // Фильтр по продавцу
-        if ($selectedSellerAlias) {
-            $seller = Seller::getCachedByAlias($selectedSellerAlias);
-            if ($seller) {
-                $query->where('seller_id', $seller->id);
-            }
-        }
-
-        // Фильтр по цене
-        if (!empty($priceRange)) {
-            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
-        }
-
-        // Сортировка: сначала VIP, потом обычные, по push_at
-        $query->orderByDesc('is_vip')
-              ->orderByDesc('push_at');
-
-        // Пагинация (12 товаров на страницу)
-        $products = $query->paginate(12)->appends($request->query());
-
-        // Возвращаем HTML
         return view('components.products-load-more', compact('products'))->render();
     }
 
-    /**
-     * 📱 AJAX: Загрузка дополнительных товаров (конкретная категория)
-     */
-    public function loadMoreCategory($alias, Request $request)
+    public function loadMoreCategory(string $alias, Request $request, CatalogPageService $catalogPageService): string
     {
-        // Найти категорию
-        $category = Category::where('alias', $alias)
-            ->where('is_active', true)
-            ->firstOrFail();
+        $category = $catalogPageService->findActiveCategoryByAlias($alias);
+        $products = $catalogPageService->getCatalogProducts(
+            $request,
+            $catalogPageService->getCategoryIds($category)
+        );
 
-        $selectedSellerAlias = $request->input('seller');
-        $priceRange = Session::get('catalog_filters.price');
-
-        // Все ID потомков + текущая категория
-        $categoryIds = Category::descendantsAndSelf($category->id)->pluck('id')->toArray();
-        
-        // Запрос товаров с фильтрами (копируем логику из show())
-        $query = Product::visible()
-            ->whereIn('category_id', $categoryIds)
-            ->with(['images', 'seller']);
-
-        // Фильтр по продавцу
-        if ($selectedSellerAlias) {
-            $seller = Seller::getCachedByAlias($selectedSellerAlias);
-            if ($seller) {
-                $query->where('seller_id', $seller->id);
-            }
-        }
-
-        // Фильтр по цене
-        if (!empty($priceRange)) {
-            $query->whereBetween('price', [$priceRange['min'], $priceRange['max']]);
-        }
-
-        // Сортировка: сначала VIP, потом обычные, по push_at
-        $query->orderByDesc('is_vip')
-              ->orderByDesc('push_at');
-
-        // Пагинация (12 товаров на страницу)
-        $products = $query->paginate(12)->appends($request->query());
-
-        // Возвращаем HTML
         return view('components.products-load-more', compact('products'))->render();
     }
 
-    /**
-     * 📱 AJAX: Загрузка дополнительных товаров (страница распродаж)
-     */
-    public function loadMoreSale(Request $request)
+    public function loadMoreSale(Request $request, CatalogPageService $catalogPageService): string
     {
-        // Запрос товаров со скидкой (копируем логику из sale())
-        $products = Product::visible()
-            ->whereNotNull('lowprice') // Только со скидкой
-            ->orderByDesc('sale_started_at')
-            ->with(['images', 'seller'])
-            ->paginate(12);
+        $products = $catalogPageService->getSaleProducts();
 
-        // Возвращаем HTML
         return view('components.products-load-more', compact('products'))->render();
     }
 
-    /**
-     * Поиск товаров по названию и описанию
-     */
-    public function search(Request $request)
+    public function search(Request $request, CatalogPageService $catalogPageService): View
+    {
+        return view('search', $catalogPageService->getSearchPageData($request));
+    }
+
+    public function loadMoreSearch(Request $request, CatalogPageService $catalogPageService): string
     {
         $q = trim($request->input('q', ''));
         $categoryAlias = $request->input('category', '');
-
-        $selectedCategory = null;
-        $categoryIds = [];
-        if ($categoryAlias) {
-            $selectedCategory = Category::where('alias', $categoryAlias)->first();
-            if ($selectedCategory) {
-                $categoryIds = $this->collectCategoryIds($selectedCategory);
-            }
-        }
-
-        $products = Product::visible()
-            ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('name', 'LIKE', '%' . $q . '%')
-                        ->orWhere('desc', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features1', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features2', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features3', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features4', 'LIKE', '%' . $q . '%');
-                });
-            })
-            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
-                $query->whereIn('category_id', $categoryIds);
-            })
-            ->orderByDesc('is_vip')
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->paginate(12)
-            ->appends(['q' => $q, 'category' => $categoryAlias]);
-
-        return view('search', compact('products', 'q', 'selectedCategory', 'categoryAlias'));
-    }
-
-    /**
-     * AJAX: Загрузка следующей страницы результатов поиска
-     */
-    public function loadMoreSearch(Request $request)
-    {
-        $q = trim($request->input('q', ''));
-        $categoryAlias = $request->input('category', '');
-
-        $categoryIds = [];
-        if ($categoryAlias) {
-            $selectedCategory = Category::where('alias', $categoryAlias)->first();
-            if ($selectedCategory) {
-                $categoryIds = $this->collectCategoryIds($selectedCategory);
-            }
-        }
-
-        $products = Product::visible()
-            ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($sub) use ($q) {
-                    $sub->where('name', 'LIKE', '%' . $q . '%')
-                        ->orWhere('desc', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features1', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features2', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features3', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features4', 'LIKE', '%' . $q . '%');
-                });
-            })
-            ->when(!empty($categoryIds), function ($query) use ($categoryIds) {
-                $query->whereIn('category_id', $categoryIds);
-            })
-            ->orderByDesc('is_vip')
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->paginate(12)
-            ->appends(['q' => $q, 'category' => $categoryAlias]);
+        $products = $catalogPageService->getSearchProducts($q, $categoryAlias);
 
         return view('components.products-load-more', compact('products'))->render();
     }

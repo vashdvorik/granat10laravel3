@@ -220,4 +220,91 @@ class CatalogControllerTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_load_more_catalog_returns_products_partial(): void
+    {
+        $this->createVisibleProductWithSeller();
+        $package  = Package::factory()->withLimits(50, 10)->create();
+        $seller   = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->create([
+            'seller_id'   => $seller->id,
+            'category_id' => $category->id,
+            'is_active'   => true,
+            'name'        => 'LoadMoreCatalogProduct_UNIQ',
+        ]);
+
+        $response = $this->get(route('catalog.loadMore'));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreCatalogProduct_UNIQ');
+    }
+
+    public function test_load_more_category_returns_products_partial(): void
+    {
+        $package   = Package::factory()->withLimits(50, 10)->create();
+        $seller    = Seller::factory()->create();
+        $category1 = Category::factory()->create(['is_active' => true]);
+        $category2 = Category::factory()->create(['is_active' => true]);
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->create([
+            'seller_id'   => $seller->id,
+            'category_id' => $category1->id,
+            'is_active'   => true,
+            'name'        => 'LoadMoreCategoryProduct_UNIQ',
+        ]);
+        Product::factory()->create([
+            'seller_id'   => $seller->id,
+            'category_id' => $category2->id,
+            'is_active'   => true,
+            'name'        => 'LoadMoreOtherCategoryProduct_UNIQ',
+        ]);
+
+        $response = $this->get(route('catalog.loadMoreCategory', $category1->alias));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreCategoryProduct_UNIQ');
+        $response->assertDontSee('LoadMoreOtherCategoryProduct_UNIQ');
+    }
+
+    public function test_load_more_sale_returns_products_partial(): void
+    {
+        $package  = Package::factory()->withLimits(50, 10)->create();
+        $seller   = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->create([
+            'seller_id'       => $seller->id,
+            'category_id'     => $category->id,
+            'is_active'       => true,
+            'name'            => 'LoadMoreSaleProduct_UNIQ',
+            'lowprice'        => 90,
+            'sale_started_at' => now(),
+        ]);
+
+        $response = $this->get(route('catalog.loadMoreSale'));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreSaleProduct_UNIQ');
+    }
+
+    public function test_load_more_search_returns_products_partial(): void
+    {
+        $package  = Package::factory()->withLimits(50, 10)->create();
+        $seller   = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->create([
+            'seller_id'   => $seller->id,
+            'category_id' => $category->id,
+            'is_active'   => true,
+            'name'        => 'LoadMoreSearchProduct_UNIQ',
+        ]);
+
+        $response = $this->get(route('search.loadMore', ['q' => 'LoadMoreSearch']));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreSearchProduct_UNIQ');
+    }
 }

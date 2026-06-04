@@ -36,7 +36,44 @@
 - Local debug-маршрут `/test-package-system` больше не обращается к удаленному `seller.balance`, а использует `seller.user.balance`.
 - Добавлен `ShopServiceTest`: проверяет создание магазина с базовым тарифом, уникальный alias, rollback без базового тарифа и сохранение logo в webp.
 - Проверка после этапа ShopService: `php artisan test` - 184 passed, 342 assertions.
+- Статистика кабинета вынесена из `CabinetController::stats` в `CabinetStatsService`; контроллер теперь только проверяет наличие магазина и передает данные во view.
+- Добавлен `CabinetStatsServiceTest`: проверяет счетчики товаров, просмотры, top-5 товаров, активный тариф, лимиты, историю тарифов, баланс и пустой магазин.
+- `CabinetControllerTest` расширен проверкой `account.stats`, чтобы зафиксировать передачу данных сервиса во view.
+- Проверка после этапа CabinetStatsService: `php artisan test` - 187 passed, 373 assertions.
+- Смена пароля и удаление магазина вынесены из `CabinetController` в `AccountSecurityService`; проверка текущего пароля и хеширование больше не находятся в контроллере.
+- Добавлены `UpdatePasswordRequest` и `DestroyShopRequest` для валидации форм смены пароля и удаления магазина.
+- Добавлен `AccountSecurityServiceTest`: проверяет успешную смену пароля, отказ при неверном текущем пароле, удаление магазина с каскадным удалением тарифов и отказ при неверном пароле.
+- `CabinetControllerTest` расширен сценариями удаления магазина: успешное удаление, неверный пароль и обязательность пароля.
+- Проверка после этапа AccountSecurityService: `php artisan test` - 194 passed, 393 assertions.
+- Переключение автопродления вынесено из `CabinetController::toggleAutoRenew` в `SellerSettingsService`.
+- Добавлен `ToggleAutoRenewRequest` для валидации JSON/форм-поля `auto_renew`.
+- Добавлен `SellerSettingsServiceTest`, а `CabinetControllerTest` расширен сценариями включения, выключения и ошибки 404 при отсутствии магазина.
+- Проверка после этапа SellerSettingsService: `php artisan test` - 199 passed, 405 assertions.
+- Обновление данных магазина вынесено из `Backend\SellerController::update` в `SellerProfileService`; обработка логотипа и удаление старого файла больше не находятся в контроллере.
+- Добавлен `UpdateSellerRequest` для валидации формы редактирования магазина, включая уникальность имени с `ignore` текущего магазина.
+- Добавлены `SellerProfileServiceTest` и `BackendSellerControllerTest`: покрывают обновление полей, замену логотипа, удаление старого файла, запрет обновления чужого магазина и redirect при отсутствии магазина.
+- Проверка после этапа SellerProfileService: `php artisan test` - 206 passed, 429 assertions.
 
+- Публичный `SellerController` переведен на `SellerPageService`: список магазинов, страница продавца, AJAX-догрузка магазинов и товаров теперь используют единый сервисный слой вместо запросов внутри контроллера.
+- `SellerPageService` сохраняет текущую бизнес-логику: сортировка магазинов по количеству активных товаров, показ только видимых товаров продавца, фильтрация пустых корневых категорий и расчет `total_products`.
+- Добавлен `SellerPageServiceTest`: проверяет порядок магазинов, выборку только видимых товаров конкретного продавца и фильтрацию/счетчики категорий.
+- `SellerControllerTest` расширен проверками partial-ответов для `load-more` магазинов и товаров продавца.
+- Проверка после этапа SellerPageService: `php artisan test` - 211 passed, 440 assertions.
+- Публичный `CatalogController` переведен на `CatalogPageService`: общий каталог, страница категории, распродажа, поиск и AJAX-догрузка теперь используют общий сервисный слой.
+- Дублированная логика товарных запросов, фильтра продавца, ценового фильтра, category ids, меню категорий, счетчиков и продавцов категории вынесена из контроллера.
+- Исправлено применение ценового фильтра в текущем запросе: `min_price`/`max_price` теперь сразу влияют на выборку, а не только сохраняются в сессию для следующего запроса.
+- Добавлен `CatalogPageServiceTest`: проверяет текущий ценовой фильтр, фильтр продавца, выборку категории, распродажу и поиск по тексту/категории.
+- `CatalogControllerTest` расширен проверками partial-ответов для `load-more` каталога, категории, распродажи и поиска.
+- Проверка после этапа CatalogPageService: `php artisan test` - 220 passed, 461 assertions.
+- `FavoritesController` переведен на `FavoritesService`: парсинг id из localStorage, лимит входных id, первичная загрузка, пагинация и выборка видимых товаров больше не находятся в контроллере.
+- Сохранен прежний контракт эндпоинтов избранного: `/favorites/products` возвращает JSON с `html`, `has_more`, `total`, `last_page`, а `/favorites/load-more` возвращает HTML partial.
+- Улучшена стабильность выдачи избранного: сервис возвращает товары в порядке id, пришедших с клиента, и не показывает невидимые товары.
+- Добавлены `FavoritesServiceTest` и `FavoritesControllerTest`: покрывают очистку входных id, лимит 200 id, metadata первой страницы, offset следующей страницы, JSON-ответ и HTML-догрузку.
+- Проверка после этапа FavoritesService: `php artisan test` - 228 passed, 478 assertions.
+- Начат безопасный разбор большого `Backend\ProductController`: подготовка списка товаров продавца, дерева категорий, корневых категорий форм, выбранного пути категории, генерация уникального alias и AJAX дочерних категорий вынесены в `BackendProductService`.
+- `Backend\ProductController` стал тоньше в методах `index`, `create`, `edit`, частично `store`/`update` и `getChildCategories`; загрузка изображений, лимиты и update/store сценарии оставлены на следующих подэтапах, чтобы не смешивать риски.
+- Добавлены `BackendProductServiceTest` и `BackendProductControllerProductsTest`: покрывают уникальный alias, selected path, фильтр списка по категории, JSON дочерних категорий, view data списка и форму создания товара.
+- Проверка после этапа BackendProductService: `php artisan test` - 235 passed, 499 assertions.
 ## Этап 1. Стабилизировать окружение и artisan-команды
 
 ### 1.1. Исправить `AppServiceProvider`

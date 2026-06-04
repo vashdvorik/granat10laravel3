@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\DestroyShopRequest;
 use App\Http\Requests\StoreShopRequest;
+use App\Http\Requests\ToggleAutoRenewRequest;
+use App\Http\Requests\UpdatePasswordRequest;
+use App\Services\AccountSecurityService;
+use App\Services\CabinetStatsService;
+use App\Services\SellerSettingsService;
 use App\Services\ShopService;
 
 class CabinetController extends Controller
@@ -26,7 +29,7 @@ class CabinetController extends Controller
     /*
     Страница статистики: сводная информация по магазину продавца
     */
-    public function stats()
+    public function stats(CabinetStatsService $cabinetStatsService)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -36,66 +39,8 @@ class CabinetController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
 
-        // Все ID товаров продавца (один запрос)
-        $productIds = $seller->products()->pluck('id');
-
-        // Счётчики товаров
-        $totalProducts    = $productIds->count();
-        $activeProducts   = $seller->products()->where('is_active', true)->count();
-        $inactiveProducts = $totalProducts - $activeProducts;
-        $vipProducts      = $seller->products()->where('is_active', true)->where('is_vip', true)->count();
-        $saleProducts     = $seller->products()->where(function ($q) {
-            $q->whereNotNull('lowprice')->where('lowprice', '>', 0);
-        })->count();
-
-        // Просмотры
-        $totalViews = $productIds->isEmpty()
-            ? 0
-            : DB::table('views')->whereIn('product_id', $productIds)->sum('views');
-
-        // Топ-5 товаров по просмотрам
-        $topProducts = $productIds->isEmpty()
-            ? collect()
-            : DB::table('products')
-                ->join('views', 'products.id', '=', 'views.product_id')
-                ->whereIn('products.id', $productIds)
-                ->select('products.id', 'products.name', 'products.is_active', 'views.views')
-                ->orderByDesc('views.views')
-                ->limit(5)
-                ->get();
-
-        // Активный тариф
-        $activePackage = $seller->activePackage();
-        $daysLeft = null;
-        if ($activePackage && $activePackage->end_date) {
-            $daysLeft = (int) now()->diffInDays($activePackage->end_date, false);
-        }
-
-        // Лимиты тарифа
-        $productLimit = $activePackage ? $activePackage->package->active_products_limit : null;
-        $vipLimit     = $activePackage ? $activePackage->package->vip_products_limit : null;
-
-        // История тарифов
-        $packageHistory = $seller->sellerPackages()->with('package')->orderByDesc('id')->get();
-
-        // Баланс
-        $balance = $user->balance;
-
-        return view('backend.cabinet.stats', compact(
-            'seller',
-            'totalProducts', 'activeProducts', 'inactiveProducts',
-            'vipProducts', 'saleProducts',
-            'totalViews', 'topProducts',
-            'activePackage', 'daysLeft',
-            'productLimit', 'vipLimit',
-            'packageHistory', 'balance'
-        ));
+        return view('backend.cabinet.stats', $cabinetStatsService->getStats($user, $seller));
     }
-
-    /*
-    Показывает форму создания магазина
-    (проверяет, что магазин еще не создан)
-    */
     public function createShop()
     {
         $user = Auth::user();
@@ -131,26 +76,22 @@ class CabinetController extends Controller
     }
 
 
-    public function updatePassword(Request $request)
+    public function updatePassword(UpdatePasswordRequest $request, AccountSecurityService $accountSecurityService)
     {
-        $request->validate([
-            'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
         $user = Auth::user();
 
-        if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->route('account.index')->with('error', 'Текущий пароль неверный.');
+        try {
+            $accountSecurityService->updatePassword(
+                $user,
+                $request->input('current_password'),
+                $request->input('password')
+            );
+        } catch (\RuntimeException $e) {
+            return redirect()->route('account.index')->with('error', $e->getMessage());
         }
-
-        $user->password = Hash::make($request->password);
-        $user->save();
 
         return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
     }
-
-    // Аккаунт. ПОльзователь. Общая информация
     public function userIndex()
     {
         $user = Auth::user();
@@ -179,27 +120,19 @@ class CabinetController extends Controller
     /**
      * Удаляет магазин текущего пользователя
      */
-    public function destroyShop(Request $request)
+    public function destroyShop(DestroyShopRequest $request, AccountSecurityService $accountSecurityService)
     {
         $user = Auth::user();
-        $seller = $user->seller;
-        
-        if (!$seller) {
+
+        if (!$user->seller) {
             return redirect()->route('account.index')->with('error', 'Магазин не найден');
         }
-        
-        // Опциональная проверка пароля для безопасности
-        $request->validate([
-            'password' => 'required',
-        ]);
-        
-        if (!Hash::check($request->password, $user->password)) {
-            return redirect()->back()->with('error', 'Неверный пароль');
+
+        try {
+            $sellerName = $accountSecurityService->deleteShop($user, $request->input('password'));
+        } catch (\RuntimeException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         }
-        
-        // Удаляем магазин
-        $sellerName = $seller->name;
-        $seller->delete();
 
         activity('sellers')
             ->causedBy($user)
@@ -208,29 +141,19 @@ class CabinetController extends Controller
 
         return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
     }
-
-    /**
-     * Переключить автопродление пакета
-     */
-    public function toggleAutoRenew(Request $request)
+    public function toggleAutoRenew(ToggleAutoRenewRequest $request, SellerSettingsService $sellerSettingsService)
     {
         $seller = Auth::user()->seller;
-        
+
         if (!$seller) {
             return response()->json(['error' => 'Магазин не найден'], 404);
         }
-        
-        // обработка чекбокса
-        $autoRenew = $request->input('auto_renew') === '1';
-        
-        $seller->update([
-            'auto_renew' => $autoRenew
-        ]);
-        
-        // Для отладки можно вернуть данные
+
+        $seller = $sellerSettingsService->updateAutoRenew($seller, $request->boolean('auto_renew'));
+
         return response()->json([
             'success' => true,
-            'auto_renew' => $seller->auto_renew
+            'auto_renew' => $seller->auto_renew,
         ]);
     }
 }

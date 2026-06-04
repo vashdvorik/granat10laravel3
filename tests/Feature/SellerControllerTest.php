@@ -178,4 +178,38 @@ class SellerControllerTest extends TestCase
 
         $response->assertDontSee('HiddenProduct_SellerTest_UNIQUE');
     }
+
+    public function test_load_more_shops_returns_sellers_partial(): void
+    {
+        Seller::factory()->create(['name' => 'LoadMoreShopUnique']);
+
+        $response = $this->get(route('shops.loadMore'));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreShopUnique');
+    }
+
+    public function test_load_more_seller_products_returns_products_partial(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create(['alias' => 'load-more-seller-products']);
+        $category = Category::factory()->create();
+
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'LoadMoreSellerProductUnique',
+        ]);
+
+        $response = $this->get(route('seller.loadMore', $seller->alias));
+
+        $response->assertStatus(200);
+        $response->assertSee('LoadMoreSellerProductUnique');
+    }
 }
