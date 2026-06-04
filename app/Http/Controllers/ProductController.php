@@ -20,10 +20,18 @@ class ProductController extends Controller
         ->firstOrFail();
 
         // Считаем просмотр
-        DB::table('views')->updateOrInsert(
-            ['product_id' => $product->id],
-            ['views' => DB::raw('views + 1')]
-        );
+        $updated = DB::table('views')
+            ->where('product_id', $product->id)
+            ->increment('views');
+
+        if ($updated === 0) {
+            DB::table('views')->insert([
+                'product_id' => $product->id,
+                'views' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
         // Получаем категорию товара
         $category = $product->category;

@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+abstract class ProductRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'desc' => ['nullable', 'string'],
+            'features1' => ['nullable', 'string', 'max:255'],
+            'features2' => ['nullable', 'string', 'max:255'],
+            'features3' => ['nullable', 'string', 'max:255'],
+            'features4' => ['nullable', 'string', 'max:255'],
+            'is_vip' => ['boolean'],
+            'is_active' => ['boolean'],
+            'images' => ['nullable', 'array', 'max:5'],
+            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Поле "Название товара" обязательно для заполнения',
+            'name.max' => 'Название товара не может быть длиннее 255 символов',
+            'price.required' => 'Укажите цену товара',
+            'price.numeric' => 'Цена должна быть числом',
+            'price.min' => 'Цена не может быть отрицательной',
+            'category_id.required' => 'Выберите категорию товара',
+            'category_id.exists' => 'Выбранная категория не существует',
+            'lowprice.numeric' => 'Цена со скидкой должна быть числом',
+            'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
+            'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
+            'images.max' => 'Можно загрузить максимум 5 изображений',
+            'images.*.image' => 'Файл должен быть изображением',
+            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
+            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
+        ];
+    }
+}

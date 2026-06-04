@@ -3,14 +3,16 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Models\Category;
+use App\Services\ProductImageService;
+use App\Services\ProductLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Image as ProductImage;
 
 class ProductController extends Controller
@@ -94,8 +96,11 @@ class ProductController extends Controller
     /**
      * Сохранение нового товара
      */
-    public function store(Request $request)
-    {
+    public function store(
+        StoreProductRequest $request,
+        ProductImageService $productImageService,
+        ProductLimitService $productLimitService
+    ) {
         $user = Auth::user();
         $seller = $user->seller;
         
@@ -107,51 +112,8 @@ class ProductController extends Controller
         // ===================================================
         // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
         // ===================================================
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'desc' => ['nullable', 'string'],
-            'features1' => ['nullable', 'string', 'max:255'],
-            'features2' => ['nullable', 'string', 'max:255'],
-            'features3' => ['nullable', 'string', 'max:255'],
-            'features4' => ['nullable', 'string', 'max:255'],
-            'is_vip' => ['boolean'],
-            'is_active' => ['boolean'],
-            'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ], [
-            // Кастомные сообщения
-            'name.required' => 'Поле "Название товара" обязательно для заполнения',
-            'name.max' => 'Название товара не может быть длиннее 255 символов',
-            'price.required' => 'Укажите цену товара',
-            'price.numeric' => 'Цена должна быть числом',
-            'price.min' => 'Цена не может быть отрицательной',
-            'category_id.required' => 'Выберите категорию товара',
-            'category_id.exists' => 'Выбранная категория не существует',
-            'lowprice.numeric' => 'Цена со скидкой должна быть числом',
-            'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
-            'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
-            'images.max' => 'Можно загрузить максимум 5 изображений',
-            'images.*.image' => 'Файл должен быть изображением',
-            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
-            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
-        ]);
-
-        // ===================================================
-        // ШАГ 2: ПРОВЕРЯЕМ БАЗОВУЮ ВАЛИДАЦИЮ (формат полей)
-        // ===================================================
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // ===================================================
-        // ШАГ 3: ПОЛУЧАЕМ ВАЛИДИРОВАННЫЕ ДАННЫЕ
-        // ===================================================
-        $data = $validator->validated();
+        $data = $request->validated();
+        $validator = Validator::make([], []);
 
         // ===================================================
         // ШАГ 4: ПРОВЕРЯЕМ ЛИМИТЫ ПАКЕТА (бизнес-логика)
@@ -174,45 +136,29 @@ class ProductController extends Controller
                 ->withInput();
         }
         // Если товар неактивен, лимиты не проверяем
-        if ($isActive) {
-            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
-            if (!$request->hasFile('images') || count($request->file('images')) === 0) {
-                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "Снят с публикации".');
-            }
-            
-            // Проверяем лимит активных товаров
-            $activeCheck = $seller->canActivateProduct();
-            if (!$activeCheck['allowed']) {
-                $validator->errors()->add('is_active', $activeCheck['message']);
-            }
-            
-            // Если товар VIP, проверяем лимит VIP товаров
-            if ($isVip) {
-                $vipCheck = $seller->canActivateVipProduct();
-                if (!$vipCheck['allowed']) {
-                    $validator->errors()->add('is_vip', $vipCheck['message']);
-                }
-            }
-            
-            // Если есть ошибки, возвращаем назад
-            if ($validator->errors()->any()) {
-                // Сохраняем путь категории для восстановления
-                $category = Category::find($data['category_id']);
-                if ($category) {
-                    $selectedPath = $category->ancestors->pluck('id')->toArray();
-                    $selectedPath[] = $category->id;
-                    session()->put('selectedPath', $selectedPath);
-                }
-                
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
+        $limitErrors = $productLimitService->validateForStore(
+            $seller,
+            (bool) $isActive,
+            (bool) $isVip,
+            $request->hasFile('images') && count($request->file('images')) > 0
+        );
+
+        foreach ($limitErrors as $field => $message) {
+            $validator->errors()->add($field, $message);
         }
 
-        // ===================================================
-        // ШАГ 5: ГЕНЕРАЦИЯ УНИКАЛЬНОГО ALIAS
-        // ===================================================
+        if ($validator->errors()->any()) {
+            $category = Category::find($data['category_id']);
+            if ($category) {
+                $selectedPath = $category->ancestors->pluck('id')->toArray();
+                $selectedPath[] = $category->id;
+                session()->put('selectedPath', $selectedPath);
+            }
+
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         $baseAlias = Str::slug($data['name']);
         $alias = $baseAlias ?: Str::lower(Str::random(6));
         
@@ -240,35 +186,7 @@ class ProductController extends Controller
 
         // ШАГ 8: ЗАГРУЗКА И СЖАТИЕ ИЗОБРАЖЕНИЙ
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $index => $file) {
-                // Генерируем уникальное имя
-                $filename = Str::uuid() . '.webp';
-                $path = 'products/' . date('Y/m');
-                
-                // Читаем и обрабатываем изображение
-                $image = Image::make($file)->orientate();
-                
-                // Сохраняем оригинал (большое изображение - макс. 1200px)
-                $image->resize(1200, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                // Обрезаем и сохраняем изображение (квадрат 800x800px)
-                $image->fit(800, 800, function ($constraint) {
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                $fullPath = $path . '/' . $filename;
-                Storage::disk('public')->put($fullPath, (string) $image);
-                
-                // Создаем запись в БД
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'path' => $fullPath,
-                    'is_main' => $index === 0, // Первое изображение - главное
-                ]);
-            }
+            $productImageService->storeUploadedImages($product, $request->file('images'), true);
         }
         session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
@@ -320,8 +238,12 @@ class ProductController extends Controller
     /**
      * Обновление товара
      */
-    public function update(Request $request, Product $product)
-    {
+    public function update(
+        UpdateProductRequest $request,
+        Product $product,
+        ProductImageService $productImageService,
+        ProductLimitService $productLimitService
+    ) {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
         }
@@ -329,48 +251,8 @@ class ProductController extends Controller
         // ===================================================
         // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
         // ===================================================
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'desc' => ['nullable', 'string'],
-            'features1' => ['nullable', 'string', 'max:255'],
-            'features2' => ['nullable', 'string', 'max:255'],
-            'features3' => ['nullable', 'string', 'max:255'],
-            'features4' => ['nullable', 'string', 'max:255'],
-            'is_vip' => ['boolean'],
-            'is_active' => ['boolean'],
-            'images' => ['nullable', 'array', 'max:5'],
-            'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ], [
-            // Кастомные сообщения
-            'name.required' => 'Поле "Название товара" обязательно для заполнения',
-            'name.max' => 'Название товара не может быть длиннее 255 символов',
-            'price.required' => 'Укажите цену товара',
-            'price.numeric' => 'Цена должна быть числом',
-            'price.min' => 'Цена не может быть отрицательной',
-            'category_id.required' => 'Выберите категорию товара',
-            'category_id.exists' => 'Выбранная категория не существует',
-            'lowprice.numeric' => 'Цена со скидкой должна быть числом',
-            'lowprice.min' => 'Цена со скидкой не может быть отрицательной',
-            'lowprice.lt' => 'Цена со скидкой должна быть меньше обычной цены',
-            'images.max' => 'Можно загрузить максимум 5 изображений',
-            'images.*.image' => 'Файл должен быть изображением',
-            'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
-            'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
-        ]);
-
-        // ===================================================
-        // ШАГ 2: ПРОВЕРЯЕМ БАЗОВУЮ ВАЛИДАЦИЮ
-        // ===================================================
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $data = $validator->validated();
+        $data = $request->validated();
+        $validator = Validator::make([], []);
 
         // ===================================================
         // ШАГ 2.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
@@ -406,46 +288,29 @@ class ProductController extends Controller
         $isVip = $data['is_vip'];
 
         // Если товар активен, проверяем лимиты (исключая текущий товар)
-        if ($isActive) {
-            // ✅ ПРОВЕРКА: Нельзя активировать товар без изображений
-            $hasImages = $product->images()->exists();
-            if (!$hasImages && (!$request->hasFile('images') || count($request->file('images')) === 0)) {
-                $validator->errors()->add('is_active', 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото.');
-            }
-            
-            // Проверяем лимит активных товаров
-            $activeCheck = $product->seller->canActivateProduct($product->id);
-            if (!$activeCheck['allowed']) {
-                $validator->errors()->add('is_active', $activeCheck['message']);
-            }
-            
-            // Если товар VIP, проверяем лимит VIP товаров
-            if ($isVip) {
-                $vipCheck = $product->seller->canActivateVipProduct($product->id);
-                if (!$vipCheck['allowed']) {
-                    $validator->errors()->add('is_vip', $vipCheck['message']);
-                }
-            }
-            
-            if ($validator->errors()->any()) {
-                // Аналогично сохраняем путь категории
-                $category = Category::find($data['category_id']);
-                if ($category) {
-                    $selectedPath = $category->ancestors->pluck('id')->toArray();
-                    $selectedPath[] = $category->id;
-                    session()->put('selectedPath', $selectedPath); // ✅ ПРАВИЛЬНО
-                }
-                
-                return redirect()->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
+        $limitErrors = $productLimitService->validateForUpdate(
+            $product,
+            $isActive,
+            $isVip,
+            $product->images()->exists() || ($request->hasFile('images') && count($request->file('images')) > 0)
+        );
+
+        foreach ($limitErrors as $field => $message) {
+            $validator->errors()->add($field, $message);
         }
 
-        // ===================================================
-        // ШАГ 4: ОБРАБОТКА СКИДКИ
-        // ===================================================
-        // Если появилась новая скидка - ставим дату начала
+        if ($validator->errors()->any()) {
+            $category = Category::find($data['category_id']);
+            if ($category) {
+                $selectedPath = $category->ancestors->pluck('id')->toArray();
+                $selectedPath[] = $category->id;
+                session()->put('selectedPath', $selectedPath);
+            }
+
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
         if (isset($data['lowprice']) && $data['lowprice'] > 0 && !$product->lowprice) {
             $data['sale_started_at'] = now();
         } 
@@ -463,48 +328,18 @@ class ProductController extends Controller
         // ШАГ 6: ЗАГРУЗКА НОВЫХ ИЗОБРАЖЕНИЙ
         // ===================================================
         if ($request->hasFile('images')) {
-            $existingCount = $product->images()->count();
             $newFilesCount = count($request->file('images'));
-            
-            // Проверяем лимит
-            if ($existingCount + $newFilesCount > 5) {
+
+            if (!$productImageService->canAddImages($product, $newFilesCount)) {
                 return redirect()->back()
-                    ->with('error', 'Превышен лимит изображений. Можно загрузить ещё ' . (5 - $existingCount) . ' фото.')
+                    ->with('error', 'Превышен лимит изображений. Можно загрузить ещё ' . $productImageService->remainingImageSlots($product) . ' фото.')
                     ->withInput();
             }
-            
-            // ✅ ПРОВЕРЯЕМ НАЛИЧИЕ ГЛАВНОГО ИЗОБРАЖЕНИЯ ОДИН РАЗ
-            $hasMainImage = $product->images()->where('is_main', true)->exists();
-            
-            foreach ($request->file('images') as $index => $file) {
-                // Генерируем уникальное имя
-                $filename = Str::uuid() . '.webp';
-                $path = 'products/' . date('Y/m');
-                
-                // Читаем и обрабатываем изображение
-                $image = Image::make($file)->orientate();
-                
-                // Сохраняем оригинал (большое изображение - макс. 1200px)
-                $image->resize(1200, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                // Обрезаем и сохраняем изображение (квадрат 800x800px)
-                $image->fit(800, 800, function ($constraint) {
-                    $constraint->upsize();
-                })->encode('webp', 85);
-                
-                $fullPath = $path . '/' . $filename;
-                Storage::disk('public')->put($fullPath, (string) $image);
-                
-                // ✅ ИСПРАВЛЕНО: Если нет главного изображения - делаем первое загружаемое главным
-                ProductImage::create([
-                    'product_id' => $product->id,
-                    'path' => $fullPath,
-                    'is_main' => !$hasMainImage && $index === 0,
-                ]);
-            }
+            $productImageService->storeUploadedImages(
+                $product,
+                $request->file('images'),
+                !$product->images()->where('is_main', true)->exists()
+            );
         }
         session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
@@ -514,19 +349,13 @@ class ProductController extends Controller
     /**
      * Удаление товара
      */
-    public function destroy(Product $product)
+    public function destroy(Product $product, ProductImageService $productImageService)
     {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
         }
         
-        // Удаляем все изображения из storage
-        foreach ($product->images as $image) {
-            if (Storage::disk('public')->exists($image->path)) {
-                Storage::disk('public')->delete($image->path);
-            }
-        }
-        
+        $productImageService->deleteProductFiles($product);
         $product->delete();
         
         return redirect()->route('account.store.products.index')
@@ -536,47 +365,22 @@ class ProductController extends Controller
     /**
      * Активация товара
      */
-    public function activate(Product $product)
+    public function activate(Product $product, ProductLimitService $productLimitService)
     {
         if ($product->seller->user_id !== Auth::id()) {
             abort(403, 'Доступ запрещён');
         }
 
-        // ✅ ПРОВЕРКА: Нельзя опубликовать товар без изображений
-        if (!$product->images()->exists()) {
-            $errorMessage = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "снят с публикации".';
+        $errorMessage = $productLimitService->activationError($product);
+        if ($errorMessage !== null) {
             if (request()->ajax()) {
                 return response()->json([
                     'error' => $errorMessage
                 ], 422);
             }
+
             return redirect()->back()->with('error', $errorMessage);
         }
-
-        // Проверяем лимит активных товаров
-        $activeCheck = $product->seller->canActivateProduct($product->id);
-        if (!$activeCheck['allowed']) {
-            if (request()->ajax()) {
-                return response()->json([
-                    'error' => $activeCheck['message']
-                ], 422);
-            }
-            return redirect()->back()->with('error', $activeCheck['message']);
-        }
-
-        // Если товар VIP, проверяем лимит VIP товаров
-        if ($product->is_vip) {
-            $vipCheck = $product->seller->canActivateVipProduct($product->id);
-            if (!$vipCheck['allowed']) {
-                if (request()->ajax()) {
-                    return response()->json([
-                        'error' => $vipCheck['message']
-                    ], 422);
-                }
-                return redirect()->back()->with('error', $vipCheck['message']);
-            }
-        }
-
         $product->update(['is_active' => true]);
 
         if (request()->ajax()) {
@@ -613,7 +417,7 @@ class ProductController extends Controller
     /**
      * Удаление изображения товара
      */
-    public function destroyImage(ProductImage $image)
+    public function destroyImage(ProductImage $image, ProductImageService $productImageService)
     {
         $product = $image->product;
         
@@ -632,21 +436,7 @@ class ProductController extends Controller
             return redirect()->back()->with('error', $errorMessage);
         }
 
-        // Удаляем файл из хранилища
-        if (Storage::disk('public')->exists($image->path)) {
-            Storage::disk('public')->delete($image->path);
-        }
-
-        // Если удаляем главное изображение и есть другие - делаем главным первое
-        $wasMain = $image->is_main;
-        $image->delete();
-
-        if ($wasMain) {
-            $firstImage = $product->images()->first();
-            if ($firstImage) {
-                $firstImage->update(['is_main' => true]);
-            }
-        }
+        $productImageService->deleteImage($image);
 
         if (request()->ajax()) {
             return response()->json([
@@ -661,7 +451,7 @@ class ProductController extends Controller
     /**
      * Установить главное изображение
      */
-    public function setMainImage(ProductImage $image)
+    public function setMainImage(ProductImage $image, ProductImageService $productImageService)
     {
         $product = $image->product;
         
@@ -669,11 +459,7 @@ class ProductController extends Controller
             abort(403, 'Доступ запрещён');
         }
 
-        // Сбрасываем is_main у всех изображений товара
-        $product->images()->update(['is_main' => false]);
-
-        // Устанавливаем текущее как главное
-        $image->update(['is_main' => true]);
+        $productImageService->setMainImage($image);
 
         if (request()->ajax()) {
             return response()->json([

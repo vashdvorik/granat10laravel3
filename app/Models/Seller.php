@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\SellerPackage;
 use Illuminate\Support\Facades\Cache; 
-use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
@@ -274,52 +273,26 @@ class Seller extends Model
     public function tryAutoRenewPackage(): array
     {
         $activePackage = $this->activePackage();
-        
+
         if (!$activePackage) {
             return ['success' => false, 'message' => 'Нет активного пакета'];
         }
-        
-        $package = $activePackage->package;
-        
-        if ($this->user->balance < $package->price) {
-            return [
-                'success' => false, 
-                'message' => "Недостаточно средств. Нужно: {$package->price} руб, баланс: {$this->user->balance} руб"
-            ];
-        }
-        
-        // Используем транзакцию - ВСЕ ИЛИ НИЧЕГО!
-        // Если что-то пойдет не так - откатится автоматически
+
         try {
-            DB::transaction(function () use ($activePackage, $package) {
-                // Списываем деньги
-                $this->user->decrement('balance', $package->price);
-                
-                // Продлеваем пакет
-                $activePackage->update([
-                    'start_date' => now(),
-                    'end_date' => now()->addDays($package->duration_days),
-                ]);
-            });
-            
+            $renewedPackage = app(\App\Services\PackageService::class)->renew($activePackage);
+
             return [
                 'success' => true,
-                'message' => "Пакет успешно продлен до {$activePackage->end_date->format('d.m.Y')}",
-                'end_date' => $activePackage->end_date,
+                'message' => "Пакет успешно продлен до {$renewedPackage->end_date->format('d.m.Y')}",
+                'end_date' => $renewedPackage->end_date,
             ];
-            
-        } catch (\Exception $e) {
-            // Если произошла ошибка - деньги НЕ списаны (откатились)
+        } catch (\Throwable $e) {
             return [
                 'success' => false,
-                'message' => 'Ошибка при продлении пакета: ' . $e->getMessage()
+                'message' => 'Ошибка при продлении пакета: ' . $e->getMessage(),
             ];
         }
     }
-
-    /**
-     * Получить статус пакета для отображения в кабинете
-     */
     public function getPackageStatus(): array
     {
         $activePackage = $this->activePackage();

@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
-use App\Models\Category;  
+use App\Models\Category;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\Auth;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,30 +27,54 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        if (Schema::hasTable('categories')) {
-            try {
-                // 🆕 NESTED SET: Дерево категорий для меню (с кешированием 24 часа)
-                $categories = \App\Models\Category::getCachedRootTree();
+        $this->composeMenuCategories();
+        $this->composeBackendUser();
+    }
 
-                // Фильтруем пустые категории для меню (пуш-меню, футер, поиск), если включено в конфиге
-                $menuCategories = config('categories.hide_empty', true)
-                    ? Cache::remember('menu_categories', now()->addHours(24), fn () => \App\Models\Category::filterTreeByProducts($categories))
-                    : $categories;
+    private function composeMenuCategories(): void
+    {
+        View::composer('*', function ($view) {
+            static $menuCategories = null;
 
-                View::share('categories', $menuCategories);
-                View::share('menuRootCategories', $menuCategories);
-            } catch (\Exception $e) {
-                // Игнорируем ошибки при миграциях
-                View::share('categories', collect());
-                View::share('menuRootCategories', collect());
+            if ($menuCategories === null) {
+                $menuCategories = $this->loadMenuCategories();
             }
-        } else {
-            // Таблица ещё не создана (первая миграция или тестовое окружение)
-            View::share('categories', collect());
-            View::share('menuRootCategories', collect());
-        }
 
-        // Динамические переменные для кабинета
+            $data = $view->getData();
+
+            if (!array_key_exists('categories', $data)) {
+                $view->with('categories', $menuCategories);
+            }
+
+            if (!array_key_exists('menuRootCategories', $data)) {
+                $view->with('menuRootCategories', $menuCategories);
+            }
+        });
+    }
+
+    private function loadMenuCategories()
+    {
+        try {
+            if (!Schema::hasTable('categories')) {
+                return collect();
+            }
+
+            $categories = Category::getCachedRootTree();
+
+            return config('categories.hide_empty', true)
+                ? Cache::remember(
+                    'menu_categories',
+                    now()->addHours(24),
+                    fn () => Category::filterTreeByProducts($categories)
+                )
+                : $categories;
+        } catch (Throwable) {
+            return collect();
+        }
+    }
+
+    private function composeBackendUser(): void
+    {
         View::composer([
             'backend.*',
             'backend.cabinet.*',
@@ -58,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
         ], function ($view) {
             $user = Auth::user();
             $seller = $user ? $user->seller : null;
+
             $view->with('user', $user)->with('seller', $seller);
         });
     }

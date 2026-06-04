@@ -6,12 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use App\Models\Seller;
-use App\Models\SellerPackage;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use App\Http\Requests\StoreShopRequest;
+use App\Services\ShopService;
 
 class CabinetController extends Controller
 {
@@ -112,63 +108,18 @@ class CabinetController extends Controller
     Сохраняет новый магазин в базе данных
     генерирует уникальный alias из имени магазина, валидирует данные. 
     */
-    public function storeShop(Request $request)
+    public function storeShop(StoreShopRequest $request, ShopService $shopService)
     {
         $user = Auth::user();
         if ($user->seller) {
             return redirect()->route('account.index')->with('error', 'Магазин уже создан');
         }
 
-        $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')],
-            'phone'       => ['nullable', 'string', 'max:50'],
-            'town'        => ['nullable', 'string', 'max:255'],
-            'sellerplace' => ['nullable', 'string', 'max:255'],
-            'address'     => ['nullable', 'string'],
-            'description' => ['nullable', 'string'],
-            'logo'        => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
-        ]);
-
-        $data['user_id'] = $user->id;
-
-        $baseAlias = Str::slug($data['name']);
-        $baseAlias = $baseAlias ? Str::limit($baseAlias, 240, '') : Str::lower(Str::random(6));
-
-        $alias = $baseAlias;
-        $suffixLength = 4;
-        while (Seller::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . Str::lower(Str::random($suffixLength));
-            $suffixLength++;
-        }
-
-        $data['alias'] = $alias;
-        // Убираем logo из $data — храним в photo отдельно после создания
-        $logoFile = $request->file('logo');
-        unset($data['logo']);
-
-        // Создаем магазин
-        $seller = Seller::create($data);
-
-        // Загружаем логотип магазина, если файл передан
-        if ($logoFile) {
-            $filename = 'logo_' . Str::uuid() . '.webp';
-            $path = 'sellers/' . $seller->id;
-            $image = Image::make($logoFile)
-                ->orientate()
-                ->fit(400, 400, function ($c) { $c->upsize(); })
-                ->encode('webp', 85);
-            Storage::disk('public')->put($path . '/' . $filename, (string) $image);
-            $seller->update(['photo' => $path . '/' . $filename]);
-        }
-
-        // Автоматически присваиваем базовый пакет (ID = 1)
-        \App\Models\SellerPackage::create([
-            'seller_id' => $seller->id,
-            'package_id' => 1,
-            'start_date' => now(),
-            'end_date' => null, // Базовый пакет бессрочный
-            'is_active' => true,
-        ]);
+        $seller = $shopService->createShop(
+            $user,
+            $request->validated(),
+            $request->file('logo')
+        );
 
         activity('sellers')
             ->causedBy($user)
@@ -179,9 +130,7 @@ class CabinetController extends Controller
         return redirect()->route('account.index')->with('success', 'Магазин создан');
     }
 
-    
 
-    // Изменяет пароль пользователя после проверки текущего пароля
     public function updatePassword(Request $request)
     {
         $request->validate([

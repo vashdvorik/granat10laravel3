@@ -173,12 +173,13 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
 });
 
 // ТЕСТОВЫЙ РОУТ - УДАЛИТЬ ПОСЛЕ ПРОВЕРКИ
+if (app()->environment('local')) {
 Route::get('/test-package-system', function() {
     $total = \App\Models\Product::count();
     $visible = \App\Models\Product::visible()->count();
     $hidden = $total - $visible;
     
-    $sellers = \App\Models\Seller::with('sellerPackages')->get();
+    $sellers = \App\Models\Seller::with(['sellerPackages', 'user'])->get();
     
     $output = "<h2>Проверка системы пакетов</h2>";
     $output .= "<p><strong>Всего товаров:</strong> $total</p>";
@@ -193,7 +194,8 @@ Route::get('/test-package-system', function() {
         
         $output .= "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
         $output .= "<p><strong>{$seller->name}</strong> (ID: {$seller->id})</p>";
-        $output .= "<p>Баланс: {$seller->balance} руб | Автопродление: " . ($seller->auto_renew ? 'Вкл' : 'Выкл') . "</p>";
+        $balance = $seller->user?->balance ?? 0;
+        $output .= "<p>Баланс: {$balance} руб | Автопродление: " . ($seller->auto_renew ? 'Вкл' : 'Выкл') . "</p>";
         $output .= "<p>Товаров активных: " . $seller->products()->where('is_active', true)->count() . "</p>";
         
         if ($activePackage) {
@@ -209,5 +211,4 @@ Route::get('/test-package-system', function() {
     
     return $output;
 });
-
-
+}

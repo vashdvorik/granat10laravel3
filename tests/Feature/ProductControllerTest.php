@@ -9,6 +9,7 @@ use App\Models\Seller;
 use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 /**
@@ -70,6 +71,16 @@ class ProductControllerTest extends TestCase
         $response = $this->get(route('product.show', $product->alias));
 
         $response->assertSee('Тестовый товар для теста');
+    }
+
+    public function test_product_detail_increments_views_counter(): void
+    {
+        $product = $this->createVisibleProduct();
+
+        $this->get(route('product.show', $product->alias))->assertStatus(200);
+        $this->get(route('product.show', $product->alias))->assertStatus(200);
+
+        $this->assertSame(2, DB::table('views')->where('product_id', $product->id)->value('views'));
     }
 
     public function test_product_detail_returns_404_for_inactive_product(): void
