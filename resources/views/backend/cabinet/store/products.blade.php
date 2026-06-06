@@ -1,6 +1,7 @@
 {{-- КАТАЛОГ ТОВАРОВ --}}
 
 @extends('backend.cabinet.layout_cabinet')
+@inject('sellerPackageStatusService', 'App\Services\SellerPackageStatusService')
 
 @section('content_cabinet')
 @if(session('success'))
@@ -38,7 +39,7 @@
                 <div class="container-fluid">
                         {{-- Уведомление если товары скрыты от покупателей --}}
                         @php
-                            $packageStatus = $seller->getPackageStatus();
+                            $packageStatus = $sellerPackageStatusService->getStatus($seller);
                         @endphp
                         @if(!$packageStatus['has_package'])
                             <div class="row">

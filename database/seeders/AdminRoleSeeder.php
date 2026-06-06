@@ -45,8 +45,15 @@ class AdminRoleSeeder extends Seeder
             );
         }
 
-        // Ensure desired user exists and has admin role
-        $user = DB::table('users')->where('email', 'kinokaef@gmail.com')->first();
+        $email = config('admin.seed_email');
+
+        if (!$email) {
+            $this->command?->warn('ADMIN_EMAIL не задан: роль admin создана, пользователь-администратор не изменен.');
+
+            return;
+        }
+
+        $user = DB::table('users')->where('email', $email)->first();
 
         if ($user) {
             DB::table('users')
@@ -55,16 +62,25 @@ class AdminRoleSeeder extends Seeder
                     'role_id' => $roleId,
                     'updated_at' => now(),
                 ]);
-        } else {
-            DB::table('users')->insert([
-                'name' => 'Admin',
-                'email' => 'kinokaef@gmail.com',
-                'password' => Hash::make('password'),
-                'role_id' => $roleId,
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            return;
         }
+
+        $password = config('admin.seed_password');
+
+        if (!$password) {
+            $this->command?->warn("Пользователь {$email} не создан: задайте ADMIN_PASSWORD.");
+
+            return;
+        }
+
+        DB::table('users')->insert([
+            'name' => config('admin.seed_name'),
+            'email' => $email,
+            'password' => Hash::make($password),
+            'role_id' => $roleId,
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

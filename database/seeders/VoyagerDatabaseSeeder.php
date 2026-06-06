@@ -16,6 +16,7 @@ class VoyagerDatabaseSeeder extends Seeder
         $this->call([
             DataTypesTableSeeder::class,
             DataRowsTableSeeder::class,
+            VoyagerBreadSecuritySeeder::class,
             MenusTableSeeder::class,
             MenuItemsTableSeeder::class,
             RolesTableSeeder::class,

@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Services\CatalogCacheService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -62,11 +62,8 @@ class AppServiceProvider extends ServiceProvider
             $categories = Category::getCachedRootTree();
 
             return config('categories.hide_empty', true)
-                ? Cache::remember(
-                    'menu_categories',
-                    now()->addHours(24),
-                    fn () => Category::filterTreeByProducts($categories)
-                )
+                ? app(CatalogCacheService::class)
+                    ->rememberMenuCategories(fn () => Category::filterTreeByProducts($categories))
                 : $categories;
         } catch (Throwable) {
             return collect();

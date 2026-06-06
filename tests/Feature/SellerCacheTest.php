@@ -123,7 +123,7 @@ class SellerCacheTest extends TestCase
         Cache::put('sellers_list', collect([$seller]), 3600);
         Cache::put('seller_by_alias:' . $seller->alias, $seller, 3600);
 
-        // Обновляем продавца — должен сработать booted()
+        // Обновляем продавца — должен сработать SellerObserver
         $seller->update(['name' => 'Обновлённое название']);
 
         $this->assertFalse(Cache::has('sellers_list'), 'Список должен быть сброшен после обновления');

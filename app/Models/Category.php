@@ -4,10 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Category;
+use App\Services\CatalogCacheService;
 use Kalnoy\Nestedset\NodeTrait;
-use Illuminate\Support\Facades\Cache;
-use App\Jobs\WarmCategoriesCache;
 
 class Category extends Model
 {
@@ -65,7 +63,7 @@ class Category extends Model
      */
     public static function getCachedRootTree()
     {
-        return Cache::remember('categories_root_tree', now()->addHours(24), function () {
+        return app(CatalogCacheService::class)->rememberRootTree(function () {
             return self::where('is_active', true)
                 ->defaultOrder()
                 ->get()
@@ -98,7 +96,7 @@ class Category extends Model
      */
     public static function getCachedRootCategories()
     {
-        return Cache::remember('categories_root_list', now()->addHours(24), function () {
+        return app(CatalogCacheService::class)->rememberRootCategories(function () {
             return self::whereNull('parent_id')
                 ->where('is_active', true)
                 ->orderBy('number')
@@ -111,35 +109,6 @@ class Category extends Model
      */
     public static function clearCategoriesCache(): void
     {
-        Cache::forget('categories_root_tree');
-        Cache::forget('categories_root_list');
-        Cache::forget('menu_categories');
-
-        if (static::$suppressCacheWarming) {
-            return; // Сидер вызовет вручную после всех операций
-        }
-
-        // Пересчитываем кеш после отправки ответа — первый посетитель не ждёт
-        if (app()->runningInConsole()) {
-            dispatch(new WarmCategoriesCache());
-        } else {
-            dispatch(new WarmCategoriesCache())->afterResponse();
-        }
+        app(CatalogCacheService::class)->forgetCategoryRelated(!static::$suppressCacheWarming);
     }
-
-    /**
-     * Автоматическая очистка кеша при изменениях
-     */
-    protected static function booted()
-    {
-        static::saved(function ($category) {
-            self::clearCategoriesCache();
-        });
-
-        static::deleted(function ($category) {
-            self::clearCategoriesCache();
-        });
-    }
-
-
 }

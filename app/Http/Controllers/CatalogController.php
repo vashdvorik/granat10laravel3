@@ -60,7 +60,7 @@ class CatalogController extends Controller
     public function loadMoreSearch(Request $request, CatalogPageService $catalogPageService): string
     {
         $q = trim($request->input('q', ''));
-        $categoryAlias = $request->input('category', '');
+        $categoryAlias = $request->input('category', '') ?? '';
         $products = $catalogPageService->getSearchProducts($q, $categoryAlias);
 
         return view('components.products-load-more', compact('products'))->render();

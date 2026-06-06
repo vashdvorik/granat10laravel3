@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Models\Category;
+use App\Services\ProductLimitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -14,20 +15,19 @@ use Tests\TestCase;
 /**
  * Feature-тест: бизнес-логика тарифных лимитов продавца (работа с БД).
  *
- * @covers \App\Models\Seller::canActivateProduct
- * @covers \App\Models\Seller::canActivateVipProduct
- * @covers \App\Models\Seller::checkProductLimits
- * @covers \App\Models\Seller::getActiveProductsCount
- * @covers \App\Models\Seller::getVipProductsCount
+ * @covers \App\Services\ProductLimitService
  */
-class SellerPackageLimitsTest extends TestCase
+class ProductLimitServiceDatabaseTest extends TestCase
 {
     use RefreshDatabase;
+
+    private ProductLimitService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
         Cache::flush();
+        $this->service = new ProductLimitService();
     }
 
     // =========================================================================
@@ -72,7 +72,7 @@ class SellerPackageLimitsTest extends TestCase
         Product::factory()->count(3)->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => true]);
         Product::factory()->count(2)->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => false]);
 
-        $this->assertSame(3, $seller->getActiveProductsCount());
+        $this->assertSame(3, $this->service->activeProductsCount($seller));
     }
 
     public function test_get_vip_products_count_counts_only_active_vip(): void
@@ -84,7 +84,7 @@ class SellerPackageLimitsTest extends TestCase
         Product::factory()->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => true, 'is_vip' => false]);
         Product::factory()->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => false, 'is_vip' => true]); // неактивный
 
-        $this->assertSame(2, $seller->getVipProductsCount());
+        $this->assertSame(2, $this->service->vipProductsCount($seller));
     }
 
     // =========================================================================
@@ -95,7 +95,7 @@ class SellerPackageLimitsTest extends TestCase
     {
         $seller = $this->createSellerWithPackage(activeLimit: 5);
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(0, $result['current']);
@@ -109,7 +109,7 @@ class SellerPackageLimitsTest extends TestCase
         $this->addActiveProduct($seller);
         $this->addActiveProduct($seller);
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(2, $result['current']);
@@ -123,7 +123,7 @@ class SellerPackageLimitsTest extends TestCase
         $this->addActiveProduct($seller);
         $this->addActiveProduct($seller);
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('3/3', $result['message']);
@@ -133,7 +133,7 @@ class SellerPackageLimitsTest extends TestCase
     {
         $seller = Seller::factory()->create(); // без пакета
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('нет активного тарифного пакета', $result['message']);
@@ -150,7 +150,7 @@ class SellerPackageLimitsTest extends TestCase
         $p3 = $this->addActiveProduct($seller); // 3/3 лимит исчерпан
 
         // При редактировании p3 — исключаем его из подсчёта → current = 2 < 3
-        $result = $seller->canActivateProduct(excludeProductId: $p3->id);
+        $result = $this->service->canActivateProduct($seller, excludeProductId: $p3->id);
 
         $this->assertTrue($result['allowed'], 'При редактировании своего товара должно быть allowed=true');
         $this->assertSame(2, $result['current']);
@@ -166,7 +166,7 @@ class SellerPackageLimitsTest extends TestCase
 
         $this->addActiveProduct($seller, isVip: true); // 1 VIP
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(1, $result['current']);
@@ -180,7 +180,7 @@ class SellerPackageLimitsTest extends TestCase
         $this->addActiveProduct($seller, isVip: true);
         $this->addActiveProduct($seller, isVip: true); // 2/2 лимит VIP
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('2/2', $result['message']);
@@ -199,7 +199,7 @@ class SellerPackageLimitsTest extends TestCase
             'is_vip'      => true,
         ]);
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(0, $result['current']);
@@ -213,7 +213,7 @@ class SellerPackageLimitsTest extends TestCase
     {
         $seller = Seller::factory()->create(); // без пакета
 
-        $result = $seller->checkProductLimits(isActive: false, isVip: false);
+        $result = $this->service->checkProductLimits($seller, isActive: false, isVip: false);
 
         $this->assertTrue($result['allowed']);
         $this->assertEmpty($result['errors']);
@@ -223,7 +223,7 @@ class SellerPackageLimitsTest extends TestCase
     {
         $seller = $this->createSellerWithPackage(activeLimit: 5, vipLimit: 2);
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: false);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: false);
 
         $this->assertTrue($result['allowed']);
     }
@@ -232,7 +232,7 @@ class SellerPackageLimitsTest extends TestCase
     {
         $seller = $this->createSellerWithPackage(activeLimit: 5, vipLimit: 2);
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: true);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: true);
 
         $this->assertTrue($result['allowed']);
         $this->assertEmpty($result['errors']);
@@ -243,7 +243,7 @@ class SellerPackageLimitsTest extends TestCase
         $seller = $this->createSellerWithPackage(activeLimit: 1, vipLimit: 1);
         $this->addActiveProduct($seller, isVip: true); // заполнили оба лимита
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: true);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: true);
 
         $this->assertFalse($result['allowed']);
         $this->assertCount(2, $result['errors']);
@@ -265,7 +265,7 @@ class SellerPackageLimitsTest extends TestCase
             'end_date'   => now()->subDay()->toDateString(), // просрочен вчера
         ]);
 
-        $result = $seller->fresh()->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller->fresh());
 
         $this->assertFalse($result['allowed']);
         $this->assertSame(0, $result['limit']);
@@ -283,7 +283,7 @@ class SellerPackageLimitsTest extends TestCase
             'end_date'   => now()->toDateString(), // истекает сегодня
         ]);
 
-        $result = $seller->fresh()->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller->fresh());
 
         $this->assertTrue($result['allowed'], 'Пакет, истекающий сегодня, должен ещё быть активным');
     }

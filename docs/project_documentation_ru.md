@@ -8,7 +8,7 @@
 - Вьюхи Blade лежат в `resources/views`, статические ассеты (CSS, JS, изображения) — в `public/`.
 
 ## 2. Структура каталогов (верхний уровень)
-- `app/` — прикладной код Laravel: контроллеры, модели, middleware, notification, Fortify actions, провайдеры.
+- `app/` — прикладной код Laravel: контроллеры, модели, сервисы, policies, observers, middleware, notifications, Fortify actions и провайдеры.
 - `bootstrap/` и `config/` — стандартная конфигурация и загрузка фреймворка.
 - `database/` — миграции, сиды, фабрики; ядро описания схемы таблиц и демо-данных.
 - `public/` — собранные стили/скрипты (`css/`, `auth/assets/`, изображения) и точка входа `index.php`.
@@ -27,7 +27,7 @@
 - Информационные страницы: `GET /gobuyer`, `GET /help` → `PageController`.
 - Кабинет пользователя: `GET /account` → `CabinetController@cabinet` (middleware `auth`).
 - Обновление профиля из кабинета: POST `cabinet/update-name`, `cabinet/update-password` (оба под `auth`).
-- Группа `/admin` подключает маршруты Voyager и защищена `web`, `auth`, `only.my.email`. Middleware `only.my.email` проверяет список разрешённых адресов (`app/Http/Middleware/OnlyMyEmail.php`).
+- Группа `/admin` подключает маршруты Voyager и защищена `web`, `auth`, `admin.access`. Middleware вызывает Gate `access-admin`, который проверяет permission Voyager `browse_admin`.
 - Зарезервированы маршруты `cabinet/create-shop` и `cabinet/store-shop`, но методы `CabinetController::createShop` и `::storeShop` пока не реализованы.
 
 ## 4. Контроллеры (`app/Http/Controllers`)
@@ -61,16 +61,23 @@
 
 ## 5. Модели (`app/Models`)
 - `User` (расширяет `TCG\Voyager\Models\User`): `fillable` — `name`, `email`, `phone`, `password`; скрывает `password`, `remember_token`; каст `password` => `hashed`; метод `sendPasswordResetNotification()` использует `ResetPasswordCustom`.
-- `Seller`: связь `products()` (`hasMany(Product::class)`), `fillable` охватывает профиль, контакты, баланс и счётчики.
+- `Seller`: хранит профиль и контакты магазина, связи `user()`, `products()`, `sellerPackages()`, запрос активного тарифа и совместимые методы кеша. Баланс принадлежит `User`, тарифные лимиты и UI-статус в модели отсутствуют.
 - `Product`: связи `category()`, `seller()`, `images()`.
 - `Category`: `fillable` (название, алиас, номер, описание, `parent_id`), связи `children()`, `parent()`, `products()`, аксессор `breadcrumbs` собирает цепочку родителей.
 - `Image`: `fillable` (`product_id`, `path`, `is_main`), связь `product()`.
+
+### Доменные сервисы продавца и тарифа
+- `ProductLimitService` считает активные/VIP товары, проверяет лимиты тарифа и применяется при создании, редактировании, активации товара и покупке тарифа.
+- `PackageService` покупает, продлевает и деактивирует тарифы в транзакциях; списание выполняется из `User.balance` после блокировки пользователя через `lockForUpdate()`.
+- `SellerPackageStatusService` формирует данные для уведомлений кабинета о состоянии тарифа и возможности автопродления.
+- `SellerSettingsService` изменяет настройку автопродления, `SellerProfileService` обновляет профиль магазина.
 
 ## 6. Провайдеры (`app/Providers`)
 - `AppServiceProvider` при наличии таблицы `categories` шарит корневые категории во все вьюхи.
 - `FortifyServiceProvider` регистрирует кастомные действия (раздел 7), задаёт rate limiting login/2FA, переназначает вьюхи Fortify на `backend.auth.*` и `backend.password.*`.
 - `RouteServiceProvider` задаёт `HOME = '/account'`, подключает web/api маршруты.
-- `AuthServiceProvider`, `EventServiceProvider` — стандартные настройки (слушатель `Registered` → `SendEmailVerificationNotification`).
+- `AuthServiceProvider` регистрирует policies товаров и продавцов.
+- `EventServiceProvider` регистрирует observers категорий, изображений, товаров, продавцов и тарифов продавца, а также слушатели аутентификации.
 
 ## 7. Действия Fortify (`app/Actions/Fortify`)
 - `PasswordValidationRules` — общие правила (`required`, `Password::default()`, `confirmed`).
@@ -80,8 +87,9 @@
 - `ResetUserPassword` — сброс пароля по токену Fortify.
 
 ## 8. Middleware и Kernel
-- `OnlyMyEmail` разрешает доступ в `/admin` только аккаунту `kinokaef@gmail.com`, иначе `abort(403)`.
-- `app/Http/Kernel.php` регистрирует стандартные группы `web`, `api` и alias-ы (`auth`, `verified`, `only.my.email` и др.).
+- `EnsureAdminAccess` разрешает доступ в `/admin` пользователям с permission Voyager `browse_admin`.
+- `app/Http/Kernel.php` регистрирует стандартные группы `web`, `api` и alias `admin.access`.
+- Gate `access-admin` объявлен в `AuthServiceProvider`.
 
 ## 9. Уведомления
 - `ResetPasswordCustom` — mail-уведомление со ссылкой `route('password.reset')` и локализованными текстами (используется `User::sendPasswordResetNotification`).
@@ -102,7 +110,7 @@
 - Стандартные таблицы: `users`, `password_reset_tokens`, `failed_jobs`, `personal_access_tokens`, расширенные полями телефона и 2FA.
 - Категории (`categories`): `alias` unique, `parent_id` (self FK, `set null`), `is_active`.
 - Пакеты (`packages`): цена, длительность, лимиты активных и VIP товаров, `is_active`.
-- Продавцы (`sellers`): FK `user_id`, контакты, `alias` unique, `product_count`, `balance`, `can_order`.
+- Продавцы (`sellers`): FK `user_id`, контакты, `alias` unique, `product_count`, `can_order`; баланс хранится в `users`.
 - Товары (`products`): описание, `alias` unique, `is_vip`, `is_active`, `sale_started_at`, `push_at`, FK `category_id`, `seller_id`.
 - Изображения (`images`): FK `product_id`, `path`, `alias`, `alt`, `order`.
 - Просмотры (`views`): `views`, `product_id`.
@@ -110,10 +118,11 @@
 
 ## 13. Сиды (database/seeders)
 - `DatabaseSeeder` вызывает Voyager-сиды и доменные сиды (`AdminRoleSeeder`, `UsersTableSeeder`, `CategoriesTableSeeder`, `PackagesTableSeeder`, `SellersTableSeeder`, `ProductsTableSeeder`, `ImagesTableSeeder`, `SellerPackagesTableSeeder`).
-- `AdminRoleSeeder` — создаёт роль admin и привязывает email `kinokaef@gmail.com`.
+- `AdminRoleSeeder` создаёт роль admin и permission `browse_admin`; пользователь задаётся через `ADMIN_EMAIL`, а новый пароль — через `ADMIN_PASSWORD`.
+- `VoyagerBreadSecuritySeeder` запрещает изменение баланса, пароля и ролей через users BREAD.
 - `UsersTableSeeder` — пользователи `seller1@example.com`, `seller2@example.com` с ролью user.
 - `CategoriesTableSeeder` — трёхуровневое дерево категорий (примерные названия).
-- `SellersTableSeeder` — два продавца с описанием, балансом, ссылками.
+- `SellersTableSeeder` — два продавца с описанием и ссылками.
 - `PackagesTableSeeder` — тарифы («Бесплатный», «Старт» и др.).
 - `ProductsTableSeeder` — демо-товары (часть VIP), расставляет `push_at`, `sale_started_at`.
 - `ImagesTableSeeder` — изображения для товаров.
@@ -127,8 +136,10 @@
 - Маршруты `cabinet/create-shop`, `cabinet/store-shop` требуют реализации методов и шаблонов.
 
 ## 15. Voyager
-- `/admin` подключает `Voyager::routes()`; доступ требует `auth` и email из `OnlyMyEmail`.
-- Voyager-сыкты (`VoyagerDatabaseSeeder`, `VoyagerDummyDatabaseSeeder` и др.) настраивают BREAD, меню, роли, permissions.
+- `/admin` подключает `Voyager::routes()`; доступ требует `auth` и Gate `access-admin`.
+- В текущей БД зарегистрированы стандартные BREAD `users`, `menus`, `roles`.
+- Users BREAD не позволяет изменять баланс, пароль существующего пользователя и назначение ролей.
+- Voyager-сиды (`VoyagerDatabaseSeeder`, `VoyagerDummyDatabaseSeeder` и др.) настраивают BREAD, меню, роли и permissions.
 
 ## 16. Дополнительные заметки
 - В `CatalogController` импортирован `Cache`, но он не используется.

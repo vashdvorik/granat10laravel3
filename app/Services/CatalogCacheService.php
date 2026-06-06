@@ -1,0 +1,212 @@
+<?php
+
+namespace App\Services;
+
+use App\Jobs\WarmCategoriesCache;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Seller;
+use App\Models\SellerPackage;
+use Closure;
+use Illuminate\Support\Facades\Cache;
+
+class CatalogCacheService
+{
+    public const ROOT_TREE_KEY = 'categories_root_tree';
+
+    public const ROOT_LIST_KEY = 'categories_root_list';
+
+    public const MENU_CATEGORIES_KEY = 'menu_categories';
+
+    public const PRODUCT_PRICE_RANGE_KEY = 'product_price_range';
+
+    public const SELLERS_LIST_KEY = 'sellers_list';
+
+    private const SELLER_BY_ALIAS_PREFIX = 'seller_by_alias:';
+
+    private const CATEGORY_PRODUCTS_COUNT_PREFIX = 'category_products_count:';
+
+    public function rememberRootTree(Closure $callback): mixed
+    {
+        return Cache::remember(self::ROOT_TREE_KEY, now()->addHours(24), $callback);
+    }
+
+    public function rememberRootCategories(Closure $callback): mixed
+    {
+        return Cache::remember(self::ROOT_LIST_KEY, now()->addHours(24), $callback);
+    }
+
+    public function rememberMenuCategories(Closure $callback): mixed
+    {
+        return Cache::remember(self::MENU_CATEGORIES_KEY, now()->addHours(24), $callback);
+    }
+
+    public function rememberProductPriceRange(Closure $callback): mixed
+    {
+        return Cache::remember(self::PRODUCT_PRICE_RANGE_KEY, now()->addHour(), $callback);
+    }
+
+    public function rememberSellers(Closure $callback): mixed
+    {
+        return Cache::remember(self::SELLERS_LIST_KEY, now()->addMinutes(30), $callback);
+    }
+
+    public function rememberSellerByAlias(string $alias, Closure $callback): mixed
+    {
+        return Cache::remember($this->sellerByAliasKey($alias), now()->addHour(), $callback);
+    }
+
+    public function rememberCategoryProductsCount(int $categoryId, Closure $callback): mixed
+    {
+        return Cache::remember($this->categoryProductsCountKey($categoryId), now()->addMinutes(10), $callback);
+    }
+
+    public function forgetCategories(): void
+    {
+        Cache::forget(self::ROOT_TREE_KEY);
+        Cache::forget(self::ROOT_LIST_KEY);
+        $this->forgetMenuCategories();
+    }
+
+    public function forgetMenuCategories(): void
+    {
+        Cache::forget(self::MENU_CATEGORIES_KEY);
+    }
+
+    public function forgetProductPriceRange(): void
+    {
+        Cache::forget(self::PRODUCT_PRICE_RANGE_KEY);
+    }
+
+    public function forgetSellers(): void
+    {
+        Cache::forget(self::SELLERS_LIST_KEY);
+    }
+
+    public function forgetSellerByAlias(string $alias): void
+    {
+        Cache::forget($this->sellerByAliasKey($alias));
+    }
+
+    public function forgetCategoryProductsCount(int $categoryId): void
+    {
+        Cache::forget($this->categoryProductsCountKey($categoryId));
+    }
+
+    public function forgetProductCatalog(?Category $category = null, ?int $oldCategoryId = null): void
+    {
+        $this->forgetProductPriceRange();
+        $this->forgetMenuCategories();
+
+        if ($category) {
+            $this->forgetCategoryAndAncestors($category);
+        }
+
+        if ($oldCategoryId && $oldCategoryId !== $category?->id) {
+            $oldCategory = Category::find($oldCategoryId);
+
+            if ($oldCategory) {
+                $this->forgetCategoryAndAncestors($oldCategory);
+            }
+        }
+    }
+
+    public function forgetProductRelated(
+        Product $product,
+        ?int $oldCategoryId = null,
+        ?int $oldSellerId = null
+    ): void {
+        $category = Category::find($product->category_id);
+        $seller = Seller::find($product->seller_id);
+
+        $this->forgetProductCatalog($category, $oldCategoryId);
+        $this->forgetSellerRelated($seller);
+
+        if ($oldSellerId && $oldSellerId !== $product->seller_id) {
+            $oldSeller = Seller::find($oldSellerId);
+
+            if ($oldSeller) {
+                $this->forgetSellerRelated($oldSeller);
+            }
+        }
+    }
+
+    public function forgetSellerRelated(?Seller $seller = null, bool $visibilityChanged = false): void
+    {
+        $this->forgetSellers();
+
+        if ($seller) {
+            $this->forgetSellerByAlias($seller->alias);
+
+            $oldAlias = $seller->getOriginal('alias');
+
+            if ($oldAlias && $oldAlias !== $seller->alias) {
+                $this->forgetSellerByAlias($oldAlias);
+            }
+        }
+
+        if (!$visibilityChanged) {
+            return;
+        }
+
+        $this->forgetProductPriceRange();
+        $this->forgetMenuCategories();
+
+        if ($seller) {
+            $this->forgetSellerCategoryCounts($seller);
+        }
+    }
+
+    public function forgetSellerPackageRelated(SellerPackage $sellerPackage): void
+    {
+        $seller = $sellerPackage->seller;
+
+        $this->forgetSellerRelated($seller, visibilityChanged: true);
+        $this->forgetCategoryRelated();
+    }
+
+    public function forgetCategoryRelated(bool $warm = true): void
+    {
+        $this->forgetCategories();
+
+        if (!$warm) {
+            return;
+        }
+
+        if (app()->runningInConsole()) {
+            dispatch(new WarmCategoriesCache());
+        } else {
+            dispatch(new WarmCategoriesCache())->afterResponse();
+        }
+    }
+
+    public function sellerByAliasKey(string $alias): string
+    {
+        return self::SELLER_BY_ALIAS_PREFIX.$alias;
+    }
+
+    public function categoryProductsCountKey(int $categoryId): string
+    {
+        return self::CATEGORY_PRODUCTS_COUNT_PREFIX.$categoryId;
+    }
+
+    private function forgetCategoryAndAncestors(Category $category): void
+    {
+        $this->forgetCategoryProductsCount($category->id);
+
+        foreach ($category->ancestors as $ancestor) {
+            $this->forgetCategoryProductsCount($ancestor->id);
+        }
+    }
+
+    private function forgetSellerCategoryCounts(Seller $seller): void
+    {
+        $categories = Category::query()
+            ->whereIn('id', $seller->products()->select('category_id'))
+            ->get();
+
+        foreach ($categories as $category) {
+            $this->forgetCategoryAndAncestors($category);
+        }
+    }
+}

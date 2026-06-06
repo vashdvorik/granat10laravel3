@@ -61,9 +61,7 @@ class SellerController extends Controller
      */
     public function edit(Seller $seller)
     {
-        if ($seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('update', $seller);
         
         $user = Auth::user();
         
@@ -75,9 +73,7 @@ class SellerController extends Controller
      */
     public function update(UpdateSellerRequest $request, Seller $seller, SellerProfileService $sellerProfileService)
     {
-        if ($seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('update', $seller);
 
         $sellerProfileService->updateProfile(
             $seller,

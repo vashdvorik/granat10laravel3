@@ -166,14 +166,11 @@ class ModelStructureTest extends TestCase
         $this->assertTrue(method_exists(Category::class, 'getCachedRootTree'));
     }
 
-    public function test_seller_has_can_activate_product_method(): void
+    public function test_seller_does_not_contain_product_limit_logic(): void
     {
-        $this->assertTrue(method_exists(Seller::class, 'canActivateProduct'));
-    }
-
-    public function test_seller_has_check_product_limits_method(): void
-    {
-        $this->assertTrue(method_exists(Seller::class, 'checkProductLimits'));
+        $this->assertFalse(method_exists(Seller::class, 'canActivateProduct'));
+        $this->assertFalse(method_exists(Seller::class, 'checkProductLimits'));
+        $this->assertFalse(method_exists(Seller::class, 'getPackageStatus'));
     }
 
     public function test_seller_has_get_cached_by_alias_method(): void

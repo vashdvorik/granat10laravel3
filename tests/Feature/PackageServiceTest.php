@@ -8,6 +8,7 @@ use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Models\User;
 use App\Services\PackageService;
+use App\Services\ProductLimitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -22,7 +23,7 @@ class PackageServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new PackageService();
+        $this->service = new PackageService(new ProductLimitService());
     }
 
     public function test_purchase_creates_active_package_deactivates_previous_and_charges_user(): void

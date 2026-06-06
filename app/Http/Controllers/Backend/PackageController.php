@@ -40,9 +40,7 @@ class PackageController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
 
-        if ($seller->user_id !== $user->id) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('purchasePackage', $seller);
 
         try {
             $packageService->purchase($user, $seller, $package);

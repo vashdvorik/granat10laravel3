@@ -6,6 +6,7 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Services\ProductLimitService;
 use Illuminate\Support\Facades\Cache;
 use Mockery;
 use Mockery\MockInterface;
@@ -15,16 +16,17 @@ use Tests\TestCase;
  * Unit-тест: бизнес-логика лимитов тарифного пакета продавца.
  * Данные кладём напрямую во фреймворк-мок, БД не трогаем.
  *
- * @covers \App\Models\Seller::canActivateProduct
- * @covers \App\Models\Seller::canActivateVipProduct
- * @covers \App\Models\Seller::checkProductLimits
+ * @covers \App\Services\ProductLimitService
  */
-class SellerLimitsUnitTest extends TestCase
+class ProductLimitServiceUnitTest extends TestCase
 {
+    private ProductLimitService $service;
+
     protected function setUp(): void
     {
         parent::setUp();
         Cache::spy();
+        $this->service = new ProductLimitService();
     }
 
     protected function tearDown(): void
@@ -41,7 +43,7 @@ class SellerLimitsUnitTest extends TestCase
     {
         $seller = $this->sellerMockWithNoPackage();
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('нет активного тарифного пакета', $result['message']);
@@ -58,7 +60,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 0
         );
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(3, $result['current']);
@@ -75,7 +77,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 0
         );
 
-        $result = $seller->canActivateProduct();
+        $result = $this->service->canActivateProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('Достигнут лимит', $result['message']);
@@ -90,7 +92,7 @@ class SellerLimitsUnitTest extends TestCase
     {
         $seller = $this->sellerMockWithNoPackage();
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertFalse($result['allowed']);
     }
@@ -104,7 +106,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 1
         );
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertTrue($result['allowed']);
         $this->assertSame(1, $result['current']);
@@ -120,7 +122,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 3  // лимит VIP исчерпан
         );
 
-        $result = $seller->canActivateVipProduct();
+        $result = $this->service->canActivateVipProduct($seller);
 
         $this->assertFalse($result['allowed']);
         $this->assertStringContainsString('3/3', $result['message']);
@@ -135,7 +137,7 @@ class SellerLimitsUnitTest extends TestCase
         // Нет пакета — но товар неактивный, поэтому ограничений нет
         $seller = $this->sellerMockWithNoPackage();
 
-        $result = $seller->checkProductLimits(isActive: false, isVip: false);
+        $result = $this->service->checkProductLimits($seller, isActive: false, isVip: false);
 
         $this->assertTrue($result['allowed']);
         $this->assertEmpty($result['errors']);
@@ -150,7 +152,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 0
         );
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: false);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: false);
 
         $this->assertTrue($result['allowed']);
         $this->assertEmpty($result['errors']);
@@ -165,7 +167,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 0
         );
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: true);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: true);
 
         $this->assertFalse($result['allowed']);
         // Должна быть ошибка по активному лимиту
@@ -181,7 +183,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 3  // VIP лимит исчерпан
         );
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: true);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: true);
 
         $this->assertFalse($result['allowed']);
         $this->assertCount(1, $result['errors']);
@@ -196,7 +198,7 @@ class SellerLimitsUnitTest extends TestCase
             currentVip: 3
         );
 
-        $result = $seller->checkProductLimits(isActive: true, isVip: true);
+        $result = $this->service->checkProductLimits($seller, isActive: true, isVip: true);
 
         $this->assertFalse($result['allowed']);
         $this->assertCount(2, $result['errors']);

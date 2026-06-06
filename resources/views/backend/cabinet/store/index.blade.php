@@ -1,6 +1,7 @@
 {{-- МАГАЗИН - Общая информация --}}
 
 @extends('backend.cabinet.layout_cabinet')
+@inject('productLimitService', 'App\Services\ProductLimitService')
 
 @section('content_cabinet')
 
@@ -364,7 +365,7 @@
                                         </span>
                                         <strong>
                                             @if($activePackage->package->active_products_limit)
-                                                {{ $seller->getActiveProductsCount() }} / {{ $activePackage->package->active_products_limit }}
+                                                {{ $productLimitService->activeProductsCount($seller) }} / {{ $activePackage->package->active_products_limit }}
                                             @else
                                                 <span class="text-success">Безлимит</span>
                                             @endif
@@ -377,7 +378,7 @@
                                         </span>
                                         <strong>
                                             @if($activePackage->package->vip_products_limit !== null)
-                                                {{ $seller->getVipProductsCount() }} / {{ $activePackage->package->vip_products_limit }}
+                                                {{ $productLimitService->vipProductsCount($seller) }} / {{ $activePackage->package->vip_products_limit }}
                                             @else
                                                 <span class="text-success">Безлимит</span>
                                             @endif

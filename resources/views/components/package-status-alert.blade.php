@@ -1,6 +1,7 @@
 {{-- Компонент уведомления о статусе пакета --}}
+@inject('sellerPackageStatusService', 'App\Services\SellerPackageStatusService')
 @php
-    $packageStatus = $seller->getPackageStatus();
+    $packageStatus = $sellerPackageStatusService->getStatus($seller);
 @endphp
 
 <div class="alert alert-{{ $packageStatus['alert_type'] }} alert-dismissible fade show mb-25" role="alert">

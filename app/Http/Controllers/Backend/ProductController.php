@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Backend;
 
+use App\Exceptions\ProductActivationException;
+use App\Exceptions\ProductImageDeletionException;
+use App\Exceptions\ProductPushTooSoonException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
-use App\Models\Category;
 use App\Services\BackendProductService;
-use App\Services\ProductImageService;
-use App\Services\ProductLimitService;
+use App\Services\ProductActionService;
+use App\Services\ProductWriteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Models\Image as ProductImage;
 
 class ProductController extends Controller
@@ -65,9 +66,7 @@ class ProductController extends Controller
      */
     public function store(
         StoreProductRequest $request,
-        ProductImageService $productImageService,
-        ProductLimitService $productLimitService,
-        BackendProductService $backendProductService
+        ProductWriteService $productWriteService
     ) {
         $user = Auth::user();
         $seller = $user->seller;
@@ -77,73 +76,12 @@ class ProductController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
 
-        // ===================================================
-        // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
-        // ===================================================
-        $data = $request->validated();
-        $validator = Validator::make([], []);
-
-        // ===================================================
-        // ШАГ 4: ПРОВЕРЯЕМ ЛИМИТЫ ПАКЕТА (бизнес-логика)
-        // ===================================================
-        $isActive = $request->input('is_active', false);
-        $isVip = $request->input('is_vip', false);
-        
-        // ===================================================
-        // ШАГ 3.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
-        // ===================================================
-        $category = Category::find($data['category_id']);
-        if ($category && !$category->isLeaf()) {
-            // Сохраняем путь категории для восстановления
-            $backendProductService->rememberSelectedPath($category);
-            
-            return redirect()->back()
-                ->withErrors(['category_id' => 'Пожалуйста, выберите подкатегорию последнего уровня для размещения товара. Нельзя добавлять товары в категории, у которых есть подкатегории.'])
-                ->withInput();
-        }
-        // Если товар неактивен, лимиты не проверяем
-        $limitErrors = $productLimitService->validateForStore(
+        $productWriteService->create(
             $seller,
-            (bool) $isActive,
-            (bool) $isVip,
-            $request->hasFile('images') && count($request->file('images')) > 0
+            $request->validated(),
+            $request->file('images', [])
         );
 
-        foreach ($limitErrors as $field => $message) {
-            $validator->errors()->add($field, $message);
-        }
-
-        if ($validator->errors()->any()) {
-            $category = Category::find($data['category_id']);
-            if ($category) {
-                $backendProductService->rememberSelectedPath($category);
-            }
-
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-        $data['alias'] = $backendProductService->generateUniqueAlias($data['name']);
-        $data['seller_id'] = $seller->id;
-        $data['push_at'] = now();
-        
-        // ===================================================
-        // ШАГ 6: ОБРАБОТКА СКИДКИ
-        // ===================================================
-        if (isset($data['lowprice']) && $data['lowprice'] > 0) {
-            $data['sale_started_at'] = now();
-        }
-
-        // ===================================================
-        // ШАГ 7: СОЗДАНИЕ ТОВАРА
-        // ===================================================
-        $product = Product::create($data);
-
-        // ШАГ 8: ЗАГРУЗКА И СЖАТИЕ ИЗОБРАЖЕНИЙ
-        if ($request->hasFile('images')) {
-            $productImageService->storeUploadedImages($product, $request->file('images'), true);
-        }
-        session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар создан');
     }
@@ -153,9 +91,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('view', $product);
         
         $product->load(['category', 'seller']);
         $product->load(['images' => function ($query) {
@@ -170,9 +106,7 @@ class ProductController extends Controller
      */
     public function edit(Product $product, BackendProductService $backendProductService)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('update', $product);
         
         // Только корневые категории для первого уровня (из кеша)
         $categories = $backendProductService->getRootCategories();
@@ -189,95 +123,16 @@ class ProductController extends Controller
     public function update(
         UpdateProductRequest $request,
         Product $product,
-        ProductImageService $productImageService,
-        ProductLimitService $productLimitService,
-        BackendProductService $backendProductService
+        ProductWriteService $productWriteService
     ) {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('update', $product);
 
-        // ===================================================
-        // ШАГ 1: СОЗДАЕМ ВАЛИДАТОР С ПРАВИЛАМИ И СООБЩЕНИЯМИ
-        // ===================================================
-        $data = $request->validated();
-        $validator = Validator::make([], []);
-
-        // ===================================================
-        // ШАГ 2.5: ПРОВЕРЯЕМ, ЧТО КАТЕГОРИЯ КОНЕЧНАЯ (БЕЗ ДОЧЕРНИХ)
-        $category = Category::find($data['category_id']);
-        if ($category && !$category->isLeaf()) {
-            $backendProductService->rememberSelectedPath($category);
-
-            return redirect()->back()
-                ->withErrors(['category_id' => 'Р’С‹Р±РµСЂРёС‚Рµ РєРѕРЅРµС‡РЅСѓСЋ РєР°С‚РµРіРѕСЂРёСЋ...'])
-                ->withInput();
-        }
-
-        // ===================================================
-        // ШАГ 3: ОБРАБАТЫВАЕМ ЧЕКБОКСЫ И ПРОВЕРЯЕМ ЛИМИТЫ
-        // ===================================================
-
-        // Обрабатываем радио-кнопки и чекбоксы (конвертируем в boolean)
-        $data['is_active'] = $request->input('is_active', 0) == '1' ? true : false;
-        $data['is_vip'] = $request->input('is_vip', 0) == '1' ? true : false;
-
-        $isActive = $data['is_active'];
-        $isVip = $data['is_vip'];
-
-        // Если товар активен, проверяем лимиты (исключая текущий товар)
-        $limitErrors = $productLimitService->validateForUpdate(
+        $productWriteService->update(
             $product,
-            $isActive,
-            $isVip,
-            $product->images()->exists() || ($request->hasFile('images') && count($request->file('images')) > 0)
+            $request->validated(),
+            $request->file('images', [])
         );
 
-        foreach ($limitErrors as $field => $message) {
-            $validator->errors()->add($field, $message);
-        }
-
-        if ($validator->errors()->any()) {
-            $category = Category::find($data['category_id']);
-            if ($category) {
-                $backendProductService->rememberSelectedPath($category);
-            }
-
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-        if (isset($data['lowprice']) && $data['lowprice'] > 0 && !$product->lowprice) {
-            $data['sale_started_at'] = now();
-        } 
-        // Если скидку убрали - очищаем дату
-        elseif (empty($data['lowprice'])) {
-            $data['sale_started_at'] = null;
-        }
-
-        // ===================================================
-        // ШАГ 5: ОБНОВЛЕНИЕ ТОВАРА
-        // ===================================================
-        $product->update($data);
-
-        // ===================================================
-        // ШАГ 6: ЗАГРУЗКА НОВЫХ ИЗОБРАЖЕНИЙ
-        // ===================================================
-        if ($request->hasFile('images')) {
-            $newFilesCount = count($request->file('images'));
-
-            if (!$productImageService->canAddImages($product, $newFilesCount)) {
-                return redirect()->back()
-                    ->with('error', 'Превышен лимит изображений. Можно загрузить ещё ' . $productImageService->remainingImageSlots($product) . ' фото.')
-                    ->withInput();
-            }
-            $productImageService->storeUploadedImages(
-                $product,
-                $request->file('images'),
-                !$product->images()->where('is_main', true)->exists()
-            );
-        }
-        session()->forget('selectedPath');
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар обновлён');
     }
@@ -285,14 +140,11 @@ class ProductController extends Controller
     /**
      * Удаление товара
      */
-    public function destroy(Product $product, ProductImageService $productImageService)
+    public function destroy(Product $product, ProductActionService $productActionService)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
-        
-        $productImageService->deleteProductFiles($product);
-        $product->delete();
+        $this->authorize('delete', $product);
+
+        $productActionService->delete($product);
         
         return redirect()->route('account.store.products.index')
             ->with('success', 'Товар удалён');
@@ -301,23 +153,21 @@ class ProductController extends Controller
     /**
      * Активация товара
      */
-    public function activate(Product $product, ProductLimitService $productLimitService)
+    public function activate(Product $product, ProductActionService $productActionService)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('activate', $product);
 
-        $errorMessage = $productLimitService->activationError($product);
-        if ($errorMessage !== null) {
+        try {
+            $productActionService->activate($product);
+        } catch (ProductActivationException $exception) {
             if (request()->ajax()) {
                 return response()->json([
-                    'error' => $errorMessage
+                    'error' => $exception->getMessage(),
                 ], 422);
             }
 
-            return redirect()->back()->with('error', $errorMessage);
+            return redirect()->back()->with('error', $exception->getMessage());
         }
-        $product->update(['is_active' => true]);
 
         if (request()->ajax()) {
             return response()->json([
@@ -332,13 +182,11 @@ class ProductController extends Controller
     /**
      * Деактивация товара
      */
-    public function deactivate(Product $product)
+    public function deactivate(Product $product, ProductActionService $productActionService)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('deactivate', $product);
 
-        $product->update(['is_active' => false]);
+        $productActionService->deactivate($product);
 
         if (request()->ajax()) {
             return response()->json([
@@ -353,26 +201,23 @@ class ProductController extends Controller
     /**
      * Удаление изображения товара
      */
-    public function destroyImage(ProductImage $image, ProductImageService $productImageService)
+    public function destroyImage(ProductImage $image, ProductActionService $productActionService)
     {
         $product = $image->product;
         
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('manageImages', $product);
 
-        // ✅ ПРОВЕРКА: Если товар активен и это последнее фото - запретить удаление
-        if ($product->is_active && $product->images()->count() === 1) {
-            $errorMessage = 'Нельзя удалить последнее изображение активного товара. Сначала деактивируйте товар или загрузите новое фото.';
+        try {
+            $productActionService->deleteImage($image);
+        } catch (ProductImageDeletionException $exception) {
             if (request()->ajax()) {
                 return response()->json([
-                    'error' => $errorMessage
+                    'error' => $exception->getMessage(),
                 ], 422);
             }
-            return redirect()->back()->with('error', $errorMessage);
-        }
 
-        $productImageService->deleteImage($image);
+            return redirect()->back()->with('error', $exception->getMessage());
+        }
 
         if (request()->ajax()) {
             return response()->json([
@@ -387,15 +232,13 @@ class ProductController extends Controller
     /**
      * Установить главное изображение
      */
-    public function setMainImage(ProductImage $image, ProductImageService $productImageService)
+    public function setMainImage(ProductImage $image, ProductActionService $productActionService)
     {
         $product = $image->product;
         
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('manageImages', $product);
 
-        $productImageService->setMainImage($image);
+        $productActionService->setMainImage($image);
 
         if (request()->ajax()) {
             return response()->json([
@@ -410,35 +253,29 @@ class ProductController extends Controller
     /**
      * Поднять товар выше в списке
      */
-    public function pushUp(Product $product)
+    public function pushUp(Product $product, ProductActionService $productActionService)
     {
-        if ($product->seller->user_id !== Auth::id()) {
-            abort(403, 'Доступ запрещён');
-        }
+        $this->authorize('pushUp', $product);
 
-        // Проверяем, прошло ли 24 часа с последнего поднятия
-        if ($product->push_at && $product->push_at->addHours(24)->isFuture()) {
-            $availableAt = $product->push_at->addHours(24);
-            $errorMessage = 'Поднять товар можно только раз в 24 часа. Следующее поднятие доступно: ' . $availableAt->format('d.m.Y в H:i');
-            
+        try {
+            $result = $productActionService->pushUp($product);
+        } catch (ProductPushTooSoonException $exception) {
             if (request()->ajax()) {
                 return response()->json([
-                    'error' => $errorMessage,
-                    'available_at' => $availableAt->toIso8601String()
+                    'error' => $exception->getMessage(),
+                    'available_at' => $exception->availableAt->toIso8601String(),
                 ], 422);
             }
-            return redirect()->back()->with('error', $errorMessage);
-        }
 
-        // Обновляем только push_at
-        $product->update(['push_at' => now()]);
+            return redirect()->back()->with('error', $exception->getMessage());
+        }
 
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Товар "' . $product->name . '" поднят в списке',
-                'push_at' => now()->format('d.m.Y в H:i'),
-                'next_available_at' => now()->addHours(24)->toIso8601String()
+                'push_at' => $result['pushed_at']->format('d.m.Y в H:i'),
+                'next_available_at' => $result['next_available_at']->toIso8601String(),
             ]);
         }
 

@@ -56,8 +56,7 @@ Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
 Route::get('help', [PageController::class, 'help'])->name('help');
 
 
-// не пропускать страницы, которые не админы и не прописаны в app/Http/Middleware/OnlyMyEmail.php
-Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'only.my.email']], function () {
+Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'admin.access']], function () {
     Route::get('activity-log', [ActivityLogController::class, 'index'])->name('admin.activity-log');
     Route::get('category-tree', [CategoryTreeController::class, 'index'])->name('admin.category-tree');
     Voyager::routes();
@@ -174,7 +173,7 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
 
 // ТЕСТОВЫЙ РОУТ - УДАЛИТЬ ПОСЛЕ ПРОВЕРКИ
 if (app()->environment('local')) {
-Route::get('/test-package-system', function() {
+Route::get('/test-package-system', function(\App\Services\SellerPackageStatusService $sellerPackageStatusService) {
     $total = \App\Models\Product::count();
     $visible = \App\Models\Product::visible()->count();
     $hidden = $total - $visible;
@@ -190,7 +189,7 @@ Route::get('/test-package-system', function() {
     $output .= "<h3>Продавцы:</h3>";
     foreach ($sellers as $seller) {
         $activePackage = $seller->activePackage();
-        $status = $seller->getPackageStatus();
+        $status = $sellerPackageStatusService->getStatus($seller);
         
         $output .= "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
         $output .= "<p><strong>{$seller->name}</strong> (ID: {$seller->id})</p>";

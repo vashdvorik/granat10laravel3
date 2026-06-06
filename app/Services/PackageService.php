@@ -11,6 +11,10 @@ use RuntimeException;
 
 class PackageService
 {
+    public function __construct(private readonly ProductLimitService $productLimitService)
+    {
+    }
+
     public function purchase(User $user, Seller $seller, Package $package): SellerPackage
     {
         return DB::transaction(function () use ($user, $seller, $package) {
@@ -97,7 +101,7 @@ class PackageService
 
     private function ensureSellerFitsPackage(Seller $seller, Package $package): void
     {
-        $activeProductsCount = $seller->getActiveProductsCount();
+        $activeProductsCount = $this->productLimitService->activeProductsCount($seller);
         $maxProducts = $package->active_products_limit ?? PHP_INT_MAX;
 
         if ($maxProducts !== PHP_INT_MAX && $activeProductsCount > $maxProducts) {
@@ -106,7 +110,7 @@ class PackageService
             throw new RuntimeException("Тариф \"{$package->name}\" позволяет опубликовать не более {$maxProducts} товаров. У вас сейчас активно {$activeProductsCount} товаров. Пожалуйста, отключите {$excess} " . $this->productsWord($excess) . ', чтобы активировать этот пакет.');
         }
 
-        $vipProductsCount = $seller->getVipProductsCount();
+        $vipProductsCount = $this->productLimitService->vipProductsCount($seller);
         $maxVipProducts = $package->vip_products_limit ?? PHP_INT_MAX;
 
         if ($maxVipProducts !== PHP_INT_MAX && $vipProductsCount > $maxVipProducts) {

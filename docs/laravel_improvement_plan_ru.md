@@ -74,6 +74,60 @@
 - `Backend\ProductController` стал тоньше в методах `index`, `create`, `edit`, частично `store`/`update` и `getChildCategories`; загрузка изображений, лимиты и update/store сценарии оставлены на следующих подэтапах, чтобы не смешивать риски.
 - Добавлены `BackendProductServiceTest` и `BackendProductControllerProductsTest`: покрывают уникальный alias, selected path, фильтр списка по категории, JSON дочерних категорий, view data списка и форму создания товара.
 - Проверка после этапа BackendProductService: `php artisan test` - 235 passed, 499 assertions.
+- Создан и явно зарегистрирован `ProductPolicy` с abilities `view`, `update`, `delete`, `activate`, `deactivate`, `manageImages`, `pushUp`.
+- В `Backend\ProductController` удалены все ручные проверки `$product->seller->user_id !== Auth::id()`; просмотр, редактирование, удаление, публикация, снятие с публикации, изображения и поднятие товара используют `$this->authorize()`.
+- Добавлен `ProductPolicyTest`: проверяет разрешения владельца, запреты для другого пользователя и ответы 403 всех защищенных backend-маршрутов товара.
+- Проверка после этапа ProductPolicy: `php artisan test` - 238 passed, 521 assertions.
+- Создан и зарегистрирован `SellerPolicy` с abilities `view`, `update`, `delete`, `manageSettings`, `purchasePackage`.
+- Ручные проверки владельца магазина заменены на `$this->authorize()` в `Backend\SellerController` и `Backend\PackageController`; в `CabinetController` policy применяется для кабинета, статистики, удаления магазина и автопродления.
+- Добавлен `SellerPolicyTest`: проверяет все разрешения владельца, запреты для другого пользователя и ответы 403 backend-маршрутов редактирования магазина.
+- Проверка после этапа SellerPolicy: `php artisan test` - 241 passed, 533 assertions.
+- Создание и обновление товара вынесены из `Backend\ProductController` в `ProductWriteService`: конечная категория, тарифные лимиты, boolean-флаги, alias, даты скидки, запись товара и добавление изображений теперь координируются сервисом.
+- Удален искусственный `Validator::make([], [])`; доменные ошибки сервиса возвращаются через стандартный `ValidationException` с сохранением пути выбранной категории.
+- Исправлен риск частичного обновления: лимит новых изображений проверяется до `$product->update()`, поэтому при переполнении лимита данные товара не сохраняются частично.
+- Добавлен `ProductWriteServiceTest`, а `BackendProductControllerProductsTest` расширен сценариями создания и обновления товара через HTTP.
+- Проверка после этапа ProductWriteService: `php artisan test` - 247 passed, 556 assertions.
+- Активация, деактивация и поднятие товара вынесены из `Backend\ProductController` в `ProductActionService`.
+- Ошибки активации и 24-часового cooldown оформлены типизированными `ProductActivationException` и `ProductPushTooSoonException`; контроллер сохраняет прежние JSON/redirect-контракты.
+- Время успешного поднятия теперь возвращается из сохраненной модели, что исключает расхождение микросекунд между ответом и значением в БД.
+- Добавлен `ProductActionServiceTest`, а `BackendProductControllerProductsTest` расширен AJAX-сценариями успешной/ошибочной активации, деактивации и повторного поднятия.
+- Проверка после этапа ProductActionService: `php artisan test` - 256 passed, 580 assertions.
+- Удаление товара, удаление изображения и назначение главного изображения перенесены из `Backend\ProductController` в `ProductActionService`.
+- Запрет удаления последнего изображения активного товара оформлен через `ProductImageDeletionException`; контроллер сохраняет прежние JSON/redirect-ответы.
+- `ProductActionServiceTest` и `BackendProductControllerProductsTest` расширены сценариями удаления товара и файлов, запрета последнего изображения, продвижения нового главного изображения и AJAX-назначения главного изображения.
+- Проверка этапа ProductActionService images: `php -l` для измененных PHP-файлов пройден; PHPUnit-тесты не запускались по указанию пользователя и должны быть выполнены позже.
+- Создан `CatalogCacheService`, который централизует ключи, TTL, чтение и точечную инвалидацию кеша категорий, меню, диапазона цен, продавцов и счетчиков товаров.
+- `Category`, `Product`, `Seller`, `SellerPackage`, `CatalogPageService`, `AppServiceProvider` и `WarmCategoriesCache` переведены на единый сервис без изменения существующих публичных методов моделей и имен ключей.
+- Добавлен `CatalogCacheServiceTest`: фиксирует повторное использование закешированных значений, изоляцию alias продавцов и полную/точечную очистку ключей.
+- Проверка этапа CatalogCacheService: `php -l` для измененных PHP-файлов пройден; PHPUnit-тесты не запускались по указанию пользователя и должны быть выполнены позже.
+
+## Проверка 06.06.2026
+
+- Отложенные PHPUnit-тесты запущены полным набором: `267 passed`, `616 assertions`.
+- `php artisan route:list --json` выполнен успешно, зарегистрировано 165 маршрутов.
+- Laravel корректно загружается в локальном окружении: Laravel 10.48.29, PHP 8.4.1, maintenance mode выключен.
+- Повторная проверка `php -l` измененных PHP-файлов не обнаружила синтаксических ошибок.
+- Регрессии после внедрения policies, товарных сервисов и `CatalogCacheService` не обнаружены.
+- Инвалидация кеша вынесена из model `booted()` в `ProductObserver`, `SellerObserver`, `CategoryObserver`, `SellerPackageObserver` и `ImageObserver`; observers зарегистрированы в `EventServiceProvider`.
+- Публичные методы `Product::clearProductCaches()`, `Seller::clearSellersCache()` и `Category::clearCategoriesCache()` сохранены как совместимые фасады над `CatalogCacheService`.
+- Исправлена инвалидация при переносе товара: теперь очищаются счетчики старой и новой категории, а также кеши старого и нового продавца.
+- Изменение тарифа продавца теперь очищает category counts категорий его товаров, поскольку видимость товаров зависит от активности тарифа.
+- Добавлен `CacheObserverTest` для переноса товара, смены alias продавца и изменения тарифа.
+- Проверка после этапа observers: `270 passed`, `627 assertions`; `route:list` успешно регистрирует 165 маршрутов.
+- Модель `Seller` сокращена с 435 до 136 строк: из нее удалены тарифные лимиты, подсчеты активных/VIP товаров, автопродление, UI-статус тарифа и склонение слов.
+- Вся логика лимитов и подсчетов перенесена в `ProductLimitService`; `PackageService` получает его через dependency injection и использует тот же источник правил при покупке тарифа.
+- Создан `SellerPackageStatusService`, который формирует данные для Blade-компонента статуса тарифа и использует только `User.balance`.
+- Blade-шаблоны кабинета и local debug-маршрут переведены с методов модели на сервисы.
+- Проверено отсутствие обращений к удаленному `Seller.balance`; миграции фиксируют перенос поля в `users`, а списание по-прежнему выполняется через `PackageService` с `lockForUpdate()`.
+- Тесты лимитов перенесены с модели на `ProductLimitService`; добавлены feature-тесты статуса бессрочного/истекающего тарифа и достаточного/недостаточного баланса пользователя.
+- Проверка после упрощения `Seller`: `273 passed`, `641 assertions`; Blade успешно компилируется, `route:list` регистрирует 165 маршрутов.
+- Hardcoded email удалён из runtime-доступа к `/admin`: middleware `EnsureAdminAccess` использует Gate `access-admin`, который проверяет Voyager permission `browse_admin`.
+- `AdminRoleSeeder` больше не содержит email и пароль по умолчанию; первоначальный администратор задаётся через `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`.
+- Добавлен `VoyagerBreadSecuritySeeder`: users BREAD использует `App\Models\User`, запрещает изменение баланса, пароля и назначение ролей.
+- Фактический аудит локальной БД подтвердил только стандартные BREAD `users`, `menus`, `roles`; security-сидер применён к локальной БД.
+- Добавлены `AdminAccessTest`, `AdminRoleSeederTest`, `VoyagerBreadSecuritySeederTest`.
+- Проверка после этапа админ-доступа: `279 passed`, `664 assertions`; конфигурация кешируется, `route:list` регистрирует 165 маршрутов.
+
 ## Этап 1. Стабилизировать окружение и artisan-команды
 
 ### 1.1. Исправить `AppServiceProvider`
@@ -357,14 +411,15 @@ $this->authorize('update', $product);
 
 ## Этап 10. Привести админку и доступы к Laravel-подходу
 
+Статус: выполнено 06.06.2026.
+
 ### 10.1. Убрать hardcoded email
 
-Вместо массива email в `OnlyMyEmail` использовать:
+Вместо массива email используется:
 
-- роли Voyager;
-- permissions;
-- `Gate::allows('access-admin')`;
-- при необходимости `config('admin.allowed_emails')` как временный промежуточный шаг.
+- permission Voyager `browse_admin`;
+- Gate `access-admin`;
+- middleware `admin.access`.
 
 ### 10.2. Проверить Voyager BREAD
 
@@ -375,6 +430,14 @@ $this->authorize('update', $product);
 - защищены ли чувствительные поля;
 - нет ли возможности редактировать баланс без аудита;
 - нет ли возможности назначать себе роль администратора.
+
+Результат проверки:
+
+- в текущей БД зарегистрированы только `users`, `menus`, `roles`;
+- `balance` не экспонируется в users BREAD;
+- изменение `role_id` и role relationships отключено;
+- изменение пароля существующего пользователя через BREAD отключено;
+- создание администратора выполняется только через явно заданные env-переменные.
 
 ## Этап 11. Улучшить тесты
 

@@ -2,30 +2,29 @@
 
 namespace Tests\Unit;
 
-use App\Models\Seller;
+use App\Services\SellerPackageStatusService;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit-тест: склонение слова "день" в Seller::getDaysWord().
+ * Unit-тест: склонение слова "день" в SellerPackageStatusService.
  * Не требует БД — тестирует чистую PHP-логику.
  *
- * @covers \App\Models\Seller
+ * @covers \App\Services\SellerPackageStatusService
  */
-class SellerDaysWordTest extends TestCase
+class SellerPackageStatusServiceTest extends TestCase
 {
-    private Seller $seller;
+    private SellerPackageStatusService $service;
 
     protected function setUp(): void
     {
         parent::setUp();
-        // Создаём объект без персистентности — только логика
-        $this->seller = new Seller();
+        $this->service = new SellerPackageStatusService();
     }
 
     /** @dataProvider daysWordProvider */
     public function test_days_word_declension(int $days, string $expected): void
     {
-        $result = $this->callProtected($days);
+        $result = $this->service->daysWord($days);
         $this->assertSame($expected, $result);
     }
 
@@ -52,13 +51,5 @@ class SellerDaysWordTest extends TestCase
             [111, 'дней'],  // исключение: 11
             [0,   'дней'],
         ];
-    }
-
-    /** Вызов protected-метода через Reflection */
-    private function callProtected(int $days): string
-    {
-        $reflection = new \ReflectionMethod(Seller::class, 'getDaysWord');
-        $reflection->setAccessible(true);
-        return $reflection->invoke($this->seller, $days);
     }
 }

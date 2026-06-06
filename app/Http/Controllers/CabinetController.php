@@ -23,6 +23,11 @@ class CabinetController extends Controller
     {
         $user = Auth::user(); 
         $seller = $user->seller; // из модели user получили селлер
+
+        if ($seller) {
+            $this->authorize('view', $seller);
+        }
+
         return view('backend.cabinet.cabinet', compact('seller'));
     }
 
@@ -38,6 +43,8 @@ class CabinetController extends Controller
             return redirect()->route('account.store.create')
                 ->with('error', 'Сначала создайте магазин');
         }
+
+        $this->authorize('view', $seller);
 
         return view('backend.cabinet.stats', $cabinetStatsService->getStats($user, $seller));
     }
@@ -113,7 +120,9 @@ class CabinetController extends Controller
         if (!$user->seller) {
             return redirect()->route('account.index')->with('error', 'У вас нет магазина');
         }
-        
+
+        $this->authorize('delete', $user->seller);
+
         return view('backend.cabinet.delete_shop', compact('user'));
     }
 
@@ -127,6 +136,8 @@ class CabinetController extends Controller
         if (!$user->seller) {
             return redirect()->route('account.index')->with('error', 'Магазин не найден');
         }
+
+        $this->authorize('delete', $user->seller);
 
         try {
             $sellerName = $accountSecurityService->deleteShop($user, $request->input('password'));
@@ -148,6 +159,8 @@ class CabinetController extends Controller
         if (!$seller) {
             return response()->json(['error' => 'Магазин не найден'], 404);
         }
+
+        $this->authorize('manageSettings', $seller);
 
         $seller = $sellerSettingsService->updateAutoRenew($seller, $request->boolean('auto_renew'));
 

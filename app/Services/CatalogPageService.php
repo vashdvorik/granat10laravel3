@@ -9,7 +9,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
 class CatalogPageService
@@ -76,7 +75,7 @@ class CatalogPageService
     public function getSearchPageData(Request $request): array
     {
         $q = trim($request->input('q', ''));
-        $categoryAlias = $request->input('category', '');
+        $categoryAlias = $request->input('category', '') ?? '';
 
         return [
             'products' => $this->getSearchProducts($q, $categoryAlias),
@@ -86,8 +85,10 @@ class CatalogPageService
         ];
     }
 
-    public function getSearchProducts(string $q, string $categoryAlias = '', int $perPage = 12): LengthAwarePaginator
+    public function getSearchProducts(string $q, ?string $categoryAlias = '', int $perPage = 12): LengthAwarePaginator
     {
+        $categoryAlias = $categoryAlias ?? '';
+
         $category = $this->getSearchCategory($categoryAlias);
         $categoryIds = $category ? $this->getCategoryIds($category) : [];
 
@@ -180,7 +181,8 @@ class CatalogPageService
             return $categories;
         }
 
-        return Cache::remember('menu_categories', now()->addHours(24), fn () => Category::filterTreeByProducts($categories));
+        return app(CatalogCacheService::class)
+            ->rememberMenuCategories(fn () => Category::filterTreeByProducts($categories));
     }
 
     private function getCategoryMenuCategories(Category $category): Collection
@@ -229,8 +231,10 @@ class CatalogPageService
             ->get();
     }
 
-    private function getSearchCategory(string $categoryAlias): ?Category
+    private function getSearchCategory(?string $categoryAlias): ?Category
     {
+        $categoryAlias = $categoryAlias ?? '';
+
         if ($categoryAlias === '') {
             return null;
         }
