@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-//use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordCustom;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Gate;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends \TCG\Voyager\Models\User
+class User extends \TCG\Voyager\Models\User implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -24,14 +26,15 @@ class User extends \TCG\Voyager\Models\User
         'phone',
         'password',
     ];
+
     protected $guarded = [
         'id',
         'balance',
         'role_id',
         'remember_token',
     ];
+
     /**
-     * 
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -53,11 +56,17 @@ class User extends \TCG\Voyager\Models\User
 
     public function sendPasswordResetNotification($token)
     {
-    $this->notify(new ResetPasswordCustom($token));
+        $this->notify(new ResetPasswordCustom($token));
     }
-    
+
     public function seller()
     {
         return $this->hasOne(Seller::class);
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $panel->getId() === 'control'
+            && Gate::forUser($this)->allows('access-admin');
     }
 }
