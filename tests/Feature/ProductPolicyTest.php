@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Image;
+use App\Models\Permission;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,6 +38,19 @@ class ProductPolicyTest extends TestCase
             $this->assertFalse(
                 Gate::forUser($otherUser)->allows($ability, $product),
                 "Other user should not be allowed to {$ability} product."
+            );
+        }
+    }
+
+    public function test_administrator_is_allowed_all_product_abilities(): void
+    {
+        [, $product] = $this->createOwnedProduct();
+        $administrator = $this->createAdministrator();
+
+        foreach ($this->abilities() as $ability) {
+            $this->assertTrue(
+                Gate::forUser($administrator)->allows($ability, $product),
+                "Administrator should be allowed to {$ability} product."
             );
         }
     }
@@ -82,5 +97,20 @@ class ProductPolicyTest extends TestCase
             'manageImages',
             'pushUp',
         ];
+    }
+
+    private function createAdministrator(): User
+    {
+        $role = Role::query()->create([
+            'name' => 'admin-'.uniqid(),
+            'display_name' => 'Administrator',
+        ]);
+        $permission = Permission::query()->create([
+            'key' => 'browse_admin',
+            'table_name' => null,
+        ]);
+        $role->permissions()->attach($permission);
+
+        return User::factory()->create(['role_id' => $role->id]);
     }
 }

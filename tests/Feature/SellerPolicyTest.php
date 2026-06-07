@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,6 +39,19 @@ class SellerPolicyTest extends TestCase
         }
     }
 
+    public function test_administrator_is_allowed_all_seller_abilities(): void
+    {
+        [, $seller] = $this->createOwnedSeller();
+        $administrator = $this->createAdministrator();
+
+        foreach ($this->abilities() as $ability) {
+            $this->assertTrue(
+                Gate::forUser($administrator)->allows($ability, $seller),
+                "Administrator should be allowed to {$ability} seller."
+            );
+        }
+    }
+
     public function test_backend_seller_routes_forbid_non_owner(): void
     {
         [, $seller] = $this->createOwnedSeller();
@@ -67,5 +82,20 @@ class SellerPolicyTest extends TestCase
             'manageSettings',
             'purchasePackage',
         ];
+    }
+
+    private function createAdministrator(): User
+    {
+        $role = Role::query()->create([
+            'name' => 'admin-'.uniqid(),
+            'display_name' => 'Administrator',
+        ]);
+        $permission = Permission::query()->create([
+            'key' => 'browse_admin',
+            'table_name' => null,
+        ]);
+        $role->permissions()->attach($permission);
+
+        return User::factory()->create(['role_id' => $role->id]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Seller;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
@@ -12,7 +13,19 @@ class SellerProfileService
 {
     public function updateProfile(Seller $seller, array $data, ?UploadedFile $logoFile = null): Seller
     {
-        unset($data['logo']);
+        $data = Arr::only($data, [
+            'name',
+            'phone',
+            'town',
+            'sellerplace',
+            'address',
+            'description',
+            'link',
+            'link_map',
+            'telegram',
+            'instagram',
+            'viber',
+        ]);
 
         if ($logoFile) {
             if ($seller->photo) {
@@ -29,8 +42,8 @@ class SellerProfileService
 
     private function storeLogo(Seller $seller, UploadedFile $logoFile): string
     {
-        $filename = 'logo_' . Str::uuid() . '.webp';
-        $path = 'sellers/' . $seller->id;
+        $filename = 'logo_'.Str::uuid().'.webp';
+        $path = 'sellers/'.$seller->id;
 
         $image = Image::make($logoFile)
             ->orientate()
@@ -39,8 +52,8 @@ class SellerProfileService
             })
             ->encode('webp', 85);
 
-        Storage::disk('public')->put($path . '/' . $filename, (string) $image);
+        Storage::disk('public')->put($path.'/'.$filename, (string) $image);
 
-        return $path . '/' . $filename;
+        return $path.'/'.$filename;
     }
 }

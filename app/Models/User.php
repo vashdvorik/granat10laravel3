@@ -7,11 +7,17 @@ use App\Notifications\ResetPasswordCustom;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Sanctum\HasApiTokens;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use TCG\Voyager\Contracts\User as VoyagerUser;
 
-class User extends \TCG\Voyager\Models\User implements FilamentUser
+class User extends Authenticatable implements FilamentUser, VoyagerUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -52,7 +58,10 @@ class User extends \TCG\Voyager\Models\User implements FilamentUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'settings' => 'collection',
     ];
+
+    public $additional_attributes = ['locale'];
 
     public function sendPasswordResetNotification($token)
     {
@@ -62,6 +71,94 @@ class User extends \TCG\Voyager\Models\User implements FilamentUser
     public function seller()
     {
         return $this->hasOne(Seller::class);
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    public function rolesAll(): Collection
+    {
+        $this->loadMissing(['role', 'roles']);
+
+        return collect([$this->role])
+            ->filter()
+            ->merge($this->roles)
+            ->unique('id')
+            ->values();
+    }
+
+    public function roles_all(): Collection
+    {
+        return $this->rolesAll();
+    }
+
+    public function hasRole($name): bool
+    {
+        $roleNames = is_array($name) ? $name : [$name];
+
+        return $this->rolesAll()
+            ->pluck('name')
+            ->intersect($roleNames)
+            ->isNotEmpty();
+    }
+
+    public function setRole($name): static
+    {
+        $role = Role::query()->where('name', $name)->first();
+
+        if ($role) {
+            $this->role()->associate($role);
+            $this->save();
+        }
+
+        return $this;
+    }
+
+    public function hasPermission($name): bool
+    {
+        $this->loadMissing(['role.permissions', 'roles.permissions']);
+
+        return $this->rolesAll()
+            ->flatMap->permissions
+            ->contains('key', $name);
+    }
+
+    public function hasPermissionOrFail($name): bool
+    {
+        if (! $this->hasPermission($name)) {
+            throw new UnauthorizedHttpException(null);
+        }
+
+        return true;
+    }
+
+    public function hasPermissionOrAbort($name, $statusCode = 403): bool
+    {
+        abort_unless($this->hasPermission($name), $statusCode);
+
+        return true;
+    }
+
+    public function getAvatarAttribute(?string $value): string
+    {
+        return $value ?? config('voyager.user.default_avatar', 'users/default.png');
+    }
+
+    public function getLocaleAttribute(): mixed
+    {
+        return collect($this->settings)->get('locale');
+    }
+
+    public function setLocaleAttribute(mixed $value): void
+    {
+        $this->settings = collect($this->settings)->put('locale', $value);
     }
 
     public function canAccessPanel(Panel $panel): bool

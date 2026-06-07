@@ -20,7 +20,7 @@ class SellerProfileServiceTest extends TestCase
         parent::setUp();
 
         Storage::fake('public');
-        $this->service = new SellerProfileService();
+        $this->service = new SellerProfileService;
     }
 
     public function test_update_profile_updates_seller_fields(): void
@@ -64,5 +64,26 @@ class SellerProfileServiceTest extends TestCase
         $this->assertStringEndsWith('.webp', $updatedSeller->photo);
         Storage::disk('public')->assertMissing('sellers/old-logo.webp');
         Storage::disk('public')->assertExists($updatedSeller->photo);
+    }
+
+    public function test_update_profile_ignores_owner_product_count_and_settings(): void
+    {
+        $seller = Seller::factory()->create([
+            'product_count' => 4,
+            'auto_renew' => false,
+        ]);
+        $originalOwnerId = $seller->user_id;
+
+        $updatedSeller = $this->service->updateProfile($seller, [
+            'name' => 'Safe update',
+            'user_id' => $originalOwnerId + 1000,
+            'product_count' => 999,
+            'auto_renew' => true,
+        ]);
+
+        $this->assertSame('Safe update', $updatedSeller->name);
+        $this->assertSame($originalOwnerId, $updatedSeller->user_id);
+        $this->assertSame(4, $updatedSeller->product_count);
+        $this->assertFalse($updatedSeller->auto_renew);
     }
 }

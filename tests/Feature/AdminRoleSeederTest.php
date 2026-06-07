@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\AdminRoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use TCG\Voyager\Models\Permission;
-use TCG\Voyager\Models\Role;
 use Tests\TestCase;
 
 class AdminRoleSeederTest extends TestCase

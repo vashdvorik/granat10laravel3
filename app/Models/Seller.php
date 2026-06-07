@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\CatalogCacheService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\SellerPackage;
-use App\Services\CatalogCacheService;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Seller extends Model
 {
@@ -20,11 +20,11 @@ class Seller extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('sellers')
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Магазин создан: "' . $this->name . '"',
-                'updated' => 'Магазин обновлён: "' . $this->name . '"',
-                'deleted' => 'Магазин удалён: "' . $this->name . '"',
-                default   => $eventName,
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'created' => 'Магазин создан: "'.$this->name.'"',
+                'updated' => 'Магазин обновлён: "'.$this->name.'"',
+                'deleted' => 'Магазин удалён: "'.$this->name.'"',
+                default => $eventName,
             });
     }
 
@@ -37,7 +37,6 @@ class Seller extends Model
         'address',
         'description',
         'alias',
-        'product_count',
         'region_id',
         'link',
         'link_map',
@@ -47,34 +46,47 @@ class Seller extends Model
         'photos',
         'photo',
         'auto_renew',
-        
+
     ];
+
     protected $guarded = [
-    'id',
-    'product_count', // Автоматически считается
+        'id',
+        'product_count', // Автоматически считается
     ];
-    
+
     protected $casts = [
-    'can_order' => 'boolean',
-    'auto_renew' => 'boolean',
+        'can_order' => 'boolean',
+        'auto_renew' => 'boolean',
     ];
 
     public function user()
     {
         return $this->belongsTo(\App\Models\User::class);
     }
-    
+
     public function products()
     {
         return $this->hasMany(Product::class);
-    } 
+    }
 
-        /**
+    /**
      * Связь с пакетами через таблицу seller_packages
      */
     public function sellerPackages()
     {
         return $this->hasMany(SellerPackage::class);
+    }
+
+    public function activeSellerPackage(): HasOne
+    {
+        return $this->hasOne(SellerPackage::class)
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query
+                    ->whereNull('end_date')
+                    ->orWhere('end_date', '>=', now()->toDateString());
+            })
+            ->latestOfMany();
     }
 
     /**
@@ -84,7 +96,7 @@ class Seller extends Model
     {
         return $this->sellerPackages()
             ->where('is_active', true)
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('end_date')                         // Бессрочный пакет
                     ->orWhere('end_date', '>=', now()->toDateString()); // Или срок еще не истек (сравниваем DATE с DATE)
             })
@@ -103,8 +115,8 @@ class Seller extends Model
     {
         return app(CatalogCacheService::class)->rememberSellers(function () {
             return self::withCount(['products' => function ($query) {
-                    $query->where('is_active', true);
-                }])
+                $query->where('is_active', true);
+            }])
                 ->orderBy('products_count', 'desc')
                 ->get();
         });
@@ -115,12 +127,14 @@ class Seller extends Model
      */
     public static function getCachedByAlias($alias)
     {
-        if (!$alias) return null;
-        
+        if (! $alias) {
+            return null;
+        }
+
         return app(CatalogCacheService::class)->rememberSellerByAlias($alias, function () use ($alias) {
             return self::withCount(['products' => function ($query) {
-                    $query->where('is_active', true);
-                }])
+                $query->where('is_active', true);
+            }])
                 ->where('alias', $alias)
                 ->first();
         });
