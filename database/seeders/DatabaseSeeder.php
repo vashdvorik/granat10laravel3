@@ -12,7 +12,9 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            VoyagerDatabaseSeeder::class,
+            RolesTableSeeder::class,
+            PermissionsTableSeeder::class,
+            PermissionRoleTableSeeder::class,
             AdminRoleSeeder::class,
             UsersTableSeeder::class,
             //CategoriesTableSeeder::class,
@@ -21,7 +23,7 @@ class DatabaseSeeder extends Seeder
             SellersTableSeeder::class,
             ProductsTableSeeder::class,
             ImagesTableSeeder::class,
-            SellerPackagesTableSeeder::class
+            SellerPackagesTableSeeder::class,
         ]);
     }
 }

@@ -30,7 +30,7 @@ class ActivityLogPageTest extends TestCase
         $administrator = $this->createAdministrator();
 
         $this->actingAs($administrator)
-            ->get('/control/activity-log')
+            ->get('/admin/activity-log')
             ->assertOk()
             ->assertSee('Журнал действий');
     }
@@ -38,7 +38,7 @@ class ActivityLogPageTest extends TestCase
     public function test_regular_user_cannot_open_activity_log_page(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/control/activity-log')
+            ->get('/admin/activity-log')
             ->assertForbidden();
     }
 

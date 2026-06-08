@@ -7,8 +7,6 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CabinetController;
-use App\Http\Controllers\Admin\ActivityLogController;
-use App\Http\Controllers\Admin\CategoryTreeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +23,7 @@ use App\Http\Controllers\Admin\CategoryTreeController;
 */
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/home', [HomeController::class, 'home'])->name('home');
+Route::get('/home', [HomeController::class, 'home']);
 
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
 Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
@@ -55,12 +53,6 @@ Route::get('/shops/{alias}/load-more', [SellerController::class, 'loadMoreSeller
 Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
 Route::get('help', [PageController::class, 'help'])->name('help');
 
-
-Route::group(['prefix' => 'admin', 'middleware' => ['web', 'auth', 'admin.access']], function () {
-    Route::get('activity-log', [ActivityLogController::class, 'index'])->name('admin.activity-log');
-    Route::get('category-tree', [CategoryTreeController::class, 'index'])->name('admin.category-tree');
-    Voyager::routes();
-});
 
 /*
 // роут для личного кабинета

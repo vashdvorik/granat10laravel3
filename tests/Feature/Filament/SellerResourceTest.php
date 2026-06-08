@@ -35,14 +35,14 @@ class SellerResourceTest extends TestCase
         $administrator = $this->createAdministrator();
 
         $this->actingAs($administrator)
-            ->get('/control/sellers')
+            ->get('/admin/sellers')
             ->assertOk();
     }
 
     public function test_regular_user_cannot_open_seller_resource(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/control/sellers')
+            ->get('/admin/sellers')
             ->assertForbidden();
     }
 
@@ -167,7 +167,7 @@ class SellerResourceTest extends TestCase
         $seller = Seller::factory()->create();
 
         $this->actingAs($administrator)
-            ->get("/control/sellers/{$seller->id}/edit")
+            ->get("/admin/sellers/{$seller->id}/edit")
             ->assertOk()
             ->assertSee('Товары')
             ->assertSee('История тарифов');

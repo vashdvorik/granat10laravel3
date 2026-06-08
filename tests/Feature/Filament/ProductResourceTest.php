@@ -40,14 +40,14 @@ class ProductResourceTest extends TestCase
         $administrator = $this->createAdministrator();
 
         $this->actingAs($administrator)
-            ->get('/control/products')
+            ->get('/admin/products')
             ->assertOk();
     }
 
     public function test_regular_user_cannot_open_product_resource(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/control/products')
+            ->get('/admin/products')
             ->assertForbidden();
     }
 

@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Rules\SafeEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -24,6 +25,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'required',
                 'string',
                 'email',
+                new SafeEmail,
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],

@@ -19,12 +19,12 @@ class FilamentPanelAccessTest extends TestCase
         config()->set('admin.filament_enabled', true);
     }
 
-    public function test_admin_can_open_control_panel(): void
+    public function test_admin_can_open_admin_panel(): void
     {
         $user = $this->createUserWithPermissions(['browse_admin']);
 
         $this->actingAs($user)
-            ->get('/control')
+            ->get('/admin')
             ->assertOk();
     }
 
@@ -33,22 +33,32 @@ class FilamentPanelAccessTest extends TestCase
         $user = $this->createUserWithPermissions([]);
 
         $this->actingAs($user)
-            ->get('/control')
+            ->get('/admin')
             ->assertForbidden();
     }
 
     public function test_guest_is_redirected_to_filament_login(): void
     {
-        $this->get('/control')
-            ->assertRedirect('/control/login');
+        $this->get('/admin')
+            ->assertRedirect('/admin/login');
     }
 
     public function test_panel_routes_are_hidden_when_feature_flag_is_disabled(): void
     {
         config()->set('admin.filament_enabled', false);
 
+        $this->get('/admin')->assertNotFound();
+        $this->get('/admin/login')->assertNotFound();
+    }
+
+    public function test_old_control_path_and_legacy_admin_routes_are_not_registered(): void
+    {
         $this->get('/control')->assertNotFound();
-        $this->get('/control/login')->assertNotFound();
+
+        $this->assertFalse(app('router')->has('voyager.dashboard'));
+        $this->assertFalse(app('router')->has('voyager.media.index'));
+        $this->assertFalse(app('router')->has('admin.activity-log'));
+        $this->assertFalse(app('router')->has('admin.category-tree'));
     }
 
     private function createUserWithPermissions(array $permissionKeys): User

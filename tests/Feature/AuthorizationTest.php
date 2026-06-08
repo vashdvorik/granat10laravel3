@@ -8,8 +8,6 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
-use TCG\Voyager\Models\Permission as VoyagerPermission;
-use TCG\Voyager\Models\Role as VoyagerRole;
 use Tests\TestCase;
 
 class AuthorizationTest extends TestCase
@@ -48,13 +46,13 @@ class AuthorizationTest extends TestCase
         $this->assertFalse(Gate::forUser($user)->allows('access-admin'));
     }
 
-    public function test_existing_voyager_role_data_remains_compatible(): void
+    public function test_existing_role_data_remains_compatible_with_application_models(): void
     {
-        $role = VoyagerRole::query()->create([
+        $role = Role::query()->create([
             'name' => 'legacy-admin',
             'display_name' => 'Legacy administrator',
         ]);
-        $permission = VoyagerPermission::query()->create([
+        $permission = Permission::query()->create([
             'key' => 'browse_admin',
             'table_name' => null,
         ]);

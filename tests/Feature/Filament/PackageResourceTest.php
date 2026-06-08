@@ -33,16 +33,16 @@ class PackageResourceTest extends TestCase
     {
         $administrator = $this->createAdministrator();
 
-        $this->actingAs($administrator)->get('/control/packages')->assertOk();
-        $this->actingAs($administrator)->get('/control/seller-packages')->assertOk();
+        $this->actingAs($administrator)->get('/admin/packages')->assertOk();
+        $this->actingAs($administrator)->get('/admin/seller-packages')->assertOk();
     }
 
     public function test_regular_user_cannot_open_package_or_subscription_resources(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get('/control/packages')->assertForbidden();
-        $this->actingAs($user)->get('/control/seller-packages')->assertForbidden();
+        $this->actingAs($user)->get('/admin/packages')->assertForbidden();
+        $this->actingAs($user)->get('/admin/seller-packages')->assertForbidden();
     }
 
     public function test_administrator_can_create_package_with_explicit_limits(): void

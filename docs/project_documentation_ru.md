@@ -2,7 +2,7 @@
 
 ## 1. Общая архитектура и стек
 - Бэкенд построен на Laravel 10 (см. `composer.json`, зависимость `laravel/framework` ^10.10) с PHP ^8.1.
-- Используются пакеты Laravel Fortify для аутентификации и TCG Voyager 1.7 для административной панели (`composer.json`).
+- Используются Laravel Fortify для аутентификации и Filament 3 для административной панели.
 - Дополнительные сервисы Laravel Sanctum, GuzzleHTTP для HTTP-запросов, Laravel Pint и PHPUnit в dev-зависимостях.
 - Фронтенд собирается через Vite (`package.json`), клиентские зависимости ограничены `axios`, `laravel-vite-plugin`, `vite`.
 - Вьюхи Blade лежат в `resources/views`, статические ассеты (CSS, JS, изображения) — в `public/`.
@@ -27,7 +27,7 @@
 - Информационные страницы: `GET /gobuyer`, `GET /help` → `PageController`.
 - Кабинет пользователя: `GET /account` → `CabinetController@cabinet` (middleware `auth`).
 - Обновление профиля из кабинета: POST `cabinet/update-name`, `cabinet/update-password` (оба под `auth`).
-- Группа `/admin` подключает маршруты Voyager и защищена `web`, `auth`, `admin.access`. Middleware вызывает Gate `access-admin`, который проверяет permission Voyager `browse_admin`.
+- `/admin` обслуживается Filament и использует guard `web`, контракт `FilamentUser` и Gate `access-admin`.
 - Зарезервированы маршруты `cabinet/create-shop` и `cabinet/store-shop`, но методы `CabinetController::createShop` и `::storeShop` пока не реализованы.
 
 ## 4. Контроллеры (`app/Http/Controllers`)
@@ -60,7 +60,7 @@
 - `Controller.php` — базовый трейт `AuthorizesRequests`, `ValidatesRequests`.
 
 ## 5. Модели (`app/Models`)
-- `User` (расширяет `TCG\Voyager\Models\User`): `fillable` — `name`, `email`, `phone`, `password`; скрывает `password`, `remember_token`; каст `password` => `hashed`; метод `sendPasswordResetNotification()` использует `ResetPasswordCustom`.
+- `User` расширяет стандартный Laravel `Authenticatable` и реализует `FilamentUser`: `fillable` — `name`, `email`, `phone`, `password`; скрывает `password`, `remember_token`; каст `password` => `hashed`; метод `sendPasswordResetNotification()` использует `ResetPasswordCustom`.
 - `Seller`: хранит профиль и контакты магазина, связи `user()`, `products()`, `sellerPackages()`, запрос активного тарифа и совместимые методы кеша. Баланс принадлежит `User`, тарифные лимиты и UI-статус в модели отсутствуют.
 - `Product`: связи `category()`, `seller()`, `images()`.
 - `Category`: `fillable` (название, алиас, номер, описание, `parent_id`), связи `children()`, `parent()`, `products()`, аксессор `breadcrumbs` собирает цепочку родителей.
@@ -87,7 +87,7 @@
 - `ResetUserPassword` — сброс пароля по токену Fortify.
 
 ## 8. Middleware и Kernel
-- `EnsureAdminAccess` разрешает доступ в `/admin` пользователям с permission Voyager `browse_admin`.
+- `EnsureAdminAccess` разрешает административный доступ через application-owned permission `browse_admin`.
 - `app/Http/Kernel.php` регистрирует стандартные группы `web`, `api` и alias `admin.access`.
 - Gate `access-admin` объявлен в `AuthServiceProvider`.
 
@@ -117,9 +117,8 @@
 - Связки пакетов (`seller_packages`): `seller_id`, `package_id`, даты `start_date`/`end_date`, `is_active`.
 
 ## 13. Сиды (database/seeders)
-- `DatabaseSeeder` вызывает Voyager-сиды и доменные сиды (`AdminRoleSeeder`, `UsersTableSeeder`, `CategoriesTableSeeder`, `PackagesTableSeeder`, `SellersTableSeeder`, `ProductsTableSeeder`, `ImagesTableSeeder`, `SellerPackagesTableSeeder`).
+- `DatabaseSeeder` создаёт application-owned роли и permissions, затем запускает доменные сиды (`AdminRoleSeeder`, `UsersTableSeeder`, `CategoriesTableSeeder`, `PackagesTableSeeder`, `SellersTableSeeder`, `ProductsTableSeeder`, `ImagesTableSeeder`, `SellerPackagesTableSeeder`).
 - `AdminRoleSeeder` создаёт роль admin и permission `browse_admin`; пользователь задаётся через `ADMIN_EMAIL`, а новый пароль — через `ADMIN_PASSWORD`.
-- `VoyagerBreadSecuritySeeder` запрещает изменение баланса, пароля и ролей через users BREAD.
 - `UsersTableSeeder` — пользователи `seller1@example.com`, `seller2@example.com` с ролью user.
 - `CategoriesTableSeeder` — трёхуровневое дерево категорий (примерные названия).
 - `SellersTableSeeder` — два продавца с описанием и ссылками.
@@ -135,11 +134,11 @@
 - Стили кабинета расположены в `public/css/cabinet.css`.
 - Маршруты `cabinet/create-shop`, `cabinet/store-shop` требуют реализации методов и шаблонов.
 
-## 15. Voyager
-- `/admin` подключает `Voyager::routes()`; доступ требует `auth` и Gate `access-admin`.
-- В текущей БД зарегистрированы стандартные BREAD `users`, `menus`, `roles`.
-- Users BREAD не позволяет изменять баланс, пароль существующего пользователя и назначение ролей.
-- Voyager-сиды (`VoyagerDatabaseSeeder`, `VoyagerDummyDatabaseSeeder` и др.) настраивают BREAD, меню, роли и permissions.
+## 15. Filament
+- `/admin` обслуживается Filament; доступ требует Gate `access-admin`.
+- Voyager и его BREAD-инфраструктура полностью удалены.
+- Ресурсы Filament управляют пользователями, продавцами, товарами, категориями, тарифами и подписками.
+- Изменение баланса, ролей и других критичных данных выполняется через отдельные действия и сервисы.
 
 ## 16. Дополнительные заметки
 - В `CatalogController` импортирован `Cache`, но он не используется.

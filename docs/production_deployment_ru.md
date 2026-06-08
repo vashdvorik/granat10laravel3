@@ -98,10 +98,10 @@ php artisan db:seed --class=AdminRoleSeeder --force
 Адрес Filament:
 
 ```text
-https://example.com/control/login
+https://example.com/admin/login
 ```
 
-Voyager временно остаётся доступен по `/admin` до завершения миграции.
+Административная панель `/admin` обслуживается только Filament. Voyager удалён из приложения.
 
 ## 5. Production-кеш
 
@@ -145,7 +145,7 @@ php artisan up
 
 ```bash
 php artisan about
-php artisan route:list --path=control
+php artisan route:list --path=admin
 tail -n 100 storage/logs/laravel.log
 ```
 

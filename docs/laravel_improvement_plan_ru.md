@@ -121,11 +121,10 @@
 - Проверено отсутствие обращений к удаленному `Seller.balance`; миграции фиксируют перенос поля в `users`, а списание по-прежнему выполняется через `PackageService` с `lockForUpdate()`.
 - Тесты лимитов перенесены с модели на `ProductLimitService`; добавлены feature-тесты статуса бессрочного/истекающего тарифа и достаточного/недостаточного баланса пользователя.
 - Проверка после упрощения `Seller`: `273 passed`, `641 assertions`; Blade успешно компилируется, `route:list` регистрирует 165 маршрутов.
-- Hardcoded email удалён из runtime-доступа к `/admin`: middleware `EnsureAdminAccess` использует Gate `access-admin`, который проверяет Voyager permission `browse_admin`.
+- Hardcoded email удалён из runtime-доступа к `/admin`: middleware `EnsureAdminAccess` использует Gate `access-admin` и application-owned permission `browse_admin`.
 - `AdminRoleSeeder` больше не содержит email и пароль по умолчанию; первоначальный администратор задаётся через `ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`.
-- Добавлен `VoyagerBreadSecuritySeeder`: users BREAD использует `App\Models\User`, запрещает изменение баланса, пароля и назначение ролей.
-- Фактический аудит локальной БД подтвердил только стандартные BREAD `users`, `menus`, `roles`; security-сидер применён к локальной БД.
-- Добавлены `AdminAccessTest`, `AdminRoleSeederTest`, `VoyagerBreadSecuritySeederTest`.
+- Историческая защита Voyager BREAD заменена ресурсами Filament, policies и специализированными сервисами.
+- Добавлены тесты административного доступа, ролей и критичных действий Filament.
 - Проверка после этапа админ-доступа: `279 passed`, `664 assertions`; конфигурация кешируется, `route:list` регистрирует 165 маршрутов.
 
 ## Этап 1. Стабилизировать окружение и artisan-команды

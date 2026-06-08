@@ -38,16 +38,16 @@ class CategoryResourceTest extends TestCase
     {
         $administrator = $this->createAdministrator();
 
-        $this->actingAs($administrator)->get('/control/categories')->assertOk();
-        $this->actingAs($administrator)->get('/control/category-tree')->assertOk();
+        $this->actingAs($administrator)->get('/admin/categories')->assertOk();
+        $this->actingAs($administrator)->get('/admin/category-tree')->assertOk();
     }
 
     public function test_regular_user_cannot_open_category_resource_or_tree(): void
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get('/control/categories')->assertForbidden();
-        $this->actingAs($user)->get('/control/category-tree')->assertForbidden();
+        $this->actingAs($user)->get('/admin/categories')->assertForbidden();
+        $this->actingAs($user)->get('/admin/category-tree')->assertForbidden();
     }
 
     public function test_administrator_can_create_root_and_child_categories(): void

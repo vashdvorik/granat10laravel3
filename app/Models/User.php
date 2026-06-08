@@ -11,13 +11,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Sanctum\HasApiTokens;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
-use TCG\Voyager\Contracts\User as VoyagerUser;
 
-class User extends Authenticatable implements FilamentUser, VoyagerUser
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -66,6 +66,15 @@ class User extends Authenticatable implements FilamentUser, VoyagerUser
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordCustom($token));
+    }
+
+    public function routeNotificationForMail(): string
+    {
+        if (str_contains($this->email, "\r") || str_contains($this->email, "\n")) {
+            throw new InvalidArgumentException('Email address contains prohibited line breaks.');
+        }
+
+        return $this->email;
     }
 
     public function seller()
@@ -148,7 +157,7 @@ class User extends Authenticatable implements FilamentUser, VoyagerUser
 
     public function getAvatarAttribute(?string $value): string
     {
-        return $value ?? config('voyager.user.default_avatar', 'users/default.png');
+        return $value ?? 'users/default.png';
     }
 
     public function getLocaleAttribute(): mixed

@@ -26,7 +26,7 @@ class ControlPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('control')
-            ->path('control')
+            ->path(config('admin.filament_path'))
             ->login()
             ->authGuard('web')
             ->brandName(config('app.name'))

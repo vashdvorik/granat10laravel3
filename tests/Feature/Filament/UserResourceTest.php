@@ -32,14 +32,14 @@ class UserResourceTest extends TestCase
         $administrator = $this->createAdministrator();
 
         $this->actingAs($administrator)
-            ->get('/control/users')
+            ->get('/admin/users')
             ->assertOk();
     }
 
     public function test_regular_user_cannot_open_user_resource(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get('/control/users')
+            ->get('/admin/users')
             ->assertForbidden();
     }
 
@@ -97,6 +97,26 @@ class UserResourceTest extends TestCase
         $this->assertSame('+37360000000', $user->phone);
         $this->assertNull($user->role_id);
         $this->assertSame(0.0, (float) $user->balance);
+    }
+
+    public function test_administrator_cannot_create_user_with_line_breaks_in_email(): void
+    {
+        $administrator = $this->createAdministrator();
+
+        $this->actingAs($administrator);
+
+        Livewire::test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Unsafe user',
+                'email' => "user@example.com\r\nBcc: attacker@example.com",
+                'phone' => '+37360000000',
+                'password' => 'secure-password',
+                'password_confirmation' => 'secure-password',
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['email']);
+
+        $this->assertDatabaseMissing('users', ['name' => 'Unsafe user']);
     }
 
     public function test_regular_edit_does_not_expose_or_change_password_role_and_balance(): void
