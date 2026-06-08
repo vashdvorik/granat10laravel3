@@ -61,9 +61,9 @@ class AdminResourcePolicyTest extends TestCase
             'view',
             'create',
             'update',
-            'delete',
-            'deleteAny',
         ]);
+        $this->assertFalse(Gate::forUser($administrator)->allows('delete', $sellerPackage));
+        $this->assertFalse(Gate::forUser($administrator)->allows('deleteAny', SellerPackage::class));
         $this->assertPolicyAbilities($administrator, Product::class, $product, [
             'viewAny',
             'view',

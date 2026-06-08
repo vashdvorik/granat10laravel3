@@ -14,16 +14,16 @@ class ProductWriteService
         private readonly ProductLimitService $productLimitService,
         private readonly ProductImageService $productImageService,
         private readonly BackendProductService $backendProductService
-    ) {
-    }
+    ) {}
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, UploadedFile> $images
+     * @param  array<string, mixed>  $data
+     * @param  array<int, UploadedFile>  $images
      */
     public function create(Seller $seller, array $data, array $images = []): Product
     {
         $category = $this->validateCategory($data['category_id']);
+        unset($data['images']);
         $data = $this->normalizeFlags($data);
 
         $this->validateLimits(
@@ -31,7 +31,7 @@ class ProductWriteService
                 $seller,
                 $data['is_active'],
                 $data['is_vip'],
-                !empty($images)
+                ! empty($images)
             ),
             $category
         );
@@ -39,11 +39,11 @@ class ProductWriteService
         $data['alias'] = $this->backendProductService->generateUniqueAlias($data['name']);
         $data['seller_id'] = $seller->id;
         $data['push_at'] = now();
-        $data['sale_started_at'] = !empty($data['lowprice']) ? now() : null;
+        $data['sale_started_at'] = ! empty($data['lowprice']) ? now() : null;
 
         $product = Product::create($data);
 
-        if (!empty($images)) {
+        if (! empty($images)) {
             $this->productImageService->storeUploadedImages($product, $images, true);
         }
 
@@ -53,12 +53,13 @@ class ProductWriteService
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<int, UploadedFile> $images
+     * @param  array<string, mixed>  $data
+     * @param  array<int, UploadedFile>  $images
      */
     public function update(Product $product, array $data, array $images = []): Product
     {
         $category = $this->validateCategory($data['category_id']);
+        unset($data['images']);
         $data = $this->normalizeFlags($data);
 
         $this->validateLimits(
@@ -66,20 +67,20 @@ class ProductWriteService
                 $product,
                 $data['is_active'],
                 $data['is_vip'],
-                $product->images()->exists() || !empty($images)
+                $product->images()->exists() || ! empty($images)
             ),
             $category
         );
 
-        if (!empty($images) && !$this->productImageService->canAddImages($product, count($images))) {
+        if (! empty($images) && ! $this->productImageService->canAddImages($product, count($images))) {
             $this->fail([
                 'images' => 'Превышен лимит изображений. Можно загрузить ещё '
-                    . $this->productImageService->remainingImageSlots($product)
-                    . ' фото.',
+                    .$this->productImageService->remainingImageSlots($product)
+                    .' фото.',
             ], $category);
         }
 
-        if (!empty($data['lowprice']) && !$product->lowprice) {
+        if (! empty($data['lowprice']) && ! $product->lowprice) {
             $data['sale_started_at'] = now();
         } elseif (empty($data['lowprice'])) {
             $data['sale_started_at'] = null;
@@ -87,11 +88,11 @@ class ProductWriteService
 
         $product->update($data);
 
-        if (!empty($images)) {
+        if (! empty($images)) {
             $this->productImageService->storeUploadedImages(
                 $product,
                 $images,
-                !$product->images()->where('is_main', true)->exists()
+                ! $product->images()->where('is_main', true)->exists()
             );
         }
 
@@ -104,10 +105,10 @@ class ProductWriteService
     {
         $category = Category::findOrFail($categoryId);
 
-        if (!$category->isLeaf()) {
+        if (! $category->isLeaf()) {
             $this->fail([
                 'category_id' => 'Пожалуйста, выберите подкатегорию последнего уровня для размещения товара. '
-                    . 'Нельзя добавлять товары в категории, у которых есть подкатегории.',
+                    .'Нельзя добавлять товары в категории, у которых есть подкатегории.',
             ], $category);
         }
 
@@ -115,7 +116,7 @@ class ProductWriteService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     private function normalizeFlags(array $data): array
@@ -127,17 +128,17 @@ class ProductWriteService
     }
 
     /**
-     * @param array<string, string> $errors
+     * @param  array<string, string>  $errors
      */
     private function validateLimits(array $errors, Category $category): void
     {
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             $this->fail($errors, $category);
         }
     }
 
     /**
-     * @param array<string, string> $errors
+     * @param  array<string, string>  $errors
      */
     private function fail(array $errors, Category $category): never
     {

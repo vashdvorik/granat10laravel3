@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Services\CatalogCacheService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\CatalogCacheService;
 use Kalnoy\Nestedset\NodeTrait;
 
 class Category extends Model
@@ -26,10 +26,16 @@ class Category extends Model
         'icon_color',
         'bg_color',
         'parent_id',
+        'is_active',
     ];
 
-    /*ДОБАВИЛ ПРИ ПЕРЕХОДЕ НА ПАКЕТ NESTED SET */
-     /**
+    protected $casts = [
+        'is_active' => 'boolean',
+        'number' => 'integer',
+    ];
+
+    /* ДОБАВИЛ ПРИ ПЕРЕХОДЕ НА ПАКЕТ NESTED SET */
+    /**
      * Получить breadcrumbs (хлебные крошки) для категории
      */
     public function getBreadcrumbsAttribute()
@@ -44,13 +50,14 @@ class Category extends Model
     {
         return $this->hasMany(\App\Models\Product::class);
     }
-    
+
     /**
      * Получить все товары включая товары подкатегорий
      */
     public function allProducts()
     {
         $categoryIds = Category::whereDescendantOrSelf($this->id)->pluck('id');
+
         return \App\Models\Product::whereIn('category_id', $categoryIds);
     }
 
@@ -85,6 +92,7 @@ class Category extends Model
 
             // Проверяем наличие видимых товаров в категории или её потомках
             $categoryIds = self::descendantsAndSelf($category->id)->pluck('id');
+
             return \App\Models\Product::visible()
                 ->whereIn('category_id', $categoryIds)
                 ->exists();
@@ -109,6 +117,6 @@ class Category extends Model
      */
     public static function clearCategoriesCache(): void
     {
-        app(CatalogCacheService::class)->forgetCategoryRelated(!static::$suppressCacheWarming);
+        app(CatalogCacheService::class)->forgetCategoryRelated(! static::$suppressCacheWarming);
     }
 }

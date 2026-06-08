@@ -7,15 +7,26 @@ use App\Models\Product;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Intervention\Image\Facades\Image;
 
 class ProductImageService
 {
     /**
-     * @param array<int, UploadedFile> $files
+     * @param  array<int, UploadedFile>  $files
      */
     public function storeUploadedImages(Product $product, array $files, bool $makeFirstMain = false): void
     {
+        if (! $this->canAddImages($product, count($files))) {
+            throw ValidationException::withMessages([
+                'images' => 'Превышен лимит изображений. Можно загрузить ещё '
+                    .$this->remainingImageSlots($product)
+                    .' фото.',
+            ]);
+        }
+
+        $nextOrder = ((int) $product->images()->max('order')) + 1;
+
         foreach ($files as $index => $file) {
             $fullPath = $this->storeUploadedFile($file);
 
@@ -23,6 +34,7 @@ class ProductImageService
                 'product_id' => $product->id,
                 'path' => $fullPath,
                 'is_main' => $makeFirstMain && $index === 0,
+                'order' => $nextOrder + $index,
             ]);
         }
     }
@@ -67,8 +79,8 @@ class ProductImageService
 
     private function storeUploadedFile(UploadedFile $file): string
     {
-        $filename = Str::uuid() . '.webp';
-        $path = 'products/' . date('Y/m');
+        $filename = Str::uuid().'.webp';
+        $path = 'products/'.date('Y/m');
 
         $image = Image::make($file)->orientate();
 
@@ -81,7 +93,7 @@ class ProductImageService
             $constraint->upsize();
         })->encode('webp', 85);
 
-        $fullPath = $path . '/' . $filename;
+        $fullPath = $path.'/'.$filename;
         Storage::disk('public')->put($fullPath, (string) $image);
 
         return $fullPath;

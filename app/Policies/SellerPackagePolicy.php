@@ -29,12 +29,12 @@ class SellerPackagePolicy
 
     public function delete(User $user, SellerPackage $sellerPackage): bool
     {
-        return $this->isAdministrator($user);
+        return false;
     }
 
     public function deleteAny(User $user): bool
     {
-        return $this->isAdministrator($user);
+        return false;
     }
 
     private function isAdministrator(User $user): bool

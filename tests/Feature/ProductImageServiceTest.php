@@ -21,7 +21,7 @@ class ProductImageServiceTest extends TestCase
         parent::setUp();
 
         Storage::fake('public');
-        $this->service = new ProductImageService();
+        $this->service = new ProductImageService;
     }
 
     public function test_store_uploaded_images_creates_records_and_files(): void
@@ -85,5 +85,28 @@ class ProductImageServiceTest extends TestCase
 
         $this->assertFalse((bool) $oldMain->fresh()->is_main);
         $this->assertTrue((bool) $newMain->fresh()->is_main);
+    }
+
+    public function test_store_uploaded_images_sets_order_and_enforces_total_limit(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->service->storeUploadedImages($product, [
+            UploadedFile::fake()->image('first.jpg', 800, 800),
+            UploadedFile::fake()->image('second.jpg', 800, 800),
+        ], true);
+
+        $images = $product->images()->orderBy('order')->get();
+
+        $this->assertSame([1, 2], $images->pluck('order')->all());
+        $this->assertTrue((bool) $images->first()->is_main);
+
+        ProductImage::factory()->count(3)->create(['product_id' => $product->id]);
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+
+        $this->service->storeUploadedImages($product, [
+            UploadedFile::fake()->image('overflow.jpg', 800, 800),
+        ]);
     }
 }

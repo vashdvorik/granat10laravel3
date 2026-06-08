@@ -20,6 +20,7 @@ class SellerPackage extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'is_active' => 'boolean',
     ];
 
     /**
@@ -29,6 +30,7 @@ class SellerPackage extends Model
     {
         return $this->belongsTo(Seller::class);
     }
+
     /**
      * Связь с пакетом
      */
@@ -36,5 +38,4 @@ class SellerPackage extends Model
     {
         return $this->belongsTo(Package::class);
     }
-
 }

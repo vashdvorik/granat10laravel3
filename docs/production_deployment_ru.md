@@ -65,6 +65,17 @@ sudo chmod -R 775 storage bootstrap/cache
 
 Не запускайте `migrate:fresh` или полный набор тестовых seeders на production.
 
+Если разворачивается новая пустая база, отдельно импортируйте справочники категорий и тарифов:
+
+```bash
+php artisan db:seed --class=CategoriesJsonSeeder --force
+php artisan db:seed --class=PackagesTableSeeder --force
+```
+
+`CategoriesJsonSeeder` идемпотентен: он сохраняет фиксированные ID и alias категорий, восстанавливает Nested Set и пересобирает кеш каталога.
+
+`PackagesTableSeeder` предварительно очищает таблицу тарифов, поэтому запускайте его только для новой пустой базы. На существующей рабочей базе не запускайте этот seeder и обязательно делайте резервную копию перед любым импортом.
+
 ## 4. Первый администратор
 
 Временно добавьте в `.env`:
@@ -138,3 +149,11 @@ php artisan route:list --path=control
 tail -n 100 storage/logs/laravel.log
 ```
 
+Для production используйте ротацию журналов и отключённый debug:
+
+```env
+APP_ENV=production
+APP_DEBUG=false
+LOG_CHANNEL=daily
+LOG_LEVEL=warning
+```

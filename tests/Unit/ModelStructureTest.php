@@ -8,7 +8,6 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
-use App\Models\User;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -30,7 +29,7 @@ class ModelStructureTest extends TestCase
 
     public function test_product_fillable_contains_required_fields(): void
     {
-        $product = new Product();
+        $product = new Product;
         $fillable = $product->getFillable();
 
         foreach (['name', 'price', 'alias', 'is_vip', 'is_active', 'category_id', 'seller_id'] as $field) {
@@ -40,13 +39,13 @@ class ModelStructureTest extends TestCase
 
     public function test_product_guarded_contains_id(): void
     {
-        $product = new Product();
+        $product = new Product;
         $this->assertContains('id', $product->getGuarded());
     }
 
     public function test_product_casts_datetime_fields(): void
     {
-        $product = new Product();
+        $product = new Product;
         $casts = $product->getCasts();
 
         $this->assertArrayHasKey('push_at', $casts);
@@ -59,7 +58,7 @@ class ModelStructureTest extends TestCase
 
     public function test_seller_fillable_contains_core_fields(): void
     {
-        $seller = new Seller();
+        $seller = new Seller;
         $fillable = $seller->getFillable();
 
         foreach (['user_id', 'name', 'alias', 'phone', 'town'] as $field) {
@@ -69,13 +68,13 @@ class ModelStructureTest extends TestCase
 
     public function test_seller_product_count_is_guarded(): void
     {
-        $seller = new Seller();
+        $seller = new Seller;
         $this->assertContains('product_count', $seller->getGuarded(), 'product_count должен быть guarded');
     }
 
     public function test_seller_casts_booleans(): void
     {
-        $seller = new Seller();
+        $seller = new Seller;
         $casts = $seller->getCasts();
 
         $this->assertArrayHasKey('auto_renew', $casts);
@@ -88,18 +87,23 @@ class ModelStructureTest extends TestCase
 
     public function test_package_casts_boolean_features(): void
     {
-        $package = new Package();
+        $package = new Package;
         $casts = $package->getCasts();
 
         foreach (['has_website_link', 'has_social_links', 'has_order_system', 'is_active'] as $field) {
             $this->assertArrayHasKey($field, $casts, "Package должен кастить '{$field}'");
             $this->assertSame('boolean', $casts[$field]);
         }
+
+        $this->assertSame('decimal:2', $casts['price']);
+        $this->assertSame('integer', $casts['duration_days']);
+        $this->assertSame('integer', $casts['active_products_limit']);
+        $this->assertSame('integer', $casts['vip_products_limit']);
     }
 
     public function test_package_fillable_contains_limit_fields(): void
     {
-        $package = new Package();
+        $package = new Package;
         $fillable = $package->getFillable();
 
         $this->assertContains('active_products_limit', $fillable);
@@ -112,16 +116,17 @@ class ModelStructureTest extends TestCase
 
     public function test_seller_package_casts_dates(): void
     {
-        $sp = new SellerPackage();
+        $sp = new SellerPackage;
         $casts = $sp->getCasts();
 
         $this->assertArrayHasKey('start_date', $casts, 'start_date должен быть кастирован');
         $this->assertArrayHasKey('end_date', $casts, 'end_date должен быть кастирован');
+        $this->assertSame('boolean', $casts['is_active']);
     }
 
     public function test_seller_package_fillable(): void
     {
-        $sp = new SellerPackage();
+        $sp = new SellerPackage;
         $fillable = $sp->getFillable();
 
         foreach (['seller_id', 'package_id', 'start_date', 'end_date', 'is_active'] as $field) {
@@ -133,14 +138,18 @@ class ModelStructureTest extends TestCase
     // Category
     // =========================================================================
 
-    public function test_category_fillable_contains_seo_fields(): void
+    public function test_category_fillable_and_casts_support_filament_management(): void
     {
-        $category = new Category();
+        $category = new Category;
         $fillable = $category->getFillable();
+        $casts = $category->getCasts();
 
-        foreach (['name', 'alias', 'parent_id', 'number'] as $field) {
+        foreach (['name', 'alias', 'parent_id', 'number', 'is_active'] as $field) {
             $this->assertContains($field, $fillable);
         }
+
+        $this->assertSame('boolean', $casts['is_active']);
+        $this->assertSame('integer', $casts['number']);
     }
 
     // =========================================================================
@@ -149,7 +158,7 @@ class ModelStructureTest extends TestCase
 
     public function test_image_fillable(): void
     {
-        $image = new Image();
+        $image = new Image;
         $fillable = $image->getFillable();
 
         $this->assertContains('product_id', $fillable);

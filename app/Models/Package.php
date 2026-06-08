@@ -22,10 +22,14 @@ class Package extends Model
     ];
 
     protected $casts = [
-    'has_website_link' => 'boolean',
-    'has_social_links' => 'boolean',
-    'has_order_system' => 'boolean',
-    'is_active' => 'boolean',
+        'price' => 'decimal:2',
+        'duration_days' => 'integer',
+        'active_products_limit' => 'integer',
+        'vip_products_limit' => 'integer',
+        'has_website_link' => 'boolean',
+        'has_social_links' => 'boolean',
+        'has_order_system' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     public function sellerPackages()

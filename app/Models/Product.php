@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\CatalogCacheService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Services\CatalogCacheService;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
@@ -19,11 +20,11 @@ class Product extends Model
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('products')
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Товар создан: "' . $this->name . '"',
-                'updated' => 'Товар обновлён: "' . $this->name . '"',
-                'deleted' => 'Товар удалён: "' . $this->name . '"',
-                default   => $eventName,
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'created' => 'Товар создан: "'.$this->name.'"',
+                'updated' => 'Товар обновлён: "'.$this->name.'"',
+                'deleted' => 'Товар удалён: "'.$this->name.'"',
+                default => $eventName,
             });
     }
 
@@ -40,14 +41,16 @@ class Product extends Model
         'is_vip',
         'is_active',
         'category_id',
-        'seller_id',      
-        'sale_started_at', 
-        'push_at',        
+        'seller_id',
+        'sale_started_at',
+        'push_at',
     ];
+
     protected $guarded = [
-    'id',
+        'id',
 
     ];
+
     protected $casts = [
         'push_at' => 'datetime',
         'sale_started_at' => 'datetime',
@@ -62,11 +65,18 @@ class Product extends Model
     {
         return $this->belongsTo(\App\Models\Seller::class);
     }
-    
+
     public function images()
     {
         return $this->hasMany(\App\Models\Image::class);
-    }   
+    }
+
+    public function mainImage(): HasOne
+    {
+        return $this->hasOne(Image::class)
+            ->where('is_main', true)
+            ->orderBy('order');
+    }
 
     /**
      * Scope: только товары от продавцов с активными пакетами
@@ -75,7 +85,7 @@ class Product extends Model
     {
         return $query->whereHas('seller.sellerPackages', function ($q) {
             $q->where('is_active', true)
-                ->where(function($dateQuery) {
+                ->where(function ($dateQuery) {
                     $dateQuery->whereNull('end_date')
                         ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE, не DATETIME
                 });
@@ -83,7 +93,7 @@ class Product extends Model
     }
 
     /**
-     * Scope: публичные товары 
+     * Scope: публичные товары
      * (продавец активировал И у продавца есть активный пакет)
      */
     public function scopeVisible($query)
@@ -111,11 +121,12 @@ class Product extends Model
     {
         return app(CatalogCacheService::class)->rememberCategoryProductsCount((int) $categoryId, function () use ($categoryId) {
             $category = \App\Models\Category::find($categoryId);
-            if (!$category) {
+            if (! $category) {
                 return 0;
             }
-            
+
             $categoryIds = \App\Models\Category::whereDescendantOrSelf($categoryId)->pluck('id');
+
             return self::visible()
                 ->whereIn('category_id', $categoryIds)
                 ->count();
@@ -134,5 +145,4 @@ class Product extends Model
             ];
         });
     }
-
 }
