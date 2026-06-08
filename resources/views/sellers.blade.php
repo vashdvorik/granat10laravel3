@@ -47,7 +47,7 @@
         <a href="#" class="image-bd effect_img2"><img src="img/shop-banner.jpg" alt="" class="img-reponsive"></a> 
     </div>
     <div class="pd-top">
-        <h1 class="title">Магазины</h1>
+        <h1 class="title">Магазины{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : '' }}</h1>
         <div class="show-element"><span>Показано {{ $sellers->firstItem() }}–{{ $sellers->lastItem() }} из {{ $sellers->total() }} магазинов</span></div>
     </div>
     <div class="pd-middle">
@@ -74,13 +74,13 @@
 
     <div class="blog spc1">
         <div class="blog-grid">
-            <h1 class="blog-heading text-center">Продавцы г. Тирасполь</h1>
+            <h2 class="blog-heading text-center">Продавцы{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' ПМР' }}</h2>
             <div class="row">
 
             @foreach($sellers as $seller)
                 <div class="col-md-4 col-sm-6 col-xs-12 blog-post-item">
                     <div class="blog-img">
-                        <a href="{{ route('seller', ['alias' => $seller->alias])}}" class="hover-images">
+                        <a href="{{ $regionalUrl->route('seller', ['alias' => $seller->alias])}}" class="hover-images">
                             <img src="{{ $seller->photo ? Storage::url($seller->photo) : asset('img/blog/blog_3.jpg') }}" alt="{{ $seller->name }}" class="img-reponsive">
                         </a>
                         <div class="blog-post-date e-gradient abs">
@@ -90,7 +90,7 @@
                     </div>
                     <div class="blog-info">
                         <h3 class="blog-post-title">
-                            <a href="{{ route('seller', ['alias' => $seller->alias])}}">{{ $seller->name ?? 'Название продавца' }}</a>
+                            <a href="{{ $regionalUrl->route('seller', ['alias' => $seller->alias])}}">{{ $seller->name ?? 'Название продавца' }}</a>
                         </h3>
                         <p class="blog-post-desc">{{ $seller->description ?? '' }}</p>
                         <div class="blog-post-author">
@@ -135,7 +135,7 @@
             @if($sellers->currentPage() < $sellers->lastPage())
                 <div class="load-more-wrapper hidden-md hidden-lg text-center">
                     <button class="btn btn-load-more" 
-                            data-url="{{ route('shops.loadMore') }}"
+                            data-url="{{ $regionalUrl->route('shops.loadMore') }}"
                             data-current-page="{{ $sellers->currentPage() }}"
                             data-last-page="{{ $sellers->lastPage() }}">
                         <i class="ion-load-c"></i> Загрузить еще

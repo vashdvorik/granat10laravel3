@@ -11,6 +11,7 @@ use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\SellerPackage;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -94,7 +95,7 @@ class SellerResourceTest extends TestCase
                 'user_id' => $owner->id,
                 'name' => 'Новый магазин',
                 'phone' => '+37360000000',
-                'town' => 'Кишинёв',
+                'settlement_id' => Settlement::factory()->create(['name' => 'Кишинёв'])->id,
                 'link' => 'https://example.test',
                 'telegram' => '@new_shop',
             ])
@@ -134,7 +135,7 @@ class SellerResourceTest extends TestCase
                 'user_id' => $otherUser->id,
                 'name' => 'Обновлённый магазин',
                 'phone' => '+37361111111',
-                'town' => 'Бельцы',
+                'settlement_id' => Settlement::factory()->create(['name' => 'Бельцы'])->id,
             ])
             ->call('save')
             ->assertHasNoFormErrors()

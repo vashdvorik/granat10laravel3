@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Package;
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\User;
 use App\Services\ShopService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,11 +31,12 @@ class ShopServiceTest extends TestCase
     {
         $basePackage = Package::factory()->free()->create(['id' => ShopService::BASE_PACKAGE_ID]);
         $user = User::factory()->create();
+        $settlement = Settlement::factory()->create(['name' => 'City']);
 
         $seller = $this->service->createShop($user, [
             'name' => 'Test Shop',
             'phone' => '+1',
-            'town' => 'City',
+            'settlement_id' => $settlement->id,
             'sellerplace' => 'Market',
             'address' => 'Street',
             'description' => 'Description',
@@ -54,9 +56,11 @@ class ShopServiceTest extends TestCase
     {
         Package::factory()->free()->create(['id' => ShopService::BASE_PACKAGE_ID]);
         Seller::factory()->create(['alias' => 'test-shop']);
+        $settlement = Settlement::factory()->create();
 
         $seller = $this->service->createShop(User::factory()->create(), [
             'name' => 'Test Shop',
+            'settlement_id' => $settlement->id,
         ]);
 
         $this->assertStringStartsWith('test-shop-', $seller->alias);
@@ -64,12 +68,14 @@ class ShopServiceTest extends TestCase
 
     public function test_create_shop_rolls_back_when_base_package_is_missing(): void
     {
+        $settlement = Settlement::factory()->create();
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Базовый тариф не найден');
 
         try {
             $this->service->createShop(User::factory()->create(), [
                 'name' => 'No Package Shop',
+                'settlement_id' => $settlement->id,
             ]);
         } finally {
             $this->assertDatabaseMissing('sellers', [
@@ -81,10 +87,11 @@ class ShopServiceTest extends TestCase
     public function test_create_shop_stores_logo_as_webp(): void
     {
         Package::factory()->free()->create(['id' => ShopService::BASE_PACKAGE_ID]);
+        $settlement = Settlement::factory()->create();
 
         $seller = $this->service->createShop(
             User::factory()->create(),
-            ['name' => 'Logo Shop'],
+            ['name' => 'Logo Shop', 'settlement_id' => $settlement->id],
             UploadedFile::fake()->image('logo.jpg', 800, 800)
         );
 

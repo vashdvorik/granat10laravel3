@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use App\Services\CatalogCacheService;
+use App\Services\RegionalContext;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -33,11 +36,11 @@ class Seller extends Model
         'name',
         'phone',
         'town',
+        'settlement_id',
         'sellerplace',
         'address',
         'description',
         'alias',
-        'region_id',
         'link',
         'link_map',
         'telegram',
@@ -64,9 +67,28 @@ class Seller extends Model
         return $this->belongsTo(\App\Models\User::class);
     }
 
+    public function settlement(): BelongsTo
+    {
+        return $this->belongsTo(Settlement::class);
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder
+    {
+        $context ??= app(RegionalContext::class);
+        $settlement = $context->settlement();
+
+        return $query->when(
+            $settlement,
+            fn (Builder $regionalQuery) => $regionalQuery->where(
+                $regionalQuery->qualifyColumn('settlement_id'),
+                $settlement->id
+            )
+        );
     }
 
     /**
@@ -114,7 +136,7 @@ class Seller extends Model
     public static function getCachedAll()
     {
         return app(CatalogCacheService::class)->rememberSellers(function () {
-            return self::withCount(['products' => function ($query) {
+            return self::forRegionalContext()->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
                 ->orderBy('products_count', 'desc')
@@ -132,7 +154,7 @@ class Seller extends Model
         }
 
         return app(CatalogCacheService::class)->rememberSellerByAlias($alias, function () use ($alias) {
-            return self::withCount(['products' => function ($query) {
+            return self::forRegionalContext()->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
                 ->where('alias', $alias)

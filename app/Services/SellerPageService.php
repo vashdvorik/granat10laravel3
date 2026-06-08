@@ -12,7 +12,7 @@ class SellerPageService
 {
     public function getShops(int $perPage = 12): LengthAwarePaginator
     {
-        return Seller::withCount(['products' => function ($query) {
+        return Seller::forRegionalContext()->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
             ->orderBy('products_count', 'desc')
@@ -22,6 +22,7 @@ class SellerPageService
     public function getSellerProducts(Seller $seller, int $perPage = 12): LengthAwarePaginator
     {
         return Product::visible()
+            ->forRegionalContext()
             ->where('seller_id', $seller->id)
             ->with(['images'])
             ->orderByDesc('created_at')

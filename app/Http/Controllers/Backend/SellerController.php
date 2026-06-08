@@ -64,8 +64,13 @@ class SellerController extends Controller
         $this->authorize('update', $seller);
         
         $user = Auth::user();
+        $regions = \App\Models\Region::query()
+            ->active()
+            ->ordered()
+            ->with(['settlements' => fn ($query) => $query->active()->ordered()])
+            ->get();
         
-        return view('backend.cabinet.store.edit', compact('seller', 'user'));
+        return view('backend.cabinet.store.edit', compact('seller', 'user', 'regions'));
     }
 
     /**

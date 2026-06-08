@@ -5,7 +5,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>@yield('title')</title>
+    <title>{{ $seoTitle ?: trim($__env->yieldContent('title')) }}</title>
+    @if(config('regionality.seo_enabled'))
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta name="robots" content="{{ $robotsMeta }}">
+    @if($seoDescription)
+    <meta name="description" content="{{ $seoDescription }}">
+    @endif
+    @endif
     <link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
     <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/slick.css') }}">
@@ -34,7 +41,7 @@
           "@type": "ListItem",
           "position": 2,
           "name": "Каталог",
-          "item": "{{ route('catalog.index') }}"
+          "item": "{{ $regionalUrl->route('catalog.index') }}"
         }
         @if(isset($breadcrumbs) && $breadcrumbs->count() > 0)
           @foreach($breadcrumbs as $index => $crumb)
@@ -42,7 +49,7 @@
             "@type": "ListItem",
             "position": {{ $index + 3 }},
             "name": "{{ $crumb->name }}",
-            "item": "{{ route('catalog.show', $crumb->alias) }}"
+            "item": "{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}"
           }
           @endforeach
         @endif
@@ -461,6 +468,35 @@
         justify-content: center;
     }
 
+    .regional-selector .dropdown-menu {
+        max-height: 420px;
+        min-width: 280px;
+        overflow-y: auto;
+        padding: 8px 0;
+    }
+
+    .regional-selector__group {
+        padding: 8px 16px 4px;
+        color: #777;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .regional-selector__option {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        padding: 7px 16px;
+        text-align: left;
+    }
+
+    .regional-selector__option:hover,
+    .regional-selector__option.is-active {
+        background: #f5f5f5;
+        color: #e53935;
+    }
+
     </style>
 
     {{-- Open Graph для соцсетей --}}
@@ -569,13 +605,46 @@
             <div class="row flex">
                 <div class="col-md-6 col-sm-6 col-xs-4 flex-left">
                     <div class="topbar-left">
-                        <div class="element element-store hidden-xs hidden-sm">
-                            <a id="label1" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            <img src="{{ asset('img/icon-map.png') }}" alt="">
-                            <span>г. Тирасполь</span>
-                            
-                            </a>
-
+                        <div class="element element-store regional-selector">
+                            @if(config('regionality.enabled'))
+                                <a id="label1" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                    <img src="{{ asset('img/icon-map.png') }}" alt="">
+                                    <span>{{ $regionalContext->label() }}</span>
+                                    <span class="fa fa-caret-down"></span>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="label1">
+                                    <li>
+                                        <form method="POST" action="{{ route('regionality.update') }}">
+                                            @csrf
+                                            <input type="hidden" name="return_to" value="{{ request()->fullUrl() }}">
+                                            <button type="submit" class="regional-selector__option {{ $regionalContext->isAllRegions() ? 'is-active' : '' }}">
+                                                Все регионы
+                                            </button>
+                                        </form>
+                                    </li>
+                                    @foreach($regionalRegions as $region)
+                                        <li class="regional-selector__group">{{ $region->name }}</li>
+                                        @foreach($region->settlements as $settlement)
+                                            <li>
+                                                <form method="POST" action="{{ route('regionality.update') }}">
+                                                    @csrf
+                                                    <input type="hidden" name="settlement_id" value="{{ $settlement->id }}">
+                                                    <input type="hidden" name="return_to" value="{{ request()->fullUrl() }}">
+                                                    <button type="submit" class="regional-selector__option {{ $regionalContext->settlement()?->is($settlement) ? 'is-active' : '' }}">
+                                                        {{ $settlement->name }}
+                                                        <small>({{ $settlement->type }})</small>
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endforeach
+                                    @endforeach
+                                </ul>
+                            @else
+                                <span>
+                                    <img src="{{ asset('img/icon-map.png') }}" alt="">
+                                    Все регионы
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -611,11 +680,11 @@
             <div class="row flex">
                 <!-- логотип -->
                 <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 v-center header-logo">
-                    <a href="/"><img src="{{ asset('img/logo.png') }}" alt="" class="img-reponsive"></a>
+                    <a href="{{ $regionalUrl->route('home') }}"><img src="{{ asset('img/logo.png') }}" alt="" class="img-reponsive"></a>
                 </div>
     <!-- поиск по сайту -->
                 <div class="col-lg-7 col-md-7 v-center header-search hidden-xs hidden-sm">
-                    <form method="get" class="searchform ajax-search" action="/search" role="search">
+                    <form method="get" class="searchform ajax-search" action="{{ $regionalUrl->route('search') }}" role="search">
                         <input type="hidden" name="type" value="product">
                         <input type="text" onblur="if (this.value=='') this.value = this.defaultValue" onfocus="if (this.value==this.defaultValue) this.value = ''" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}">
                         <input type="hidden" name="category" id="search-category-input" value="{{ request('category') }}">
@@ -661,7 +730,7 @@
                 <!-- Иконки -->
                         <div class="header-sub-element row">
                             <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
-                            <a href="{{ route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
+                            <a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
                             
                             <div class="cart">
                                 
@@ -675,8 +744,8 @@
                                             <span>Чтобы оформить заказ, свяжитесь с продавцом по телефону.</span>
                                         </div>
                                         <div class="button-cart">
-                                            <a href="{{ route('shops') }}" class="cart-btn btn-viewcart">Магазины</a>
-                                            <a href="{{ route('catalog.index') }}" class="cart-btn e-checkout btn-gradient">Каталог</a>
+                                            <a href="{{ $regionalUrl->route('shops') }}" class="cart-btn btn-viewcart">Магазины</a>
+                                            <a href="{{ $regionalUrl->route('catalog.index') }}" class="cart-btn e-checkout btn-gradient">Каталог</a>
                                         </div>
                                     </div>
                                 </div> 
@@ -697,7 +766,7 @@
             <div class="row flex lr2">
                 <div class="col-lg-3 widget-verticalmenu">
                     <div class="navbar-vertical">
-                        <a href="{{ route('catalog.index') }}"><button class="navbar-toggles"><span>Каталог товаров</span></button></a>
+                        <a href="{{ $regionalUrl->route('catalog.index') }}"><button class="navbar-toggles"><span>Каталог товаров</span></button></a>
                     </div>
                 </div>    
                 <div class="col-lg-9 widget-left">
@@ -705,9 +774,9 @@
                         <nav class="main-menu" style="margin-left: 20px;">
                             <div class="collapse navbar-collapse" id="myNavbar">
                                 <ul class="nav navbar-nav">
-                                    <li class="level1"><a href="{{ route('shops') }}"><img src="{{ asset('img/icon-ship.png') }}" alt="">Магазины</a></li>
-                                    <li class="level1"><a href="{{ route('favorites') }}"><img src="{{ asset('img/icon-heart3.png') }}" alt="">Понравившиеся</a></li>
-                                    <li class="level1"><a href="{{ route('catalog.sale') }}"><img src="{{ asset('img/skidka-logo.png') }}" alt="">Распродажи сейчас<span class="h-ribbon h-pos e-red">sale</span></a></li>
+                                    <li class="level1"><a href="{{ $regionalUrl->route('shops') }}"><img src="{{ asset('img/icon-ship.png') }}" alt="">Магазины</a></li>
+                                    <li class="level1"><a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart3.png') }}" alt="">Понравившиеся</a></li>
+                                    <li class="level1"><a href="{{ $regionalUrl->route('catalog.sale') }}"><img src="{{ asset('img/skidka-logo.png') }}" alt="">Распродажи сейчас<span class="h-ribbon h-pos e-red">sale</span></a></li>
                                 </ul>
                             </div>
                         </nav>
@@ -757,7 +826,7 @@
                         <h3 class="footer-block-title">Категории</h3>
                         <ul class="footer-block-content">
                             @foreach($categories->take(7) as $category)
-                            <li><a href="{{ route('catalog.show', $category->alias ?? $category->id) }}">{{ $category->name }}</a></li>
+                            <li><a href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias ?? $category->id]) }}">{{ $category->name }}</a></li>
                             @endforeach
                         </ul>
                     </div>
@@ -818,19 +887,19 @@
             <i class="fa fa-user f-18"></i>
             <span class="mobile-nav-label">Кабинет</span>
         </a>
-        <a href="{{ route('favorites') }}" class="mobile-nav-item" title="Избранное">
+        <a href="{{ $regionalUrl->route('favorites') }}" class="mobile-nav-item" title="Избранное">
             <i class="fa fa-heart f-18"></i>
             <span class="mobile-nav-label">Избранное</span>
         </a>
-        <a href="{{ route('catalog.index') }}" class="mobile-nav-item " title="Меню">
+        <a href="{{ $regionalUrl->route('catalog.index') }}" class="mobile-nav-item " title="Меню">
             <i class="fa fa-th f-18"></i>
             <span class="mobile-nav-label">Каталог</span>
         </a>
-        <a href="{{ route('catalog.sale') }}" class="mobile-nav-item" title="Распродажи">
+        <a href="{{ $regionalUrl->route('catalog.sale') }}" class="mobile-nav-item" title="Распродажи">
             <img src="{{ asset('img/skidka-logo.png') }}" alt="Распродажи" style="width:20px; height:20px;">
             <span class="mobile-nav-label">Распродажи</span>
         </a>
-        <a href="{{ route('shops') }}" class="mobile-nav-item" title="Магазины">
+        <a href="{{ $regionalUrl->route('shops') }}" class="mobile-nav-item" title="Магазины">
             <img src="{{ asset('img/icon-ship.png') }}" alt="Магазины" style="width:20px; height:20px;">
             <span class="mobile-nav-label">Магазины</span>
         </a>

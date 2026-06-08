@@ -68,18 +68,28 @@
                                     </div>
                                     <div class="form-group mb-25">
                                         <div class="countryOption">
-                                        <label for="town">
-                                            Город
+                                        <label for="settlement_id">
+                                            Населённый пункт
                                         </label>
-                                        <select class="js-example-basic-single js-states form-control" id="town" name="town" >
-                                            <option value="Тирасполь">Тирасполь</option>
+                                        <select class="js-example-basic-single js-states form-control @error('settlement_id') is-invalid @enderror" id="settlement_id" name="settlement_id" required>
+                                            <option value="">Выберите населённый пункт</option>
+                                            @foreach($regions as $region)
+                                                <optgroup label="{{ $region->name }}">
+                                                    @foreach($region->settlements as $settlement)
+                                                        <option value="{{ $settlement->id }}" @selected((string) old('settlement_id') === (string) $settlement->id)>
+                                                            {{ $settlement->name }} ({{ $settlement->type }})
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
                                         </select>
+                                        @error('settlement_id') <div class="text-danger small">{{ $message }}</div> @enderror
                                         </div>
                                     </div>
                                     <div class="form-group mb-25">
                                         <div class="cityOption">
                                         <label for="sellerplace">
-                                            Район Тирасполя
+                                            Район / торговое место
                                         </label>
                                         <select class="js-example-basic-single js-states form-control" id="sellerplace" name="sellerplace">
                                             <option value="Центр">Центр</option>

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Services\CatalogCacheService;
+use App\Services\RegionalContext;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -102,6 +104,19 @@ class Product extends Model
             ->fromActiveSellerPackage();         // и пакет активен
     }
 
+    public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder
+    {
+        $context ??= app(RegionalContext::class);
+        $settlement = $context->settlement();
+
+        return $query->when($settlement, function (Builder $regionalQuery) use ($settlement) {
+            $regionalQuery->whereHas(
+                'seller',
+                fn (Builder $sellerQuery) => $sellerQuery->where('settlement_id', $settlement->id)
+            );
+        });
+    }
+
     // ==========================================
     // РАБОТА С КЕШЕМ
     // ==========================================
@@ -128,6 +143,7 @@ class Product extends Model
             $categoryIds = \App\Models\Category::whereDescendantOrSelf($categoryId)->pluck('id');
 
             return self::visible()
+                ->forRegionalContext()
                 ->whereIn('category_id', $categoryIds)
                 ->count();
         });
@@ -140,8 +156,8 @@ class Product extends Model
     {
         return app(CatalogCacheService::class)->rememberProductPriceRange(function () {
             return [
-                'min' => self::min('price') ?? 0,
-                'max' => self::max('price') ?? 0,
+                'min' => self::visible()->forRegionalContext()->min('price') ?? 0,
+                'max' => self::visible()->forRegionalContext()->max('price') ?? 0,
             ];
         });
     }

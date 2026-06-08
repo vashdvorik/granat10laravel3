@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Package;
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,7 @@ class ShopService
     public function createShop(User $user, array $data, ?UploadedFile $logoFile = null): Seller
     {
         unset($data['logo']);
+        $data['town'] = Settlement::query()->findOrFail($data['settlement_id'])->name;
 
         $seller = DB::transaction(function () use ($user, $data) {
             $basePackage = Package::find(self::BASE_PACKAGE_ID);

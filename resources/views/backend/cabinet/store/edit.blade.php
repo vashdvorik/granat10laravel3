@@ -73,10 +73,21 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="town" class="form-label">Город</label>
-                                        <input type="text" class="form-control @error('town') is-invalid @enderror" 
-                                               id="town" name="town" value="{{ old('town', $seller->town) }}">
-                                        @error('town')
+                                        <label for="settlement_id" class="form-label">Населённый пункт</label>
+                                        <select class="form-control @error('settlement_id') is-invalid @enderror"
+                                                id="settlement_id" name="settlement_id" required>
+                                            <option value="">Выберите населённый пункт</option>
+                                            @foreach($regions as $region)
+                                                <optgroup label="{{ $region->name }}">
+                                                    @foreach($region->settlements as $settlement)
+                                                        <option value="{{ $settlement->id }}" @selected((string) old('settlement_id', $seller->settlement_id) === (string) $settlement->id)>
+                                                            {{ $settlement->name }} ({{ $settlement->type }})
+                                                        </option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endforeach
+                                        </select>
+                                        @error('settlement_id')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
                                     </div>

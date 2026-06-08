@@ -11,6 +11,7 @@ use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\SellerPackage;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -56,7 +57,7 @@ class AdministrationWorkflowTest extends TestCase
                 'name' => 'Тестовый магазин',
                 'logo' => UploadedFile::fake()->image('seller-logo.png', 800, 800),
                 'phone' => '+37360000000',
-                'town' => 'Кишинёв',
+                'settlement_id' => Settlement::factory()->create(['name' => 'Кишинёв'])->id,
             ])
             ->call('create')
             ->assertHasNoFormErrors()

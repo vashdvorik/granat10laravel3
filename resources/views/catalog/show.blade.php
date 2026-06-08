@@ -18,14 +18,14 @@
     <div id="catalog-top"></div>
     <ul class="breadcrumb">
         <li><a href="{{ route('home') }}">Главная</a></li>
-        <li class="active"><a href="{{ route('catalog.index') }}">Каталог</a></li>
+        <li class="active"><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог</a></li>
 
     <!--    <li class="active">{{ $category->name }}</li> -->
      @foreach($breadcrumbs as $crumb)
         @if ($loop->last)
             <li class="active">{{ $crumb->name }}</li>
         @else
-            <li><a href="{{ route('catalog.show', $crumb->alias) }}">{{ $crumb->name }}</a></li>
+            <li><a href="{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}">{{ $crumb->name }}</a></li>
         @endif
     @endforeach
 
@@ -49,14 +49,14 @@
                         if ($hasChildren) {
                             // Есть дети - назад к родителю или каталог
                             $desktopBackUrl = $category->parent 
-                                ? route('catalog.show', $category->parent->alias ?? $category->parent->id) 
-                                : route('catalog.index');
+                                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->alias ?? $category->parent->id])
+                                : $regionalUrl->route('catalog.index');
                             $backText = $category->parent ? 'Назад' : 'В каталог';
                         } else {
                             // Нет детей, показываются братья - назад на 2 уровня вверх
                             $desktopBackUrl = ($category->parent && $category->parent->parent) 
-                                ? route('catalog.show', $category->parent->parent->alias ?? $category->parent->parent->id)
-                                : route('catalog.index');
+                                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->parent->alias ?? $category->parent->parent->id])
+                                : $regionalUrl->route('catalog.index');
                             $backText = ($category->parent && $category->parent->parent) ? 'Назад' : 'В каталог';
                         }
                     @endphp
@@ -70,7 +70,7 @@
                     
                     @foreach ($categories as $subcategory)
                      <li class="{{ $subcategory->children->isNotEmpty() ? 'active' : '' }}">
-                        <a href="{{ route('catalog.show', $subcategory->alias) }}">
+                        <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias]) }}">
                      {{--   {{ $subcategory->name }} <span class="number">(80)</span> --}}
                         {{ $subcategory->name }} <span class="number">({{ $categoryProductsCounts[$subcategory->id] ?? 0 }})</span>
                         </a>
@@ -261,6 +261,8 @@
                     </div> -->
                     
                     <div class="pd-sort">
+                        @include('components.catalog-region-selector')
+                        {{--
                         <div class="filter-sort">
                             <div class="dropdown">
                               <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -278,6 +280,7 @@
                               </ul>
                             </div>
                         </div>
+                        --}}
                         <div class="filter-show">
                             <div class="dropdown">
                                   <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -308,13 +311,13 @@
         if ($hasChildren) {
             // Есть дети - назад к родителю или каталог
             $backUrl = $category->parent 
-                ? route('catalog.show', $category->parent->alias ?? $category->parent->id) 
-                : route('catalog.index');
+                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->alias ?? $category->parent->id])
+                : $regionalUrl->route('catalog.index');
         } else {
             // Нет детей, показываются братья - назад на 2 уровня вверх
             $backUrl = ($category->parent && $category->parent->parent) 
-                ? route('catalog.show', $category->parent->parent->alias ?? $category->parent->parent->id)
-                : route('catalog.index');
+                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->parent->alias ?? $category->parent->parent->id])
+                : $regionalUrl->route('catalog.index');
         }
     @endphp
 
@@ -335,7 +338,7 @@
             <!-- Список категорий с иконками -->
             @foreach ($categories as $subcategory)
                 <div class="mobile-category-card">
-                    <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                    <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">
                         <div class="mobile-category-image" 
                              style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
                             @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
@@ -368,7 +371,7 @@
             <!-- Список категорий текстом -->
             @foreach ($categories as $subcategory)
                 <div class="mobile-category-tile">
-                    <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                    <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">
                         <span>{{ $subcategory->name }}</span>
                     </a>
                 </div>
@@ -401,7 +404,7 @@
                         <div class="load-more-wrapper hidden-md hidden-lg text-center">
                             @if($products->currentPage() < $products->lastPage())
                                 <button class="btn btn-load-more" 
-                                        data-url="{{ route('catalog.loadMoreCategory', $category->alias) }}"
+                                        data-url="{{ $regionalUrl->route('catalog.loadMoreCategory', ['alias' => $category->alias]) }}"
                                         data-current-page="{{ $products->currentPage() }}"
                                         data-last-page="{{ $products->lastPage() }}"
                                         data-seller="{{ request('seller') }}">

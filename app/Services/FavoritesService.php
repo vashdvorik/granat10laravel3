@@ -62,6 +62,7 @@ class FavoritesService
         }
 
         return Product::visible()
+            ->forRegionalContext()
             ->whereIn('id', $pageIds)
             ->with(['images', 'seller'])
             ->get()

@@ -9473,6 +9473,8 @@ span.star:before {
     margin-bottom: 15px; } }
 .filter-sort .dropdown {
   padding: 10px 23px; }
+  .filter-sort .dropdown-menu > .catalog-region-heading {
+    padding: 3px 20px; }
   .filter-sort .dropdown:after {
     right: 23px; }
   .filter-sort .dropdown button {

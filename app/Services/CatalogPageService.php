@@ -66,6 +66,7 @@ class CatalogPageService
     public function getSaleProducts(int $perPage = 12): LengthAwarePaginator
     {
         return Product::visible()
+            ->forRegionalContext()
             ->whereNotNull('lowprice')
             ->orderByDesc('sale_started_at')
             ->with(['images', 'seller'])
@@ -93,6 +94,7 @@ class CatalogPageService
         $categoryIds = $category ? $this->getCategoryIds($category) : [];
 
         return Product::visible()
+            ->forRegionalContext()
             ->when($q !== '', function (Builder $query) use ($q) {
                 $query->where(function (Builder $subQuery) use ($q) {
                     $subQuery->where('name', 'LIKE', '%' . $q . '%')
@@ -155,6 +157,7 @@ class CatalogPageService
     private function baseCatalogQuery(?array $categoryIds, array $filters): Builder
     {
         return Product::visible()
+            ->forRegionalContext()
             ->when(!empty($categoryIds), function (Builder $query) use ($categoryIds) {
                 $query->whereIn('category_id', $categoryIds);
             })
@@ -212,7 +215,8 @@ class CatalogPageService
 
     private function getSellersForCategory(array $categoryIds): Collection
     {
-        return Seller::whereHas('sellerPackages', function (Builder $query) {
+        return Seller::forRegionalContext()
+            ->whereHas('sellerPackages', function (Builder $query) {
                 $query->where('is_active', true)
                     ->where(function (Builder $dateQuery) {
                         $dateQuery->whereNull('end_date')

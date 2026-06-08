@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -23,6 +24,7 @@ class SellerFactory extends Factory
             'name'         => $name,
             'phone'        => fake()->phoneNumber(),
             'town'         => fake()->city(),
+            'settlement_id' => Settlement::factory(),
             'sellerplace'  => fake()->streetName(),
             'address'      => fake()->address(),
             'description'  => fake()->paragraph(),

@@ -6,6 +6,7 @@ use App\Filament\Resources\SellerResource\Pages;
 use App\Filament\Resources\SellerResource\RelationManagers\ProductsRelationManager;
 use App\Filament\Resources\SellerResource\RelationManagers\SellerPackagesRelationManager;
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\User;
 use App\Services\AdminSellerService;
 use App\Services\SellerSettingsService;
@@ -82,9 +83,23 @@ class SellerResource extends Resource
                             ->label('Телефон')
                             ->tel()
                             ->maxLength(50),
-                        Forms\Components\TextInput::make('town')
-                            ->label('Город')
-                            ->maxLength(255),
+                        Forms\Components\Select::make('settlement_id')
+                            ->label('Населённый пункт')
+                            ->options(fn (): array => Settlement::query()
+                                ->active()
+                                ->ordered()
+                                ->with('region')
+                                ->get()
+                                ->groupBy(fn (Settlement $settlement): string => $settlement->region->name)
+                                ->map(fn ($settlements): array => $settlements
+                                    ->mapWithKeys(fn (Settlement $settlement): array => [
+                                        $settlement->id => "{$settlement->name} ({$settlement->type})",
+                                    ])
+                                    ->all())
+                                ->all())
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Forms\Components\TextInput::make('sellerplace')
                             ->label('Район / торговое место')
                             ->maxLength(255),
@@ -141,9 +156,11 @@ class SellerResource extends Resource
                     ->label('Alias')
                     ->searchable()
                     ->toggleable(),
-                Tables\Columns\TextColumn::make('town')
-                    ->label('Город')
+                Tables\Columns\TextColumn::make('settlement.name')
+                    ->label('Населённый пункт')
+                    ->description(fn (Seller $record): ?string => $record->settlement?->region?->name)
                     ->placeholder('—')
+                    ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('active_products_count')
                     ->label('Активные товары')

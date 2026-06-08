@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Seller;
+use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -38,7 +39,7 @@ class BackendSellerControllerTest extends TestCase
         $response = $this->actingAs($user)->put(route('account.store.update', $seller), [
             'name' => 'Updated Backend Shop',
             'phone' => '+123456789',
-            'town' => 'Updated City',
+            'settlement_id' => Settlement::factory()->create(['name' => 'Updated City'])->id,
             'sellerplace' => 'Updated Market',
             'address' => 'Updated Address',
             'description' => 'Updated Description',
@@ -83,6 +84,7 @@ class BackendSellerControllerTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('account.store.update', $seller), [
             'name' => $seller->name,
+            'settlement_id' => $seller->settlement_id,
             'logo' => UploadedFile::fake()->image('logo.png', 800, 800),
         ]);
 
@@ -102,6 +104,7 @@ class BackendSellerControllerTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('account.store.update', $seller), [
             'name' => 'Blocked Update',
+            'settlement_id' => $seller->settlement_id,
         ]);
 
         $response->assertForbidden();

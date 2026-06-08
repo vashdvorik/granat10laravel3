@@ -27,7 +27,7 @@
             <a href="#" class="image-bd effect_img2"><img src="img/shop-banner.jpg" alt="" class="img-reponsive"></a> 
         </div>
         <div class="pd-top">
-            <h1 class="title">Акции сейчас</h1>
+            <h1 class="title">Акции{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' в ПМР' }}</h1>
             <div class="show-element"><span>Показано {{ $products->firstItem() }}–{{ $products->lastItem() }} из {{ $products->total() }} товаров</span></div>
         </div>
         <div class="product-collection-grid product-grid spc1">
@@ -1501,7 +1501,7 @@
             @if($products->currentPage() < $products->lastPage())
                 <div class="load-more-wrapper hidden-md hidden-lg text-center">
                     <button class="btn btn-load-more" 
-                            data-url="{{ route('catalog.loadMoreSale') }}"
+                            data-url="{{ $regionalUrl->route('catalog.loadMoreSale') }}"
                             data-current-page="{{ $products->currentPage() }}"
                             data-last-page="{{ $products->lastPage() }}">
                         <i class="ion-load-c"></i> Загрузить еще

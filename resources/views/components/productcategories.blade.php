@@ -9,7 +9,7 @@
                     $discount = round(100 - ($product->lowprice / $product->price * 100));
                 }
             @endphp
-            <a href="{{ route('product.show', $product->alias) }}">
+            <a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">
                 @if($mainImage && !empty($mainImage->path))
                     <img src="{{ Storage::url($mainImage->path) }}"
                         alt="{{ $mainImage->alt ?? $product->name }}"
@@ -43,8 +43,8 @@
                     <span class="star star-1"></span>
                     <div class="number-rating">( 896 reviews )</div>
                 </div>
-                <p class="product-cate"><a href="{{ route('seller', $product->seller->alias) }}">{{ $product->seller->name }}</a></p>
-                <h3 class="product-title"><a href="{{ route('product.show', $product->alias) }}">{{ $product->name }}</a></h3>
+                <p class="product-cate"><a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">{{ $product->seller->name }}</a></p>
+                <h3 class="product-title"><a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">{{ $product->name }}</a></h3>
                 <div class="product-bottom">
                     <div class="product-price">
                         @if(!is_null($product->lowprice))
@@ -64,7 +64,7 @@
                     <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                         <span class="icon-bg icon-wishlist"></span>
                     </a>
-                    <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="Перейти к продавцу">
+                    <a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}" class="btn-icon" title="Перейти к продавцу">
                         <span class="icon-bg icon-shop"></span>
                     </a>
                 </div>
@@ -78,7 +78,7 @@
                 <a href="#" class="btn-icon wishlist-btn" data-product-id="{{ $product->id }}">
                     <span class="icon-bg icon-wishlist"></span>
                 </a>
-                <a href="{{ route('seller', $product->seller->alias) }}" class="btn-icon" title="Перейти  к продавцу">
+                <a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}" class="btn-icon" title="Перейти  к продавцу">
                     <span class="icon-bg icon-shop"></span>
                 </a>
             </div>

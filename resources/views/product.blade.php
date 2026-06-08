@@ -6,12 +6,12 @@
         <div class="single-product-detail product-bundle product-aff">
         <ul class="breadcrumb">
             <li><a href="{{ route('home') }}">Главная</a></li>
-            <li class="active"><a href="{{ route('catalog.index') }}">Каталог</a></li>
+            <li class="active"><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог</a></li>
 
             <!--    <li class="active">{{ $category->name }}</li> -->
             @foreach($breadcrumbs as $crumb)  
             <li>
-                <a href="{{ route('catalog.show', $crumb->alias) }}">{{ $crumb->name }}</a>
+                <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}">{{ $crumb->name }}</a>
             </li> 
             @endforeach
             <li class="active">{{ $product->name }}</li>
@@ -90,7 +90,7 @@
                             <span class="star star-1"></span>
                             <div class="number-rating">( 896 reviews )</div>
                         </div>
-                        <h3 class="product-title"><a href="{{ route('product.show', $product->alias) }}">{{ $product->name }}</a></h3>
+                        <h3 class="product-title"><a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">{{ $product->name }}</a></h3>
                         <div class="product-price">
                         <!--    <span>$1,215.00</span> -->
                             @if(!is_null($product->lowprice))

@@ -43,7 +43,7 @@
             <i class="ion-ios-heart-outline favorites-empty-icon"></i>
             <p class="favorites-empty-text">Вы ещё не добавили ни одного товара в избранное.</p>
             <p style="color:#aaa;">Нажмите <i class="fa fa-heart" style="color:#e74c3c;"></i> на карточке товара, чтобы сохранить его здесь.</p>
-            <a href="{{ route('catalog.index') }}" class="btn btn-primary" style="margin-top: 20px; padding: 10px 30px; border-radius: 25px;">
+            <a href="{{ $regionalUrl->route('catalog.index') }}" class="btn btn-primary" style="margin-top: 20px; padding: 10px 30px; border-radius: 25px;">
                 Перейти в каталог
             </a>
         </div>

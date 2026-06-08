@@ -24,12 +24,12 @@
                         @if($products->total() > 0)
                             Найдено {{ $products->total() }} {{ trans_choice('товар|товара|товаров', $products->total()) }}
                             @if($selectedCategory)
-                                &nbsp;·&nbsp; <a href="{{ route('search', ['q' => $q]) }}">Искать во всех категориях</a>
+                                &nbsp;·&nbsp; <a href="{{ $regionalUrl->route('search', ['q' => $q]) }}">Искать во всех категориях</a>
                             @endif
                         @else
                             Ничего не найдено
                             @if($selectedCategory)
-                                &nbsp;·&nbsp; <a href="{{ route('search', ['q' => $q]) }}">Искать во всех категориях</a>
+                                &nbsp;·&nbsp; <a href="{{ $regionalUrl->route('search', ['q' => $q]) }}">Искать во всех категориях</a>
                             @endif
                         @endif
                     </span>
@@ -59,7 +59,7 @@
                 @if($products->currentPage() < $products->lastPage())
                     <div class="load-more-wrapper hidden-md hidden-lg text-center">
                         <button class="btn btn-load-more"
-                                data-url="{{ route('search.loadMore') }}?q={{ urlencode($q) }}&category={{ urlencode($categoryAlias) }}"
+                                data-url="{{ $regionalUrl->route('search.loadMore', ['q' => $q, 'category' => $categoryAlias]) }}"
                                 data-current-page="{{ $products->currentPage() }}"
                                 data-last-page="{{ $products->lastPage() }}"
                                 data-container="#search-products-grid">
@@ -73,7 +73,7 @@
             <div class="search-empty text-center">
                 <i class="ion-ios-search-strong search-empty-icon"></i>
                 <p class="search-empty-text">По запросу <strong>«{{ $q }}»</strong> ничего не найдено.</p>
-                <p>Попробуйте изменить запрос или перейдите в <a href="{{ route('catalog.index') }}">каталог</a>.</p>
+                <p>Попробуйте изменить запрос или перейдите в <a href="{{ $regionalUrl->route('catalog.index') }}">каталог</a>.</p>
             </div>
         @endif
     </div>

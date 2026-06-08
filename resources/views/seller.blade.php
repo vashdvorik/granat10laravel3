@@ -33,7 +33,7 @@
     <div class="blog spc1">
         <ul class="breadcrumb">
         <li><a href="{{ route('home') }}">Главная</a></li>
-        <li><a href="{{ route('shops') }}">Магазины</a></li>
+        <li><a href="{{ $regionalUrl->route('shops') }}">Магазины</a></li>
         <li class="active">{{ $seller->name ?? 'Название продавца' }}</li>
         </ul>
         <div class="blog-single-post">
@@ -178,7 +178,7 @@
                     @if($products->currentPage() < $products->lastPage())
                         <div class="load-more-wrapper hidden-md hidden-lg text-center">
                             <button class="btn btn-load-more"
-                                    data-url="{{ route('seller.loadMore', $seller->alias) }}"
+                                    data-url="{{ $regionalUrl->route('seller.loadMore', ['alias' => $seller->alias]) }}"
                                     data-current-page="{{ $products->currentPage() }}"
                                     data-last-page="{{ $products->lastPage() }}"
                                     data-container="#seller-products-grid">

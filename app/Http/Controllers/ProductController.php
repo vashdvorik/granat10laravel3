@@ -14,7 +14,8 @@ class ProductController extends Controller
 {
        public function show($alias)
     {
-        $product = Product::visible()  
+        $product = Product::visible()
+        ->forRegionalContext()
         ->with(['images', 'seller', 'category'])
         ->where('alias', $alias)
         ->firstOrFail();

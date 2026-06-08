@@ -54,7 +54,13 @@ class CabinetController extends Controller
         if ($user->seller) {
             return redirect()->route('account.index')->with('error', 'Магазин уже создан');
         }
-        return view('backend.cabinet.create_shop');
+        $regions = \App\Models\Region::query()
+            ->active()
+            ->ordered()
+            ->with(['settlements' => fn ($query) => $query->active()->ordered()])
+            ->get();
+
+        return view('backend.cabinet.create_shop', compact('regions'));
     }
     /* 
     Сохраняет новый магазин в базе данных

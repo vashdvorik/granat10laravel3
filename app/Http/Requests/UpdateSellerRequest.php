@@ -21,7 +21,11 @@ class UpdateSellerRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255', Rule::unique('sellers', 'name')->ignore($sellerId)],
             'phone' => ['nullable', 'string', 'max:50'],
-            'town' => ['nullable', 'string', 'max:255'],
+            'settlement_id' => [
+                'required',
+                'integer',
+                Rule::exists('settlements', 'id')->where('is_active', true),
+            ],
             'sellerplace' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],

@@ -6,6 +6,7 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -101,7 +102,7 @@ class CabinetControllerTest extends TestCase
         $response = $this->actingAs($user)->post(route('account.store.store'), [
             'name'        => 'Мой тестовый магазин Уникальный 99Z',
             'phone'       => '+7-999-999-99-99',
-            'town'        => 'Москва',
+            'settlement_id' => Settlement::factory()->create(['name' => 'Москва'])->id,
             'sellerplace' => 'Центральный рынок',
             'address'     => 'ул. Тестовая, д. 1',
             'description' => 'Описание нашего магазина',
@@ -151,6 +152,7 @@ class CabinetControllerTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('account.store.store'), [
             'name' => 'Второй Магазин Попытка',
+            'settlement_id' => $seller->settlement_id,
         ]);
 
         $response->assertRedirect(route('account.index'));
@@ -167,6 +169,7 @@ class CabinetControllerTest extends TestCase
 
         $this->actingAs($user)->post(route('account.store.store'), [
             'name' => 'Мой Тест Магазин Алиас 007',
+            'settlement_id' => Settlement::factory()->create()->id,
         ]);
 
         $seller = Seller::where('user_id', $user->id)->first();

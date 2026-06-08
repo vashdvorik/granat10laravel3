@@ -10,17 +10,17 @@
             <div class="col-lg-3 widget-verticalmenu">
                 <div class="vertical-wrapper">
                     <ul class="vertical-group">
-                        <li class="vertical-item level1 mega-parent"><a href="{{ route('shops') }}">Магазины рядом </a></li>
-                        <li class="vertical-item level1 mega-parent"><a href="{{ route('catalog.sale') }}">Распродажа <span class="h-ribbon e-red mg-l10">SALE</span></a></li>
+                        <li class="vertical-item level1 mega-parent"><a href="{{ $regionalUrl->route('shops') }}">Магазины рядом </a></li>
+                        <li class="vertical-item level1 mega-parent"><a href="{{ $regionalUrl->route('catalog.sale') }}">Распродажа <span class="h-ribbon e-red mg-l10">SALE</span></a></li>
                         
                         <!-- Статичные категории (замените alias на свои) -->
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'apparel') }}">Одежда и обувь</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'electronics') }}">Электроника</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'home-and-interior') }}">Дом и интерьер</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'construction-repair') }}">Строительство</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'automotive-goods') }}">Авто и мото</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'beauty-and-health') }}">Красота и здоровье</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ route('catalog.show', 'kids-products-main') }}">Товары для детей</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'apparel']) }}">Одежда и обувь</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'electronics']) }}">Электроника</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'home-and-interior']) }}">Дом и интерьер</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'construction-repair']) }}">Строительство</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'automotive-goods']) }}">Авто и мото</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'beauty-and-health']) }}">Красота и здоровье</a></li>
+                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'kids-products-main']) }}">Товары для детей</a></li>
                         
                     <!--
                         <li class="vertical-item level1 vertical-drop"><a href="#">Одежда и обувь</a>
@@ -241,7 +241,7 @@
                             </div>
                         </li>
                     -->
-                        <li class="vertical-item level1 vertical-drop mega-parent"><a href="{{ route('catalog.index') }}">Все категории</a>
+                        <li class="vertical-item level1 vertical-drop mega-parent"><a href="{{ $regionalUrl->route('catalog.index') }}">Все категории</a>
                         </li>
                     </ul>
                 </div>

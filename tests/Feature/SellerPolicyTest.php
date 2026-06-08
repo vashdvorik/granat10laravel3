@@ -62,6 +62,7 @@ class SellerPolicyTest extends TestCase
         $this->get(route('account.store.edit', $seller))->assertForbidden();
         $this->put(route('account.store.update', $seller), [
             'name' => 'Foreign Seller Update',
+            'settlement_id' => $seller->settlement_id,
         ])->assertForbidden();
     }
 

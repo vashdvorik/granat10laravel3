@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Services\CatalogCacheService;
+use App\Services\RegionalContext;
+use App\Services\RegionalUrlService;
+use App\Services\SeoService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -17,7 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(RegionalContext::class);
+        $this->app->scoped(RegionalUrlService::class);
     }
 
     /**
@@ -29,6 +33,37 @@ class AppServiceProvider extends ServiceProvider
 
         $this->composeMenuCategories();
         $this->composeBackendUser();
+        $this->composeRegionalContext();
+        $this->composeSeo();
+    }
+
+    private function composeSeo(): void
+    {
+        View::composer('main_layots', function ($view) {
+            $seo = app(SeoService::class);
+            $request = request();
+
+            $view
+                ->with('canonicalUrl', $seo->canonical($request))
+                ->with('robotsMeta', $seo->robots($request))
+                ->with('seoTitle', $seo->title($request))
+                ->with('seoDescription', $seo->description($request));
+        });
+    }
+
+    private function composeRegionalContext(): void
+    {
+        View::composer('main_layots', function ($view) {
+            $context = app(RegionalContext::class);
+
+            $view
+                ->with('regionalContext', $context)
+                ->with('regionalUrl', app(RegionalUrlService::class))
+                ->with(
+                    'regionalRegions',
+                    config('regionality.enabled') ? $context->availableRegions() : collect(),
+                );
+        });
     }
 
     private function composeMenuCategories(): void
@@ -48,6 +83,14 @@ class AppServiceProvider extends ServiceProvider
 
             if (!array_key_exists('menuRootCategories', $data)) {
                 $view->with('menuRootCategories', $menuCategories);
+            }
+
+            if (!array_key_exists('regionalUrl', $data)) {
+                $view->with('regionalUrl', app(RegionalUrlService::class));
+            }
+
+            if (!array_key_exists('regionalContext', $data)) {
+                $view->with('regionalContext', app(RegionalContext::class));
             }
         });
     }

@@ -7,6 +7,8 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\CabinetController;
+use App\Http\Controllers\RegionalSelectionController;
+use App\Http\Controllers\SitemapController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,6 +26,8 @@ use App\Http\Controllers\CabinetController;
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/home', [HomeController::class, 'home']);
+Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
 Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
@@ -49,6 +53,36 @@ Route::get('/shops', [SellerController::class, 'shops'])->name('shops');
 Route::get('/shops/load-more', [SellerController::class, 'loadMoreShops'])->name('shops.loadMore');
 Route::get('/shops/{alias}', [SellerController::class, 'seller'])->name('seller');
 Route::get('/shops/{alias}/load-more', [SellerController::class, 'loadMoreSellerProducts'])->name('seller.loadMore');
+
+if (config('regionality.urls_enabled')) {
+    $reservedLocations = implode('|', array_map(
+        static fn (string $slug): string => preg_quote($slug, '/'),
+        config('regionality.reserved_slugs', [])
+    ));
+
+    Route::prefix('{location}')
+        ->where(['location' => '^(?!('.$reservedLocations.')$)[a-z0-9-]+$'])
+        ->name('regional.')
+        ->group(function () {
+            Route::get('/', [HomeController::class, 'home'])->name('home');
+            Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
+            Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
+            Route::get('/catalog/{alias}/load-more', [CatalogController::class, 'loadMoreCategory'])->name('catalog.loadMoreCategory');
+            Route::get('/catalog/{alias}', [CatalogController::class, 'show'])->name('catalog.show');
+            Route::get('/sale', [CatalogController::class, 'sale'])->name('catalog.sale');
+            Route::get('/sale/load-more', [CatalogController::class, 'loadMoreSale'])->name('catalog.loadMoreSale');
+            Route::get('/search', [CatalogController::class, 'search'])->name('search');
+            Route::get('/search/load-more', [CatalogController::class, 'loadMoreSearch'])->name('search.loadMore');
+            Route::get('/favorites', [App\Http\Controllers\FavoritesController::class, 'index'])->name('favorites');
+            Route::get('/favorites/products', [App\Http\Controllers\FavoritesController::class, 'getProducts'])->name('favorites.products');
+            Route::get('/favorites/load-more', [App\Http\Controllers\FavoritesController::class, 'loadMoreFavorites'])->name('favorites.loadMore');
+            Route::get('/product/{alias}', [ProductController::class, 'show'])->name('product.show');
+            Route::get('/shops', [SellerController::class, 'shops'])->name('shops');
+            Route::get('/shops/load-more', [SellerController::class, 'loadMoreShops'])->name('shops.loadMore');
+            Route::get('/shops/{alias}', [SellerController::class, 'seller'])->name('seller');
+            Route::get('/shops/{alias}/load-more', [SellerController::class, 'loadMoreSellerProducts'])->name('seller.loadMore');
+        });
+}
 // роутs для обычных страниц
 Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
 Route::get('help', [PageController::class, 'help'])->name('help');

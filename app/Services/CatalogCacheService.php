@@ -7,8 +7,11 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Models\Settlement;
 use Closure;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class CatalogCacheService
 {
@@ -38,27 +41,31 @@ class CatalogCacheService
 
     public function rememberMenuCategories(Closure $callback): mixed
     {
-        return Cache::remember(self::MENU_CATEGORIES_KEY, now()->addHours(24), $callback);
+        return Cache::remember($this->regionalKey(self::MENU_CATEGORIES_KEY), now()->addHours(24), $callback);
     }
 
     public function rememberProductPriceRange(Closure $callback): mixed
     {
-        return Cache::remember(self::PRODUCT_PRICE_RANGE_KEY, now()->addHour(), $callback);
+        return Cache::remember($this->regionalKey(self::PRODUCT_PRICE_RANGE_KEY), now()->addHour(), $callback);
     }
 
     public function rememberSellers(Closure $callback): mixed
     {
-        return Cache::remember(self::SELLERS_LIST_KEY, now()->addMinutes(30), $callback);
+        return Cache::remember($this->regionalKey(self::SELLERS_LIST_KEY), now()->addMinutes(30), $callback);
     }
 
     public function rememberSellerByAlias(string $alias, Closure $callback): mixed
     {
-        return Cache::remember($this->sellerByAliasKey($alias), now()->addHour(), $callback);
+        return Cache::remember($this->regionalKey($this->sellerByAliasKey($alias)), now()->addHour(), $callback);
     }
 
     public function rememberCategoryProductsCount(int $categoryId, Closure $callback): mixed
     {
-        return Cache::remember($this->categoryProductsCountKey($categoryId), now()->addMinutes(10), $callback);
+        return Cache::remember(
+            $this->regionalKey($this->categoryProductsCountKey($categoryId)),
+            now()->addMinutes(10),
+            $callback
+        );
     }
 
     public function forgetCategories(): void
@@ -70,27 +77,27 @@ class CatalogCacheService
 
     public function forgetMenuCategories(): void
     {
-        Cache::forget(self::MENU_CATEGORIES_KEY);
+        $this->forgetRegionalVariants(self::MENU_CATEGORIES_KEY);
     }
 
     public function forgetProductPriceRange(): void
     {
-        Cache::forget(self::PRODUCT_PRICE_RANGE_KEY);
+        $this->forgetRegionalVariants(self::PRODUCT_PRICE_RANGE_KEY);
     }
 
     public function forgetSellers(): void
     {
-        Cache::forget(self::SELLERS_LIST_KEY);
+        $this->forgetRegionalVariants(self::SELLERS_LIST_KEY);
     }
 
     public function forgetSellerByAlias(string $alias): void
     {
-        Cache::forget($this->sellerByAliasKey($alias));
+        $this->forgetRegionalVariants($this->sellerByAliasKey($alias));
     }
 
     public function forgetCategoryProductsCount(int $categoryId): void
     {
-        Cache::forget($this->categoryProductsCountKey($categoryId));
+        $this->forgetRegionalVariants($this->categoryProductsCountKey($categoryId));
     }
 
     public function forgetProductCatalog(?Category $category = null, ?int $oldCategoryId = null): void
@@ -188,6 +195,30 @@ class CatalogCacheService
     public function categoryProductsCountKey(int $categoryId): string
     {
         return self::CATEGORY_PRODUCTS_COUNT_PREFIX.$categoryId;
+    }
+
+    public function regionalKey(string $baseKey): string
+    {
+        $settlementId = app(RegionalContext::class)->settlement()?->id;
+
+        return $settlementId ? $baseKey.':settlement:'.$settlementId : $baseKey;
+    }
+
+    private function forgetRegionalVariants(string $baseKey): void
+    {
+        Cache::forget($baseKey);
+
+        try {
+            if (! Schema::hasTable('settlements')) {
+                return;
+            }
+
+            Settlement::query()->pluck('id')->each(
+                fn (int $settlementId) => Cache::forget($baseKey.':settlement:'.$settlementId)
+            );
+        } catch (Throwable) {
+            return;
+        }
     }
 
     private function forgetCategoryAndAncestors(Category $category): void

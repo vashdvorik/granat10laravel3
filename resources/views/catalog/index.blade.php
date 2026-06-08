@@ -35,7 +35,7 @@
                 <ul class="wiget-content v2">
                     @foreach ($categories as $subcategory)
                      <li class="{{ $subcategory->children->isNotEmpty() ? 'active' : '' }}">
-                        <a href="{{ route('catalog.show', $subcategory->alias) }}">
+                        <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias]) }}">
                         {{ $subcategory->name }}
                         <span class="number">
                             ({{ $categoryProductsCounts[$subcategory->id] ?? 0 }})
@@ -214,7 +214,7 @@
                    <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/shop-banner.jpg') }}" alt="" class="img-reponsive"></a> 
                 </div>
                 <div class="pd-top">
-                    <h1 class="title">Каталог</h1>
+                    <h1 class="title">Каталог товаров{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : '' }}</h1>
                     <div class="show-element">
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>
@@ -268,7 +268,7 @@
                     <div class="mobile-categories-grid">
                         @foreach ($categories as $subcategory)
                             <div class="mobile-category-card">
-                                <a href="{{ route('catalog.show', $subcategory->alias ?? $subcategory->id) }}">
+                                <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">
                                     <div class="mobile-category-image" 
                                         style="background: {{ $subcategory->bg_color ?? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }};">
                                         @if($subcategory->icon && str_starts_with($subcategory->icon, 'fa-'))
@@ -293,6 +293,25 @@
                 </div>
                 <!-- / МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ -->
 
+                <div class="pd-middle">
+                    <div class="pd-sort">
+                        @include('components.catalog-region-selector')
+                        <div class="filter-show">
+                            <div class="dropdown">
+                                <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    Сортировать по
+                                    <span class="dropdown-label">12</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">12</a></li>
+                                    <li><a href="#">24</a></li>
+                                    <li><a href="#">36</a></li>
+                                    <li><a href="#">48</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="product-collection-grid product-grid">
                     <div class="row">
                         {{-- КАРТОЧКА ТОВАРА --}} 
@@ -316,7 +335,7 @@
                         <div class="load-more-wrapper hidden-md hidden-lg text-center">
                             @if($products->currentPage() < $products->lastPage())
                                 <button class="btn btn-load-more" 
-                                        data-url="{{ route('catalog.loadMore') }}"
+                                        data-url="{{ $regionalUrl->route('catalog.loadMore') }}"
                                         data-current-page="{{ $products->currentPage() }}"
                                         data-last-page="{{ $products->lastPage() }}"
                                         data-seller="{{ request('seller') }}">

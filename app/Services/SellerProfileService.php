@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Seller;
+use App\Models\Settlement;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ class SellerProfileService
         $data = Arr::only($data, [
             'name',
             'phone',
-            'town',
+            'settlement_id',
             'sellerplace',
             'address',
             'description',
@@ -26,6 +27,10 @@ class SellerProfileService
             'instagram',
             'viber',
         ]);
+
+        if (isset($data['settlement_id'])) {
+            $data['town'] = Settlement::query()->findOrFail($data['settlement_id'])->name;
+        }
 
         if ($logoFile) {
             if ($seller->photo) {

@@ -17,8 +17,9 @@ class SellersTableSeeder extends Seeder
 
         $seller1UserId = DB::table('users')->where('email', 'seller1@example.com')->value('id');
         $seller2UserId = DB::table('users')->where('email', 'seller2@example.com')->value('id');
+        $tiraspolId = DB::table('settlements')->where('slug', 'tiraspol')->value('id');
 
-        if (!$seller1UserId || !$seller2UserId) {
+        if (!$seller1UserId || !$seller2UserId || !$tiraspolId) {
             return;
         }
 
@@ -28,6 +29,7 @@ class SellersTableSeeder extends Seeder
                 'name' => '"Тестовый магазин Мода"',
                 'phone' => '(779)93-603',
                 'town' => 'Тирасполь',
+                'settlement_id' => $tiraspolId,
                 'address' => 'ул. Примерная, 1',
                 'description' => '"Лучший магазин одежды для всей семьи! У нас вы найдете стильные и качественные вещи на любой сезон - от повседневных образов до нарядных луков. Широкий размерный ряд, доступные цены и постоянные новинки. Удобная примерка, быстрая доставка и выгодные акции. Создавайте идеальные образы с нами!" ',
                 'link' => 'https://moda.ru',
@@ -47,6 +49,7 @@ class SellersTableSeeder extends Seeder
                 'name' => '"Тестовый магазин Техника"',
                 'phone' => '(779)93-604',
                 'town' => 'Тирасполь',
+                'settlement_id' => $tiraspolId,
                 'address' => 'ул. Примерная, 2',
                 'description' => 'Магазин бытовой техники и электроники.',
                 'link' => null,
