@@ -178,6 +178,17 @@ class SellerResource extends Resource
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
+            ->filters([
+                Tables\Filters\TernaryFilter::make('without_settlement')
+                    ->label('Населённый пункт')
+                    ->placeholder('Все продавцы')
+                    ->trueLabel('Без населённого пункта')
+                    ->falseLabel('С населённым пунктом')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNull('settlement_id'),
+                        false: fn (Builder $query): Builder => $query->whereNotNull('settlement_id'),
+                    ),
+            ])
             ->actions([
                 Tables\Actions\Action::make('publicPage')
                     ->label('Открыть магазин')

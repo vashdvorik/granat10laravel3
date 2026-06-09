@@ -92,9 +92,90 @@ class RegionalLinksAndSitemapTest extends TestCase
                 'location' => $settlement->slug,
                 'alias' => $product->alias,
             ]), false)
+            ->assertSee(route('catalog.show', ['alias' => $category->alias]), false)
+            ->assertSee(route('regional.catalog.show', [
+                'location' => $settlement->slug,
+                'alias' => $category->alias,
+            ]), false)
+            ->assertDontSee(route('regional.catalog.show', [
+                'location' => $otherSettlement->slug,
+                'alias' => $category->alias,
+            ]), false)
             ->assertDontSee(route('regional.seller', [
                 'location' => $otherSettlement->slug,
                 'alias' => $seller->alias,
             ]), false);
+    }
+
+    public function test_regional_entity_pages_use_real_names_in_seo(): void
+    {
+        $settlement = Settlement::factory()->create([
+            'slug' => 'seo-city',
+            'name' => 'SEO-город',
+        ]);
+        $seller = $this->createSellerWithPackage($settlement, 'seo-shop');
+        $category = Category::factory()->create([
+            'name' => 'Ноутбуки',
+            'alias' => 'laptops',
+        ]);
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'name' => 'Ноутбук Pro',
+            'alias' => 'laptop-pro',
+            'is_active' => true,
+        ]);
+
+        $this->get(route('regional.catalog.show', [
+            'location' => $settlement->slug,
+            'alias' => $category->alias,
+        ]))
+            ->assertOk()
+            ->assertSee('Ноутбуки — товары в SEO-город | ГРАНАТ');
+
+        $this->get(route('regional.product.show', [
+            'location' => $settlement->slug,
+            'alias' => $product->alias,
+        ]))
+            ->assertOk()
+            ->assertSee('Ноутбук Pro в SEO-город | ГРАНАТ')
+            ->assertSee('<h1 class="product-title">', false);
+
+        $this->get(route('regional.seller', [
+            'location' => $settlement->slug,
+            'alias' => $seller->alias,
+        ]))
+            ->assertOk()
+            ->assertSee($seller->name.' в SEO-город | ГРАНАТ')
+            ->assertSee('<h1 class="blog-heading text-center">', false);
+    }
+
+    public function test_regional_home_uses_settlement_manual_seo_fields(): void
+    {
+        $settlement = Settlement::factory()->create([
+            'slug' => 'manual-seo-city',
+            'meta_title' => 'Ручной SEO Title',
+            'meta_description' => 'Ручное SEO-описание города.',
+        ]);
+
+        $this->get(route('regional.home', ['location' => $settlement->slug]))
+            ->assertOk()
+            ->assertSee('Ручной SEO Title')
+            ->assertSee('Ручное SEO-описание города.');
+    }
+
+    private function createSellerWithPackage(Settlement $settlement, string $alias): Seller
+    {
+        $seller = Seller::factory()->for($settlement)->create(['alias' => $alias]);
+        $package = Package::factory()->withLimits(50, 10)->create();
+
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+            'end_date' => null,
+        ]);
+
+        return $seller;
     }
 }

@@ -90,7 +90,7 @@
                             <span class="star star-1"></span>
                             <div class="number-rating">( 896 reviews )</div>
                         </div>
-                        <h3 class="product-title"><a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">{{ $product->name }}</a></h3>
+                        <h1 class="product-title"><a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">{{ $product->name }}</a></h1>
                         <div class="product-price">
                         <!--    <span>$1,215.00</span> -->
                             @if(!is_null($product->lowprice))

@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Models\Settlement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -92,5 +93,35 @@ class CacheObserverTest extends TestCase
         $this->assertFalse(Cache::has('product_price_range'));
         $this->assertFalse(Cache::has('sellers_list'));
         $this->assertNotSame('stale-menu', Cache::get('menu_categories'));
+    }
+
+    public function test_seller_settlement_change_clears_regional_visibility_caches(): void
+    {
+        $oldSettlement = Settlement::factory()->create();
+        $newSettlement = Settlement::factory()->create();
+        $category = Category::factory()->create();
+        $seller = Seller::factory()->for($oldSettlement)->create();
+
+        Product::factory()->create([
+            'category_id' => $category->id,
+            'seller_id' => $seller->id,
+            'is_active' => true,
+        ]);
+
+        foreach ([$oldSettlement, $newSettlement] as $settlement) {
+            Cache::put('product_price_range:settlement:'.$settlement->id, ['min' => 10, 'max' => 20]);
+            Cache::put('menu_categories:settlement:'.$settlement->id, 'stale-menu');
+            Cache::put('category_products_count:'.$category->id.':settlement:'.$settlement->id, 1);
+        }
+
+        $seller->update(['settlement_id' => $newSettlement->id]);
+
+        foreach ([$oldSettlement, $newSettlement] as $settlement) {
+            $this->assertFalse(Cache::has('product_price_range:settlement:'.$settlement->id));
+            $this->assertFalse(Cache::has('menu_categories:settlement:'.$settlement->id));
+            $this->assertFalse(Cache::has(
+                'category_products_count:'.$category->id.':settlement:'.$settlement->id
+            ));
+        }
     }
 }

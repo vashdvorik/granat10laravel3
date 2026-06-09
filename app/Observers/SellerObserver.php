@@ -18,7 +18,10 @@ class SellerObserver
 
     public function updated(Seller $seller): void
     {
-        $this->cache->forgetSellerRelated($seller);
+        $this->cache->forgetSellerRelated(
+            $seller,
+            visibilityChanged: $seller->wasChanged('settlement_id')
+        );
     }
 
     public function deleting(Seller $seller): void

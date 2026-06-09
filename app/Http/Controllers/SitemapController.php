@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\Settlement;
+use App\Services\RegionalContext;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 
 class SitemapController extends Controller
 {
@@ -18,12 +21,15 @@ class SitemapController extends Controller
             route('catalog.sale'),
         ]);
 
+        $this->appendCategoryUrls($urls);
+
         if (config('regionality.urls_enabled')) {
             Settlement::query()
                 ->active()
                 ->whereHas('region', fn ($query) => $query->where('is_active', true))
                 ->each(function (Settlement $settlement) use ($urls): void {
                     $parameters = ['location' => $settlement->slug];
+                    $context = $this->contextFor($settlement);
 
                     $urls->push(
                         route('regional.home', $parameters),
@@ -32,8 +38,10 @@ class SitemapController extends Controller
                         route('regional.catalog.sale', $parameters),
                     );
 
+                    $this->appendCategoryUrls($urls, $context, $settlement);
+
                     Seller::query()
-                        ->forRegionalContext($this->contextFor($settlement))
+                        ->forRegionalContext($context)
                         ->whereHas('products', fn ($query) => $query->visible())
                         ->pluck('alias')
                         ->each(fn (string $alias) => $urls->push(route(
@@ -43,7 +51,7 @@ class SitemapController extends Controller
 
                     Product::query()
                         ->visible()
-                        ->forRegionalContext($this->contextFor($settlement))
+                        ->forRegionalContext($context)
                         ->pluck('alias')
                         ->each(fn (string $alias) => $urls->push(route(
                             'regional.product.show',
@@ -57,9 +65,47 @@ class SitemapController extends Controller
             ->header('Content-Type', 'application/xml; charset=UTF-8');
     }
 
-    private function contextFor(Settlement $settlement): \App\Services\RegionalContext
+    private function appendCategoryUrls(
+        Collection $urls,
+        ?RegionalContext $context = null,
+        ?Settlement $settlement = null
+    ): void {
+        $categories = Category::query()
+            ->where('is_active', true)
+            ->defaultOrder()
+            ->get(['id', 'alias', '_lft', '_rgt']);
+
+        $usedCategoryIds = Product::query()
+            ->visible()
+            ->when($context, fn ($query) => $query->forRegionalContext($context))
+            ->distinct()
+            ->pluck('category_id');
+
+        if ($usedCategoryIds->isEmpty()) {
+            return;
+        }
+
+        $usedCategories = $categories->whereIn('id', $usedCategoryIds);
+        $availableCategories = $categories->filter(
+            fn (Category $category): bool => $usedCategories->contains(
+                fn (Category $used): bool => $category->_lft <= $used->_lft
+                    && $category->_rgt >= $used->_rgt
+            )
+        );
+
+        foreach ($availableCategories as $category) {
+            $urls->push($settlement
+                ? route('regional.catalog.show', [
+                    'location' => $settlement->slug,
+                    'alias' => $category->alias,
+                ])
+                : route('catalog.show', ['alias' => $category->alias]));
+        }
+    }
+
+    private function contextFor(Settlement $settlement): RegionalContext
     {
-        $context = new \App\Services\RegionalContext();
+        $context = new RegionalContext();
         $context->setSettlement($settlement);
 
         return $context;

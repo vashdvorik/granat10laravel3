@@ -135,6 +135,27 @@ class RegionalCatalogFilteringTest extends TestCase
         );
     }
 
+    public function test_regional_menu_hides_category_with_products_only_in_other_settlement(): void
+    {
+        $selectedCategory = Category::factory()->create([
+            'name' => 'Selected City Category',
+            'is_active' => true,
+        ]);
+        $otherCategory = Category::factory()->create([
+            'name' => 'Other City Category',
+            'is_active' => true,
+        ]);
+
+        $this->createProduct($this->selectedSeller, $selectedCategory, 'Selected Category Product');
+        $this->createProduct($this->otherSeller, $otherCategory, 'Other Category Product');
+
+        $this->withSelectedSettlement()
+            ->get(route('catalog.index'))
+            ->assertOk()
+            ->assertSee($selectedCategory->name)
+            ->assertDontSee($otherCategory->name);
+    }
+
     private function withSelectedSettlement(): static
     {
         return $this->withSession(['regional_settlement_id' => $this->selectedSettlement->id]);

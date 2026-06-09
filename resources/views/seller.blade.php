@@ -37,6 +37,7 @@
         <li class="active">{{ $seller->name ?? 'Название продавца' }}</li>
         </ul>
         <div class="blog-single-post">
+            <h1 class="blog-heading text-center">{{ $seller->name }}</h1>
             <div class="row">
                 <div class="blog-content col-md-12 col-xs-12">
                     <div class="blog-post-item v2">

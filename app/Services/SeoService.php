@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\Seller;
 use Illuminate\Http\Request;
 
 class SeoService
@@ -26,12 +29,21 @@ class SeoService
 
     public function title(Request $request): string
     {
-        $location = $this->context->settlement()?->name;
+        $settlement = $this->context->settlement();
+        $location = $settlement?->name;
         $suffix = ' | ГРАНАТ';
+
+        if ($request->routeIs('regional.home') && $settlement?->meta_title) {
+            return $settlement->meta_title;
+        }
 
         return match (true) {
             $request->routeIs('regional.catalog.show', 'catalog.show') =>
-                (($request->route('alias') ?: 'Каталог').' — товары'.($location ? ' в '.$location : '')).$suffix,
+                (($this->categoryName($request) ?: 'Каталог').' — товары'.($location ? ' в '.$location : '')).$suffix,
+            $request->routeIs('regional.product.show', 'product.show') =>
+                (($this->productName($request) ?: 'Товар').($location ? ' в '.$location : '')).$suffix,
+            $request->routeIs('regional.seller', 'seller') =>
+                (($this->sellerName($request) ?: 'Магазин').($location ? ' в '.$location : '')).$suffix,
             $request->routeIs('regional.catalog.index', 'catalog.index') =>
                 ('Каталог товаров'.($location ? ' в '.$location : ' в ПМР')).$suffix,
             $request->routeIs('regional.shops', 'shops') =>
@@ -46,9 +58,18 @@ class SeoService
 
     public function description(Request $request): string
     {
-        $location = $this->context->settlement()?->name ?? 'ПМР';
+        $settlement = $this->context->settlement();
+        $location = $settlement?->name ?? 'ПМР';
+
+        if ($request->routeIs('regional.home') && $settlement?->meta_description) {
+            return $settlement->meta_description;
+        }
 
         return match (true) {
+            $request->routeIs('regional.product.show', 'product.show') =>
+                ($this->productName($request) ?: 'Товар')." от местного продавца в {$location}: цена, описание и контакты магазина.",
+            $request->routeIs('regional.seller', 'seller') =>
+                ($this->sellerName($request) ?: 'Магазин')." в {$location}: товары, цены и контактная информация продавца.",
             $request->routeIs('regional.shops', 'shops') =>
                 "Каталог магазинов и местных продавцов в {$location}.",
             $request->routeIs('regional.catalog.sale', 'catalog.sale') =>
@@ -59,6 +80,27 @@ class SeoService
                 "Маркетплейс товаров и магазинов в {$location}.",
             default => '',
         };
+    }
+
+    private function categoryName(Request $request): ?string
+    {
+        return Category::query()
+            ->where('alias', $request->route('alias'))
+            ->value('name');
+    }
+
+    private function productName(Request $request): ?string
+    {
+        return Product::query()
+            ->where('alias', $request->route('alias'))
+            ->value('name');
+    }
+
+    private function sellerName(Request $request): ?string
+    {
+        return Seller::query()
+            ->where('alias', $request->route('alias'))
+            ->value('name');
     }
 
     private function isTechnicalPage(Request $request): bool

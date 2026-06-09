@@ -94,6 +94,7 @@ class Category extends Model
             $categoryIds = self::descendantsAndSelf($category->id)->pluck('id');
 
             return \App\Models\Product::visible()
+                ->forRegionalContext()
                 ->whereIn('category_id', $categoryIds)
                 ->exists();
         })->values();
