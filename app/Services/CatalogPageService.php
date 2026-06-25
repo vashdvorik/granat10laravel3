@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Application\Products\Queries\SearchProducts;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
@@ -88,31 +89,7 @@ class CatalogPageService
 
     public function getSearchProducts(string $q, ?string $categoryAlias = '', int $perPage = 12): LengthAwarePaginator
     {
-        $categoryAlias = $categoryAlias ?? '';
-
-        $category = $this->getSearchCategory($categoryAlias);
-        $categoryIds = $category ? $this->getCategoryIds($category) : [];
-
-        return Product::visible()
-            ->forRegionalContext()
-            ->when($q !== '', function (Builder $query) use ($q) {
-                $query->where(function (Builder $subQuery) use ($q) {
-                    $subQuery->where('name', 'LIKE', '%' . $q . '%')
-                        ->orWhere('desc', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features1', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features2', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features3', 'LIKE', '%' . $q . '%')
-                        ->orWhere('features4', 'LIKE', '%' . $q . '%');
-                });
-            })
-            ->when(!empty($categoryIds), function (Builder $query) use ($categoryIds) {
-                $query->whereIn('category_id', $categoryIds);
-            })
-            ->orderByDesc('is_vip')
-            ->orderByDesc('push_at')
-            ->with(['images', 'seller'])
-            ->paginate($perPage)
-            ->appends(['q' => $q, 'category' => $categoryAlias]);
+        return app(SearchProducts::class)->execute($q, $categoryAlias, $perPage);
     }
 
     public function findActiveCategoryByAlias(string $alias): Category
@@ -158,7 +135,7 @@ class CatalogPageService
     {
         return Product::visible()
             ->forRegionalContext()
-            ->when(!empty($categoryIds), function (Builder $query) use ($categoryIds) {
+            ->when(! empty($categoryIds), function (Builder $query) use ($categoryIds) {
                 $query->whereIn('category_id', $categoryIds);
             })
             ->when($filters['seller'] ?? null, function (Builder $query, string $sellerAlias) {
@@ -168,7 +145,7 @@ class CatalogPageService
                     $query->where('seller_id', $seller->id);
                 }
             })
-            ->when(!empty($filters['price']), function (Builder $query) use ($filters) {
+            ->when(! empty($filters['price']), function (Builder $query) use ($filters) {
                 $query->whereBetween('price', [$filters['price']['min'], $filters['price']['max']]);
             })
             ->orderByDesc('is_vip')
@@ -180,7 +157,7 @@ class CatalogPageService
     {
         $categories = Category::getCachedRootTree();
 
-        if (!config('categories.hide_empty', true)) {
+        if (! config('categories.hide_empty', true)) {
             return $categories;
         }
 
@@ -195,7 +172,7 @@ class CatalogPageService
             ? $category->children
             : ($category->parent ? $category->parent->children : collect());
 
-        if (!config('categories.hide_empty', true)) {
+        if (! config('categories.hide_empty', true)) {
             return $categories;
         }
 

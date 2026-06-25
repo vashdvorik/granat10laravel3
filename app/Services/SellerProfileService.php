@@ -8,6 +8,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Intervention\Image\Facades\Image;
 
 class SellerProfileService
@@ -26,7 +27,23 @@ class SellerProfileService
             'telegram',
             'instagram',
             'viber',
+            'can_order',
+            'delivery_enabled',
+            'delivery_terms',
         ]);
+
+        $data['can_order'] = (bool) ($data['can_order'] ?? false);
+        $data['delivery_enabled'] = (bool) ($data['delivery_enabled'] ?? false);
+
+        if ($data['can_order'] && ! ($seller->activePackage()?->package?->has_order_system ?? false)) {
+            throw ValidationException::withMessages([
+                'can_order' => 'Ваш текущий тариф не поддерживает приём заказов.',
+            ]);
+        }
+
+        if (! $data['can_order']) {
+            $data['delivery_enabled'] = false;
+        }
 
         if (isset($data['settlement_id'])) {
             $data['town'] = Settlement::query()->findOrFail($data['settlement_id'])->name;

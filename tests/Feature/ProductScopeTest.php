@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProductModerationStatus;
 use App\Models\Category;
 use App\Models\Package;
 use App\Models\Product;
@@ -155,6 +156,23 @@ class ProductScopeTest extends TestCase
         $found = Product::visible()->find($product->id);
 
         $this->assertNull($found, 'Активный товар с истёкшим пакетом не должен быть виден');
+    }
+
+    public function test_visible_scope_excludes_product_without_current_approval(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $pending = $this->createProduct($seller, [
+            'moderation_status' => ProductModerationStatus::Pending,
+            'moderated_version' => null,
+        ]);
+        $outdated = $this->createProduct($seller, [
+            'moderation_status' => ProductModerationStatus::Approved,
+            'moderation_version' => 2,
+            'moderated_version' => 1,
+        ]);
+
+        $this->assertNull(Product::visible()->find($pending->id));
+        $this->assertNull(Product::visible()->find($outdated->id));
     }
 
     public function test_visible_scope_count_matches_expectations(): void

@@ -29,6 +29,21 @@ class ProductPolicyTest extends TestCase
         }
     }
 
+    public function test_owner_actions_follow_product_state(): void
+    {
+        [$owner, $product] = $this->createOwnedProduct();
+        $product->forceFill([
+            'moderation_status' => \App\Enums\ProductModerationStatus::Pending,
+            'moderated_version' => null,
+            'is_active' => false,
+        ])->save();
+
+        $this->assertFalse(Gate::forUser($owner)->allows('activate', $product));
+        $this->assertFalse(Gate::forUser($owner)->allows('deactivate', $product));
+        $this->assertFalse(Gate::forUser($owner)->allows('pushUp', $product));
+        $this->assertFalse(Gate::forUser($owner)->allows('submitForModeration', $product));
+    }
+
     public function test_other_user_is_denied_all_product_abilities(): void
     {
         [, $product] = $this->createOwnedProduct();
@@ -92,10 +107,7 @@ class ProductPolicyTest extends TestCase
             'view',
             'update',
             'delete',
-            'activate',
-            'deactivate',
             'manageImages',
-            'pushUp',
         ];
     }
 

@@ -2,23 +2,27 @@
 
 namespace App\Models;
 
+use App\Enums\ProductModerationStatus;
 use App\Services\CatalogCacheService;
+use App\Services\ProductViewStateFactory;
 use App\Services\RegionalContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Laravel\Scout\Searchable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, Searchable;
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'price', 'lowprice', 'is_vip', 'is_active', 'category_id', 'seller_id'])
+            ->logOnly(['name', 'price', 'lowprice', 'is_vip', 'is_active', 'publication_requested', 'category_id', 'seller_id'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('products')
@@ -42,6 +46,9 @@ class Product extends Model
         'alias',
         'is_vip',
         'is_active',
+        'publication_requested',
+        'can_order',
+        'delivery_enabled',
         'category_id',
         'seller_id',
         'sale_started_at',
@@ -56,7 +63,54 @@ class Product extends Model
     protected $casts = [
         'push_at' => 'datetime',
         'sale_started_at' => 'datetime',
+        'moderation_status' => ProductModerationStatus::class,
+        'moderation_version' => 'integer',
+        'moderated_version' => 'integer',
+        'moderation_risk_score' => 'decimal:4',
+        'moderation_submitted_at' => 'datetime',
+        'moderated_at' => 'datetime',
+        'is_active' => 'boolean',
+        'publication_requested' => 'boolean',
+        'can_order' => 'boolean',
+        'delivery_enabled' => 'boolean',
     ];
+
+    public function searchableAs(): string
+    {
+        return 'products';
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        return $this->moderation_status === ProductModerationStatus::Approved
+            && $this->moderated_version === $this->moderation_version
+            && $this->is_active
+            && $this->seller?->activePackage() !== null;
+    }
+
+    public function toSearchableArray(): array
+    {
+        $this->loadMissing(['category', 'seller.settlement']);
+
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->desc,
+            'features' => array_values(array_filter([
+                $this->features1,
+                $this->features2,
+                $this->features3,
+                $this->features4,
+            ])),
+            'category_id' => $this->category_id,
+            'category_name' => $this->category?->name,
+            'seller_id' => $this->seller_id,
+            'seller_name' => $this->seller?->name,
+            'settlement_id' => $this->seller?->settlement_id,
+            'is_vip' => (int) $this->is_vip,
+            'push_at' => $this->push_at?->getTimestamp() ?? 0,
+        ];
+    }
 
     public function category()
     {
@@ -80,6 +134,43 @@ class Product extends Model
             ->orderBy('order');
     }
 
+    public function moderationRuns(): HasMany
+    {
+        return $this->hasMany(ProductModerationRun::class);
+    }
+
+    public function moderationActions(): HasMany
+    {
+        return $this->hasMany(ProductModerationAction::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function moderatedBy()
+    {
+        return $this->belongsTo(User::class, 'moderated_by_user_id');
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        if (
+            $this->moderation_status === ProductModerationStatus::Approved
+            && $this->moderated_version === $this->moderation_version
+        ) {
+            return $this->is_active ? 'Опубликован' : 'Снят с публикации';
+        }
+
+        return $this->moderation_status->label();
+    }
+
+    public function getViewStateAttribute(): \App\Data\ProductViewState
+    {
+        return app(ProductViewStateFactory::class)->make($this);
+    }
+
     /**
      * Scope: только товары от продавцов с активными пакетами
      */
@@ -100,8 +191,11 @@ class Product extends Model
      */
     public function scopeVisible($query)
     {
-        return $query->where('is_active', true)  // продавец сам активировал
-            ->fromActiveSellerPackage();         // и пакет активен
+        return $query
+            ->where('is_active', true)
+            ->where('moderation_status', ProductModerationStatus::Approved->value)
+            ->whereColumn('moderated_version', 'moderation_version')
+            ->fromActiveSellerPackage();
     }
 
     public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder

@@ -87,19 +87,22 @@
                                         </div>
                                     </div>
                                     <div class="form-group mb-25">
-                                        <div class="cityOption">
                                         <label for="sellerplace">
-                                            Район / торговое место
+                                            Район / ориентир
                                         </label>
-                                        <select class="js-example-basic-single js-states form-control" id="sellerplace" name="sellerplace">
-                                            <option value="Центр">Центр</option>
-                                            <option value="Балка">Балка</option>
-                                            <option value="Промзона">Промзона</option>
-                                            <option value="Бородинка">Бородинка</option>
-                                            <option value="Красные казармы">Красные казармы</option>
-                                            <option value="Западный">Западный</option>
-                                        </select>
-                                        </div>
+                                        <input
+                                            type="text"
+                                            class="form-control @error('sellerplace') is-invalid @enderror"
+                                            id="sellerplace"
+                                            name="sellerplace"
+                                            value="{{ old('sellerplace') }}"
+                                            maxlength="255"
+                                            placeholder="Например: центр, рынок, микрорайон"
+                                        >
+                                        <small class="form-text text-muted">
+                                            Необязательно. Укажите район или понятный ориентир внутри выбранного населённого пункта.
+                                        </small>
+                                        @error('sellerplace') <div class="text-danger small">{{ $message }}</div> @enderror
                                     </div>
                                     <div class="form-group mb-25">
                                         <label for="address">Адресс</label>

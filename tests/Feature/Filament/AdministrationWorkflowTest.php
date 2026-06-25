@@ -111,7 +111,8 @@ class AdministrationWorkflowTest extends TestCase
         $product = Product::query()->where('name', 'Тестовый товар')->firstOrFail();
         $image = $product->images()->firstOrFail();
 
-        $this->assertTrue((bool) $product->is_active);
+        $this->assertFalse((bool) $product->is_active);
+        $this->assertTrue($product->publication_requested);
         $this->assertTrue((bool) $product->is_vip);
         $this->assertTrue((bool) $image->is_main);
         Storage::disk('public')->assertExists($image->path);

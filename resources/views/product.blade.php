@@ -1,1085 +1,357 @@
 @extends('main_layots')
-@section('title', 'Каталог товара | Маркетплейс ПМР')
+
+@section('title', $product->name . ' | ГРАНАТ')
+@section('og_type', 'product')
+
+@php
+    $images = $product->images
+        ->sortBy(fn ($image) => sprintf('%d-%08d', $image->is_main ? 0 : 1, $image->order ?? 0))
+        ->values();
+    $mainImage = $images->first();
+    $mainImageUrl = $mainImage ? url(Storage::url($mainImage->path)) : asset('img/no-image.jpg');
+    $currentPrice = !is_null($product->lowprice) && $product->lowprice < $product->price
+        ? $product->lowprice
+        : $product->price;
+    $hasDiscount = $currentPrice < $product->price;
+    $discount = $hasDiscount && $product->price > 0
+        ? round(100 - ($currentPrice / $product->price * 100))
+        : null;
+    $formatPrice = static fn ($price) => rtrim(rtrim(number_format((float) $price, 2, '.', ' '), '0'), '.');
+    $phoneHref = preg_replace('/[^\d+]/', '', (string) $product->seller->phone);
+    $features = collect([
+        $product->features1,
+        $product->features2,
+        $product->features3,
+        $product->features4,
+    ])->filter()->values();
+
+    $breadcrumbItems = [
+        [
+            '@type' => 'ListItem',
+            'position' => 1,
+            'name' => 'Главная',
+            'item' => route('home'),
+        ],
+        [
+            '@type' => 'ListItem',
+            'position' => 2,
+            'name' => 'Каталог',
+            'item' => $regionalUrl->route('catalog.index'),
+        ],
+    ];
+
+    foreach ($breadcrumbs as $crumb) {
+        $breadcrumbItems[] = [
+            '@type' => 'ListItem',
+            'position' => count($breadcrumbItems) + 1,
+            'name' => $crumb->name,
+            'item' => $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]),
+        ];
+    }
+
+    $breadcrumbItems[] = [
+        '@type' => 'ListItem',
+        'position' => count($breadcrumbItems) + 1,
+        'name' => $product->name,
+        'item' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
+    ];
+
+    $productSchema = [
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => $product->name,
+        'image' => $images->isNotEmpty()
+            ? $images->map(fn ($image) => url(Storage::url($image->path)))->values()->all()
+            : [$mainImageUrl],
+        'description' => $product->desc ?: $product->name,
+        'sku' => (string) $product->id,
+        'brand' => [
+            '@type' => 'Brand',
+            'name' => $product->seller->name,
+        ],
+        'offers' => [
+            '@type' => 'Offer',
+            'url' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
+            'priceCurrency' => 'RUB',
+            'price' => number_format((float) $currentPrice, 2, '.', ''),
+            'availability' => 'https://schema.org/InStock',
+            'seller' => [
+                '@type' => 'Organization',
+                'name' => $product->seller->name,
+            ],
+        ],
+    ];
+@endphp
+
+@section('og_image', $mainImageUrl)
+
+@push('head')
+<script type="application/ld+json">{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'BreadcrumbList',
+    'itemListElement' => $breadcrumbItems,
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+<script type="application/ld+json">{!! json_encode($productSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@endpush
 
 @section('content')
-<div class="container container-240">
-        <div class="single-product-detail product-bundle product-aff">
-        <ul class="breadcrumb">
-            <li><a href="{{ route('home') }}">Главная</a></li>
-            <li class="active"><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог</a></li>
+<main class="product-page">
+    <div class="container container-240">
+        <nav aria-label="Хлебные крошки">
+            <ol class="breadcrumb product-breadcrumbs">
+                <li><a href="{{ route('home') }}">Главная</a></li>
+                <li><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог</a></li>
+                @foreach($breadcrumbs as $crumb)
+                    <li>
+                        <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}">
+                            {{ $crumb->name }}
+                        </a>
+                    </li>
+                @endforeach
+                <li class="active" aria-current="page">{{ $product->name }}</li>
+            </ol>
+        </nav>
 
-            <!--    <li class="active">{{ $category->name }}</li> -->
-            @foreach($breadcrumbs as $crumb)  
-            <li>
-                <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}">{{ $crumb->name }}</a>
-            </li> 
-            @endforeach
-            <li class="active">{{ $product->name }}</li>
-        </ul>
-        <div class="row">
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                
-                <div class="flex product-img-slide">
-                    
-                
-                    <div class="product-images">
-                        <div class="main-img js-product-slider">
-
-                            @forelse($product->images->sortByDesc('is_main') as $image)
-                                <a href="#" class="hover-images effect">
-                                    <img src="{{ Storage::url($image->path) }}"
-                                        alt="{{ $image->alt ?? $product->name }}"
-                                        class="img-reponsive"
-                                        onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';">
-                                </a>
-                            @empty
-                                <a href="#" class="hover-images effect">
-                                    <img src="{{ asset('img/no-image.jpg') }}"
-                                        alt="{{ $product->name }}"
-                                        class="img-reponsive">
-                                </a>
-                            @endforelse
-                    </div>
-                        @php
-                            $discount = null;
-                            if (!is_null($product->lowprice) && $product->price > 0) {
-                                $discount = round(100 - ($product->lowprice / $product->price * 100));
-                            }
-                        @endphp
-                        @if($discount)
-                            <div class="ribbon-price v2 red"><span>- {{ $discount }}% </span></div>
-                        @endif
-                    </div>
-                    <div class="multiple-img-list-ver2 js-click-product">
-                    
-
-                        
-                        @forelse($product->images->sortByDesc('is_main') as $key => $image)
-                            <div class="product-col">
-                                <div class="img{{ $key === 0 ? ' active' : '' }}">
-                                    <img src="{{ Storage::url($image->path) }}"
-                                        alt="{{ $image->alt ?? $product->name }}"
-                                        class="img-responsive"
-                                        onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';">
-                                </div>
-                            </div>
-                        @empty
-                            <div class="product-col">
-                                <div class="img active">
-                                    <img src="{{ asset('img/no-image.jpg') }}"
-                                        alt="{{ $product->name }}"
-                                        class="img-responsive">
-                                </div>
-                            </div>
-                        @endforelse
-
-                    </div>
+        <section class="product-hero" aria-labelledby="product-title">
+            <div class="product-gallery">
+                <div class="product-gallery__main js-product-slider">
+                    @forelse($images as $index => $image)
+                        <div class="product-gallery__slide">
+                            <img
+                                src="{{ Storage::url($image->path) }}"
+                                alt="{{ $image->alt ?? $product->name }}"
+                                class="product-gallery__image"
+                                width="800"
+                                height="800"
+                                @if($index > 0) loading="lazy" @else fetchpriority="high" @endif
+                                onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';"
+                            >
+                        </div>
+                    @empty
+                        <div class="product-gallery__slide">
+                            <img
+                                src="{{ asset('img/no-image.jpg') }}"
+                                alt="{{ $product->name }}"
+                                class="product-gallery__image"
+                                width="800"
+                                height="800"
+                                fetchpriority="high"
+                            >
+                        </div>
+                    @endforelse
                 </div>
-                    
-                
-            </div>
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="single-flex">
-                    <div class="single-product-info product-info product-grid-v2 s-50">
-                        <p class="product-cate">{{ $product->category->name ?? '' }}</p>
-                        <div class="product-rating">
-                            <span class="star star-5"></span>
-                            <span class="star star-4"></span>
-                            <span class="star star-3"></span>
-                            <span class="star star-2"></span>
-                            <span class="star star-1"></span>
-                            <div class="number-rating">( 896 reviews )</div>
-                        </div>
-                        <h1 class="product-title"><a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">{{ $product->name }}</a></h1>
-                        <div class="product-price">
-                        <!--    <span>$1,215.00</span> -->
-                            @if(!is_null($product->lowprice))
-                                <span class="red">{{ $product->lowprice }} руб.</span>
-                                <span class="old">{{ $product->price }} руб.</span>
-                            @else
-                                <span>{{ $product->price }} руб.</span>
-                            @endif
-                        </div>
-                        <div class="availability">
-                            <p class="product-inventory"> <label>Город: </label><span> {{ $product->seller->town }}</span></p>
-                        </div>
-                        <div class="product-brand" style="margin-bottom: 4px;">
-                            <p>Продавец: {{ $product->seller->name }}</p>
-                        </div>
 
-                            @if(!empty($product->seller->address))
-                                <div class="product-sku" style="margin-top: 0;">
-                                    <label>Адрес:</label>
-                                    <span title="Адрес продавца">
-                                        {{ $product->seller->address }}
-                                    </span>
-                                    @if(!empty($product->seller->link_map))
-                                        <a href="{{ $product->seller->link_map }}" target="_blank" rel="noopener"
-                                        style="margin-left: 8px; background: #b169d6; color: #fff; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-weight: 500; display: inline-block;">
-                                            Показать на карте
-                                        </a>
-                                    @endif
-                                </div>
-                            @endif
-                        <div class="short-desc">
-                            <p class="product-desc">{{ $product->desc }}</p>
-                            <ul class="desc-list">
-                            @foreach([$product->features1, $product->features2, $product->features3, $product->features4] as $feature)
-                                @if(!empty($feature))
-                                    <li>{{ $feature }}</li>
+                @if($discount)
+                    <span class="product-discount">−{{ $discount }}%</span>
+                @endif
+
+                @if($images->count() > 1)
+                    <div class="product-gallery__thumbs js-click-product" aria-label="Фотографии товара">
+                        @foreach($images as $index => $image)
+                            <button type="button" class="product-gallery__thumb{{ $index === 0 ? ' active' : '' }}"
+                                aria-label="Показать фотографию {{ $index + 1 }}">
+                                <img
+                                    src="{{ Storage::url($image->path) }}"
+                                    alt=""
+                                    width="88"
+                                    height="88"
+                                    loading="lazy"
+                                    onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';"
+                                >
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
+            <div class="product-summary">
+                @if($product->category)
+                    <a class="product-summary__category"
+                        href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">
+                        {{ $product->category->name }}
+                    </a>
+                @endif
+
+                <div class="product-summary__heading">
+                    <h1 id="product-title">{{ $product->name }}</h1>
+                    <button type="button" class="product-favorite wishlist-btn"
+                        data-product-id="{{ $product->id }}" aria-label="Добавить товар в избранное">
+                        <span class="icon-bg icon-wishlist" aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                <div class="product-price" aria-label="Цена товара">
+                    <span class="{{ $hasDiscount ? 'red' : '' }}">{{ $formatPrice($currentPrice) }} руб.</span>
+                    @if($hasDiscount)
+                        <del>{{ $formatPrice($product->price) }} руб.</del>
+                    @endif
+                </div>
+
+                <dl class="product-meta">
+                    @if(!empty($product->seller->town))
+                        <div><dt>Город</dt><dd>{{ $product->seller->town }}</dd></div>
+                    @endif
+                    <div>
+                        <dt>Продавец</dt>
+                        <dd>
+                            <a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">
+                                {{ $product->seller->name }}
+                            </a>
+                        </dd>
+                    </div>
+                    @if(!empty($product->seller->address))
+                        <div>
+                            <dt>Адрес</dt>
+                            <dd>
+                                {{ $product->seller->address }}
+                                @if(!empty($product->seller->link_map))
+                                    <a class="product-map-link" href="{{ $product->seller->link_map }}"
+                                        target="_blank" rel="noopener">На карте</a>
                                 @endif
-                            @endforeach
-                            </ul>
+                            </dd>
                         </div>
+                    @endif
+                </dl>
 
-        {{--Вывод кружочков с ссылками на цвет товара
-                        <!--        <div class="color-group">
-                            <label>Color :</label>
-                            <a href="#" class="circle black"></a>
-                            <a href="#" class="circle red"></a>
-                            <a href="#" class="circle gray"></a>
-                        </div> --> --}}
-        {{--Вывод номера телефона после описания
-                 <!--   <div class="hot-line e-gradient">
-                            <p></p>
-                            <div class="flex align-center tele" >
-                                <div class="phone-number">
-                                    <a href="tel:{{ preg_replace('/\D+/', '', $product->seller->phone) }}">
-                                        {{ $product->seller->phone }}
+                <div class="product-actions">
+                    @if(!empty($product->seller->phone))
+                        <a class="product-action product-action--primary" href="tel:{{ $phoneHref }}">
+                            <i class="fa fa-phone" aria-hidden="true"></i>
+                            Позвонить продавцу
+                            <span>{{ $product->seller->phone }}</span>
+                        </a>
+                    @endif
+                    @if($orderAvailability->allowed)
+                        <a class="product-action product-action--secondary" href="#order-form">
+                            Оформить заказ
+                        </a>
+                    @endif
+                </div>
+
+                @if(!$orderAvailability->allowed && ($product->seller->can_order || $product->can_order))
+                    <p class="product-order-status" role="status">
+                        Заказ через сайт для этого товара сейчас недоступен.
+                        @if(!empty($product->seller->phone)) Свяжитесь с продавцом по телефону. @endif
+                    </p>
+                @endif
+
+                <div class="product-trust">
+                    <div>
+                        <i class="fa fa-credit-card" aria-hidden="true"></i>
+                        <span><strong>Оплата продавцу</strong>Маркетплейс не принимает оплату.</span>
+                    </div>
+                    <div>
+                        <i class="fa fa-truck" aria-hidden="true"></i>
+                        <span><strong>Получение товара</strong>Условия согласовываются с продавцом.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="product-details" aria-label="Информация о товаре">
+            <div class="product-details__content">
+                <h2>Описание</h2>
+                @if(!empty($product->desc))
+                    <div class="product-description" style="white-space: pre-line;">{{ $product->desc }}</div>
+                @else
+                    <p class="product-empty">Продавец пока не добавил подробное описание.</p>
+                @endif
+            </div>
+
+            @if($features->isNotEmpty())
+                <div class="product-details__features">
+                    <h2>Характеристики</h2>
+                    <ul>
+                        @foreach($features as $feature)
+                            <li>{{ $feature }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+        </section>
+
+        @if($orderAvailability->allowed)
+            <div class="product-order-section">
+                @include('orders._form')
+            </div>
+        @endif
+
+        @if($relatedProducts->isNotEmpty())
+            <section class="product-related" aria-labelledby="related-title">
+                <div class="product-section-heading">
+                    <h2 id="related-title">{{ $relatedTitle }}</h2>
+                    @if($relatedFromSeller)
+                        <a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">
+                            Смотреть все
+                        </a>
+                    @elseif($product->category)
+                        <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">
+                            Смотреть все
+                        </a>
+                    @endif
+                </div>
+                <div class="product-related__grid">
+                    @foreach($relatedProducts as $relatedProduct)
+                        @php
+                            $relatedImage = $relatedProduct->images->where('is_main', true)->first()
+                                ?? $relatedProduct->images->first();
+                            $relatedPrice = !is_null($relatedProduct->lowprice)
+                                && $relatedProduct->lowprice < $relatedProduct->price
+                                    ? $relatedProduct->lowprice
+                                    : $relatedProduct->price;
+                        @endphp
+                        <article class="related-card">
+                            <a class="related-card__image"
+                                href="{{ $regionalUrl->route('product.show', ['alias' => $relatedProduct->alias]) }}">
+                                <img
+                                    src="{{ $relatedImage ? Storage::url($relatedImage->path) : asset('img/no-image.jpg') }}"
+                                    alt="{{ $relatedImage->alt ?? $relatedProduct->name }}"
+                                    width="360"
+                                    height="360"
+                                    loading="lazy"
+                                    onerror="this.onerror=null;this.src='{{ asset('img/no-image.jpg') }}';"
+                                >
+                            </a>
+                            <div class="related-card__body">
+                                <a class="related-card__seller"
+                                    href="{{ $regionalUrl->route('seller', ['alias' => $relatedProduct->seller->alias]) }}">
+                                    {{ $relatedProduct->seller->name }}
+                                </a>
+                                <h3>
+                                    <a href="{{ $regionalUrl->route('product.show', ['alias' => $relatedProduct->alias]) }}">
+                                        {{ $relatedProduct->name }}
                                     </a>
-                                </div>
+                                </h3>
+                                <p>{{ $formatPrice($relatedPrice) }} руб.</p>
                             </div>
-                        </div>-->--}}
-
-                        <div class="single-product-button-group">
-                            <div class="e-btn cart-qtt btn-gradient">
-                                <div class="e-quantity">
-                                    <input type="number" step="1" min="1" max="999" name="quantity" value="1" title="Qty" class="qty input-text js-number" size="4">
-                                    <div class="tc pa">
-                                        <a class="js-plus quantity-right-plus"><i class="fa fa-caret-up"></i></a>
-                                        <a class="js-minus quantity-left-minus"><i class="fa fa-caret-down"></i></a>
-                                    </div>
-                                </div>
-                                <a href="#" class="btn-add-cart"> В корзину<span class="icon-bg icon-cart v2"></span></a>
-                            </div>
-                            <a href="#" class="e-btn btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                        {{-- кнопка толи поделиться, толи перемешать--}}
-                        {{--<a href="#" class="e-btn btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a> --}}
-                        </div>
-                        {{--Вывод номера телефона--}}
-                        @if(!empty($product->seller->phone))
-                        <div class="hot-line e-gradient">
-                        <div aria-hidden="true" style="height:2px;"></div>
-                            <div class="flex align-center tele" >
-                                <div class="phone-number">
-                                <div aria-hidden="true" style="height:14px;"></div>
-                                    <a href="tel:{{ preg_replace('/\D+/', '', $product->seller->phone) }}">
-                                        {{ $product->seller->phone }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div>  
-                        @endif
-                        {{--Вывод тегов--}}
-                        <div class="product-tags">
-                            <label></label>
-                            <a href="#"></a>
-                        </div>
-                        <div class="product-tags">
-                            <label>Tags :</label>
-                            <a href="#">Fast,</a>
-                            <a href="#">Gaming,</a>
-                            <a href="#">Strong</a>
-                        </div>
-                    </div>
-
-
-                    <div class="single-product-feature s-50 hidden-xs hidden-sm">
-                        <div class="bd-7">
-                            <div class="single-feature-box">
-                                <div class="single-feature-img">
-                                    <img src="{{ asset('img/feature/credit-card2.png') }}" alt="">
-                                </div>
-                                <div class="single-feature-info">
-                                    <h3>Оплата продавцу</h3>
-                                    <p>Маркетплейс не принимает оплату.</p>
-                                </div>
-                            </div>
-
-                            <div class="single-feature-box">
-                                <div class="single-feature-img">
-                                    <img src="{{ asset('img/feature/safety2.png') }}" alt="">
-                                </div>
-                                <div class="single-feature-info">
-                                    <h3>Ответственность</h3>
-                                    <p>Мы — только рекламная платформа.</p>
-                                </div>
-                            </div>
-
-                            <div class="single-feature-box">
-                                <div class="single-feature-img">
-                                    <img src="{{ asset('img/feature/truck2.png') }}" alt="">
-                                </div>
-                                <div class="single-feature-info">
-                                    <h3>Доставка от продавца</h3>
-                                    <p>Доставку осуществляет сам продавец.</p>
-                                </div>
-                            </div>
-                        </div>
-                    <!--   <div class="hot-line e-gradient">
-                            <p></p>
-                            <div class="flex align-center tele">
-                            <!--    <div class="phone-number" style="text-align: center;">
-                                    <p>{{ $product->seller->phone }}</p>
-                                </div> 
-                                <div class="phone-number" style="text-align: center;">
-                                    <a href="tel:{{ preg_replace('/\D+/', '', $product->seller->phone) }}">
-                                        {{ $product->seller->phone }}
-                                    </a>
-                                </div>
-                            </div>
-                        </div> -->
-                    </div>
+                        </article>
+                    @endforeach
                 </div>
-            </div>
-        </div>
-        <div class="single-product-tab bd-7">
-            <div class="cmt-title text-center abs">
-                <ul class="nav nav-tabs v3 text-center">
-                    <li class="active"><a data-toggle="pill" href="#desc">Description</a></li>
-                    <li><a data-toggle="pill" href="#info">Specification</a></li>
-                    <li><a data-toggle="pill" href="#review">Reviews</a></li>
-                </ul>
-            </div>
-        <div class="tab-content">
-            <div id="desc" class="tab-pane fade in active">
-            </div>
-            <div id="info" class="tab-pane fade in">
-            </div>
-            <div id="review" class="tab-pane fade in ">
-            </div>
-        </div>
+            </section>
+        @endif
     </div>
-    </div>
-    <div class="bestseller">
-        <div class="ecome-heading style5v3 spc5v3">
-            <h1>Related products</h1>
-            <a href="#" class="btn-show">Shop more<i class="ion-ios-arrow-forward"></i></a>
+
+    @if(!empty($product->seller->phone) || $orderAvailability->allowed)
+        <div class="product-mobile-actions hidden-sm hidden-md hidden-lg" aria-label="Действия с товаром">
+            @if(!empty($product->seller->phone))
+                <a href="tel:{{ $phoneHref }}" class="product-mobile-actions__call">
+                    <i class="fa fa-phone" aria-hidden="true"></i> Позвонить
+                </a>
+            @endif
+            @if($orderAvailability->allowed)
+                <a href="#order-form" class="product-mobile-actions__order">Заказать</a>
+            @endif
         </div>
-        <div class="owl-carousel owl-theme owl-cate v2 js-owl-cate">
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/samsung3.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Cell Phones & Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="e-qa">
-        <div class="cmt-title v2 text-center abs"><h1 class="oval-bd btn-gradient">Customer questions & answers</h1></div>
-        <div class="row">
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Does the sonos one pair up with a sonos play1 as a stereo pair ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>As long as the players are grouped in a configuration to your liking, you can ask Alexa on the Sonos One or on an echo device to start music and playback will begin across the Sonos grouping. </p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>It uses a dictionary of over 200 Latin words ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>Latin words, combined with a handful of model sentence structures,to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humou</p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Does the sonos one pair up with a sonos play1 as a stereo pair ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>As long as the players are grouped in a configuration to your liking, you can ask Alexa on the Sonos One or on an echo device to start music and playback will begin across the Sonos grouping.  </p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>It uses a dictionary of over 200 Latin words ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-12 col-sm-6 col-md-6">
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Is the quality of the "sonos one" sound the same as ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look</p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Lorem Ipsum is simply dummy text of the printing and typesetting?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.</p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Is the quality of the "sonos one" sound the same as ?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look</p>
-                    </div>
-                </div>
-
-                <div class="qa-element">
-                    <div class="qa-quest">
-                        <span class="qa-icon">Q</span>
-                        <h3>Lorem Ipsum is simply dummy text of the printing and typesetting?</h3>
-                    </div>
-                    <div class="qa-answer">
-                        <span class="qa-icon">A</span>
-                        <p>Search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <a href="#" class="btn-qa">See more answered questions<i class="ion-ios-arrow-down"></i></a>
-        <form class="form_newsletter" action="#" method="post">
-            <input type="text" value="" placeholder="Have a question about product ? " class="newsletter-input form-control">
-            <button id="subscribe2" class="button_mini btn btn-gradient" type="submit">
-                Submit<i class="ion-ios-arrow-forward"></i>
-            </button>
-        </form>
-    </div>
-    <div class="bestseller single-space">
-        <div class="ecome-heading style5v3 spc5v3">
-            <h1>Similar Brand</h1>
-            <a href="#" class="btn-show">Shop more<i class="ion-ios-arrow-forward"></i></a>
-        </div>
-        <div class="owl-carousel owl-theme owl-cate v2 js-owl-cate">
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/samsung3.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Cell Phones & Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Audio Speakers</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/macbook2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-item">
-                <div class="pd-bd product-inner">
-                    <div class="product-img">
-                        <a href="#"><img src="img/product/sound2.jpg" alt="" class="img-reponsive"></a>
-                    </div>
-                    <div class="product-info">
-                        <div class="color-group">
-                        </div>
-                        <div class="element-list element-list-left">
-                        </div>
-                        <div class="element-list element-list-middle">
-                            <p class="product-cate">Computers &amp; Accessories</p>
-                            <h3 class="product-title"><a href="#">Cordless TrackMan Wheel</a></h3>
-                            <div class="product-bottom">
-                                <div class="product-price"><span>$1,215.00</span></div>
-                                <a href="#" class="btn-icon btn-view">
-                                    <span class="icon-bg icon-view"></span>
-                                </a>
-                            </div>    
-                        </div>         
-                        <div class="product-button-group">
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-cart"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-wishlist"></span>
-                            </a>
-                            <a href="#" class="btn-icon">
-                                <span class="icon-bg icon-compare"></span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+    @endif
+</main>
 @endsection
+
+@push('styles')
+<style>
+.product-page{padding-bottom:70px;color:#222}.product-breadcrumbs{margin-bottom:36px}.product-hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);gap:54px;align-items:start}.product-gallery{position:relative;min-width:0}.product-gallery__main{overflow:hidden;border:1px solid #eee;border-radius:14px;background:#fafafa}.product-gallery__slide{aspect-ratio:1/1}.product-gallery__image{width:100%;height:100%;object-fit:contain;display:block}.product-discount{position:absolute;top:18px;left:18px;z-index:2;display:flex;align-items:center;justify-content:center;width:62px;height:62px;border-radius:50%;background:#ff5151;color:#fff;font-size:16px;font-weight:700}.product-gallery__thumbs{display:flex;gap:12px;margin-top:14px;overflow-x:auto;padding-bottom:4px}.product-gallery__thumb{flex:0 0 88px;width:88px;height:88px;padding:3px;border:2px solid transparent;border-radius:9px;background:#fff}.product-gallery__thumb.active,.product-gallery__thumb:hover,.product-gallery__thumb:focus{border-color:#b766ef;outline:0}.product-gallery__thumb img{width:100%;height:100%;object-fit:cover;border-radius:5px}.product-summary__category{display:inline-block;margin-bottom:10px;color:#888}.product-summary__heading{display:flex;align-items:flex-start;gap:18px}.product-summary h1{flex:1;margin:0;font-size:34px;line-height:1.2;font-weight:600}.product-favorite{flex:0 0 48px;width:48px;height:48px;border:1px solid #e5e5e5;border-radius:50%;background:#fff}.product-favorite:focus{outline:2px solid #9d64e8;outline-offset:2px}.product-summary .product-price{display:flex;align-items:baseline;gap:14px;margin:22px 0;font-size:34px}.product-summary .product-price span{font-size:34px}.product-summary .product-price del{font-size:17px;color:#999}.product-meta{margin:0 0 24px}.product-meta>div{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:7px 0}.product-meta dt{font-weight:400;color:#888}.product-meta dd{margin:0}.product-meta dd>a:not(.product-map-link){font-weight:600;color:#222}.product-map-link{display:inline-block;margin-left:8px;padding:4px 10px;border-radius:5px;background:#ac62dd;color:#fff!important}.product-actions{display:grid;gap:12px}.product-action{min-height:54px;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:8px;font-size:16px;font-weight:600;text-align:center}.product-action--primary{background:linear-gradient(90deg,#b965ed,#4ed9ee);color:#fff}.product-action--primary:hover,.product-action--primary:focus{color:#fff;opacity:.9}.product-action--primary span{font-weight:400}.product-action--secondary{border:2px solid #a865e8;color:#7c42ae;background:#fff}.product-order-status{margin-top:16px;padding:13px 15px;border-radius:7px;background:#fff8e5;color:#6d5617}.product-trust{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.product-trust>div{display:flex;gap:12px;padding:15px;border:1px solid #e9e9e9;border-radius:9px}.product-trust i{margin-top:3px;color:#a764e4;font-size:20px}.product-trust span{font-size:13px;color:#777}.product-trust strong{display:block;margin-bottom:3px;color:#333;font-size:14px}.product-details{display:grid;grid-template-columns:1.4fr 1fr;gap:50px;margin-top:58px;padding:34px;border:1px solid #e8e8e8;border-radius:12px}.product-details h2,.product-related h2{margin:0 0 20px;font-size:26px}.product-description{font-size:16px;line-height:1.75;color:#555}.product-empty{color:#888}.product-details__features ul{margin:0;padding:0;list-style:none}.product-details__features li{position:relative;padding:10px 0 10px 22px;border-bottom:1px solid #eee}.product-details__features li:before{content:"";position:absolute;left:2px;top:17px;width:7px;height:7px;border-radius:50%;background:#aa64e4}.product-order-section{max-width:820px;margin:50px auto 0}.product-related{margin-top:58px}.product-section-heading{display:flex;align-items:center;justify-content:space-between;gap:20px}.product-section-heading h2{flex:1;min-width:0}.product-section-heading>a{flex:0 0 auto;color:#8b4fc1}.product-related__grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}.related-card{overflow:hidden;border:1px solid #e9e9e9;border-radius:10px;background:#fff;transition:transform .2s,box-shadow .2s}.related-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.08)}.related-card__image{display:block;aspect-ratio:1/1;background:#fafafa}.related-card__image img{width:100%;height:100%;object-fit:contain}.related-card__body{padding:15px}.related-card__seller{display:block;overflow:hidden;margin-bottom:6px;color:#999;font-size:12px;text-overflow:ellipsis;white-space:nowrap}.related-card h3{height:42px;overflow:hidden;margin:0 0 10px;font-size:15px;line-height:1.4}.related-card h3 a{color:#222}.related-card p{margin:0;font-size:18px;font-weight:600}.product-mobile-actions{position:fixed;right:0;bottom:58px;left:0;z-index:9997;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;padding:10px 15px;background:rgba(255,255,255,.96);box-shadow:0 -4px 18px rgba(0,0,0,.12);backdrop-filter:blur(8px)}.product-mobile-actions a{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:7px;font-weight:600}.product-mobile-actions__call{border:1px solid #a45edc;color:#7f42ae}.product-mobile-actions__order{background:linear-gradient(90deg,#b965ed,#4ed9ee);color:#fff!important}
+@media(max-width:1199px){.product-hero{gap:30px}.product-summary h1{font-size:29px}.product-related__grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:991px){.product-hero{grid-template-columns:1fr 1fr}.product-trust{grid-template-columns:1fr}.product-details{gap:30px}.product-related__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.product-page{padding:0 0 132px;overflow:hidden}.product-hero{display:block}.product-gallery{margin:0 -15px}.product-gallery__main{border-radius:0}.product-gallery__thumbs{padding:0 15px 4px}.product-discount{top:16px;left:16px;width:52px;height:52px;font-size:14px}.product-summary{padding-top:28px}.product-summary__heading{gap:10px}.product-summary h1{font-size:25px}.product-favorite{flex-basis:44px;width:44px;height:44px}.product-summary .product-price,.product-summary .product-price span{font-size:29px}.product-meta>div{grid-template-columns:75px 1fr}.product-action--primary span{display:none}.product-trust{grid-template-columns:1fr}.product-trust>div{padding:12px}.product-trust span{font-size:12px}.product-details{display:block;margin-top:35px;padding:24px 20px}.product-details__features{margin-top:32px}.product-details h2,.product-related h2{font-size:21px}.product-order-section{margin-top:35px}.product-related{margin-top:40px}.product-related__grid{display:flex;gap:12px;overflow-x:auto;margin-right:-15px;padding:0 15px 12px 0;scroll-snap-type:x mandatory}.related-card{flex:0 0 72%;scroll-snap-align:start}.product-section-heading{align-items:flex-start;flex-wrap:wrap;gap:4px}.product-section-heading h2{flex-basis:100%;margin-bottom:0}.product-section-heading>a{font-size:13px;white-space:nowrap}footer .col-xs-6{width:100%}footer .phone-desc{max-width:100%;overflow-wrap:anywhere}}
+@media(max-width:480px){.product-actions{display:none}.product-related__grid{grid-template-columns:1fr}.related-card{flex-basis:78%}}
+</style>
+@endpush

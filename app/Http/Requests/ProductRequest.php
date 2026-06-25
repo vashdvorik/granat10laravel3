@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ProductSaveAction;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 abstract class ProductRequest extends FormRequest
 {
@@ -24,7 +26,9 @@ abstract class ProductRequest extends FormRequest
             'features3' => ['nullable', 'string', 'max:255'],
             'features4' => ['nullable', 'string', 'max:255'],
             'is_vip' => ['boolean'],
-            'is_active' => ['boolean'],
+            'save_action' => ['required', Rule::enum(ProductSaveAction::class)],
+            'can_order' => ['boolean'],
+            'delivery_enabled' => ['boolean'],
             'images' => ['nullable', 'array', 'max:5'],
             'images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ];
@@ -47,6 +51,19 @@ abstract class ProductRequest extends FormRequest
             'images.*.image' => 'Файл должен быть изображением',
             'images.*.mimes' => 'Поддерживаются только форматы: JPEG, PNG, JPG, WebP',
             'images.*.max' => 'Размер изображения не должен превышать 5 МБ',
+            'save_action.required' => 'Выберите, сохранить черновик или отправить товар на проверку',
+            'save_action.enum' => 'Выбрано недопустимое действие с товаром',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('save_action') && $this->has('is_active')) {
+            $this->merge([
+                'save_action' => $this->boolean('is_active')
+                    ? ProductSaveAction::Submit->value
+                    : ProductSaveAction::Draft->value,
+            ]);
+        }
     }
 }

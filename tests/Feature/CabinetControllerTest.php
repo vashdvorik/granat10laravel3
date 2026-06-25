@@ -69,7 +69,12 @@ class CabinetControllerTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('account.store.create'));
 
-        $response->assertStatus(200);
+        $response
+            ->assertStatus(200)
+            ->assertSee('Район / ориентир')
+            ->assertSee('name="sellerplace"', false)
+            ->assertDontSee('<option value="Центр">', false)
+            ->assertDontSee('<option value="Балка">', false);
     }
 
     public function test_create_shop_redirects_if_shop_already_exists(): void

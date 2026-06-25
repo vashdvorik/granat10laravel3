@@ -307,4 +307,15 @@ class CatalogControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('LoadMoreSearchProduct_UNIQ');
     }
+
+    public function test_search_page_accepts_cyrillic_query(): void
+    {
+        $product = $this->createVisibleProductWithSeller();
+        $product->update(['name' => 'Беспроводные наушники']);
+
+        $response = $this->get(route('search', ['q' => 'наушники']));
+
+        $response->assertOk();
+        $response->assertSee('Беспроводные наушники');
+    }
 }

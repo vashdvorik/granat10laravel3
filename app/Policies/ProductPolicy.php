@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ProductStateTransitionService;
 
 class ProductPolicy
 {
@@ -39,12 +40,20 @@ class ProductPolicy
 
     public function activate(User $user, Product $product): bool
     {
-        return $this->ownsProduct($user, $product);
+        return $this->ownsProduct($user, $product)
+            && app(ProductStateTransitionService::class)->canPublish($product);
     }
 
     public function deactivate(User $user, Product $product): bool
     {
-        return $this->ownsProduct($user, $product);
+        return $this->ownsProduct($user, $product)
+            && app(ProductStateTransitionService::class)->canUnpublish($product);
+    }
+
+    public function submitForModeration(User $user, Product $product): bool
+    {
+        return $this->ownsProduct($user, $product)
+            && app(ProductStateTransitionService::class)->canSubmit($product);
     }
 
     public function manageImages(User $user, Product $product): bool
@@ -54,7 +63,8 @@ class ProductPolicy
 
     public function pushUp(User $user, Product $product): bool
     {
-        return $this->ownsProduct($user, $product);
+        return $this->ownsProduct($user, $product)
+            && app(ProductStateTransitionService::class)->canPushUp($product);
     }
 
     public function deleteAny(User $user): bool

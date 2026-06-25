@@ -34,6 +34,9 @@ class UpdateSellerRequest extends FormRequest
             'telegram' => ['nullable', 'string', 'max:255'],
             'instagram' => ['nullable', 'string', 'max:255'],
             'viber' => ['nullable', 'string', 'max:255'],
+            'can_order' => ['boolean'],
+            'delivery_enabled' => ['boolean'],
+            'delivery_terms' => ['nullable', 'string', 'max:2000'],
             'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
         ];
     }

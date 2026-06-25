@@ -37,7 +37,7 @@ class SellerController extends Controller
 
         $products = $sellerPageService->getSellerProducts($seller);
 
-        return view('components.products-load-more', compact('products'))->render();
+        return view('components.seller-products-load-more', compact('products'))->render();
     }
 
     public function loadMoreShops(Request $request, SellerPageService $sellerPageService)

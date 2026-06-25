@@ -25,6 +25,7 @@
                 $activePackage = $seller->activePackage();
                 $hasWebsiteLink = $activePackage && $activePackage->package && $activePackage->package->has_website_link;
                 $hasSocialLinks = $activePackage && $activePackage->package && $activePackage->package->has_social_links;
+                $hasOrderSystem = $activePackage && $activePackage->package && $activePackage->package->has_order_system;
             @endphp
 
             <div class="row">
@@ -47,6 +48,62 @@
                 <div class="row">
                     <div class="col-lg-8">
                         {{-- Основная информация --}}
+                        <div class="card mb-25">
+                            <div class="card-header">
+                                <h6 class="fw-500 mb-0">Заказы и доставка</h6>
+                            </div>
+                            <div class="card-body">
+                                @if(!$hasOrderSystem)
+                                    <div class="alert alert-warning">Текущий тариф не поддерживает заказы через сайт.</div>
+                                @endif
+                                <div class="form-check form-switch mb-3">
+                                    <input type="hidden" name="can_order" value="0">
+                                    <input class="form-check-input @error('can_order') is-invalid @enderror"
+                                           type="checkbox" id="can_order" name="can_order" value="1"
+                                           @checked(old('can_order', $seller->can_order))
+                                           @disabled(!$hasOrderSystem)>
+                                    <label class="form-check-label" for="can_order">Принимать заказы через сайт</label>
+                                    <small class="text-muted d-block">На карточках разрешённых товаров появится форма заказа.</small>
+                                    @error('can_order')<div class="text-danger small">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input type="hidden" name="delivery_enabled" value="0">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="delivery_enabled" name="delivery_enabled" value="1"
+                                           @checked(old('delivery_enabled', $seller->delivery_enabled))
+                                           @disabled(!$hasOrderSystem)>
+                                    <label class="form-check-label" for="delivery_enabled">Предлагать доставку</label>
+                                    <small class="text-muted d-block">Доставка появится только у товаров, где она также разрешена.</small>
+                                </div>
+                                <label for="delivery_terms" class="form-label">Условия доставки</label>
+                                <textarea class="form-control @error('delivery_terms') is-invalid @enderror"
+                                          id="delivery_terms" name="delivery_terms" rows="4" maxlength="2000"
+                                          @disabled(!$hasOrderSystem)>{{ old('delivery_terms', $seller->delivery_terms) }}</textarea>
+                                <small class="text-muted">Например: районы доставки, стоимость и сроки.</small>
+                                @error('delivery_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <hr>
+                                <h6>Telegram-уведомления</h6>
+                                @if($seller->telegram_verified_at)
+                                    <p class="text-success mb-2">
+                                        Telegram подключён {{ $seller->telegram_verified_at->format('d.m.Y H:i') }}.
+                                    </p>
+                                    <form method="POST" action="{{ route('account.store.telegram.disconnect') }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">Отключить Telegram</button>
+                                    </form>
+                                @else
+                                    <p class="text-muted">
+                                        После подключения бот будет присылать сообщения о новых заказах.
+                                    </p>
+                                    <form method="POST" action="{{ route('account.store.telegram.connect') }}">
+                                        @csrf
+                                        <button type="submit" class="btn btn-outline-primary btn-sm">Подключить Telegram</button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+
                         <div class="card mb-25">
                             <div class="card-header">
                                 <h6 class="fw-500 mb-0">Основная информация</h6>

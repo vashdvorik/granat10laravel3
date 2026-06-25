@@ -58,6 +58,8 @@ class SellerControllerTest extends TestCase
         $response = $this->get(route('shops'));
 
         $response->assertSee('МагазинТестXYZUnique789');
+        $response->assertSee('class="shop-card"', false);
+        $response->assertDontSee('shop-banner.jpg', false);
     }
 
     public function test_shops_page_paginates_sellers(): void
@@ -155,6 +157,8 @@ class SellerControllerTest extends TestCase
         $response = $this->get(route('seller', $seller->alias));
 
         $response->assertSee('Уникальное описание тест-магазина XYZ789');
+        $response->assertSee('class="seller-profile__panel"', false);
+        $response->assertDontSee('blog-banner.png', false);
     }
 
     public function test_inactive_product_not_shown_on_seller_page(): void
@@ -187,6 +191,7 @@ class SellerControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('LoadMoreShopUnique');
+        $response->assertSee('class="shop-card"', false);
     }
 
     public function test_load_more_seller_products_returns_products_partial(): void
@@ -211,5 +216,6 @@ class SellerControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('LoadMoreSellerProductUnique');
+        $response->assertSee('class="home-product"', false);
     }
 }

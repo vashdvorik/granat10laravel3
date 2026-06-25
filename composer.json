@@ -8,12 +8,16 @@
         "php": "^8.1",
         "filament/filament": "^3.3",
         "guzzlehttp/guzzle": "^7.2",
+        "http-interop/http-factory-guzzle": "^1.2",
         "intervention/image": "^2.7",
         "kalnoy/nestedset": "*",
         "laravel/fortify": "^1.26",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
+        "laravel/scout": "^10.8",
         "laravel/tinker": "^2.8",
+        "meilisearch/meilisearch-php": "^1.16",
+        "predis/predis": "^2.2",
         "spatie/laravel-activitylog": "^4.12"
     },
     "require-dev": {
@@ -38,6 +42,20 @@
         }
     },
     "scripts": {
+        "quality": [
+            "@validate-project",
+            "@test",
+            "@format-check"
+        ],
+        "validate-project": [
+            "@composer validate --no-check-publish"
+        ],
+        "test": [
+            "@php artisan test"
+        ],
+        "format-check": [
+            "@php vendor/bin/pint --test app/Domain app/Application app/Infrastructure"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",

@@ -4,37 +4,11 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\Seller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class BackendProductService
 {
-    public function getIndexData(Seller $seller, Request $request): array
-    {
-        $query = $seller->products()->with(['category', 'images']);
-
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->input('category'));
-        }
-
-        $products = $query->orderByDesc('created_at')
-            ->paginate(20)
-            ->appends($request->all());
-
-        $sellerCategoryIds = $seller->products()
-            ->distinct()
-            ->pluck('category_id')
-            ->toArray();
-
-        return [
-            'products' => $products,
-            'categoryTree' => $this->getSellerCategoryTree($sellerCategoryIds),
-            'sellerCategoryIds' => $sellerCategoryIds,
-        ];
-    }
-
     public function getRootCategories(): Collection
     {
         return Category::getCachedRootCategories();
@@ -42,13 +16,13 @@ class BackendProductService
 
     public function getSelectedPath(?int $categoryId): array
     {
-        if (!$categoryId) {
+        if (! $categoryId) {
             return [];
         }
 
         $category = Category::find($categoryId);
 
-        if (!$category) {
+        if (! $category) {
             return [];
         }
 
@@ -57,7 +31,7 @@ class BackendProductService
 
     public function rememberSelectedPath(?Category $category): void
     {
-        if (!$category) {
+        if (! $category) {
             return;
         }
 
@@ -72,7 +46,7 @@ class BackendProductService
         $counter = 1;
 
         while (Product::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . $counter;
+            $alias = $baseAlias.'-'.$counter;
             $counter++;
         }
 
@@ -96,28 +70,6 @@ class BackendProductService
         });
 
         return $categories;
-    }
-
-    private function getSellerCategoryTree(array $sellerCategoryIds): Collection
-    {
-        $allCategoryIds = [];
-
-        foreach ($sellerCategoryIds as $categoryId) {
-            $category = Category::find($categoryId);
-
-            if (!$category) {
-                continue;
-            }
-
-            $allCategoryIds[] = $categoryId;
-            $allCategoryIds = array_merge($allCategoryIds, $category->ancestors()->pluck('id')->toArray());
-        }
-
-        return Category::whereIn('id', array_unique($allCategoryIds))
-            ->where('is_active', true)
-            ->defaultOrder()
-            ->get()
-            ->toTree();
     }
 
     private function getCategoryPath(Category $category): array

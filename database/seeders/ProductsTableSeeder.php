@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ProductModerationStatus;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class ProductsTableSeeder extends Seeder
             return;
         }
 
-        DB::table('products')->insert([
+        $products = [
             [
                 'name' => 'Красивое платье(пример)',
                 'category_id' => 1112, // платья
@@ -197,6 +198,19 @@ class ProductsTableSeeder extends Seeder
                 'push_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
                 'sale_started_at' => Carbon::now()->subDays(rand(0, 15))->subHours(rand(0, 23)),
             ],
-        ]);
+        ];
+
+        $moderatedAt = now();
+
+        DB::table('products')->insert(array_map(
+            fn (array $product): array => array_merge($product, [
+                'moderation_status' => ProductModerationStatus::Approved->value,
+                'moderation_version' => 1,
+                'moderated_version' => 1,
+                'moderation_source' => 'seeder',
+                'moderated_at' => $moderatedAt,
+            ]),
+            $products
+        ));
     }
 }

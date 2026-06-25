@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Jobs\RecordQueueWorkerHeartbeat;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -17,6 +18,16 @@ class Kernel extends ConsoleKernel
             ->dailyAt('01:00')
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/packages-check.log'));
+
+        $schedule->command('orders:anonymize-expired')
+            ->dailyAt('02:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/orders-anonymization.log'));
+
+        if (config('queue.default') !== 'sync') {
+            $schedule->job(new RecordQueueWorkerHeartbeat)->everyMinute();
+        }
     }
 
     /**

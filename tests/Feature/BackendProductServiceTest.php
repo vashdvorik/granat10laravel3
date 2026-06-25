@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Application\Products\Queries\ListSellerProducts;
 use App\Models\Category;
 use App\Models\Package;
 use App\Models\Product;
@@ -9,7 +10,6 @@ use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Services\BackendProductService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
@@ -24,7 +24,7 @@ class BackendProductServiceTest extends TestCase
         parent::setUp();
 
         Cache::flush();
-        $this->service = new BackendProductService();
+        $this->service = new BackendProductService;
     }
 
     public function test_generate_unique_alias_adds_suffix_when_alias_exists(): void
@@ -62,9 +62,10 @@ class BackendProductServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        $data = $this->service->getIndexData(
+        $data = app(ListSellerProducts::class)->execute(
             $seller,
-            Request::create('/account/store/products', 'GET', ['category' => $targetCategory->id])
+            $targetCategory->id,
+            ['category' => $targetCategory->id]
         );
 
         $this->assertTrue($data['products']->contains($targetProduct));

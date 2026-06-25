@@ -8,8 +8,9 @@ use App\Models\SellerPackage;
 
 class ProductLimitService
 {
-    private const STORE_PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото или поставьте статус "Снят с публикации".';
-    private const UPDATE_PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Нельзя активировать товар без изображений. Загрузите хотя бы одно фото.';
+    private const STORE_PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или нажмите "Сохранить черновик".';
+
+    private const UPDATE_PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или нажмите "Сохранить черновик".';
 
     public function validateForStore(Seller $seller, bool $isActive, bool $isVip, bool $hasImages): array
     {
@@ -23,7 +24,7 @@ class ProductLimitService
 
     public function activationError(Product $product): ?string
     {
-        if (!$product->images()->exists()) {
+        if (! $product->images()->exists()) {
             return self::UPDATE_PRODUCT_WITHOUT_IMAGES_MESSAGE;
         }
 
@@ -74,21 +75,21 @@ class ProductLimitService
         bool $isVip,
         ?int $excludeProductId = null
     ): array {
-        if (!$isActive) {
+        if (! $isActive) {
             return ['allowed' => true, 'errors' => []];
         }
 
         $errors = [];
         $activeCheck = $this->canActivateProduct($seller, $excludeProductId);
 
-        if (!$activeCheck['allowed']) {
+        if (! $activeCheck['allowed']) {
             $errors[] = $activeCheck['message'];
         }
 
         if ($isVip) {
             $vipCheck = $this->canActivateVipProduct($seller, $excludeProductId);
 
-            if (!$vipCheck['allowed']) {
+            if (! $vipCheck['allowed']) {
                 $errors[] = $vipCheck['message'];
             }
         }
@@ -107,24 +108,24 @@ class ProductLimitService
         bool $hasImages,
         string $missingImagesMessage
     ): array {
-        if (!$isActive) {
+        if (! $isActive) {
             return [];
         }
 
         $errors = [];
 
-        if (!$hasImages) {
+        if (! $hasImages) {
             $errors['is_active'] = $missingImagesMessage;
         }
 
         $activeCheck = $this->canActivateProduct($seller, $excludeProductId);
-        if (!$activeCheck['allowed']) {
+        if (! $activeCheck['allowed']) {
             $errors['is_active'] = $activeCheck['message'];
         }
 
         if ($isVip) {
             $vipCheck = $this->canActivateVipProduct($seller, $excludeProductId);
-            if (!$vipCheck['allowed']) {
+            if (! $vipCheck['allowed']) {
                 $errors['is_vip'] = $vipCheck['message'];
             }
         }
@@ -142,7 +143,7 @@ class ProductLimitService
     ): array {
         $activePackage = $seller->activePackage();
 
-        if (!$activePackage instanceof SellerPackage) {
+        if (! $activePackage instanceof SellerPackage) {
             return [
                 'allowed' => false,
                 'message' => 'У вас нет активного тарифного пакета',

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="ru" dir="ltr">
 
 <head>
    <meta charset="UTF-8">
@@ -28,6 +28,238 @@
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/trumbowyg.min.css') }}">
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/wickedpicker.min.css') }}">
 <link rel="stylesheet" href="{{ asset('cabinet/assets/style.css') }}">
+<style>
+   body.side-menu .btn,
+   body.side-menu button,
+   body.side-menu .dropdown-wrapper__more,
+   body.side-menu .product-moderation-actions,
+   body.side-menu .product-moderation-actions *,
+   body.side-menu .text-capitalize {
+      text-transform: none !important;
+   }
+
+   .product-moderation-issues {
+      background: #fff7ec;
+      border: 1px solid #ffe1bd;
+      border-radius: 6px;
+      color: #5f3b00;
+      padding: 16px 18px;
+   }
+
+   .product-moderation-issues__title {
+      color: #ff7a00;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 12px;
+   }
+
+   .product-moderation-issues__list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+   }
+
+   .product-moderation-issues__item {
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 6px;
+      padding: 12px;
+   }
+
+   .product-moderation-issues__field {
+      font-weight: 700;
+      margin-bottom: 6px;
+   }
+
+   .product-moderation-issues__image-index {
+      color: #8a5a00;
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-left: 8px;
+   }
+
+   .product-moderation-issues__field a {
+      color: #7a2cff;
+      text-decoration: none;
+   }
+
+   .product-moderation-issues__field a:hover {
+      text-decoration: underline;
+   }
+
+   .product-moderation-issues__body {
+      align-items: flex-start;
+      display: flex;
+      gap: 12px;
+   }
+
+   .product-moderation-issues__thumb {
+      border: 1px solid #ffe1bd;
+      border-radius: 6px;
+      display: block;
+      flex: 0 0 86px;
+      overflow: hidden;
+      width: 86px;
+   }
+
+   .product-moderation-issues__thumb img {
+      aspect-ratio: 4 / 3;
+      display: block;
+      height: auto;
+      object-fit: cover;
+      width: 100%;
+   }
+
+   .product-moderation-issues__content {
+      flex: 1 1 auto;
+      min-width: 0;
+   }
+
+   .product-moderation-issues__message,
+   .product-moderation-issues__suggestion {
+      color: #ff7a00;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+   }
+
+   .product-moderation-issues__suggestion {
+      margin-top: 6px;
+   }
+
+   .product-moderation-issues__suggestion span {
+      font-weight: 700;
+   }
+
+   .product-form-page .product-form-page__container {
+      padding-left: 24px;
+      padding-right: 24px;
+   }
+
+   .product-form-page .product-form-shell {
+      background: transparent !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      margin-bottom: 32px !important;
+      padding: 0 !important;
+   }
+
+   .product-form-page .product-form-column {
+      flex: 0 0 100%;
+      max-width: 100%;
+      width: 100%;
+   }
+
+   .product-form-page .product-form-inner {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+   }
+
+   .product-form-page .product-form-section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: none;
+      padding: 0 !important;
+   }
+
+   .product-form-page .product-form-section > .card-body {
+      border-radius: inherit;
+      box-shadow: none;
+   }
+
+   .product-form-page .product-form-section > .card-body > .card-header {
+      border-bottom: 1px solid #edf0f3;
+      min-height: auto;
+      padding: 20px 24px;
+   }
+
+   .product-form-page .product-form-alerts,
+   .product-form-page .add-product__body,
+   .product-form-page .add-product__body-img {
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+   }
+
+   .product-form-page .add-product__body,
+   .product-form-page .add-product__body-img {
+      padding-bottom: 28px;
+      padding-top: 24px;
+   }
+
+   .product-form-page .product-form-actions {
+      align-items: center;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      bottom: 12px;
+      box-shadow: 0 8px 24px rgba(39, 43, 65, 0.1);
+      margin-top: 20px !important;
+      padding: 12px;
+      position: sticky;
+      z-index: 20;
+   }
+
+   @media (max-width: 575.98px) {
+      .product-moderation-issues__body {
+         flex-direction: column;
+      }
+
+      .product-moderation-issues__thumb {
+         width: 120px;
+      }
+
+      .product-form-page .product-form-page__container {
+         padding-left: 12px;
+         padding-right: 12px;
+      }
+
+      .product-form-page .breadcrumb-main {
+         align-items: flex-start;
+         gap: 12px;
+         padding: 18px 0;
+      }
+
+      .product-form-page .product-form-section {
+         border-left: 0;
+         border-radius: 0;
+         border-right: 0;
+         margin-left: -12px;
+         margin-right: -12px;
+      }
+
+      .product-form-page .product-form-section > .card-body > .card-header {
+         padding: 16px;
+      }
+
+      .product-form-page .product-form-alerts,
+      .product-form-page .add-product__body,
+      .product-form-page .add-product__body-img {
+         padding-left: 16px !important;
+         padding-right: 16px !important;
+      }
+
+      .product-form-page .add-product__body,
+      .product-form-page .add-product__body-img {
+         padding-bottom: 20px;
+         padding-top: 18px;
+      }
+
+      .product-form-page .product-form-actions {
+         bottom: 8px;
+         display: grid !important;
+         grid-template-columns: 1fr;
+         margin-left: -4px;
+         margin-right: -4px;
+         padding: 8px;
+      }
+
+      .product-form-page .product-form-actions .btn {
+         justify-content: center;
+         margin: 0;
+         width: 100%;
+      }
+   }
+</style>
 
    <!-- endinject -->
 
@@ -61,6 +293,61 @@
          </div>
          <div class="navbar-right">
             <ul class="navbar-right__menu">
+               @php
+                  $cabinetNotifications = auth()->user()->notifications()->latest()->limit(5)->get();
+                  $unreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+               @endphp
+               <li class="nav-notification">
+                  <div class="dropdown-custom">
+                     <a href="javascript:;" class="nav-item-toggle {{ $unreadNotificationsCount > 0 ? 'icon-active' : '' }}">
+                        <img class="svg" src="{{ asset('cabinet/img/svg/alarm.svg') }}" alt="Уведомления">
+                     </a>
+                     <div class="dropdown-parent-wrapper">
+                        <div class="dropdown-wrapper">
+                           <h2 class="dropdown-wrapper__title">
+                              Уведомления
+                              @if($unreadNotificationsCount > 0)
+                                 <span class="badge-circle badge-warning ms-1">{{ $unreadNotificationsCount }}</span>
+                              @endif
+                           </h2>
+                           <ul>
+                              @forelse($cabinetNotifications as $notification)
+                                 <li class="nav-notification__single {{ $notification->read_at ? '' : 'nav-notification__single--unread' }} d-flex flex-wrap">
+                                    <div class="nav-notification__type nav-notification__type--primary">
+                                       <img class="svg" src="{{ asset('cabinet/img/svg/inbox.svg') }}" alt="">
+                                    </div>
+                                    <div class="nav-notification__details">
+                                       <p>
+                                          <a href="{{ route('account.notifications.read', $notification->id) }}" class="subject stretched-link">
+                                             {{ $notification->data['subject'] ?? $notification->data['product_name'] ?? 'Уведомление' }}
+                                          </a>
+                                          <span>{{ $notification->data['title'] ?? $notification->data['status_label'] ?? 'Статус изменён' }}</span>
+                                       </p>
+                                       @if(!empty($notification->data['status_label']) && !empty($notification->data['title']))
+                                          <p>{{ $notification->data['status_label'] }}</p>
+                                       @endif
+                                       @if(!empty($notification->data['comment']))
+                                          <p>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 80) }}</p>
+                                       @endif
+                                       <p><span class="time-posted">{{ $notification->created_at->diffForHumans() }}</span></p>
+                                    </div>
+                                 </li>
+                              @empty
+                                 <li class="p-3 text-center text-muted">Новых уведомлений нет</li>
+                              @endforelse
+                           </ul>
+                           @if($unreadNotificationsCount > 0)
+                              <form method="POST" action="{{ route('account.notifications.read-all') }}">
+                                 @csrf
+                                 <button type="submit" class="dropdown-wrapper__more border-0 bg-transparent w-100">
+                                    Отметить все прочитанными
+                                 </button>
+                              </form>
+                           @endif
+                        </div>
+                     </div>
+                  </div>
+               </li>
                <!--
                <li class="nav-notification">
                   <div class="dropdown-custom">
@@ -313,6 +600,9 @@
                         </li>
                         <li class="{{ request()->routeIs('account.store.products.create') ? 'active' : '' }}">
                            <a href="{{ route('account.store.products.create') }}">Добавить товар</a>
+                        </li>
+                        <li class="{{ request()->routeIs('account.store.orders.*') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.orders.index') }}">Заказы</a>
                         </li>
                         @if(auth()->check() && auth()->user()->seller)
                         <li class="{{ request()->routeIs('account.packages.index') ? 'active' : '' }}">

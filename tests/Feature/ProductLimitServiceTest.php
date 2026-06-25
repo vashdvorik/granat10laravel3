@@ -21,7 +21,7 @@ class ProductLimitServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new ProductLimitService();
+        $this->service = new ProductLimitService;
     }
 
     public function test_inactive_product_does_not_require_package_or_images(): void
@@ -40,7 +40,8 @@ class ProductLimitServiceTest extends TestCase
         $errors = $this->service->validateForStore($seller, true, false, false);
 
         $this->assertArrayHasKey('is_active', $errors);
-        $this->assertStringContainsString('Нельзя активировать товар без изображений', $errors['is_active']);
+        $this->assertStringContainsString('Нельзя опубликовать товар без изображений', $errors['is_active']);
+        $this->assertStringContainsString('Сохранить черновик', $errors['is_active']);
     }
 
     public function test_active_store_product_respects_active_limit(): void
@@ -84,7 +85,8 @@ class ProductLimitServiceTest extends TestCase
         $error = $this->service->activationError($product);
 
         $this->assertNotNull($error);
-        $this->assertStringContainsString('Нельзя активировать товар без изображений', $error);
+        $this->assertStringContainsString('Нельзя опубликовать товар без изображений', $error);
+        $this->assertStringContainsString('Сохранить черновик', $error);
     }
 
     private function createSellerWithPackage(int $activeLimit = 5, int $vipLimit = 2): Seller

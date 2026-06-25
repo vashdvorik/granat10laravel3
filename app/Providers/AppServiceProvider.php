@@ -2,11 +2,19 @@
 
 namespace App\Providers;
 
+use App\Contracts\AiModerationClient;
+use App\Contracts\ProductImageModerationClient;
+use App\Contracts\TelegramBotClient;
 use App\Models\Category;
 use App\Services\CatalogCacheService;
+use App\Services\FakeAiModerationClient;
+use App\Services\GoogleGeminiImageModerationClient;
+use App\Services\GoogleGeminiModerationClient;
+use App\Services\OpenAiCompatibleModerationClient;
 use App\Services\RegionalContext;
 use App\Services\RegionalUrlService;
 use App\Services\SeoService;
+use App\Services\TelegramHttpBotClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -20,8 +28,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(TelegramBotClient::class, TelegramHttpBotClient::class);
         $this->app->scoped(RegionalContext::class);
         $this->app->scoped(RegionalUrlService::class);
+        $this->app->bind(AiModerationClient::class, function () {
+            return match (config('moderation.provider')) {
+                'fake' => app(FakeAiModerationClient::class),
+                'google' => app(GoogleGeminiModerationClient::class),
+                'openai_compatible' => app(OpenAiCompatibleModerationClient::class),
+                default => throw new \RuntimeException('Unsupported AI moderation provider.'),
+            };
+        });
+        $this->app->bind(ProductImageModerationClient::class, function () {
+            return match (config('moderation.images.provider')) {
+                'google' => app(GoogleGeminiImageModerationClient::class),
+                default => throw new \RuntimeException('Unsupported image moderation provider.'),
+            };
+        });
     }
 
     /**
@@ -77,19 +100,19 @@ class AppServiceProvider extends ServiceProvider
 
             $data = $view->getData();
 
-            if (!array_key_exists('categories', $data)) {
+            if (! array_key_exists('categories', $data)) {
                 $view->with('categories', $menuCategories);
             }
 
-            if (!array_key_exists('menuRootCategories', $data)) {
+            if (! array_key_exists('menuRootCategories', $data)) {
                 $view->with('menuRootCategories', $menuCategories);
             }
 
-            if (!array_key_exists('regionalUrl', $data)) {
+            if (! array_key_exists('regionalUrl', $data)) {
                 $view->with('regionalUrl', app(RegionalUrlService::class));
             }
 
-            if (!array_key_exists('regionalContext', $data)) {
+            if (! array_key_exists('regionalContext', $data)) {
                 $view->with('regionalContext', app(RegionalContext::class));
             }
         });
@@ -98,7 +121,7 @@ class AppServiceProvider extends ServiceProvider
     private function loadMenuCategories()
     {
         try {
-            if (!Schema::hasTable('categories')) {
+            if (! Schema::hasTable('categories')) {
                 return collect();
             }
 

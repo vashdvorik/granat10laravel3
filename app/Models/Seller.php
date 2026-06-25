@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -48,7 +49,13 @@ class Seller extends Model
         'viber',
         'photos',
         'photo',
+        'can_order',
         'auto_renew',
+        'delivery_enabled',
+        'delivery_terms',
+        'telegram_notifications_enabled',
+        'telegram_chat_id',
+        'telegram_verified_at',
 
     ];
 
@@ -60,6 +67,9 @@ class Seller extends Model
     protected $casts = [
         'can_order' => 'boolean',
         'auto_renew' => 'boolean',
+        'delivery_enabled' => 'boolean',
+        'telegram_notifications_enabled' => 'boolean',
+        'telegram_verified_at' => 'datetime',
     ];
 
     public function user()
@@ -75,6 +85,11 @@ class Seller extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder

@@ -4,8 +4,8 @@
 
 @section('content_cabinet')
 
-<div class="contents">
-    <div class="container-fluid">
+<div class="contents product-form-page">
+    <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
@@ -20,13 +20,13 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="product-add global-shadow px-sm-30 py-sm-50 px-0 py-20 bg-white radius-xl w-100 mb-40">
-                    <div class="row justify-content-center">
-                        <div class="col-xxl-7 col-lg-10">
-                            <div class="mx-sm-30 mx-20">
+                <div class="product-add product-form-shell w-100">
+                    <div class="row">
+                        <div class="col-12 product-form-column">
+                            <div class="product-form-inner">
                                 <form action="{{ route('account.store.products.store') }}" 
                                       method="POST" 
                                       enctype="multipart/form-data"
@@ -34,7 +34,7 @@
                                     @csrf
 
                                     {{-- Основная информация --}}
-                                    <div class="card add-product p-sm-30 p-20 mb-30">
+                                    <div class="card add-product product-form-section mb-24">
                                         <div class="card-body p-0">
                                             <div class="card-header">
                                                 <h6 class="fw-500">Информация о товаре</h6>
@@ -43,7 +43,7 @@
                                             {{-- ============================================ --}}
                                             {{-- БЛОК СООБЩЕНИЙ И ОШИБОК --}}
                                             {{-- ============================================ --}}
-                                            <div class="px-sm-40 px-20 pt-20">
+                                            <div class="product-form-alerts pt-20">
                                                 {{-- ✅ СООБЩЕНИЕ ОБ УСПЕХЕ --}}
                                                 @if(session('success'))
                                                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -108,6 +108,19 @@
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+
+                                                    <div class="form-check form-switch mt-3">
+                                                        <input type="hidden" name="can_order" value="0">
+                                                        <input class="form-check-input" type="checkbox" name="can_order"
+                                                               id="can_order" value="1" @checked(old('can_order', true))>
+                                                        <label class="form-check-label" for="can_order">Разрешить заказ товара через сайт</label>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-2">
+                                                        <input type="hidden" name="delivery_enabled" value="0">
+                                                        <input class="form-check-input" type="checkbox" name="delivery_enabled"
+                                                               id="delivery_enabled" value="1" @checked(old('delivery_enabled', true))>
+                                                        <label class="form-check-label" for="delivery_enabled">Разрешить доставку этого товара</label>
+                                                    </div>
                                                 </div>
 
                                                 {{-- Категория --}}
@@ -175,49 +188,6 @@
                                                     <small class="text-muted">Если указана, будет показана как скидочная цена</small>
                                                     @error('lowprice')
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-
-                                                {{-- Статус активности --}}
-                                                <div class="form-group mb-20">
-                                                    <label class="form-label">Статус активности</label>
-                                                    <div class="d-flex gap-3">
-                                                        <div class="radio-horizontal-list d-flex flex-wrap gap-3">
-                                                            <div class="radio-theme-default custom-radio">
-                                                                <input class="radio @error('is_active') is-invalid @enderror" 
-                                                                       type="radio" 
-                                                                       name="is_active" 
-                                                                       value="1" 
-                                                                       id="active-yes"
-                                                                       {{ old('is_active', '1') == '1' ? 'checked' : '' }}>
-                                                                <label for="active-yes">
-                                                                    <span class="radio-text">Опубликован</span>
-                                                                </label>
-                                                            </div>
-                                                            <div class="radio-theme-default custom-radio">
-                                                                <input class="radio @error('is_active') is-invalid @enderror" 
-                                                                       type="radio" 
-                                                                       name="is_active" 
-                                                                       value="0" 
-                                                                       id="active-no"
-                                                                       {{ old('is_active') == '0' ? 'checked' : '' }}>
-                                                                <label for="active-no">
-                                                                    <span class="radio-text">Снят с публикации</span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {{-- ⚠️ Ошибка лимита АКТИВНЫХ товаров --}}
-                                                    @error('is_active')
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
-                                                            <div>
-                                                                <small class="d-block mb-0 text-dark">
-                                                                    <strong>{{ $message }}</strong>
-                                                                </small>
-                                                            </div>
-                                                        </div>
                                                     @enderror
                                                 </div>
 
@@ -330,7 +300,7 @@
                                     </div>
 
                                     {{-- Изображения товара --}}
-                                    <div class="card add-product p-sm-30 p-20 mb-30">
+                                    <div class="card add-product product-form-section mb-24">
                                         <div class="card-body p-0">
                                             <div class="card-header">
                                                 <h6 class="fw-500">Изображения товара</h6>
@@ -372,14 +342,22 @@
                                     </div>
 
                                     {{-- Кнопки --}}
-                                    <div class="button-group add-product-btn d-flex justify-content-sm-end justify-content-center mt-40 gap-2">
+                                    <div class="button-group add-product-btn product-form-actions d-flex justify-content-end gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
                                            class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
                                             Отмена
                                         </a>
-                                        <button type="submit" 
+                                        <button type="submit"
+                                                name="save_action"
+                                                value="save_draft"
+                                                class="btn btn-light btn-default btn-squared text-capitalize">
+                                            <i class="uil uil-save"></i> Сохранить черновик
+                                        </button>
+                                        <button type="submit"
+                                                name="save_action"
+                                                value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-save"></i> Сохранить товар
+                                            <i class="uil uil-shield-check"></i> Отправить на проверку
                                         </button>
                                     </div>
                                 </form>

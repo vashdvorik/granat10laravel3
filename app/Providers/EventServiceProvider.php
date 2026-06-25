@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\Events\OrderCreated;
+use App\Events\OrderStatusChanged;
+use App\Events\ProductModerationDecided;
+use App\Listeners\SendNewOrderNotification;
+use App\Listeners\SendOrderStatusChangedNotification;
+use App\Listeners\SendOrderTelegramNotification;
+use App\Listeners\SendProductModerationDecisionNotification;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
@@ -36,6 +43,17 @@ class EventServiceProvider extends ServiceProvider
         ],
         Logout::class => [
             \App\Listeners\LogSuccessfulLogout::class,
+        ],
+        ProductModerationDecided::class => [
+            SendProductModerationDecisionNotification::class,
+        ],
+        OrderCreated::class => [
+            SendNewOrderNotification::class,
+            SendOrderTelegramNotification::class,
+        ],
+        OrderStatusChanged::class => [
+            SendOrderStatusChangedNotification::class,
+            SendOrderTelegramNotification::class,
         ],
     ];
 

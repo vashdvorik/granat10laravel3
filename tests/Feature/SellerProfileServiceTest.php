@@ -2,11 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Package;
 use App\Models\Seller;
+use App\Models\SellerPackage;
 use App\Services\SellerProfileService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class SellerProfileServiceTest extends TestCase
@@ -85,5 +88,40 @@ class SellerProfileServiceTest extends TestCase
         $this->assertSame($originalOwnerId, $updatedSeller->user_id);
         $this->assertSame(4, $updatedSeller->product_count);
         $this->assertFalse($updatedSeller->auto_renew);
+    }
+
+    public function test_update_profile_saves_order_and_delivery_settings_for_supported_tariff(): void
+    {
+        $seller = Seller::factory()->create(['can_order' => false]);
+        $package = Package::factory()->create(['has_order_system' => true]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+            'end_date' => null,
+        ]);
+
+        $updatedSeller = $this->service->updateProfile($seller, [
+            'name' => $seller->name,
+            'can_order' => true,
+            'delivery_enabled' => true,
+            'delivery_terms' => 'Доставка по городу.',
+        ]);
+
+        $this->assertTrue($updatedSeller->can_order);
+        $this->assertTrue($updatedSeller->delivery_enabled);
+        $this->assertSame('Доставка по городу.', $updatedSeller->delivery_terms);
+    }
+
+    public function test_update_profile_rejects_orders_for_unsupported_tariff(): void
+    {
+        $seller = Seller::factory()->create(['can_order' => false]);
+
+        $this->expectException(ValidationException::class);
+
+        $this->service->updateProfile($seller, [
+            'name' => $seller->name,
+            'can_order' => true,
+        ]);
     }
 }

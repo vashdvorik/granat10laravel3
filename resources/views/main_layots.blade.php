@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <!-- подключаем head -->
 <head>
     <meta charset="utf-8">
@@ -500,16 +500,21 @@
     </style>
 
     {{-- Open Graph для соцсетей --}}
-    <meta property="og:title" content="@yield('title', 'Маркетплейс ПМР')">
-    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $seoTitle ?: trim($__env->yieldContent('title')) }}">
+    <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:site_name" content="Маркетплейс ПМР">
-
-    {{-- Canonical URL --}}
-    <link rel="canonical" href="{{ url()->current() }}">
+    @if($seoDescription)
+    <meta property="og:description" content="{{ $seoDescription }}">
+    @endif
+    @hasSection('og_image')
+    <meta property="og:image" content="@yield('og_image')">
+    @endif
     
     {{-- SEO: Pagination meta tags --}}
     @yield('meta')
+    <link rel="stylesheet" href="{{ asset('css/marketplace-design.css') }}">
+    @stack('head')
     @stack('styles')
 </head>
 
@@ -1007,9 +1012,12 @@
                 const nextPage = currentPage + 1;
                 
                 // Определяем контейнер для добавления элементов
-                const container = $('.product-collection-grid .row').length > 0 
-                    ? $('.product-collection-grid .row') 
-                    : $('.blog-grid .row');
+                const targetSelector = btn.data('container');
+                const container = targetSelector
+                    ? $(targetSelector)
+                    : ($('.product-collection-grid .row').length > 0
+                        ? $('.product-collection-grid .row')
+                        : $('.blog-grid .row'));
                 
                 // AJAX запрос
                 $.ajax({

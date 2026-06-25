@@ -3,307 +3,171 @@
 @section('title', 'ГРАНАТ | Маркетплейс ПМР')
 
 @section('content')
-<!-- МЕНЮ КАТАЛОГА СЛЕВА-->
-<div class="header-bottom hidden-xs hidden-sm">
-    <div class="container container-240">
-        <div class="row flex lr2">
-            <div class="col-lg-3 widget-verticalmenu">
-                <div class="vertical-wrapper">
-                    <ul class="vertical-group">
-                        <li class="vertical-item level1 mega-parent"><a href="{{ $regionalUrl->route('shops') }}">Магазины рядом </a></li>
-                        <li class="vertical-item level1 mega-parent"><a href="{{ $regionalUrl->route('catalog.sale') }}">Распродажа <span class="h-ribbon e-red mg-l10">SALE</span></a></li>
-                        
-                        <!-- Статичные категории (замените alias на свои) -->
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'apparel']) }}">Одежда и обувь</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'electronics']) }}">Электроника</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'home-and-interior']) }}">Дом и интерьер</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'construction-repair']) }}">Строительство</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'automotive-goods']) }}">Авто и мото</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'beauty-and-health']) }}">Красота и здоровье</a></li>
-                        <li class="vertical-item level1 vertical-drop"><a href="{{ $regionalUrl->route('catalog.show', ['alias' => 'kids-products-main']) }}">Товары для детей</a></li>
-                        
-                    <!--
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Одежда и обувь</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu v2 tvbg pd2 style1">
-                                <ul class="level1">
-                                    <li class="level2 col-md-5">
-                                        <a href="#">TVs by Type</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">4K Ultra HD</a></li>
-                                            <li class="level3"><a href="#" title="">Smart TVs</a></li>
-                                            <li class="level3"><a href="#" title="">LED & LCD TVs & amplifiers</a></li>
-                                            <li class="level3"><a href="#" title="">OLED TVs</a></li>
-                                            <li class="level3"><a href="#" title="">QLED/Quantum Dot TVs  </a></li>
-                                        </ul>
-                                        <a href="#">Blu-ray & DVD Players</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">4K Blu-ray Players</a></li>
-                                            <li class="level3"><a href="#" title="">Streaming Blu-ray Players</a></li>
-                                            <li class="level3"><a href="#" title="">3D Blu-ray Players</a></li>
-                                            <li class="level3"><a href="#" title="">Portable Blu-ray Players</a></li>
-                                            <li class="level3"><a href="#" title="">DVD Recorders</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="level2 col-md-7">
-                                        <a href="# ">Home Audio</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Home Theater Systems</a></li>
-                                            <li class="level3"><a href="#" title="">Soundbars</a></li>
-                                            <li class="level3"><a href="#" title="">Speakers</a></li>
-                                            <li class="level3"><a href="#" title="">Receivers & Amplifiers</a></li>
-                                            <li class="level3"><a href="#" title="">Premium Audio</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Дом и сад</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu v2 homebg pd2 style1">
-                                <ul class="level1">
-                                    <li class="level2 col-md-4">
-                                        <a href="#">Home theater</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Sound bars</a></li>
-                                            <li class="level3"><a href="#" title="">Speakers</a></li>
-                                            <li class="level3"><a href="#" title="">Receivers & amplifiers</a></li>
-                                            <li class="level3"><a href="#" title="">Equalizers</a></li>
-                                            <li class="level3"><a href="#" title="">Phono preamps  </a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="level2 col-md-4">
-                                        <a href="# ">Speakers</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Bluetooth speakers</a></li>
-                                            <li class="level3"><a href="#" title="">Ceiling & in-wall speakers</a></li>
-                                            <li class="level3"><a href="#" title="">Digital music systems</a></li>
-                                            <li class="level3"><a href="#" title="">Outdoor</a></li>
-                                            <li class="level3"><a href="#" title="">Satellite speakers</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="level2 col-md-4">
-                                        <a href="#">Accessories</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Receivers & amplifiers</a></li>
-                                            <li class="level3"><a href="#" title="">Cd & tape players</a></li>
-                                            <li class="level3"><a href="#" title="">Tuners</a></li>
-                                            <li class="level3"><a href="#" title="">Curntables</a></li>
-                                            <li class="level3"><a href="#" title="">Receivers & adapters</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Строительство</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu">
-                                <ul class="vertical-menu1">
-                                    <li><a href="#">Car Audio</a></li>
-                                    <li><a href="#">Radar Detectors</a></li>
-                                    <li><a href="#">Car Safety & Security</a></li>
-                                    <li><a href="#">Car Video</a></li>
-                                    <li><a href="#">Two-Way Radios</a></li>
-                                    <li><a href="#">CB Radios & Scanners</a></li>
-                                    <li><a href="#">In-Dash Mounting Kits</a></li>
-                                    <li><a href="#">Installation Accessories.</a></li>
-                                    <li><a href="#">Car Audio</a></li>
-                                    <li><a href="#">Radar Detectors</a></li>
-                                    <li><a href="#">Car Safety & Security</a></li>
-                                    <li><a href="#">Car Video</a></li>
-                                    <li><a href="#">Two-Way Radios</a></li>
-                                    <li><a href="#">CB Radios & Scanners</a></li>
-                                    <li><a href="#">In-Dash Mounting Kits</a></li>
-                                    <li><a href="#">Installation Accessories.</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Техника и электроника</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu v2 phonebg pd2 style1">
-                                <ul class="level1">
-                                    <li class="level2 col-md-4">
-                                        <a href="#">Cell Phones</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Samsung Galaxy S8</a></li>
-                                            <li class="level3"><a href="#" title="">iPhone 7/7 Plus</a></li>
-                                            <li class="level3"><a href="#" title="">iPhone 6</a></li>
-                                            <li class="level3"><a href="#" title="">Samsung Galaxy S7</a></li>
-                                            <li class="level3"><a href="#" title="">Unlocked Phones</a></li>
-                                        </ul>
-                                        <a href="#">Cases</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">4Armbands</a></li>
-                                            <li class="level3"><a href="#" title="">Armbands</a></li>
-                                            <li class="level3"><a href="#" title="">Cases</a></li>
-                                            <li class="level3"><a href="#" title="">Flip Cases</a></li>
-                                            <li class="level3"><a href="#" title="">Holsters & Clips</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="level2 col-md-8">
-                                        <a href="# ">Accessories</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Batteries</a></li>
-                                            <li class="level3"><a href="#" title="">Bluetooth Headsets</a></li>
-                                            <li class="level3"><a href="#" title="">Bluetooth Speakers</a></li>
-                                            <li class="level3"><a href="#" title="">Car Accessories</a></li>
-                                            <li class="level3"><a href="#" title="">Chargers</a></li>
-                                        </ul>
-                                        <a href="# ">Connected Devices</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Tablets</a></li>
-                                            <li class="level3"><a href="#" title="">Mobile Hotspots</a></li>
-                                            <li class="level3"><a href="#" title="">Smart Watches</a></li>
-                                            <li class="level3"><a href="#" title="">Wearable Technology</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Авто и мото</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu v2 headphonebg pd3 style1">
-                                <ul class="level1">
-                                    <li class="level2 col-md-6">
-                                        <a href="#">Headphones</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">In-Ear & Earbud</a></li>
-                                            <li class="level3"><a href="#" title="">On-Ear</a></li>
-                                            <li class="level3"><a href="#" title="">Over-Ear</a></li>
-                                            <li class="level3"><a href="#" title="">Wireless</a></li>
-                                            <li class="level3"><a href="#" title="">Sports & Fitness</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="level2 col-md-6">
-                                        <a href="# ">Speaker System</a>
-                                        <ul class="menu-level-2">
-                                            <li class="level3"><a href="#" title="">Complete Systems</a></li>
-                                            <li class="level3"><a href="#" title="">Sound Bars</a></li>
-                                            <li class="level3"><a href="#" title="">Surround Sound</a></li>
-                                            <li class="level3"><a href="#" title="">Receivers & Amplifiers</a></li>
-                                            <li class="level3"><a href="#" title="">Equalizers</a></li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Красота и здоровье</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu">
-                                <ul class="vertical-menu1">
-                                    <li><a href="#">Car Audio</a></li>
-                                    <li><a href="#">Radar Detectors</a></li>
-                                    <li><a href="#">Car Safety & Security</a></li>
-                                    <li><a href="#">Car Video</a></li>
-                                    <li><a href="#">Two-Way Radios</a></li>
-                                    <li><a href="#">CB Radios & Scanners</a></li>
-                                    <li><a href="#">In-Dash Mounting Kits</a></li>
-                                    <li><a href="#">Installation Accessories.</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="vertical-item level1 vertical-drop"><a href="#">Товары для детей</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu">
-                                <ul class="vertical-menu1">
-                                    <li><a href="#">Car Audio</a></li>
-                                    <li><a href="#">Radar Detectors</a></li>
-                                    <li><a href="#">Car Safety & Security</a></li>
-                                    <li><a href="#">Car Video</a></li>
-                                    <li><a href="#">Two-Way Radios</a></li>
-                                    <li><a href="#">CB Radios & Scanners</a></li>
-                                    <li><a href="#">In-Dash Mounting Kits</a></li>
-                                    <li><a href="#">Installation Accessories.</a></li>
-                                </ul>
-                            </div>
-                        </li>    
-                        <li class="vertical-item level1 vertical-drop mega-parent"><a href="#">Все категории</a>
-                            <div class="menu-level-1 dropdown-menu vertical-menu v2 pd">
-                                <div class="row">
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate1.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Mirrorless Cameras</a></h3>
-                                    </div>
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate2.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Lenses</a></h3>
-                                    </div>
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate3.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Photography Drones</a></h3>
-                                    </div>
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate4.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Sports & Action Cameras</a></h3>
-                                    </div>
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate5.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Optics</a></h3>
-                                    </div>
-                                    <div class="col-md-4 text-center cate-item">
-                                        <a href="#"><img src="img/megamenu/cate6.jpg" alt="" class="img-reponsive"></a>
-                                        <h3><a href="#">Accessories</a></h3>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    -->
-                        <li class="vertical-item level1 vertical-drop mega-parent"><a href="{{ $regionalUrl->route('catalog.index') }}">Все категории</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="col-lg-9 widget-left">
-            </div>
-        </div>
-    </div>
-</div>
+<main class="home-page">
+    <section class="home-hero">
+        <div class="container container-240">
+            <div class="home-hero__panel">
+                <div class="home-hero__content">
+                    <span class="home-eyebrow">Местные товары и магазины</span>
+                    <h1>Находите нужное рядом в {{ $locationName }}</h1>
+                    <p>Товары местных магазинов, актуальные цены и прямой контакт с продавцом.</p>
 
-<!-- БАННЕРЫ-->
-<div class="ads-group v3">
-    <div class="container container-240">
-        <div class="row">
-            <div class="col-lg-3 col-md-3 set-w"></div>
-            <div class="col-lg-9 col-md-9 set-w2">
-                <div class="row">
-                    <div class="col-md-8 col-sm-8 col-xs-12">
-                        <div class="slide">
-                            <div class="e-slide v2 js-slider-3items">
-                                <div class="e-slide-img v2">
-                                    <a href="#"><img src="img/slider/h1_s1-1.jpg" alt=""></a>
-                                    <div class="box-center slide-content v3">
-                                        <p class="cate v2 white text-center">Бытовые кондиционеры</p>
-                                        <h3 class="white v3 text-center"> От 4 851 руб.</h3>
-                                        <a href="#" class="slide-btn e-red-gradient">Купить сейчас<i class="ion-ios-arrow-forward"></i></a>
-                                    </div>
-                                </div>
-                                <div class="e-slide-img v2">
-                                    <a href="#"><img src="img/slider/h1_s2.jpg" alt=""></a>
-                                    <div class="box-center slide-content v3">
-                                        <p class="cate v2 white text-center">Power to the pro</p>
-                                        <h3 class="white v3 text-center">The vision is brighter than ever.</h3>
-                                        <a href="#" class="slide-btn e-red-gradient">Shop now<i class="ion-ios-arrow-forward"></i></a>
-                                    </div>
-                                </div>
-                                <div class="e-slide-img v2">
-                                    <a href="#"><img src="img/slider/h1_s3.jpg" alt=""></a>
-                                    <div class="box-center slide-content v3">
-                                        <p class="cate v2 white text-center">Power to the pro</p>
-                                        <h3 class="white v3 text-center">The vision is brighter than ever.</h3>
-                                        <a href="#" class="slide-btn e-red-gradient">Shop now<i class="ion-ios-arrow-forward"></i></a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <form class="home-search" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">
+                        <label class="sr-only" for="home-search-query">Поиск товаров</label>
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        <input id="home-search-query" type="search" name="q"
+                            placeholder="Что вы ищете?" autocomplete="off">
+                        <button type="submit">Найти</button>
+                    </form>
+
+                    <div class="home-hero__actions">
+                        <a class="home-btn home-btn--primary" href="{{ $regionalUrl->route('catalog.index') }}">
+                            Открыть каталог
+                        </a>
+                        <a class="home-btn home-btn--light" href="{{ $regionalUrl->route('shops') }}">
+                            Смотреть магазины
+                        </a>
                     </div>
-                    <div class="col-md-4 col-sm-4 col-xs-12">
-                        <div class="ads">
-                            <div class="banner-img banner-img2">
-                                <a href="#"><img src="img/banner/h1_b1-1.jpg" alt="" class="img-responsive"></a>
-                                <div class="h-banner-content v3">
-                                    <p class="content-name">Летние платья</p>
-                                    <p class="content-price percent">Скидки до <span class="red">25</span></p>
-                                    <a href="#" class="btn-banner e-red-gradient">Купить сейчас<i class="ion-ios-arrow-forward"></i></a> 
-                                </div>
-                            </div>
-                        </div>
+                </div>
+
+                <div class="home-hero__aside">
+                    <div class="home-stat">
+                        <strong>{{ $visibleProductsCount }}</strong>
+                        <span>актуальных товаров</span>
                     </div>
+                    <div class="home-stat">
+                        <strong>{{ $visibleSellersCount }}</strong>
+                        <span>местных магазинов</span>
+                    </div>
+                    <a class="home-sale-link" href="{{ $regionalUrl->route('catalog.sale') }}">
+                        <span><i class="fa fa-percent" aria-hidden="true"></i></span>
+                        <div><strong>Скидки и акции</strong><small>Посмотреть выгодные предложения</small></div>
+                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
+
+    @if($featuredCategories->isNotEmpty())
+        <section class="home-section home-categories" aria-labelledby="home-categories-title">
+            <div class="container container-240">
+                <div class="home-section__heading">
+                    <div>
+                        <span class="home-eyebrow">Быстрый выбор</span>
+                        <h2 id="home-categories-title">Популярные категории</h2>
+                    </div>
+                    <a href="{{ $regionalUrl->route('catalog.index') }}">Все категории</a>
+                </div>
+
+                <div class="home-categories__grid">
+                    @foreach($featuredCategories as $category)
+                        <a class="home-category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias]) }}">
+                            <span class="home-category__icon" aria-hidden="true">
+                                {{ mb_strtoupper(mb_substr($category->name, 0, 1)) }}
+                            </span>
+                            <span class="home-category__content">
+                                <strong>{{ $category->name }}</strong>
+                                <small>{{ $category->visible_products_count }}
+                                    {{ trans_choice('товар|товара|товаров', $category->visible_products_count) }}</small>
+                            </span>
+                            <i class="fa fa-angle-right" aria-hidden="true"></i>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if($latestProducts->isNotEmpty())
+        <section class="home-section" aria-labelledby="home-latest-title">
+            <div class="container container-240">
+                <div class="home-section__heading">
+                    <div>
+                        <span class="home-eyebrow">Свежие предложения</span>
+                        <h2 id="home-latest-title">Новые товары</h2>
+                    </div>
+                    <a href="{{ $regionalUrl->route('catalog.index') }}">Смотреть каталог</a>
+                </div>
+
+                <div class="home-products">
+                    @foreach($latestProducts as $product)
+                        @include('components.home-product-card', ['product' => $product])
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if($saleProducts->isNotEmpty())
+        <section class="home-section home-sale" aria-labelledby="home-sale-title">
+            <div class="container container-240">
+                <div class="home-section__heading">
+                    <div>
+                        <span class="home-eyebrow">Цена ниже обычной</span>
+                        <h2 id="home-sale-title">Выгодные предложения</h2>
+                    </div>
+                    <a href="{{ $regionalUrl->route('catalog.sale') }}">Все скидки</a>
+                </div>
+
+                <div class="home-products home-products--sale">
+                    @foreach($saleProducts as $product)
+                        @include('components.home-product-card', ['product' => $product])
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if($featuredSellers->isNotEmpty())
+        <section class="home-section" aria-labelledby="home-sellers-title">
+            <div class="container container-240">
+                <div class="home-section__heading">
+                    <div>
+                        <span class="home-eyebrow">Покупайте у местных</span>
+                        <h2 id="home-sellers-title">Магазины рядом</h2>
+                    </div>
+                    <a href="{{ $regionalUrl->route('shops') }}">Все магазины</a>
+                </div>
+
+                <div class="home-sellers">
+                    @foreach($featuredSellers as $seller)
+                        <a class="home-seller" href="{{ $regionalUrl->route('seller', ['alias' => $seller->alias]) }}">
+                            <span class="home-seller__logo">
+                                @if($seller->photo)
+                                    <img src="{{ Storage::url($seller->photo) }}" alt="{{ $seller->name }}"
+                                        width="72" height="72" loading="lazy">
+                                @else
+                                    {{ mb_strtoupper(mb_substr(trim($seller->name, '" '), 0, 1)) }}
+                                @endif
+                            </span>
+                            <span class="home-seller__content">
+                                <strong>{{ trim($seller->name, '" ') }}</strong>
+                                <small>{{ $seller->town }} · {{ $seller->visible_products_count }}
+                                    {{ trans_choice('товар|товара|товаров', $seller->visible_products_count) }}</small>
+                            </span>
+                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <section class="home-section home-how" aria-labelledby="home-how-title">
+        <div class="container container-240">
+            <div class="home-section__heading">
+                <div>
+                    <span class="home-eyebrow">Просто и понятно</span>
+                    <h2 id="home-how-title">Как пользоваться маркетплейсом</h2>
+                </div>
+            </div>
+            <div class="home-how__grid">
+                <div><span>1</span><strong>Найдите товар</strong><p>Используйте поиск, категории и фильтры каталога.</p></div>
+                <div><span>2</span><strong>Выберите продавца</strong><p>Посмотрите цену, описание, адрес и контакты магазина.</p></div>
+                <div><span>3</span><strong>Свяжитесь или закажите</strong><p>Позвоните продавцу или отправьте заказ через сайт, если функция доступна.</p></div>
+            </div>
+        </div>
+    </section>
+</main>
 @endsection

@@ -4,8 +4,8 @@
 
 @section('content_cabinet')
 
-<div class="contents">
-    <div class="container-fluid">
+<div class="contents product-form-page">
+    <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
@@ -14,8 +14,12 @@
                         <a href="{{ url()->previous() }}" class="btn btn-sm btn-secondary">
                             <i class="uil uil-arrow-left"></i> Назад
                         </a>
-                        <button type="submit" form="product-edit-form" class="btn btn-sm btn-primary">
-                            <i class="uil uil-save"></i> Сохранить изменения
+                        <button type="submit"
+                                form="product-edit-form"
+                                name="save_action"
+                                value="save_and_submit"
+                                class="btn btn-sm btn-primary">
+                            <i class="uil uil-shield-check"></i> Сохранить и отправить
                         </button>
                     </div>
                 </div>
@@ -23,13 +27,13 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
-                <div class="product-add global-shadow px-sm-30 py-sm-50 px-0 py-20 bg-white radius-xl w-100 mb-40">
-                    <div class="row justify-content-center">
-                        <div class="col-xxl-7 col-lg-10">
-                            <div class="mx-sm-30 mx-20">
+                <div class="product-add product-form-shell w-100">
+                    <div class="row">
+                        <div class="col-12 product-form-column">
+                            <div class="product-form-inner">
                                 <form action="{{ route('account.store.products.update', $product) }}" 
                                       method="POST" 
                                       enctype="multipart/form-data"
@@ -37,9 +41,14 @@
                                       novalidate>
                                     @csrf
                                     @method('PUT')
+                                    <input type="hidden"
+                                           name="expected_moderation_version"
+                                           value="{{ $product->moderation_version }}">
+                                    <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
+                                    <x-product-moderation-issues :issues="$moderationIssues" />
 
                                     {{-- Основная информация --}}
-                                    <div class="card add-product p-sm-30 p-20 mb-30">
+                                    <div class="card add-product product-form-section mb-24">
                                         <div class="card-body p-0">
                                             <div class="card-header">
                                                 <h6 class="fw-500">Информация о товаре</h6>
@@ -48,7 +57,7 @@
                                             {{-- ============================================ --}}
                                             {{-- БЛОК СООБЩЕНИЙ И ОШИБОК --}}
                                             {{-- ============================================ --}}
-                                            <div class="px-sm-40 px-20 pt-20">
+                                            <div class="product-form-alerts pt-20">
                                                 {{-- ✅ СООБЩЕНИЕ ОБ УСПЕХЕ --}}
                                                 @if(session('success'))
                                                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -96,9 +105,10 @@
                                                 {{-- Название --}}
                                                 <div class="form-group">
                                                     <label for="name">Название товара <span class="text-danger">*</span></label>
-                                                    <input type="text" 
+                                                    <input type="text"
                                                            class="form-control @error('name') is-invalid @enderror" 
                                                            id="name" 
+                                                           style="scroll-margin-top: 110px;"
                                                            name="name" 
                                                            value="{{ old('name', $product->name) }}" 
                                                            placeholder="Введите название товара"
@@ -113,12 +123,29 @@
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+                                                    <x-product-moderation-field-issues
+                                                        :issues="$moderationIssues"
+                                                        field="name"
+                                                    />
+
+                                                    <div class="form-check form-switch mt-3">
+                                                        <input type="hidden" name="can_order" value="0">
+                                                        <input class="form-check-input" type="checkbox" name="can_order"
+                                                               id="can_order" value="1" @checked(old('can_order', $product->can_order))>
+                                                        <label class="form-check-label" for="can_order">Разрешить заказ товара через сайт</label>
+                                                    </div>
+                                                    <div class="form-check form-switch mt-2">
+                                                        <input type="hidden" name="delivery_enabled" value="0">
+                                                        <input class="form-check-input" type="checkbox" name="delivery_enabled"
+                                                               id="delivery_enabled" value="1" @checked(old('delivery_enabled', $product->delivery_enabled))>
+                                                        <label class="form-check-label" for="delivery_enabled">Разрешить доставку этого товара</label>
+                                                    </div>
                                                 </div>
 
                                                 {{-- Категория --}}
                                                 <div class="form-group">
                                                     <label>Категория <span class="text-danger">*</span></label>
-                                                    <div id="category-selectors">
+                                                    <div id="category-selectors" style="scroll-margin-top: 110px;">
                                                         {{-- Будет заполнено через JS --}}
                                                     </div>
                                                     
@@ -128,6 +155,10 @@
                                                     @error('category_id')
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror
+                                                    <x-product-moderation-field-issues
+                                                        :issues="$moderationIssues"
+                                                        field="category"
+                                                    />
                                                 </div>
 
                                                 {{-- Цена --}}
@@ -172,46 +203,9 @@
                                                     @enderror
                                                 </div>
 
-                                                {{-- Статус активности --}}
-                                                <div class="form-group mb-20">
-                                                    <label class="form-label">Статус активности</label>
-                                                    <div class="d-flex gap-3">
-                                                        <div class="radio-horizontal-list d-flex flex-wrap gap-3">
-                                                            <div class="radio-theme-default custom-radio">
-                                                                <input class="radio @error('is_active') is-invalid @enderror" 
-                                                                       type="radio" 
-                                                                       name="is_active" 
-                                                                       value="1" 
-                                                                       id="active-yes"
-                                                                       {{ old('is_active', $product->is_active) == '1' ? 'checked' : '' }}>
-                                                                <label for="active-yes">
-                                                                    <span class="radio-text">Опубликован</span>
-                                                                </label>
-                                                            </div>
-                                                            <div class="radio-theme-default custom-radio">
-                                                                <input class="radio @error('is_active') is-invalid @enderror" 
-                                                                       type="radio" 
-                                                                       name="is_active" 
-                                                                       value="0" 
-                                                                       id="active-no"
-                                                                       {{ old('is_active', $product->is_active) == '0' ? 'checked' : '' }}>
-                                                                <label for="active-no">
-                                                                    <span class="radio-text">Снят с публикации</span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    
-                                                    {{-- ⚠️ Ошибка лимита АКТИВНЫХ товаров --}}
-                                                    @error('is_active')
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
-                                                            <div>
-                                                                <small class="d-block mb-0 text-dark">
-                                                                    <strong>{{ $message }}</strong>
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                    @enderror
+                                                <div class="alert alert-light border mb-20">
+                                                    Изменение названия, категории, цены, описания,
+                                                    характеристик или фотографий требует новой проверки.
                                                 </div>
 
                                                 {{-- ✅ VIP ТОВАР С ИНФОРМАЦИОННЫМ БЛОКОМ --}}
@@ -256,22 +250,28 @@
                                                 {{-- Описание --}}
                                                 <div class="form-group">
                                                     <label for="desc">Описание товара</label>
-                                                    <textarea class="form-control @error('desc') is-invalid @enderror" 
+                                                    <textarea class="form-control @error('desc') is-invalid @enderror"
                                                               id="desc" 
+                                                              style="scroll-margin-top: 110px;"
                                                               name="desc" 
                                                               rows="4" 
                                                               placeholder="Подробное описание товара">{{ old('desc', $product->desc) }}</textarea>
                                                     @error('desc')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+                                                    <x-product-moderation-field-issues
+                                                        :issues="$moderationIssues"
+                                                        field="description"
+                                                    />
                                                 </div>
 
                                                 {{-- Характеристики --}}
                                                 <div class="form-group">
                                                     <label for="features1">Характеристика 1</label>
-                                                    <input type="text" 
+                                                    <input type="text"
                                                            class="form-control @error('features1') is-invalid @enderror" 
                                                            id="features1" 
+                                                           style="scroll-margin-top: 110px;"
                                                            name="features1" 
                                                            value="{{ old('features1', $product->features1) }}" 
                                                            placeholder="Например: Цвет: Красный">
@@ -317,13 +317,19 @@
                                                     @error('features4')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
+                                                    <x-product-moderation-field-issues
+                                                        :issues="$moderationIssues"
+                                                        field="features"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     {{-- Изображения товара --}}
-                                    <div class="card add-product p-sm-30 p-20 mb-30">
+                                    <div class="card add-product product-form-section mb-24"
+                                         id="product-images-section"
+                                         style="scroll-margin-top: 110px;">
                                         <div class="card-body p-0">
                                             <div class="card-header d-flex justify-content-between align-items-center">
                                                 <h6 class="fw-500">Изображения товара</h6>
@@ -331,6 +337,10 @@
                                             </div>
                                             
                                             <div class="add-product__body-img px-sm-40 px-20">
+                                                <x-product-moderation-field-issues
+                                                    :issues="$moderationIssues"
+                                                    field="images"
+                                                />
                                                 {{-- Существующие изображения --}}
                                                 @if($product->images->count() > 0)
                                                     <div class="existing-images mb-25">
@@ -420,14 +430,22 @@
                                     </div>
 
                                     {{-- Кнопки --}}
-                                    <div class="button-group add-product-btn d-flex justify-content-sm-end justify-content-center mt-40 gap-2">
+                                    <div class="button-group add-product-btn product-form-actions d-flex justify-content-end gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
                                            class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
                                             Отмена
                                         </a>
-                                        <button type="submit" 
+                                        <button type="submit"
+                                                name="save_action"
+                                                value="save_draft"
+                                                class="btn btn-light btn-default btn-squared text-capitalize">
+                                            <i class="uil uil-save"></i> Сохранить черновик
+                                        </button>
+                                        <button type="submit"
+                                                name="save_action"
+                                                value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-save"></i> Сохранить изменения
+                                            <i class="uil uil-shield-check"></i> Сохранить и отправить
                                         </button>
                                     </div>
                                 </form>

@@ -26,7 +26,7 @@ class CatalogPageServiceTest extends TestCase
 
         Cache::flush();
         Session::flush();
-        $this->service = new CatalogPageService();
+        $this->service = new CatalogPageService;
     }
 
     public function test_catalog_page_data_applies_current_price_filter(): void
@@ -80,7 +80,7 @@ class CatalogPageServiceTest extends TestCase
 
         $data = $this->service->getCategoryPageData(
             $targetCategory,
-            Request::create('/catalog/' . $targetCategory->alias)
+            Request::create('/catalog/'.$targetCategory->alias)
         );
 
         $this->assertTrue($data['products']->contains($targetProduct));
@@ -125,6 +125,56 @@ class CatalogPageServiceTest extends TestCase
 
         $this->assertTrue($products->contains($targetProduct));
         $this->assertFalse($products->contains($otherProduct));
+    }
+
+    public function test_search_requires_every_meaningful_word(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $matchingProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Красная зимняя куртка',
+        ]);
+        $partialProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Красная рубашка',
+        ]);
+
+        $products = $this->service->getSearchProducts('  Красная   куртка ');
+
+        $this->assertTrue($products->contains($matchingProduct));
+        $this->assertFalse($products->contains($partialProduct));
+    }
+
+    public function test_search_orders_exact_name_before_description_match(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $descriptionMatch = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Обычный товар',
+            'desc' => 'Содержит точный поисковый запрос Телефон',
+            'is_vip' => false,
+        ]);
+        $exactMatch = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Телефон',
+            'is_vip' => false,
+        ]);
+
+        $products = $this->service->getSearchProducts('Телефон');
+
+        $this->assertSame($exactMatch->id, $products->first()->id);
+        $this->assertTrue($products->contains($descriptionMatch));
+    }
+
+    public function test_search_treats_sql_wildcards_as_regular_characters(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $regularProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Обычный товар',
+        ]);
+
+        $products = $this->service->getSearchProducts('%');
+
+        $this->assertFalse($products->contains($regularProduct));
     }
 
     private function createSellerWithPackage(array $sellerAttributes = []): Seller

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Filament;
 
+use App\Enums\ProductModerationStatus;
 use App\Filament\Resources\ProductResource\Pages\CreateProduct;
 use App\Filament\Resources\ProductResource\Pages\EditProduct;
 use App\Filament\Resources\ProductResource\Pages\ListProducts;
@@ -11,6 +12,7 @@ use App\Models\Image;
 use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
+use App\Models\ProductModerationRun;
 use App\Models\Role;
 use App\Models\Seller;
 use App\Models\SellerPackage;
@@ -92,6 +94,49 @@ class ProductResourceTest extends TestCase
             ->filterTable('on_sale', true)
             ->assertCanSeeTableRecords([$firstProduct])
             ->assertCanNotSeeTableRecords([$secondProduct]);
+    }
+
+    public function test_product_list_filters_image_moderation_problems(): void
+    {
+        $administrator = $this->createAdministrator();
+        $problemProduct = Product::factory()->create([
+            'moderation_version' => 3,
+            'moderation_status' => ProductModerationStatus::NeedsReview,
+        ]);
+        $cleanProduct = Product::factory()->create([
+            'moderation_version' => 3,
+            'moderation_status' => ProductModerationStatus::Approved,
+        ]);
+
+        ProductModerationRun::create([
+            'product_id' => $problemProduct->id,
+            'content_version' => 3,
+            'trigger' => 'image_queue',
+            'provider' => 'image_google',
+            'status' => 'completed',
+            'decision' => 'review',
+            'request_fingerprint' => hash('sha256', 'problem-image'),
+        ]);
+        ProductModerationRun::create([
+            'product_id' => $cleanProduct->id,
+            'content_version' => 3,
+            'trigger' => 'image_queue',
+            'provider' => 'image_google',
+            'status' => 'completed',
+            'decision' => 'allow',
+            'request_fingerprint' => hash('sha256', 'clean-image'),
+        ]);
+
+        $this->actingAs($administrator);
+
+        Livewire::test(ListProducts::class)
+            ->filterTable('image_moderation_problem', true)
+            ->assertCanSeeTableRecords([$problemProduct])
+            ->assertCanNotSeeTableRecords([$cleanProduct])
+            ->resetTableFilters()
+            ->filterTable('image_moderation_problem', false)
+            ->assertCanSeeTableRecords([$cleanProduct])
+            ->assertCanNotSeeTableRecords([$problemProduct]);
     }
 
     public function test_administrator_can_create_inactive_product_through_write_service(): void
@@ -176,7 +221,8 @@ class ProductResourceTest extends TestCase
         $product = Product::query()->where('name', 'Активный товар')->firstOrFail();
         $image = $product->images()->firstOrFail();
 
-        $this->assertTrue((bool) $product->is_active);
+        $this->assertFalse((bool) $product->is_active);
+        $this->assertTrue($product->publication_requested);
         $this->assertTrue((bool) $image->is_main);
         Storage::disk('public')->assertExists($image->path);
     }
@@ -291,6 +337,66 @@ class ProductResourceTest extends TestCase
         $this->assertFalse((bool) $vipLimitedProduct->refresh()->is_active);
     }
 
+    public function test_moderator_can_approve_request_changes_and_reject_products(): void
+    {
+        $administrator = $this->createAdministrator();
+        $approved = Product::factory()->pendingModeration()->create(['is_active' => true]);
+        $changes = Product::factory()->pendingModeration()->create(['is_active' => true]);
+        $rejected = Product::factory()->pendingModeration()->create(['is_active' => true]);
+
+        $this->actingAs($administrator);
+
+        Livewire::test(ListProducts::class)
+            ->callTableAction('approveModeration', $approved, [
+                'comment' => 'Одобрено вручную',
+            ])
+            ->assertNotified();
+
+        Livewire::test(ListProducts::class)
+            ->callTableAction('requestChanges', $changes, [
+                'comment' => 'Добавьте описание',
+            ])
+            ->assertNotified();
+
+        Livewire::test(ListProducts::class)
+            ->callTableAction('rejectModeration', $rejected, [
+                'reason_code' => 'prohibited_product',
+                'comment' => 'Запрещённый товар',
+            ])
+            ->assertNotified();
+
+        $this->assertSame(ProductModerationStatus::Approved, $approved->fresh()->moderation_status);
+        $this->assertSame(ProductModerationStatus::ChangesRequired, $changes->fresh()->moderation_status);
+        $this->assertSame(ProductModerationStatus::Rejected, $rejected->fresh()->moderation_status);
+        $this->assertFalse((bool) $changes->fresh()->is_active);
+        $this->assertFalse((bool) $rejected->fresh()->is_active);
+    }
+
+    public function test_moderator_can_approve_product_after_provider_failure(): void
+    {
+        $administrator = $this->createAdministrator();
+        $product = Product::factory()->create([
+            'moderation_status' => ProductModerationStatus::NeedsReview,
+            'moderation_version' => 2,
+            'moderated_version' => null,
+            'is_active' => false,
+        ]);
+
+        $this->actingAs($administrator);
+
+        Livewire::test(ListProducts::class)
+            ->assertTableActionVisible('approveModeration', $product)
+            ->callTableAction('approveModeration', $product, [
+                'comment' => 'Проверено администратором после сбоя ИИ',
+            ])
+            ->assertNotified();
+
+        $product->refresh();
+
+        $this->assertSame(ProductModerationStatus::Approved, $product->moderation_status);
+        $this->assertSame(2, $product->moderated_version);
+    }
+
     public function test_deactivate_push_and_delete_actions_use_action_service(): void
     {
         $administrator = $this->createAdministrator();
@@ -310,12 +416,6 @@ class ProductResourceTest extends TestCase
 
         $this->actingAs($administrator);
 
-        Livewire::test(ListProducts::class)
-            ->callTableAction('deactivate', $product)
-            ->assertNotified();
-
-        $this->assertFalse((bool) $product->refresh()->is_active);
-
         $oldPushAt = $product->push_at;
 
         Livewire::test(ListProducts::class)
@@ -323,6 +423,12 @@ class ProductResourceTest extends TestCase
             ->assertNotified();
 
         $this->assertTrue($product->refresh()->push_at->greaterThan($oldPushAt));
+
+        Livewire::test(ListProducts::class)
+            ->callTableAction('deactivate', $product)
+            ->assertNotified();
+
+        $this->assertFalse((bool) $product->refresh()->is_active);
 
         Livewire::test(ListProducts::class)
             ->callTableAction('deleteProduct', $product)

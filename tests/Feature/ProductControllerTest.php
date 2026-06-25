@@ -133,5 +133,40 @@ class ProductControllerTest extends TestCase
         $response->assertViewHas('breadcrumbs');
         $response->assertViewHas('product');
         $response->assertViewHas('category');
+        $response->assertViewHas('relatedProducts');
+    }
+
+    public function test_product_page_has_real_seo_markup_without_demo_content(): void
+    {
+        $product = $this->createVisibleProduct(['name' => 'Товар для SEO']);
+
+        $response = $this->get(route('product.show', $product->alias));
+
+        $response
+            ->assertOk()
+            ->assertSee('"@type":"Product"', false)
+            ->assertSee('<meta property="og:type" content="product">', false)
+            ->assertDontSee('896 reviews')
+            ->assertDontSee('Customer questions & answers')
+            ->assertDontSee('Cordless TrackMan Wheel');
+
+        $this->assertSame(1, substr_count($response->getContent(), 'rel="canonical"'));
+        $this->assertSame(1, substr_count($response->getContent(), '<h1'));
+    }
+
+    public function test_product_page_shows_other_products_from_same_seller_as_fallback(): void
+    {
+        $product = $this->createVisibleProduct();
+        $related = Product::factory()->create([
+            'seller_id' => $product->seller_id,
+            'category_id' => Category::factory()->create()->id,
+            'name' => 'Другой товар этого продавца',
+            'is_active' => true,
+        ]);
+
+        $this->get(route('product.show', $product->alias))
+            ->assertOk()
+            ->assertSee('Другие товары продавца')
+            ->assertSee($related->name);
     }
 }

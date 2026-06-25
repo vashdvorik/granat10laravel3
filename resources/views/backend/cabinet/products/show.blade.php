@@ -13,7 +13,7 @@
             <div class="col-lg-12">
                 <div class="shop-breadcrumb">
                     <div class="breadcrumb-main">
-                        <h4 class="text-capitalize breadcrumb-title">{{ $product->name }}</h4>
+                        <h4 class="breadcrumb-title">{{ $product->name }}</h4>
                         <div class="breadcrumb-action justify-content-center flex-wrap gap-2">
                             <a href="{{ route('account.store.products.index') }}" class="btn btn-sm btn-secondary">
                                 <i class="uil uil-arrow-left"></i> К списку
@@ -46,7 +46,7 @@
                                                         <img class="img-fluid d-flex bg-opacity-primary" 
                                                              src="{{ asset('storage/' . $image->path) }}" 
                                                              alt="{{ $product->name }}" 
-                                                             style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+                                                             style="width: 100%; height: 100%; object-fit: contain; background-color: #fafafa;">
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -97,7 +97,7 @@
                                     </div>
                                     <!-- End: Product Title -->
 
-                                    <div class="product-item__content text-capitalize">
+                                    <div class="product-item__content">
                                         <!-- Start: Product Category -->
                                         @if($product->category)
                                             <span class="product-details-brandName">Категория: <span>{{ $product->category->name }}</span></span>
@@ -109,16 +109,19 @@
                                                     <i class="uil uil-star"></i> VIP
                                                 </span>
                                             @endif
-                                            @if($product->is_active)
+                                            @if($product->view_state->isPublic)
                                                 <span class="badge badge-round badge-success badge-lg">
                                                     <i class="uil uil-check"></i> Опубликован
                                                 </span>
                                             @else
                                                 <span class="badge badge-round badge-light badge-lg badge-outlined">
-                                                    <i class="uil uil-pause"></i> Снят с публикации
+                                                    <i class="uil uil-pause"></i> Не опубликован
                                                 </span>
                                             @endif
                                         </div>
+                                        <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
+                                        <x-product-moderation-issues :issues="$moderationIssues" />
+
                                         <!-- End: Product Status Badges -->
                                         
 
@@ -143,7 +146,7 @@
 
                                         <!-- Start: Product Description -->
                                         @if($product->desc)
-                                            <p class="product-deatils-pera">{{ $product->desc }}</p>
+                                            <div class="product-deatils-pera" style="white-space: pre-line;">{{ $product->desc }}</div>
                                         @endif
                                         <!-- End: Product Description -->
 
@@ -170,58 +173,24 @@
                                         <!-- End: Product Characteristics -->
                                     {{-- Кнопки действий --}}
                                         <div class="mb-3">
-                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                                {{-- Кнопка Поднять --}}
-                                                @if($product->is_active)
-                                                    <form action="{{ route('account.store.products.push-up', $product->id) }}" 
-                                                            method="POST" 
-                                                            class="push-up-form m-0 flex-fill"
-                                                            data-product-name="{{ $product->name }}"
-                                                            data-push-at="{{ $product->push_at ? $product->push_at->format('d.m.Y H:i') : '' }}">
-                                                        @csrf
-                                                        <button type="button" 
-                                                                class="btn {{ $product->push_at && $product->push_at->addHours(24)->isFuture() ? 'btn-light' : 'btn-sm btn-primary btn-transparent-primary' }} btn-default btn-squared push-up-btn w-100"
-                                                                @if($product->push_at && $product->push_at->addHours(24)->isFuture())
-                                                                    disabled
-                                                                    title="Доступно {{ $product->push_at->addHours(24)->format('d.m.Y в H:i') }}"
-                                                                @endif>
-                                                            <i class="uil uil-arrow-up"></i> Поднять
-                                                        </button>
-                                                    </form>
-                                                @endif
-
-                                                {{-- Кнопка Опубликовать/Снять --}}
-                                                @if($product->is_active)
-                                                    <form action="{{ route('account.store.products.deactivate', $product->id) }}" 
-                                                            method="POST" 
-                                                            class="status-change-form m-0 flex-fill"
-                                                            data-action="deactivate"
-                                                            data-product-name="{{ $product->name }}">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="button" 
-                                                                class="btn btn-sm btn-warning btn-default btn-squared btn-transparent-warning status-change-btn w-100">
-                                                            <i class="uil uil-pause"></i> Стоп
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    <form action="{{ route('account.store.products.activate', $product->id) }}" 
-                                                            method="POST" 
-                                                            class="status-change-form m-0 flex-fill"
-                                                            data-action="activate"
-                                                            data-product-name="{{ $product->name }}">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="button" 
-                                                                class="btn btn-sm btn-success btn-default btn-squared btn-transparent-success status-change-btn w-100">
-                                                            <i class="uil uil-check"></i> Опубликовать
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </div>
+                                            <x-product-moderation-actions :product="$product" />
                                         </div>
                                         {{-- КНОПКИ УДАЛИТЬ И ИЗМЕНИТЬ --}}
                                         <div class="d-flex mt-20 flex-wrap gap-2">
+                                            @if($product->view_state->canUnpublish)
+                                            <form action="{{ route('account.store.products.deactivate', $product) }}"
+                                                  method="POST"
+                                                  class="status-change-form flex-fill"
+                                                  data-action="deactivate"
+                                                  data-product-name="{{ $product->name }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="button"
+                                                        class="btn btn-warning btn-default btn-squared status-change-btn w-100">
+                                                    Снять с публикации
+                                                </button>
+                                            </form>
+                                            @endif
                                             {{-- Кнопка Удалить --}}
                                             <form action="{{ route('account.store.products.destroy', $product->id) }}" 
                                                     method="POST" 
@@ -236,10 +205,12 @@
                                             </form>
 
                                             {{-- Кнопка Изменить --}}
+                                            @if($product->view_state->primaryAction !== \App\Enums\ProductPrimaryAction::Edit)
                                             <a href="{{ route('account.store.products.edit', $product->id) }}" 
                                                 class="btn btn-primary btn-default btn-squared border-0 flex-fill">
                                                 Изменить
                                             </a>
+                                            @endif
                                         </div>
                                     {{-- Конец кнопкам--}}
 

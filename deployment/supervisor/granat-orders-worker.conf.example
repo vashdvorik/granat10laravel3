@@ -1,0 +1,12 @@
+[program:granat-orders-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=/usr/bin/php /var/www/granat/artisan queue:work redis --queue=orders --sleep=3 --tries=3 --timeout=30 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/www/granat/storage/logs/worker-orders.log
+stopwaitsecs=60

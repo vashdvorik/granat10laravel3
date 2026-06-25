@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProductModerationStatus;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
@@ -31,6 +32,12 @@ class ProductFactory extends Factory
             'alias'           => Str::slug($name) . '-' . fake()->unique()->randomNumber(5),
             'is_vip'          => false,
             'is_active'       => true,
+            'publication_requested' => true,
+            'moderation_status' => ProductModerationStatus::Approved,
+            'moderation_version' => 1,
+            'moderated_version' => 1,
+            'moderation_source' => 'factory',
+            'moderated_at' => now(),
             'category_id'     => Category::factory(),
             'seller_id'       => Seller::factory(),
             'sale_started_at' => null,
@@ -41,7 +48,50 @@ class ProductFactory extends Factory
     /** Неактивный товар */
     public function inactive(): static
     {
-        return $this->state(['is_active' => false]);
+        return $this->state([
+            'is_active' => false,
+            'publication_requested' => false,
+        ]);
+    }
+
+    public function draft(): static
+    {
+        return $this->state([
+            'is_active' => false,
+            'publication_requested' => false,
+            'moderation_status' => ProductModerationStatus::Draft,
+            'moderation_version' => 1,
+            'moderated_version' => null,
+            'moderation_source' => null,
+            'moderated_at' => null,
+        ]);
+    }
+
+    public function pendingModeration(): static
+    {
+        return $this->state([
+            'is_active' => false,
+            'publication_requested' => true,
+            'moderation_status' => ProductModerationStatus::Pending,
+            'moderation_version' => 1,
+            'moderated_version' => null,
+            'moderation_source' => null,
+            'moderation_submitted_at' => now(),
+            'moderated_at' => null,
+        ]);
+    }
+
+    public function rejected(): static
+    {
+        return $this->state([
+            'is_active' => false,
+            'publication_requested' => false,
+            'moderation_status' => ProductModerationStatus::Rejected,
+            'moderation_version' => 1,
+            'moderated_version' => 1,
+            'moderation_source' => 'factory',
+            'moderated_at' => now(),
+        ]);
     }
 
     /** VIP-товар */

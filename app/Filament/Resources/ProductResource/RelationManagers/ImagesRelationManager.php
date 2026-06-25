@@ -7,6 +7,7 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Services\ProductActionService;
 use App\Services\ProductImageService;
+use App\Services\ProductModerationService;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -57,7 +58,11 @@ class ImagesRelationManager extends RelationManager
                             ->storeFiles(false)
                             ->required(),
                     ])
-                    ->action(function (array $data, ProductImageService $service): void {
+                    ->action(function (
+                        array $data,
+                        ProductImageService $service,
+                        ProductModerationService $moderationService
+                    ): void {
                         /** @var Product $product */
                         $product = $this->getOwnerRecord();
                         Gate::authorize('manageImages', $product);
@@ -67,6 +72,7 @@ class ImagesRelationManager extends RelationManager
                             $data['images'],
                             ! $product->images()->where('is_main', true)->exists(),
                         );
+                        $moderationService->invalidate($product);
 
                         Notification::make()
                             ->title('Изображения загружены')

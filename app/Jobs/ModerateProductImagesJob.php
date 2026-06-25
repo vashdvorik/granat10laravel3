@@ -1,0 +1,192 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Contracts\ProductImageModerationClient;
+use App\Enums\ProductModerationStatus;
+use App\Exceptions\AiModerationProviderException;
+use App\Models\Product;
+use App\Models\ProductModerationRun;
+use App\Services\AiModerationOutcomeStatusResolver;
+use App\Services\ProductAutoApprovalPolicy;
+use App\Services\ProductModerationFeedbackService;
+use App\Services\ProductModerationPayloadFactory;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+use Throwable;
+
+class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $timeout;
+
+    public int $tries;
+
+    public int $uniqueFor = 600;
+
+    public function __construct(
+        public readonly int $productId,
+        public readonly int $contentVersion
+    ) {
+        $this->onQueue((string) config('moderation.images.queue', 'moderation'));
+        $this->timeout = (int) config('moderation.images.timeout', 60);
+        $this->tries = (int) config('moderation.images.max_attempts', 3);
+    }
+
+    public function uniqueId(): string
+    {
+        return 'images:'.$this->productId.':'.$this->contentVersion;
+    }
+
+    public function backoff(): array
+    {
+        return [30, 120, 600];
+    }
+
+    public function handle(
+        ProductImageModerationClient $client,
+        ProductModerationPayloadFactory $payloadFactory,
+        ProductAutoApprovalPolicy $autoApprovalPolicy,
+        ?ProductModerationFeedbackService $feedbackService = null,
+        ?AiModerationOutcomeStatusResolver $statusResolver = null,
+    ): void {
+        $feedbackService ??= app(ProductModerationFeedbackService::class);
+        $statusResolver ??= app(AiModerationOutcomeStatusResolver::class);
+        $product = Product::query()->find($this->productId);
+
+        if (
+            $product === null
+            || $product->moderation_version !== $this->contentVersion
+            || ! in_array($product->moderation_status, [
+                ProductModerationStatus::Processing,
+                ProductModerationStatus::Pending,
+                ProductModerationStatus::NeedsReview,
+            ], true)
+        ) {
+            return;
+        }
+
+        $payload = $payloadFactory->make($product);
+        $runIdentity = [
+            'product_id' => $product->id,
+            'content_version' => $this->contentVersion,
+            'request_fingerprint' => $payload->fingerprint.':images',
+            'provider' => 'image_'.config('moderation.images.provider', 'google'),
+        ];
+
+        if (ProductModerationRun::query()
+            ->where($runIdentity)
+            ->where('status', 'completed')
+            ->exists()) {
+            return;
+        }
+
+        $run = ProductModerationRun::query()->updateOrCreate($runIdentity, [
+            'trigger' => 'image_queue',
+            'model' => (string) config('moderation.images.google.model'),
+            'prompt_version' => (string) config('moderation.images.audit.prompt_version'),
+            'status' => 'processing',
+            'started_at' => now(),
+            'finished_at' => null,
+            'error_code' => null,
+            'error_message' => null,
+            'image_result' => [
+                'policy_version' => config('moderation.images.audit.policy_version'),
+                'images_submitted' => count($payload->imagePaths),
+            ],
+        ]);
+
+        $startedAt = hrtime(true);
+
+        try {
+            $result = $client->moderate($payload);
+        } catch (Throwable $exception) {
+            $run->update([
+                'status' => 'failed',
+                'error_code' => $exception::class,
+                'error_message' => mb_substr($exception->getMessage(), 0, 2000),
+                'finished_at' => now(),
+            ]);
+
+            Log::channel('moderation')->warning('Image moderation request failed.', [
+                'product_id' => $this->productId,
+                'content_version' => $this->contentVersion,
+                'attempt' => $this->attempts(),
+                'exception' => $exception::class,
+            ]);
+
+            $retryable = ! $exception instanceof AiModerationProviderException
+                || $exception->isRetryable();
+
+            if (! $retryable || config('queue.default') === 'sync') {
+                $product->forceFill([
+                    'moderation_status' => ProductModerationStatus::NeedsReview,
+                    'moderation_summary' => 'Фото товара переданы администратору на проверку.',
+                    'is_active' => false,
+                    'moderated_version' => null,
+                ])->save();
+
+                return;
+            }
+
+            throw $exception;
+        }
+
+        $freshProduct = Product::query()->find($this->productId);
+
+        if ($freshProduct === null || $freshProduct->moderation_version !== $this->contentVersion) {
+            $run->update([
+                'status' => 'stale',
+                'decision' => $result->decision,
+                'finished_at' => now(),
+            ]);
+
+            return;
+        }
+
+        $autoDecision = $autoApprovalPolicy->evaluateAfterImageModeration($freshProduct, $result);
+        $status = $statusResolver->resolve($result, $autoDecision);
+
+        $freshProduct->forceFill([
+            'moderation_status' => $status,
+            'is_active' => $status === ProductModerationStatus::Approved
+                && $freshProduct->publication_requested,
+            'moderated_version' => $status === ProductModerationStatus::Approved
+                ? $this->contentVersion
+                : null,
+            'moderation_source' => 'ai_image',
+            'moderation_risk_score' => $result->riskScore,
+            'moderation_summary' => $autoDecision->approve
+                ? null
+                : $feedbackService->forSeller($result, $autoDecision->reason),
+            'moderated_at' => now(),
+            'moderated_by_user_id' => null,
+        ])->save();
+
+        $run->update([
+            'status' => 'completed',
+            'decision' => $result->decision,
+            'risk_score' => $result->riskScore,
+            'categories' => collect($result->violations)->pluck('code')->filter()->values()->all(),
+            'reasons' => $result->violations,
+            'image_result' => [
+                'decision' => $result->decision,
+                'seller_message' => $result->sellerMessage,
+                'auto_approved' => $autoDecision->approve,
+                'auto_approval_reason' => $autoDecision->reason,
+                'policy_version' => config('moderation.images.audit.policy_version'),
+                'images_submitted' => count($payload->imagePaths),
+                'images_analyzed' => $result->imagesAnalyzed,
+            ],
+            'provider_request_id' => $result->providerRequestId,
+            'latency_ms' => (int) round((hrtime(true) - $startedAt) / 1_000_000),
+            'finished_at' => now(),
+        ]);
+    }
+}

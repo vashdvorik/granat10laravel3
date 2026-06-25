@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Package;
 use App\Models\Seller;
+use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -108,5 +110,45 @@ class BackendSellerControllerTest extends TestCase
         ]);
 
         $response->assertForbidden();
+    }
+
+    public function test_owner_can_enable_orders_and_delivery_on_supported_tariff(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create(['user_id' => $user->id, 'can_order' => false]);
+        $package = Package::factory()->create(['has_order_system' => true]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+            'end_date' => null,
+        ]);
+
+        $this->actingAs($user)->put(route('account.store.update', $seller), [
+            'name' => $seller->name,
+            'settlement_id' => $seller->settlement_id,
+            'can_order' => '1',
+            'delivery_enabled' => '1',
+            'delivery_terms' => 'По городу ежедневно.',
+        ])->assertRedirect(route('account.store.index'));
+
+        $seller->refresh();
+        $this->assertTrue($seller->can_order);
+        $this->assertTrue($seller->delivery_enabled);
+        $this->assertSame('По городу ежедневно.', $seller->delivery_terms);
+    }
+
+    public function test_owner_cannot_enable_orders_on_unsupported_tariff(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create(['user_id' => $user->id, 'can_order' => false]);
+
+        $this->actingAs($user)->put(route('account.store.update', $seller), [
+            'name' => $seller->name,
+            'settlement_id' => $seller->settlement_id,
+            'can_order' => '1',
+        ])->assertSessionHasErrors(['can_order']);
+
+        $this->assertFalse($seller->fresh()->can_order);
     }
 }

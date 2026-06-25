@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ProductModerationStatus;
 use App\Exceptions\ProductActivationException;
 use App\Exceptions\ProductImageDeletionException;
 use App\Exceptions\ProductPushTooSoonException;
@@ -9,9 +10,11 @@ use App\Models\Category;
 use App\Models\Image;
 use App\Models\Package;
 use App\Models\Product;
+use App\Models\ProductModerationRun;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Services\ProductActionService;
+use App\Services\ProductModerationIssuePresenter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -53,6 +56,24 @@ class ProductActionServiceTest extends TestCase
         $activated = $this->service->activate($product);
 
         $this->assertTrue((bool) $activated->is_active);
+    }
+
+    public function test_activate_rejects_product_without_current_moderation_approval(): void
+    {
+        $product = $this->createProductWithActivePackage([
+            'is_active' => false,
+            'moderation_status' => ProductModerationStatus::Pending,
+            'moderated_version' => null,
+        ]);
+        Image::factory()->create(['product_id' => $product->id]);
+
+        $this->expectException(ProductActivationException::class);
+
+        try {
+            $this->service->activate($product);
+        } finally {
+            $this->assertFalse((bool) $product->fresh()->is_active);
+        }
     }
 
     public function test_deactivate_hides_product(): void
@@ -120,6 +141,46 @@ class ProductActionServiceTest extends TestCase
         Storage::disk('public')->assertMissing($mainImage->path);
     }
 
+    public function test_delete_image_increments_version_and_hides_old_image_issue(): void
+    {
+        $product = $this->createProductWithActivePackage([
+            'is_active' => false,
+            'moderation_status' => ProductModerationStatus::ChangesRequired,
+            'moderation_version' => 4,
+            'moderation_summary' => 'Замените фото.',
+        ]);
+        $image = Image::factory()->main()->create([
+            'product_id' => $product->id,
+            'path' => 'products/problem-action.webp',
+        ]);
+        $nextImage = Image::factory()->create(['product_id' => $product->id]);
+        Storage::disk('public')->put($image->path, 'problem');
+        ProductModerationRun::create([
+            'product_id' => $product->id,
+            'content_version' => 4,
+            'trigger' => 'image_queue',
+            'provider' => 'image_google',
+            'status' => 'completed',
+            'decision' => 'review',
+            'request_fingerprint' => hash('sha256', 'delete-image-issue'),
+            'reasons' => [[
+                'field' => 'images',
+                'image_index' => 1,
+                'evidence' => 'Старое фото не подходит.',
+                'suggestion' => 'Удалите фото.',
+            ]],
+        ]);
+
+        $this->service->deleteImage($image);
+
+        $product->refresh();
+        $this->assertSame(5, $product->moderation_version);
+        $this->assertSame(ProductModerationStatus::Draft, $product->moderation_status);
+        $this->assertNull($product->moderation_summary);
+        $this->assertSame([], app(ProductModerationIssuePresenter::class)->forProduct($product));
+        $this->assertTrue((bool) $nextImage->fresh()->is_main);
+    }
+
     public function test_set_main_image_switches_main_flag(): void
     {
         $product = $this->createProductWithActivePackage();
@@ -130,6 +191,26 @@ class ProductActionServiceTest extends TestCase
 
         $this->assertFalse((bool) $oldMain->fresh()->is_main);
         $this->assertTrue((bool) $newMain->fresh()->is_main);
+    }
+
+    public function test_set_main_image_preserves_current_approval(): void
+    {
+        $product = $this->createProductWithActivePackage([
+            'is_active' => true,
+            'moderation_status' => ProductModerationStatus::Approved,
+            'moderation_version' => 2,
+            'moderated_version' => 2,
+        ]);
+        Image::factory()->main()->create(['product_id' => $product->id]);
+        $newMain = Image::factory()->create(['product_id' => $product->id]);
+
+        $this->service->setMainImage($newMain);
+
+        $product->refresh();
+        $this->assertSame(ProductModerationStatus::Approved, $product->moderation_status);
+        $this->assertSame(2, $product->moderation_version);
+        $this->assertSame(2, $product->moderated_version);
+        $this->assertTrue((bool) $product->is_active);
     }
 
     public function test_push_up_rejects_product_before_24_hours(): void

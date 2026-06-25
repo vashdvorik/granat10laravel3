@@ -75,15 +75,19 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Имя')
                     ->searchable()
+                    ->limit(28)
+                    ->tooltip(fn (User $record): string => $record->name)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
+                    ->limit(32)
+                    ->tooltip(fn (User $record): string => $record->email)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Телефон')
                     ->placeholder('—')
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('balance')
                     ->label('Баланс')
                     ->formatStateUsing(fn (mixed $state): string => number_format((float) $state, 2, ',', ' ').' RUP')
@@ -96,11 +100,13 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('seller')
                     ->label('Магазин')
                     ->state(fn (User $record): bool => $record->seller !== null)
-                    ->boolean(),
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Регистрация')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
@@ -121,6 +127,7 @@ class UserResource extends Resource
                     }),
             ])
             ->actions([
+                Tables\Actions\ActionGroup::make([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('resetPassword')
                     ->label('Сбросить пароль')
@@ -217,6 +224,10 @@ class UserResource extends Resource
                             ->send();
                     }),
                 Tables\Actions\DeleteAction::make(),
+                ])
+                    ->label('Действия')
+                    ->icon('heroicon-m-ellipsis-vertical')
+                    ->button(),
             ])
             ->bulkActions([]);
     }
