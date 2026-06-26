@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use App\Services\FavoritesService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,16 @@ class FavoritesController extends Controller
 {
     public function index(): View
     {
-        return view('favorites');
+        $recommendedProducts = Product::visible()
+            ->forRegionalContext()
+            ->with(['images', 'seller'])
+            ->orderByDesc('is_vip')
+            ->orderByDesc('push_at')
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get();
+
+        return view('favorites', compact('recommendedProducts'));
     }
 
     public function getProducts(Request $request, FavoritesService $favoritesService): JsonResponse

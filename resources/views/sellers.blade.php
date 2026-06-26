@@ -27,6 +27,9 @@
                     <span class="market-eyebrow">Покупайте у местных</span>
                     <h1>Магазины{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' ПМР' }}</h1>
                     <p>Смотрите ассортимент, адреса и контакты местных продавцов в одном месте.</p>
+                    <div class="shops-hero__region">
+                        @include('components.regional-selector', ['variant' => 'hero'])
+                    </div>
                 </div>
                 <div class="shops-hero__count">
                     <strong>{{ $sellers->total() }}</strong>

@@ -16,6 +16,7 @@ use App\Models\Image as ProductImage;
 use App\Models\Product;
 use App\Services\BackendProductService;
 use App\Services\ProductActionService;
+use App\Services\ProductLimitService;
 use App\Services\ProductModerationIssuePresenter;
 use App\Services\ProductModerationService;
 use Illuminate\Http\Request;
@@ -54,7 +55,10 @@ class ProductController extends Controller
     /**
      * Форма создания товара
      */
-    public function create(BackendProductService $backendProductService)
+    public function create(
+        BackendProductService $backendProductService,
+        ProductLimitService $productLimitService
+    )
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -66,8 +70,9 @@ class ProductController extends Controller
 
         // Только корневые категории для первого уровня (из кеша)
         $categories = $backendProductService->getRootCategories();
+        $vipAvailability = $productLimitService->canActivateVipProduct($seller);
 
-        return view('backend.cabinet.products.create', compact('categories', 'seller'));
+        return view('backend.cabinet.products.create', compact('categories', 'seller', 'vipAvailability'));
     }
 
     /**
@@ -127,7 +132,8 @@ class ProductController extends Controller
     public function edit(
         Product $product,
         BackendProductService $backendProductService,
-        ProductModerationIssuePresenter $issuePresenter
+        ProductModerationIssuePresenter $issuePresenter,
+        ProductLimitService $productLimitService
     ) {
         $this->authorize('update', $product);
 
@@ -137,12 +143,14 @@ class ProductController extends Controller
         // Получаем цепочку категорий товара (для предзаполнения)
         $selectedPath = $backendProductService->getSelectedPath($product->category_id);
         $moderationIssues = $issuePresenter->forProduct($product);
+        $vipAvailability = $productLimitService->canActivateVipProduct($product->seller, $product->id);
 
         return view('backend.cabinet.products.edit', compact(
             'product',
             'categories',
             'selectedPath',
-            'moderationIssues'
+            'moderationIssues',
+            'vipAvailability'
         ));
     }
 

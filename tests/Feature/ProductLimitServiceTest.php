@@ -64,6 +64,7 @@ class ProductLimitServiceTest extends TestCase
 
         $this->assertArrayHasKey('is_vip', $errors);
         $this->assertStringContainsString('1/1', $errors['is_vip']);
+        $this->assertStringContainsString('пожалуйста выберите другой тариф или выключите другие VIP товары', $errors['is_vip']);
     }
 
     public function test_update_excludes_current_product_from_limit(): void

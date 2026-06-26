@@ -23,6 +23,10 @@ class ProductAutoApprovalPolicy
             return new AutoModerationDecision(false, 'Ожидается автоматическая проверка изображений товара.');
         }
 
+        if ($this->hasUnverifiedImages($product, $result)) {
+            return new AutoModerationDecision(false, 'Изображения товара не были проверены нейросетью.');
+        }
+
         if ($this->requiresImageAnalysis() && $product->images()->exists() && ! $result->imagesAnalyzed) {
             return new AutoModerationDecision(false, 'Изображения товара не были полностью проверены нейросетью.');
         }
@@ -95,6 +99,16 @@ class ProductAutoApprovalPolicy
     {
         return $decision->reason === 'Ожидается автоматическая проверка изображений товара.'
             && $this->requiresSeparateImageModeration($product);
+    }
+
+    private function hasUnverifiedImages(Product $product, ProductModerationResult $result): bool
+    {
+        if (! $product->images()->exists()) {
+            return false;
+        }
+
+        return ! $result->imagesAnalyzed
+            && ! $this->hasPassedImageModeration($product);
     }
 
     private function requiresImageAnalysis(): bool

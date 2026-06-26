@@ -64,6 +64,46 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertSee('RootCategory_UNIQ');
     }
 
+    public function test_create_form_replaces_vip_checkbox_with_limit_message_when_limit_reached(): void
+    {
+        [$user, $seller] = $this->createUserWithSeller();
+        $this->assignActivePackage($seller, vipLimit: 1);
+        $category = Category::factory()->create();
+        Product::factory()->activeVip()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.products.create'))
+            ->assertOk()
+            ->assertSee('Ваш лимит превышен 1/1')
+            ->assertDontSee('id="is_vip"', false);
+    }
+
+    public function test_edit_form_replaces_vip_checkbox_with_limit_message_when_limit_reached(): void
+    {
+        [$user, $seller] = $this->createUserWithSeller();
+        $this->assignActivePackage($seller, vipLimit: 1);
+        $category = Category::factory()->create();
+        Product::factory()->activeVip()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+        ]);
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => false,
+            'is_vip' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.products.edit', $product))
+            ->assertOk()
+            ->assertSee('Ваш лимит превышен 1/1')
+            ->assertDontSee('id="is_vip"', false);
+    }
+
     public function test_get_child_categories_returns_json(): void
     {
         [$user] = $this->createUserWithSeller();
@@ -497,9 +537,9 @@ class BackendProductControllerProductsTest extends TestCase
         return [$user, $seller];
     }
 
-    private function assignActivePackage(Seller $seller): void
+    private function assignActivePackage(Seller $seller, int $activeLimit = 50, int $vipLimit = 10): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
+        $package = Package::factory()->withLimits($activeLimit, $vipLimit)->create();
 
         SellerPackage::factory()->create([
             'seller_id' => $seller->id,

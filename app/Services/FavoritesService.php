@@ -23,10 +23,11 @@ class FavoritesService
             ];
         }
 
-        $total = count($ids);
+        $products = $this->getVisibleProductsByIds($ids);
+        $total = $products->count();
 
         return [
-            'products' => $this->getVisibleProductsByIds(array_slice($ids, 0, self::PER_PAGE), $ids),
+            'products' => $products->take(self::PER_PAGE)->values(),
             'has_more' => $total > self::PER_PAGE,
             'total' => $total,
             'last_page' => (int) ceil($total / self::PER_PAGE),
@@ -43,30 +44,31 @@ class FavoritesService
 
         $page = max(1, $page);
         $offset = ($page - 1) * self::PER_PAGE;
-        $pageIds = array_slice($ids, $offset, self::PER_PAGE);
 
-        return $this->getVisibleProductsByIds($pageIds, $ids);
+        return $this->getVisibleProductsByIds($ids)
+            ->slice($offset, self::PER_PAGE)
+            ->values();
     }
 
     public function parseIds(string $rawIds): array
     {
         $ids = array_filter(array_map('intval', explode(',', $rawIds)));
 
-        return array_slice(array_values($ids), 0, self::MAX_IDS);
+        return array_slice(array_values(array_unique($ids)), 0, self::MAX_IDS);
     }
 
-    private function getVisibleProductsByIds(array $pageIds, array $sortIds): Collection
+    private function getVisibleProductsByIds(array $ids): Collection
     {
-        if (empty($pageIds)) {
+        if (empty($ids)) {
             return collect();
         }
 
         return Product::visible()
             ->forRegionalContext()
-            ->whereIn('id', $pageIds)
+            ->whereIn('id', $ids)
             ->with(['images', 'seller'])
             ->get()
-            ->sortBy(fn (Product $product) => array_search($product->id, $sortIds, true))
+            ->sortBy(fn (Product $product) => array_search($product->id, $ids, true))
             ->values();
     }
 }

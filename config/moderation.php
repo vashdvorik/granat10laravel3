@@ -39,9 +39,9 @@ return [
         'timeout' => (int) env('AI_IMAGE_MODERATION_TIMEOUT', env('PRODUCT_MODERATION_TIMEOUT', 60)),
         'max_attempts' => (int) env('AI_IMAGE_MODERATION_MAX_ATTEMPTS', env('PRODUCT_MODERATION_MAX_ATTEMPTS', 3)),
         'google' => [
-            'api_key' => env('AI_IMAGE_MODERATION_API_KEY', env('GEMINI_API_KEY')),
-            'model' => env('AI_IMAGE_MODERATION_MODEL', env('GEMINI_MODEL', 'gemini-3.5-flash')),
-            'base_url' => env('AI_IMAGE_MODERATION_BASE_URL', env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta')),
+            'api_key' => env('AI_IMAGE_MODERATION_API_KEY'),
+            'model' => env('AI_IMAGE_MODERATION_MODEL', 'gemini-2.5-flash'),
+            'base_url' => env('AI_IMAGE_MODERATION_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         ],
         'audit' => [
             'prompt_version' => 'product-image-moderation-v1',

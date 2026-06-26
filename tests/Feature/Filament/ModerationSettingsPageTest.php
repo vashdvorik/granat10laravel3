@@ -145,6 +145,44 @@ class ModerationSettingsPageTest extends TestCase
         $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=gemini-2.5-flash', $contents);
     }
 
+    public function test_image_settings_do_not_inherit_text_provider_endpoint(): void
+    {
+        file_put_contents($this->environmentPath, implode(PHP_EOL, [
+            'QUEUE_CONNECTION=sync',
+            'PRODUCT_MODERATION_AI_ENABLED=true',
+            'PRODUCT_MODERATION_AI_PROVIDER=openai_compatible',
+            'PRODUCT_MODERATION_AI_MODE=auto',
+            'PRODUCT_MODERATION_QUEUE=moderation',
+            'PRODUCT_MODERATION_TIMEOUT=60',
+            'PRODUCT_MODERATION_MAX_ATTEMPTS=3',
+            'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK=0.10',
+            'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES=',
+            'AI_MODERATION_MODEL=deepseek-v4-flash',
+            'AI_MODERATION_BASE_URL=https://api.deepseek.com',
+            'AI_MODERATION_CHAT_COMPLETIONS_PATH=/chat/completions',
+            'AI_MODERATION_MAX_OUTPUT_TOKENS=2000',
+            'AI_MODERATION_RETRY_TIMES=2',
+            'AI_MODERATION_RETRY_SLEEP_MS=1000',
+            'AI_MODERATION_REQUESTS_PER_MINUTE=60',
+            'AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS=1',
+            'AI_MODERATION_HOURLY_REQUEST_LIMIT=60',
+            'AI_MODERATION_DAILY_REQUEST_LIMIT=500',
+            'AI_IMAGE_MODERATION_ENABLED=false',
+            'AI_IMAGE_MODERATION_QUEUE=moderation',
+            'AI_IMAGE_MODERATION_TIMEOUT=60',
+            'AI_IMAGE_MODERATION_MAX_ATTEMPTS=3',
+            '',
+        ]));
+
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->assertSet('data.model', 'deepseek-v4-flash')
+            ->assertSet('data.base_url', 'https://api.deepseek.com')
+            ->assertSet('data.image_model', 'gemini-2.5-flash')
+            ->assertSet('data.image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+    }
+
     public function test_administrator_cannot_save_private_provider_url(): void
     {
         $this->actingAs($this->createAdministrator());

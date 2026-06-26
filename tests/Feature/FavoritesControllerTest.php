@@ -29,6 +29,33 @@ class FavoritesControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_favorites_page_has_modern_empty_state_with_recommendations(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $product = $this->createVisibleProduct($seller, $category, [
+            'name' => 'FavoriteRecommendedProduct_UNIQ',
+        ]);
+
+        $response = $this->get(route('favorites'));
+
+        $response->assertStatus(200)
+            ->assertSee('В избранном пока пусто')
+            ->assertSee('Можно начать с этого')
+            ->assertSee($product->name)
+            ->assertSee('Избранные товары')
+            ->assertSee('class="home-product"', false)
+            ->assertSee('wishlist:changed')
+            ->assertSee('loadFavorites')
+            ->assertSee('showProductsState')
+            ->assertSee('displayedProductsCount')
+            ->assertSee("url: '/favorites/products'", false)
+            ->assertDontSee('Ваш список')
+            ->assertDontSee('Сохраняйте товары, чтобы быстро вернуться к ним')
+            ->assertDontSee('updateCount((favorites || []).length)', false)
+            ->assertDontSee('favorites-empty-text');
+    }
+
     public function test_get_products_returns_json_with_html_and_metadata(): void
     {
         $seller = $this->createSellerWithPackage();
@@ -59,6 +86,34 @@ class FavoritesControllerTest extends TestCase
                 'total' => 0,
                 'last_page' => 1,
             ]);
+    }
+
+    public function test_get_products_skips_stale_ids_before_visible_products(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $staleProducts = Product::factory()->count(12)->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => false,
+        ]);
+        $visibleProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'FavoriteVisibleAfterStale_UNIQ',
+        ]);
+
+        $ids = $staleProducts->pluck('id')
+            ->push($visibleProduct->id)
+            ->implode(',');
+
+        $response = $this->getJson(route('favorites.products', ['ids' => $ids]));
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'has_more' => false,
+                'total' => 1,
+                'last_page' => 1,
+            ])
+            ->assertSee('FavoriteVisibleAfterStale_UNIQ');
     }
 
     public function test_load_more_favorites_returns_products_partial(): void

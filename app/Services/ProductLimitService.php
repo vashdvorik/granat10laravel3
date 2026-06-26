@@ -166,12 +166,15 @@ class ProductLimitService
 
         $current = $query->count();
         $allowed = $limit === null || $current < $limit;
+        $blockedMessage = $vipOnly
+            ? "Ваш лимит превышен {$current}/{$limit}, пожалуйста выберите другой тариф или выключите другие VIP товары."
+            : "{$limitMessage} ({$current}/{$limit}). Обновите тариф.";
 
         return [
             'allowed' => $allowed,
             'message' => $allowed
                 ? $allowedMessage
-                : "{$limitMessage} ({$current}/{$limit}). Обновите тариф.",
+                : $blockedMessage,
             'current' => $current,
             'limit' => $limit,
             'package_name' => $package->name,

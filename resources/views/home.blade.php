@@ -9,7 +9,7 @@
             <div class="home-hero__panel home-hero__panel--search">
                 <div class="home-hero__content">
                     <span class="home-eyebrow">Местные товары и магазины</span>
-                    <h1>Находите нужное рядом в {{ $locationName }}</h1>
+                    <h1>Товары и магазины рядом: {{ $locationName }}</h1>
                     <p>Товары местных магазинов, актуальные цены и прямой контакт с продавцом.</p>
 
                     <form class="home-search" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">

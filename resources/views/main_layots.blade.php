@@ -610,40 +610,9 @@
             <div class="row flex">
                 <div class="col-md-6 col-sm-6 col-xs-4 flex-left">
                     <div class="topbar-left">
-                        <div class="element element-store regional-selector">
+                        <div class="element element-store">
                             @if(config('regionality.enabled'))
-                                <a id="label1" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                                    <img src="{{ asset('img/icon-map.png') }}" alt="">
-                                    <span>{{ $regionalContext->label() }}</span>
-                                    <span class="fa fa-caret-down"></span>
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="label1">
-                                    <li>
-                                        <form method="POST" action="{{ route('regionality.update') }}">
-                                            @csrf
-                                            <input type="hidden" name="return_to" value="{{ request()->fullUrl() }}">
-                                            <button type="submit" class="regional-selector__option {{ $regionalContext->isAllRegions() ? 'is-active' : '' }}">
-                                                Все регионы
-                                            </button>
-                                        </form>
-                                    </li>
-                                    @foreach($regionalRegions as $region)
-                                        <li class="regional-selector__group">{{ $region->name }}</li>
-                                        @foreach($region->settlements as $settlement)
-                                            <li>
-                                                <form method="POST" action="{{ route('regionality.update') }}">
-                                                    @csrf
-                                                    <input type="hidden" name="settlement_id" value="{{ $settlement->id }}">
-                                                    <input type="hidden" name="return_to" value="{{ request()->fullUrl() }}">
-                                                    <button type="submit" class="regional-selector__option {{ $regionalContext->settlement()?->is($settlement) ? 'is-active' : '' }}">
-                                                        {{ $settlement->name }}
-                                                        <small>({{ $settlement->type }})</small>
-                                                    </button>
-                                                </form>
-                                            </li>
-                                        @endforeach
-                                    @endforeach
-                                </ul>
+                                @include('components.regional-selector', ['variant' => 'topbar'])
                             @else
                                 <span>
                                     <img src="{{ asset('img/icon-map.png') }}" alt="">
@@ -675,6 +644,9 @@
                         </div> -->
                     </div>
                 </div>
+            </div>
+            <div class="header-mobile-region hidden-md hidden-lg">
+                @include('components.regional-selector', ['variant' => 'mobile-header'])
             </div>
         </div>
     </div>
@@ -714,18 +686,6 @@
                             <button class="button_search" type="submit"><i class="ion-ios-search-strong"></i></button>
                         </span>
                     </form>
-                    <div class="tags">
-                        <span>Часто ищут:</span>
-                        <a href="/search?q=платье">платье</a>
-                        <a href="/search?q=телефон">телефон</a>
-                        <a href="/search?q=наушники">наушники</a>
-                        <a href="/search?q=обувь">обувь</a>
-                        <a href="/search?q=куртка">куртка</a>
-                        <a href="/search?q=сумка">сумка</a>
-                        <a href="/search?q=ноутбук">ноутбук</a>
-                        <a href="/search?q=мебель">мебель</a>
-                        <a href="/search?q=часы">часы</a>
-                    </div>
                 </div>
         <!-- 3 иконки кабинет, лайки, корзина -->
                 <div class="col-lg-3  col-md-3 col-sm-6 col-xs-6 v-center header-sub">
@@ -795,93 +755,64 @@
 <!-- подключаем основную часть индекс-страницы -->
 @yield('content')
 
-<!-- подключаем footer  -->
- <footer>
-    <div class="f-top">
-        <div class="container container-240">
-            <div class="row">
-                <div class="col-xs-12 col-sm-6 col-md-3 col-lg-3">
-                    <div class="footer-block footer-about">
-                        <div class="f-logo">
-                            <a href="#"><img src="{{ asset('img/logo.png') }}" alt="" class="img-reponsive"></a>
-                        </div>
-                        <ul class="footer-block-content">
-                            <li class="address">
-                                <span>Приднестровье. г Тирасполь</span>
-                            </li>
-                            <li class="phone">
-                                <span>+(373) 779 93-603</span>
-                            </li>
-                            <li class="email">
-                                <span>Contact@yourcompany.com</span>
-                            </li>
-                            <li class="time">
-                                <span>Пон-Пятн 9:00 - 15:00 </span>
-                            </li>
-                        </ul>
-                        <div class="footer-social social">
-                            <h3 class="footer-block-title">Наши социальные сети</h3>
-                            <a href="#"><i class="fab fa-tiktok"></i></a>
-                            <a href="#"><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
+<footer class="site-footer">
+    <div class="container container-240">
+        <div class="site-footer__top">
+            <div class="site-footer__brand">
+                <a href="{{ $regionalUrl->route('home') }}" class="site-footer__logo" aria-label="Гранат — на главную">
+                    <img src="{{ asset('img/logo.png') }}" alt="Гранат маркетплейс ПМР">
+                </a>
+                <p>Маркетплейс товаров и местных магазинов ПМР. Выбирайте товар, связывайтесь с продавцом и оформляйте заказ напрямую.</p>
+                <div class="site-footer__contacts">
+                    <a href="tel:+37377993603"><i class="fa fa-phone" aria-hidden="true"></i> +(373) 779 93-603</a>
+                    <span><i class="fa fa-map-marker" aria-hidden="true"></i> ПМР, Тирасполь</span>
                 </div>
-                <div class="col-xs-6 col-sm-6 col-md-3 col-lg-3">
-                    <div class="footer-block">
-                        <h3 class="footer-block-title">Категории</h3>
-                        <ul class="footer-block-content">
-                            @foreach($categories->take(7) as $category)
-                            <li><a href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias ?? $category->id]) }}">{{ $category->name }}</a></li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
-                    <div class="footer-block">
-                        <h3 class="footer-block-title">Кабинет продавца</h3>
-                        <ul class="footer-block-content">
-                            <li><a href="{{ route('account.index') }}">Войти в аккаунт</a></li>
-                            <li><a href="{{ route('register') }}">Регистрация</a></li>
-                            <li><a href="{{ route('gobuyer') }}">Помощь</a></li>
+            </div>
 
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                    <div class="footer-block">
-                        <div class="footer-block-phone">
-                            <h3 class="footer-block-title">Рекламное агентство «Гранат»</h3>
-                            <p class="phone-desc">Команда профессионалов, специализирующихся на разработке эффективных рекламных IT-решений для роста и развития бизнеса в ПМР. Мы объединяем опыт в сфере маркетинга, дизайна и современных технологий, чтобы создавать инструменты, которые действительно работают.</p>
-                            <p class="phone-light">+(373) 779 93-603</p>
-                        </div>
-                        <div class="footer-block-newsletter">
-                            <h3 class="footer-block-title">Стать продавцом</h3>
-                            <p>Начни продавать прямо сейчас — зарегистрируйся всего за один шаг, указав свой email. Быстро, просто и бесплатно!</p>
-                {{--        <form class="form_newsletter" action="#" method="post">
-                                <input type="email" value="" placeholder="Введите ваш email" name="EMAIL" id="mail" class="newsletter-input form-control">
-                                <button id="subscribe" class="button_mini btn btn-gradient" type="submit">
-                                    Регистрация
-                                </button>
-                            </form> --}}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <nav class="site-footer__nav" aria-label="Навигация в футере">
+                <section>
+                    <h2>Покупателям</h2>
+                    <ul>
+                        <li><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог товаров</a></li>
+                        <li><a href="{{ $regionalUrl->route('shops') }}">Магазины</a></li>
+                        <li><a href="{{ $regionalUrl->route('catalog.sale') }}">Распродажи</a></li>
+                        <li><a href="{{ $regionalUrl->route('favorites') }}">Избранное</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Продавцам</h2>
+                    <ul>
+                        <li><a href="{{ route('register') }}">Зарегистрироваться</a></li>
+                        <li><a href="{{ route('account.index') }}">Войти в кабинет</a></li>
+                        <li><a href="{{ route('gobuyer') }}">Как продавать</a></li>
+                        <li><a href="{{ route('help') }}">Помощь</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>Категории</h2>
+                    <ul>
+                        @foreach($categories->take(6) as $category)
+                            <li><a href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias ?? $category->id]) }}">{{ $category->name }}</a></li>
+                        @endforeach
+                    </ul>
+                </section>
+
+                <section class="site-footer__notice">
+                    <h2>Как работает сайт</h2>
+                    <ul>
+                        <li>Оплата проходит напрямую продавцу.</li>
+                        <li>Доставка и самовывоз согласовываются с магазином.</li>
+                        <li>Гранат помогает найти товар и связаться с продавцом.</li>
+                    </ul>
+                </section>
+            </nav>
         </div>
-    </div>
-    <div class="f-bottom">
-        <div class="container container-240">
-            <div class="row flex lr">
-                <div class="col-xs-6 f-copyright"><span>@2024. Рекламное агенство "ГРАНАТ"</span></div>
-            <div class="col-xs-6 f-payment hidden-xs">
-            <!--    <a href="#"><img src="img/payment/mastercard.png" alt="" class="img-reponsive"></a>
-                    <a href="#"><img src="img/payment/paypal.png" alt="" class="img-reponsive"></a>
-                    <a href="#"><img src="img/payment/visa.png" alt="" class="img-reponsive"></a>
-                    <a href="#"><img src="img/payment/american-express.png" alt="" class="img-reponsive"></a>
-                    <a href="#"><img src="img/payment/western-union.png" alt="" class="img-reponsive"></a>
-                    <a href="#"><img src="img/payment/jcb.png" alt="" class="img-reponsive"></a>-->
-                </div> 
-            </div>
+
+        <div class="site-footer__bottom">
+            <span>© {{ now()->year }} ГРАНАТ маркетплейс ПМР</span>
+            <span class="site-footer__disclaimer">Наличие, цену и доставку уточняйте у продавца перед покупкой.</span>
         </div>
     </div>
 </footer>
@@ -952,11 +883,26 @@
 
     // === ИЗБРАННОЕ (WISHLIST) ===
     function getFavorites() {
-        try { return JSON.parse(localStorage.getItem('favorites') || '[]'); }
-        catch(e) { return []; }
+        try {
+            var parsed = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (!Array.isArray(parsed)) return [];
+            return parsed
+                .map(function(id) { return parseInt(id, 10); })
+                .filter(function(id, index, ids) {
+                    return Number.isInteger(id) && id > 0 && ids.indexOf(id) === index;
+                });
+        } catch(e) { return []; }
     }
     function saveFavorites(ids) {
-        localStorage.setItem('favorites', JSON.stringify(ids));
+        var normalized = Array.isArray(ids)
+            ? ids
+                .map(function(id) { return parseInt(id, 10); })
+                .filter(function(id, index, values) {
+                    return Number.isInteger(id) && id > 0 && values.indexOf(id) === index;
+                })
+            : [];
+        localStorage.setItem('favorites', JSON.stringify(normalized));
+        return normalized;
     }
     function initWishlists() {
         var favorites = getFavorites();
@@ -971,6 +917,9 @@
             e.preventDefault();
             var $btn = $(this);
             var productId = parseInt($btn.data('product-id'));
+            if (!Number.isInteger(productId) || productId <= 0) {
+                return;
+            }
             var favorites = getFavorites();
             var idx = favorites.indexOf(productId);
             if (idx === -1) {
@@ -980,7 +929,8 @@
                 favorites.splice(idx, 1);
                 $btn.find('.icon-wishlist').removeClass('wishlist-active');
             }
-            saveFavorites(favorites);
+            favorites = saveFavorites(favorites);
+            $(document).trigger('wishlist:changed', [favorites, productId, idx === -1]);
         });
     });
 

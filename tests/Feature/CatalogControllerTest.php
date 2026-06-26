@@ -380,6 +380,14 @@ class CatalogControllerTest extends TestCase
         $response->assertSee('class="home-product"', false);
         $response->assertSee('SalePageModernCardProduct');
         $response->assertDontSee('class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item"', false);
+        $response->assertDontSee('shop-banner.jpg');
+        $response->assertDontSee('<h1 class="cate-title">Featured Products</h1>', false);
+        $response->assertDontSee('<h1 class="cate-title">Top Rated Products</h1>', false);
+        $response->assertDontSee('<h1 class="cate-title">Top Selling Products</h1>', false);
+
+        $css = file_get_contents(public_path('css/marketplace-design.css'));
+        $this->assertStringContainsString('.sale-page .sale-products-grid.product-collection-grid', $css);
+        $this->assertStringContainsString('margin-top: 14px;', $css);
     }
 
     public function test_load_more_search_returns_products_partial(): void

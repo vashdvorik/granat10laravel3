@@ -81,8 +81,8 @@ class ModerationSettings extends Page implements HasForms
             'image_queue' => $values['AI_IMAGE_MODERATION_QUEUE'] ?: ($values['PRODUCT_MODERATION_QUEUE'] ?: 'moderation'),
             'image_timeout' => (int) ($values['AI_IMAGE_MODERATION_TIMEOUT'] ?: $values['PRODUCT_MODERATION_TIMEOUT'] ?: 60),
             'image_max_attempts' => (int) ($values['AI_IMAGE_MODERATION_MAX_ATTEMPTS'] ?: $values['PRODUCT_MODERATION_MAX_ATTEMPTS'] ?: 3),
-            'image_model' => $values['AI_IMAGE_MODERATION_MODEL'] ?: ($values['AI_MODERATION_MODEL'] ?: 'gemini-2.5-flash'),
-            'image_base_url' => $values['AI_IMAGE_MODERATION_BASE_URL'] ?: ($values['AI_MODERATION_BASE_URL'] ?: 'https://generativelanguage.googleapis.com/v1beta'),
+            'image_model' => $values['AI_IMAGE_MODERATION_MODEL'] ?: 'gemini-2.5-flash',
+            'image_base_url' => $values['AI_IMAGE_MODERATION_BASE_URL'] ?: 'https://generativelanguage.googleapis.com/v1beta',
         ]);
     }
 
@@ -200,7 +200,7 @@ class ModerationSettings extends Page implements HasForms
                         Forms\Components\TextInput::make('image_api_key')
                             ->label('Новый API-ключ для фото')
                             ->password()->revealable()->autocomplete(false)
-                            ->helperText('Можно оставить пустым: тогда сохранится текущий ключ или будет использован основной ключ провайдера.'),
+                            ->helperText('Можно оставить пустым: тогда сохранится текущий ключ для проверки фото.'),
                         Forms\Components\TextInput::make('image_model')
                             ->label('Модель для проверки фото')
                             ->required()

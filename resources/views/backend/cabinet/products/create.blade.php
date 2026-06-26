@@ -193,29 +193,42 @@
 
                                                 {{-- ✅ VIP ТОВАР С ИНФОРМАЦИОННЫМ БЛОКОМ --}}
                                                 <div class="form-group mb-20">
-                                                    <div class="checkbox-theme-default custom-checkbox">
-                                                        <input class="checkbox" 
-                                                               type="checkbox" 
-                                                               name="is_vip" 
-                                                               value="1" 
-                                                               id="is_vip"
-                                                               {{ old('is_vip') ? 'checked' : '' }}>
-                                                        <label for="is_vip">
-                                                            <span class="checkbox-text">
-                                                                <i class="uil uil-star text-warning"></i> VIP товар
-                                                            </span>
-                                                        </label>
-                                                    </div>
-                                                    
-                                                    {{-- ℹ️ Информационное сообщение --}}
-                                                    <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #5F63F2;">
-                                                        <i class="uil uil-info-circle me-2 mt-1" style="font-size: 18px; color: #5F63F2;"></i>
-                                                        <div>
-                                                            <small class="d-block mb-0">
-                                                                <strong>VIP товары показываются всегда первыми</strong> в каталоге и в поиске
-                                                            </small>
+                                                    @php($vipAllowed = $vipAvailability['allowed'] ?? true)
+
+                                                    @if($vipAllowed)
+                                                        <div class="checkbox-theme-default custom-checkbox">
+                                                            <input class="checkbox" 
+                                                                   type="checkbox" 
+                                                                   name="is_vip" 
+                                                                   value="1" 
+                                                                   id="is_vip"
+                                                                   {{ old('is_vip') ? 'checked' : '' }}>
+                                                            <label for="is_vip">
+                                                                <span class="checkbox-text">
+                                                                    <i class="uil uil-star text-warning"></i> VIP товар
+                                                                </span>
+                                                            </label>
                                                         </div>
-                                                    </div>
+
+                                                        {{-- ℹ️ Информационное сообщение --}}
+                                                        <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #5F63F2;">
+                                                            <i class="uil uil-info-circle me-2 mt-1" style="font-size: 18px; color: #5F63F2;"></i>
+                                                            <div>
+                                                                <small class="d-block mb-0">
+                                                                    <strong>VIP товары показываются всегда первыми</strong> в каталоге и в поиске
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    @else
+                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
+                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
+                                                            <div>
+                                                                <small class="d-block mb-0 text-dark">
+                                                                    <strong>{{ $vipAvailability['message'] }}</strong>
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    @endif
 
                                                     {{-- ⚠️ Ошибка лимита VIP товаров --}}
                                                     @error('is_vip')
@@ -357,7 +370,7 @@
                                                 name="save_action"
                                                 value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-shield-check"></i> Отправить на проверку
+                                            <i class="uil uil-shield-check"></i> Отправить на модерацию
                                         </button>
                                     </div>
                                 </form>

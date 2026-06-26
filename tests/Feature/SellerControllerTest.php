@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Package;
 use App\Models\Product;
+use App\Models\Region;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Models\Settlement;
@@ -74,6 +75,31 @@ class SellerControllerTest extends TestCase
         $response->assertStatus(200);
         $sellers = $response->viewData('sellers');
         $this->assertLessThanOrEqual(12, $sellers->count());
+    }
+
+    public function test_regional_shops_page_has_city_switcher_for_mobile_and_desktop(): void
+    {
+        $region = Region::factory()->create(['name' => 'Приднестровье']);
+        $currentSettlement = Settlement::factory()->for($region)->create([
+            'name' => 'Слободзея',
+            'slug' => 'slobodzeya',
+        ]);
+        $otherSettlement = Settlement::factory()->for($region)->create([
+            'name' => 'Тирасполь',
+            'slug' => 'tiraspol',
+        ]);
+
+        $this->get(route('regional.shops', ['location' => $currentSettlement->slug]))
+            ->assertOk()
+            ->assertSee('class="header-mobile-region hidden-md hidden-lg"', false)
+            ->assertSee('class="shops-hero__region"', false)
+            ->assertSee('regional-selector--mobile-header', false)
+            ->assertSee('regional-selector--hero', false)
+            ->assertSee('Слободзея')
+            ->assertSee('Тирасполь')
+            ->assertSee(route('regionality.update'), false)
+            ->assertSee('name="settlement_id" value="'.$otherSettlement->id.'"', false)
+            ->assertSee('name="return_to" value="'.route('regional.shops', ['location' => $currentSettlement->slug]).'"', false);
     }
 
     // =========================================================================

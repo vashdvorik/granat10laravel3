@@ -94,7 +94,7 @@ class ModerateProductJobTest extends TestCase
         $this->assertStringContainsString('Изображения товара', $product->moderation_summary);
     }
 
-    public function test_text_only_compatible_provider_does_not_require_image_analysis(): void
+    public function test_text_only_compatible_provider_does_not_auto_approve_product_with_unchecked_images(): void
     {
         config()->set('moderation.provider', 'openai_compatible');
         config()->set('moderation.openai_compatible.vision_enabled', false);
@@ -118,8 +118,9 @@ class ModerateProductJobTest extends TestCase
 
         $product->refresh();
 
-        $this->assertSame(ProductModerationStatus::Approved, $product->moderation_status);
-        $this->assertTrue((bool) $product->is_active);
+        $this->assertSame(ProductModerationStatus::NeedsReview, $product->moderation_status);
+        $this->assertFalse((bool) $product->is_active);
+        $this->assertSame('Изображения товара не были проверены нейросетью.', $product->moderation_summary);
     }
 
     public function test_text_job_waits_for_separate_image_moderation_when_enabled(): void

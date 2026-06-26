@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Image;
 use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
@@ -170,5 +171,61 @@ class ProductControllerTest extends TestCase
             ->assertSee($related->name)
             ->assertSee('class="home-product"', false)
             ->assertDontSee('class="related-card"', false);
+    }
+
+    public function test_product_gallery_uses_local_switcher_for_multiple_images(): void
+    {
+        $product = $this->createVisibleProduct();
+
+        Image::factory()->main()->create([
+            'product_id' => $product->id,
+            'path' => 'products/main.jpg',
+            'order' => 1,
+        ]);
+        Image::factory()->create([
+            'product_id' => $product->id,
+            'path' => 'products/second.jpg',
+            'order' => 2,
+        ]);
+
+        $response = $this->get(route('product.show', $product->alias));
+
+        $response->assertOk()
+            ->assertSee('data-product-gallery', false)
+            ->assertSee('data-product-gallery-thumb', false)
+            ->assertSee('data-gallery-index="1"', false)
+            ->assertSee('showSlide(index)', false)
+            ->assertDontSee('js-product-slider')
+            ->assertDontSee('js-click-product');
+    }
+
+    public function test_product_order_form_uses_full_width_section(): void
+    {
+        $product = $this->createVisibleProduct(['can_order' => true]);
+        $product->seller->update(['can_order' => true]);
+        $product->seller->activePackage()->update([
+            'package_id' => Package::factory()->create(['has_order_system' => true])->id,
+        ]);
+
+        $this->get(route('product.show', $product->alias))
+            ->assertOk()
+            ->assertSee('class="product-order-section"', false)
+            ->assertSee('class="order-form" id="order-form"', false)
+            ->assertSee('.product-order-section{width:100%;margin:50px 0 0}', false)
+            ->assertDontSee('.product-order-section{max-width:820px;margin:50px auto 0}', false);
+    }
+
+    public function test_product_mobile_call_action_shows_phone_number(): void
+    {
+        $product = $this->createVisibleProduct();
+        $product->seller->update(['phone' => '+373 777 12 345']);
+
+        $response = $this->get(route('product.show', $product->alias));
+
+        $response->assertOk()
+            ->assertSee('class="product-mobile-actions__call"', false)
+            ->assertSee('href="tel:+37377712345"', false)
+            ->assertSee('+373 777 12 345')
+            ->assertSee('aria-label="Позвонить продавцу +373 777 12 345"', false);
     }
 }
