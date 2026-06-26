@@ -167,6 +167,8 @@ class ProductControllerTest extends TestCase
         $this->get(route('product.show', $product->alias))
             ->assertOk()
             ->assertSee('Другие товары продавца')
-            ->assertSee($related->name);
+            ->assertSee($related->name)
+            ->assertSee('class="home-product"', false)
+            ->assertDontSee('class="related-card"', false);
     }
 }

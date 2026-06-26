@@ -26,7 +26,7 @@ class SellerPageService
         return Product::visible()
             ->forRegionalContext()
             ->where('seller_id', $seller->id)
-            ->with(['images'])
+            ->with(['images', 'seller'])
             ->orderByDesc('created_at')
             ->paginate($perPage);
     }

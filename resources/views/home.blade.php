@@ -6,7 +6,7 @@
 <main class="home-page">
     <section class="home-hero">
         <div class="container container-240">
-            <div class="home-hero__panel">
+            <div class="home-hero__panel home-hero__panel--search">
                 <div class="home-hero__content">
                     <span class="home-eyebrow">Местные товары и магазины</span>
                     <h1>Находите нужное рядом в {{ $locationName }}</h1>
@@ -20,30 +20,16 @@
                         <button type="submit">Найти</button>
                     </form>
 
-                    <div class="home-hero__actions">
-                        <a class="home-btn home-btn--primary" href="{{ $regionalUrl->route('catalog.index') }}">
-                            Открыть каталог
-                        </a>
-                        <a class="home-btn home-btn--light" href="{{ $regionalUrl->route('shops') }}">
-                            Смотреть магазины
-                        </a>
-                    </div>
-                </div>
-
-                <div class="home-hero__aside">
-                    <div class="home-stat">
-                        <strong>{{ $visibleProductsCount }}</strong>
-                        <span>актуальных товаров</span>
-                    </div>
-                    <div class="home-stat">
-                        <strong>{{ $visibleSellersCount }}</strong>
-                        <span>местных магазинов</span>
-                    </div>
-                    <a class="home-sale-link" href="{{ $regionalUrl->route('catalog.sale') }}">
-                        <span><i class="fa fa-percent" aria-hidden="true"></i></span>
-                        <div><strong>Скидки и акции</strong><small>Посмотреть выгодные предложения</small></div>
-                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                    </a>
+                    @if($popularSearchCategories->isNotEmpty())
+                        <div class="home-search-suggestions" aria-label="Часто ищут">
+                            <span>Часто ищут:</span>
+                            @foreach($popularSearchCategories as $category)
+                                <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias]) }}">
+                                    {{ $category->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

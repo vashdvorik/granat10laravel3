@@ -114,6 +114,8 @@ class CatalogControllerTest extends TestCase
         $response = $this->get(route('catalog.index'));
 
         $response->assertSee('VisibleProductName_UNIQUE_ZZZ');
+        $response->assertSee('class="home-product"', false);
+        $response->assertDontSee('class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item"', false);
     }
 
     public function test_catalog_paginates_products(): void
@@ -221,6 +223,69 @@ class CatalogControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_catalog_sort_by_lowest_price_first(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
+
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'ExpensiveSortedProduct',
+            'price' => 900,
+            'lowprice' => null,
+        ]);
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'CheapSortedProduct',
+            'price' => 100,
+            'lowprice' => null,
+        ]);
+
+        $response = $this->get(route('catalog.index', ['sort' => 'price_asc']));
+
+        $names = $response->viewData('products')->pluck('name')->values();
+        $this->assertSame('CheapSortedProduct', $names->first());
+        $response->assertSee('Сначала дешевые');
+    }
+
+    public function test_catalog_sort_by_sale_first(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
+
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'RegularSortedProduct',
+            'price' => 100,
+            'lowprice' => null,
+        ]);
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'SaleSortedProduct',
+            'price' => 1000,
+            'lowprice' => 700,
+            'sale_started_at' => now(),
+        ]);
+
+        $response = $this->get(route('catalog.index', ['sort' => 'sale']));
+
+        $names = $response->viewData('products')->pluck('name')->values();
+        $this->assertSame('SaleSortedProduct', $names->first());
+        $response->assertSee('Сначала акции');
+    }
+
     public function test_load_more_catalog_returns_products_partial(): void
     {
         $this->createVisibleProductWithSeller();
@@ -239,6 +304,7 @@ class CatalogControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('LoadMoreCatalogProduct_UNIQ');
+        $response->assertSee('class="home-product"', false);
     }
 
     public function test_load_more_category_returns_products_partial(): void
@@ -266,6 +332,7 @@ class CatalogControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('LoadMoreCategoryProduct_UNIQ');
         $response->assertDontSee('LoadMoreOtherCategoryProduct_UNIQ');
+        $response->assertSee('class="home-product"', false);
     }
 
     public function test_load_more_sale_returns_products_partial(): void
@@ -287,6 +354,32 @@ class CatalogControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('LoadMoreSaleProduct_UNIQ');
+        $response->assertSee('class="home-product"', false);
+    }
+
+    public function test_sale_page_uses_modern_product_cards(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'SalePageModernCardProduct',
+            'price' => 1000,
+            'lowprice' => 700,
+            'sale_started_at' => now(),
+        ]);
+
+        $response = $this->get(route('catalog.sale'));
+
+        $response->assertOk();
+        $response->assertSee('sale-products-grid', false);
+        $response->assertSee('class="home-product"', false);
+        $response->assertSee('SalePageModernCardProduct');
+        $response->assertDontSee('class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item"', false);
     }
 
     public function test_load_more_search_returns_products_partial(): void

@@ -12,6 +12,7 @@
 |---|---|
 | [project_documentation_ru.md](project_documentation_ru.md) | Текущая архитектура, подсистемы и точки входа |
 | [production_deployment_ru.md](production_deployment_ru.md) | Установка, обновление и production-эксплуатация |
+| [local_runtime_ru.md](local_runtime_ru.md) | Единая команда локального запуска workers, scheduler, сайта и Vite |
 | [order_system_ru.md](order_system_ru.md) | Фактическая реализация заказов и её ограничения |
 | [moderation_operations_ru.md](moderation_operations_ru.md) | Настройка и эксплуатация модерации товаров |
 | [product_moderation_policy_ru.md](product_moderation_policy_ru.md) | Бизнес-политика проверки товаров |

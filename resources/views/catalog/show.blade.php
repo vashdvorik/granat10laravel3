@@ -281,20 +281,7 @@
                             </div>
                         </div>
                         --}}
-                        <div class="filter-show">
-                            <div class="dropdown">
-                                  <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                      Сортировать по
-                                        <span class="dropdown-label">12</span>
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                      <li><a href="#">12</a></li>   
-                                      <li><a href="#">24</a></li>
-                                      <li><a href="#">36</a></li>
-                                        <li><a href="#">48</a></li>
-                                  </ul>
-                            </div>
-                        </div>
+                        @include('components.catalog-sort-dropdown')
                     </div>
                     
                 </div>
@@ -381,17 +368,12 @@
 </div>
 
 <!-- Карточки подкатегорий -->
-                <div class="product-collection-grid product-grid">
-                    <div class="row">
-                        {{-- КАРТОЧКА ТОВАРА --}}                      
-                        @forelse($products as $product)
-                            @include('components.productcategories', ['product' => $product])
-                        @empty
-                            <p>Нет товаров в этой категории.</p>
-                        @endforelse
-                        {{-- /// КАРТОЧКА ТОВАРА ///--}}
-                        
-                    </div>
+                <div class="product-collection-grid product-grid catalog-products-grid">
+                    @forelse($products as $product)
+                        @include('components.home-product-card', ['product' => $product])
+                    @empty
+                        <p>Нет товаров в этой категории.</p>
+                    @endforelse
                 </div>
                 <div class="pd-middle space-v1">
                     @if($products->hasPages())
@@ -407,46 +389,13 @@
                                         data-url="{{ $regionalUrl->route('catalog.loadMoreCategory', ['alias' => $category->alias]) }}"
                                         data-current-page="{{ $products->currentPage() }}"
                                         data-last-page="{{ $products->lastPage() }}"
-                                        data-seller="{{ request('seller') }}">
+                                        data-seller="{{ request('seller') }}"
+                                        data-sort="{{ request('sort') }}">
                                     <i class="ion-ios-reload"></i> Загрузить еще
                                 </button>
                             @endif
                         </div>
                     @endif
-                    <!--
-                    <div class="pd-sort">
-                        <div class="filter-sort">
-                            <div class="dropdown">
-                              <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="dropdown-label">Default sorting</span>
-                              </button>
-                              <ul class="dropdown-menu">
-                                  <li><a href="manual">Featured</a></li>   
-                                  <li><a href="best-selling">Best Selling</a></li>
-                                  <li><a href="title-ascending">Alphabetically, A-Z</a></li>
-                                    <li><a href="title-descending">Alphabetically, A-Z</a></li>
-                                  <li><a href="price-descending">Price, high to low</a></li>
-                                  <li><a href="price-ascending">Price, low to high</a></li>
-                                  <li><a href="created-ascending">Date, old to new</a></li>
-                                  <li><a href="created-descending">Date, new to old</a></li>
-                              </ul>
-                            </div>
-                        </div>
-                        <div class="filter-show">
-                            <div class="dropdown">
-                                  <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                      Show
-                                        <span class="dropdown-label">12</span>
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                      <li><a href="#">12</a></li>   
-                                      <li><a href="#">24</a></li>
-                                      <li><a href="#">36</a></li>
-                                        <li><a href="#">48</a></li>
-                                  </ul>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </div>

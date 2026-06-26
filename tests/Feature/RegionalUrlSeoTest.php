@@ -63,6 +63,16 @@ class RegionalUrlSeoTest extends TestCase
             ->assertSee('<link rel="canonical" href="'.$canonical.'">', false);
     }
 
+    public function test_paginated_catalog_pages_have_self_canonical_and_are_indexable(): void
+    {
+        $url = route('catalog.index');
+
+        $this->get($url.'?page=2')
+            ->assertOk()
+            ->assertSee('<link rel="canonical" href="'.$url.'?page=2">', false)
+            ->assertSee('<meta name="robots" content="index, follow">', false);
+    }
+
     public function test_old_catalog_url_remains_available_with_own_canonical(): void
     {
         $url = route('catalog.index');

@@ -30,15 +30,12 @@
             <h1 class="title">Акции{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' в ПМР' }}</h1>
             <div class="show-element"><span>Показано {{ $products->firstItem() }}–{{ $products->lastItem() }} из {{ $products->total() }} товаров</span></div>
         </div>
-        <div class="product-collection-grid product-grid spc1">
-            <div class="row">
-                {{-- КАРТОЧКА ТОВАРА --}} 
-                @forelse($products as $product)
-                    @include('components.productcategories', ['product' => $product])
-                @empty
-                    <p>Нет товаров в этой категории.</p>
-                @endforelse 
-            </div>
+        <div class="product-collection-grid product-grid sale-products-grid">
+            @forelse($products as $product)
+                @include('components.home-product-card', ['product' => $product])
+            @empty
+                <p>Нет товаров в этой категории.</p>
+            @endforelse
         </div>    
         {{--
         <div class="product-collection-grid product-grid spc1">

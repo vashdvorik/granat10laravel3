@@ -25,6 +25,25 @@ class HomeController extends Controller
             ->limit(10)
             ->get();
 
+        $popularSearchCategories = Category::query()
+            ->where('is_active', true)
+            ->whereHas('products', $productScope)
+            ->withCount([
+                'products as visible_products_count' => $productScope,
+                'products as recent_visible_products_count' => static fn ($query) => $query
+                    ->visible()
+                    ->forRegionalContext()
+                    ->where('products.created_at', '>=', now()->subDays(30)),
+            ])
+            ->orderByDesc('recent_visible_products_count')
+            ->orderByDesc('visible_products_count')
+            ->orderBy('number')
+            ->limit(24)
+            ->get()
+            ->shuffle()
+            ->take(9)
+            ->values();
+
         $latestProducts = Product::visible()
             ->forRegionalContext()
             ->with(['images', 'seller'])
@@ -56,6 +75,7 @@ class HomeController extends Controller
 
         return view('home', [
             'featuredCategories' => $featuredCategories,
+            'popularSearchCategories' => $popularSearchCategories,
             'latestProducts' => $latestProducts,
             'saleProducts' => $saleProducts,
             'featuredSellers' => $featuredSellers,

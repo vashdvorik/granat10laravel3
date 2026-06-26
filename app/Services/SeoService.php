@@ -15,6 +15,12 @@ class SeoService
 
     public function canonical(Request $request): string
     {
+        $page = (int) $request->query('page', 1);
+
+        if ($page > 1 && ! $this->hasCatalogFilters($request)) {
+            return $request->url().'?page='.$page;
+        }
+
         return $request->url();
     }
 

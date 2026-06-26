@@ -7,6 +7,7 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Models\Settlement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -147,9 +148,11 @@ class SellerControllerTest extends TestCase
 
     public function test_seller_page_shows_seller_description(): void
     {
+        $settlement = Settlement::factory()->create(['name' => 'Тирасполь']);
         $seller = Seller::factory()->create([
-            'alias'       => 'seller-desc-test-unique',
-            'description' => 'Уникальное описание тест-магазина XYZ789',
+            'alias'         => 'seller-desc-test-unique',
+            'description'   => 'Уникальное описание тест-магазина XYZ789',
+            'settlement_id' => $settlement->id,
         ]);
 
         Cache::flush();
@@ -157,6 +160,8 @@ class SellerControllerTest extends TestCase
         $response = $this->get(route('seller', $seller->alias));
 
         $response->assertSee('Уникальное описание тест-магазина XYZ789');
+        $response->assertSee('Тирасполь');
+        $response->assertDontSee('Местный магазин');
         $response->assertSee('class="seller-profile__panel"', false);
         $response->assertDontSee('blog-banner.png', false);
     }
@@ -217,5 +222,32 @@ class SellerControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('LoadMoreSellerProductUnique');
         $response->assertSee('class="home-product"', false);
+    }
+
+    public function test_seller_page_keeps_desktop_pagination_and_mobile_load_more(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create(['alias' => 'seller-products-pagination']);
+        $category = Category::factory()->create();
+
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+        Product::factory()->count(13)->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+        ]);
+
+        $response = $this->get(route('seller', $seller->alias));
+
+        $response->assertOk();
+        $response->assertSee('id="seller-products-grid"', false);
+        $response->assertSee('pagination-desktop hidden-xs hidden-sm', false);
+        $response->assertSee('btn-load-more', false);
+        $response->assertSee('data-container="#seller-products-grid"', false);
+        $response->assertSee(route('seller.loadMore', ['alias' => $seller->alias]), false);
     }
 }

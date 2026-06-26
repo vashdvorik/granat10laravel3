@@ -17,6 +17,7 @@ class HomeControllerTest extends TestCase
     public function test_home_page_shows_dynamic_marketplace_sections(): void
     {
         $category = Category::factory()->create(['name' => 'Категория главной']);
+        $emptyCategory = Category::factory()->create(['name' => 'Пустая категория главной']);
         $seller = Seller::factory()->create(['name' => 'Магазин главной']);
         $package = Package::factory()->withLimits(50, 10)->create();
 
@@ -42,9 +43,16 @@ class HomeControllerTest extends TestCase
             ->assertSee('Новые товары')
             ->assertSee('Выгодные предложения')
             ->assertSee('Магазины рядом')
+            ->assertSee('Часто ищут')
             ->assertSee($category->name)
+            ->assertSee(route('catalog.show', ['alias' => $category->alias]), false)
+            ->assertDontSee($emptyCategory->name)
             ->assertSee($seller->name)
             ->assertSee($product->name)
+            ->assertSee('class="home-hero__panel home-hero__panel--search"', false)
+            ->assertDontSee('Открыть каталог')
+            ->assertDontSee('Смотреть магазины')
+            ->assertDontSee('Скидки и акции')
             ->assertDontSee('Power to the pro')
             ->assertDontSee('Shop now');
     }

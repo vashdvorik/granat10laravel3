@@ -1003,6 +1003,7 @@
                 let currentPage = parseInt(btn.data('current-page'));
                 const lastPage = parseInt(btn.data('last-page'));
                 const seller = btn.data('seller') || '';
+                const sort = btn.data('sort') || '';
                 
                 // Отключаем кнопку и показываем загрузку
                 btn.prop('disabled', true).addClass('loading');
@@ -1015,8 +1016,8 @@
                 const targetSelector = btn.data('container');
                 const container = targetSelector
                     ? $(targetSelector)
-                    : ($('.product-collection-grid .row').length > 0
-                        ? $('.product-collection-grid .row')
+                    : ($('.product-collection-grid').length > 0
+                        ? $('.product-collection-grid')
                         : $('.blog-grid .row'));
                 
                 // AJAX запрос
@@ -1025,7 +1026,8 @@
                     type: 'GET',
                     data: {
                         page: nextPage,
-                        seller: seller
+                        seller: seller,
+                        sort: sort
                     },
                     success: function(html) {
                         // Добавляем элементы в конец списка

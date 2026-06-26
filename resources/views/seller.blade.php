@@ -49,7 +49,7 @@
                 <div>
                     <div class="seller-profile__header">
                         <div>
-                            <span class="market-eyebrow">Местный магазин</span>
+                            <span class="market-eyebrow">{{ $location ?: 'Магазин' }}</span>
                             <h1>{{ $sellerName }}</h1>
                         </div>
                         <span class="market-count">

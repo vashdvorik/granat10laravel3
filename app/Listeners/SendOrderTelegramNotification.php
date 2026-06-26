@@ -34,18 +34,8 @@ class SendOrderTelegramNotification implements ShouldQueue
         }
 
         $message = $event instanceof OrderCreated
-            ? implode("\n", [
-                'Новый заказ '.$order->number,
-                'Товар: '.$order->product_name,
-                'Количество: '.$order->quantity,
-                'Сумма: '.number_format((float) $order->unit_price * $order->quantity, 2, ',', ' ').' RUP',
-                route('account.store.orders.show', $order),
-            ])
-            : implode("\n", [
-                'Статус заказа '.$order->number.' изменён.',
-                'Новый статус: '.$order->status->label(),
-                route('account.store.orders.show', $order),
-            ]);
+            ? $this->newOrderMessage($order)
+            : $this->statusChangedMessage($order);
 
         $this->telegram->sendMessage($seller->telegram_chat_id, $message);
     }
@@ -53,5 +43,54 @@ class SendOrderTelegramNotification implements ShouldQueue
     public function viaQueue(): string
     {
         return (string) config('orders.notifications_queue', 'orders');
+    }
+
+    private function newOrderMessage(Order $order): string
+    {
+        return implode("\n", array_filter([
+            '🆕 Новый заказ '.$order->number,
+            'Статус: '.$order->status->label(),
+            '',
+            'Покупатель: '.$order->customer_name,
+            'Телефон: '.$order->customer_phone,
+            '',
+            'Товар: '.$order->product_name,
+            'Количество: '.$order->quantity,
+            'Цена: '.$this->formatMoney((float) $order->unit_price),
+            'Итого: '.$this->formatMoney((float) $order->unit_price * $order->quantity),
+            '',
+            'Получение: '.$this->fulfillmentMethodLabel($order->fulfillment_method),
+            filled($order->settlement_name) ? 'Город: '.$order->settlement_name : null,
+            $order->isDelivery() && filled($order->delivery_address)
+                ? 'Адрес доставки: '.$order->delivery_address
+                : null,
+            filled($order->customer_comment) ? 'Комментарий: '.$order->customer_comment : null,
+            '',
+            'Открыть заказ: '.route('account.store.orders.show', $order),
+        ], static fn ($line): bool => $line !== null));
+    }
+
+    private function statusChangedMessage(Order $order): string
+    {
+        return implode("\n", [
+            'Статус заказа '.$order->number.' изменён.',
+            'Новый статус: '.$order->status->label(),
+            'Товар: '.$order->product_name,
+            'Открыть заказ: '.route('account.store.orders.show', $order),
+        ]);
+    }
+
+    private function fulfillmentMethodLabel(string $method): string
+    {
+        return match ($method) {
+            'delivery' => 'Доставка',
+            'pickup' => 'Самовывоз',
+            default => $method,
+        };
+    }
+
+    private function formatMoney(float $amount): string
+    {
+        return number_format($amount, 2, ',', ' ').' руб.';
     }
 }

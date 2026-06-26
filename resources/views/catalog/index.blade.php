@@ -219,50 +219,6 @@
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>
                 </div>
-                <!-- блокирую 
-                <div class="pd-middle">
-                    <div class="view-mode view-group">
-                        <a class="grid-icon col active"><img src="img/grid.png" alt=""></a>
-                        <a class="grid-icon col2"><img src="img/grid2.png" alt=""></a>
-                        <a class="list-icon list"><img src="img/list.png" alt=""></a>
-                    </div>
-                    
-                    <div class="pd-sort">
-                        <div class="filter-sort">
-                            <div class="dropdown">
-                              <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="dropdown-label">Default sorting</span>
-                              </button>
-                              <ul class="dropdown-menu">
-                                  <li><a href="manual">Featured</a></li>   
-                                  <li><a href="best-selling">Best Selling</a></li>
-                                  <li><a href="title-ascending">Alphabetically, A-Z</a></li>
-                                    <li><a href="title-descending">Alphabetically, A-Z</a></li>
-                                  <li><a href="price-descending">Price, high to low</a></li>
-                                  <li><a href="price-ascending">Price, low to high</a></li>
-                                  <li><a href="created-ascending">Date, old to new</a></li>
-                                  <li><a href="created-descending">Date, new to old</a></li>
-                              </ul>
-                            </div>
-                        </div>
-                        <div class="filter-show">
-                            <div class="dropdown">
-                                  <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                      Show
-                                        <span class="dropdown-label">12</span>
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                      <li><a href="#">12</a></li>   
-                                      <li><a href="#">24</a></li>
-                                      <li><a href="#">36</a></li>
-                                        <li><a href="#">48</a></li>
-                                  </ul>
-                            </div>
-                        </div>
-                    </div>
-                     
-                </div>-->
-
                 <!-- Мобильная версия: карточки категорий 3x3 -->
                 <div class="mobile-categories-wrapper hidden-md hidden-lg">
                     <div class="mobile-categories-grid">
@@ -296,33 +252,15 @@
                 <div class="pd-middle">
                     <div class="pd-sort">
                         @include('components.catalog-region-selector')
-                        <div class="filter-show">
-                            <div class="dropdown">
-                                <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    Сортировать по
-                                    <span class="dropdown-label">12</span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">12</a></li>
-                                    <li><a href="#">24</a></li>
-                                    <li><a href="#">36</a></li>
-                                    <li><a href="#">48</a></li>
-                                </ul>
-                            </div>
-                        </div>
+                        @include('components.catalog-sort-dropdown')
                     </div>
                 </div>
-                <div class="product-collection-grid product-grid">
-                    <div class="row">
-                        {{-- КАРТОЧКА ТОВАРА --}} 
-                        @forelse($products as $product)
-                            @include('components.productcategories', ['product' => $product])
-                        @empty
-                            <p>Нет товаров в этой категории.</p>
-                        @endforelse
- 
-                        
-                    </div>
+                <div class="product-collection-grid product-grid catalog-products-grid">
+                    @forelse($products as $product)
+                        @include('components.home-product-card', ['product' => $product])
+                    @empty
+                        <p>Нет товаров в этой категории.</p>
+                    @endforelse
                 </div>
                 <div class="pd-middle space-v1">
                     @if($products->hasPages())
@@ -338,46 +276,13 @@
                                         data-url="{{ $regionalUrl->route('catalog.loadMore') }}"
                                         data-current-page="{{ $products->currentPage() }}"
                                         data-last-page="{{ $products->lastPage() }}"
-                                        data-seller="{{ request('seller') }}">
+                                        data-seller="{{ request('seller') }}"
+                                        data-sort="{{ request('sort') }}">
                                     <i class="ion-ios-reload"></i> Загрузить еще
                                 </button>
                             @endif
                         </div>
                     @endif
-                    <!-- блокирую
-                    <div class="pd-sort">
-                        <div class="filter-sort">
-                            <div class="dropdown">
-                              <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                    <span class="dropdown-label">Default sorting</span>
-                              </button>
-                              <ul class="dropdown-menu">
-                                  <li><a href="manual">Featured</a></li>   
-                                  <li><a href="best-selling">Best Selling</a></li>
-                                  <li><a href="title-ascending">Alphabetically, A-Z</a></li>
-                                    <li><a href="title-descending">Alphabetically, A-Z</a></li>
-                                  <li><a href="price-descending">Price, high to low</a></li>
-                                  <li><a href="price-ascending">Price, low to high</a></li>
-                                  <li><a href="created-ascending">Date, old to new</a></li>
-                                  <li><a href="created-descending">Date, new to old</a></li>
-                              </ul>
-                            </div>
-                        </div>
-                        <div class="filter-show">
-                            <div class="dropdown">
-                                  <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                      Show
-                                        <span class="dropdown-label">12</span>
-                                  </button>
-                                  <ul class="dropdown-menu">
-                                      <li><a href="#">12</a></li>   
-                                      <li><a href="#">24</a></li>
-                                      <li><a href="#">36</a></li>
-                                        <li><a href="#">48</a></li>
-                                  </ul>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </div>

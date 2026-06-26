@@ -79,7 +79,17 @@ class TelegramOrderNotificationTest extends TestCase
 
     public function test_listener_sends_only_to_verified_enabled_seller(): void
     {
-        $order = Order::factory()->create();
+        $order = Order::factory()->create([
+            'customer_name' => 'Иван Петров',
+            'customer_phone' => '+373 777 12 345',
+            'product_name' => 'Смартфон Test Pro',
+            'quantity' => 2,
+            'unit_price' => 1250,
+            'fulfillment_method' => 'delivery',
+            'delivery_address' => 'Тирасполь, ул. Ленина 10',
+            'customer_comment' => 'Позвонить за час',
+            'settlement_name' => 'Тирасполь',
+        ]);
         $order->seller->forceFill([
             'telegram_chat_id' => '777',
             'telegram_verified_at' => now(),
@@ -88,7 +98,16 @@ class TelegramOrderNotificationTest extends TestCase
         $telegram = Mockery::mock(TelegramBotClient::class);
         $telegram->shouldReceive('sendMessage')
             ->once()
-            ->with('777', Mockery::on(fn (string $message): bool => str_contains($message, $order->number)));
+            ->with('777', Mockery::on(fn (string $message): bool => str_contains($message, $order->number)
+                && str_contains($message, 'Иван Петров')
+                && str_contains($message, '+373 777 12 345')
+                && str_contains($message, 'Смартфон Test Pro')
+                && str_contains($message, 'Количество: 2')
+                && str_contains($message, 'Итого: 2 500,00 руб.')
+                && str_contains($message, 'Получение: Доставка')
+                && str_contains($message, 'Адрес доставки: Тирасполь, ул. Ленина 10')
+                && str_contains($message, 'Комментарий: Позвонить за час')
+                && str_contains($message, route('account.store.orders.show', $order))));
 
         (new SendOrderTelegramNotification($telegram))->handle(new OrderCreated($order->id));
 

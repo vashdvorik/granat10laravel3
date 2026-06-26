@@ -67,6 +67,14 @@ Worker должен обрабатывать очередь модерации:
 php artisan queue:work --queue=moderation,default --tries=3 --timeout=90
 ```
 
+Для локальной разработки можно запустить все runtime-процессы одной командой:
+
+```bash
+php artisan granat:work
+```
+
+Подробности: `docs/local_runtime_ru.md`.
+
 Для production используйте systemd или Supervisor. Scheduler записывает
 heartbeat worker и запускает повтор отдельных отказавших операций.
 
@@ -135,4 +143,3 @@ php artisan test tests/Feature/ModerateProductImagesJobTest.php
 php artisan test tests/Feature/ProductImageModerationFlowTest.php
 php artisan test tests/Feature/ProductViewStateTest.php
 ```
-

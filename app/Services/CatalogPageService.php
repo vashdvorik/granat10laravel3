@@ -107,6 +107,11 @@ class CatalogPageService
     private function resolveFilters(Request $request, ?array $defaultPriceRange = null): array
     {
         $selectedSellerAlias = $request->input('seller');
+        $sort = $request->input('sort', 'new');
+
+        if (! in_array($sort, ['new', 'price_asc', 'sale'], true)) {
+            $sort = 'new';
+        }
 
         if ($request->has('seller')) {
             Session::put('catalog_filters.seller', $selectedSellerAlias);
@@ -128,6 +133,7 @@ class CatalogPageService
         return [
             'seller' => $selectedSellerAlias,
             'price' => $priceRange,
+            'sort' => $sort,
         ];
     }
 
@@ -148,9 +154,30 @@ class CatalogPageService
             ->when(! empty($filters['price']), function (Builder $query) use ($filters) {
                 $query->whereBetween('price', [$filters['price']['min'], $filters['price']['max']]);
             })
-            ->orderByDesc('is_vip')
-            ->orderByDesc('push_at')
+            ->tap(fn (Builder $query) => $this->applySorting($query, $filters['sort'] ?? 'new'))
             ->with(['images', 'seller']);
+    }
+
+    private function applySorting(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'price_asc' => $query
+                ->orderByRaw(
+                    'CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN lowprice ELSE price END ASC'
+                )
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+            'sale' => $query
+                ->orderByRaw('CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN 1 ELSE 0 END DESC')
+                ->orderByRaw('CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN (price - lowprice) / NULLIF(price, 0) ELSE 0 END DESC')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+            default => $query
+                ->orderByDesc('is_vip')
+                ->orderByDesc('push_at')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+        };
     }
 
     private function getCatalogMenuCategories(): Collection
