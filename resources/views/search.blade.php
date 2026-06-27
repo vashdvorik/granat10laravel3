@@ -70,8 +70,8 @@
 
                 {{-- Mobile: кнопка "Загрузить еще" --}}
                 @if($products->currentPage() < $products->lastPage())
-                    <div class="load-more-wrapper hidden-md hidden-lg text-center">
-                        <button class="btn btn-load-more"
+                    <div class="load-more-wrapper market-pagination hidden-md hidden-lg text-center">
+                        <button class="market-btn market-btn--secondary btn-load-more"
                                 data-url="{{ $regionalUrl->route('search.loadMore', ['q' => $q, 'category' => $categoryAlias]) }}"
                                 data-current-page="{{ $products->currentPage() }}"
                                 data-last-page="{{ $products->lastPage() }}"

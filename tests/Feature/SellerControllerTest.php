@@ -75,6 +75,8 @@ class SellerControllerTest extends TestCase
         $response->assertStatus(200);
         $sellers = $response->viewData('sellers');
         $this->assertLessThanOrEqual(12, $sellers->count());
+        $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
     public function test_regional_shops_page_has_city_switcher_for_mobile_and_desktop(): void
@@ -272,7 +274,8 @@ class SellerControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="seller-products-grid"', false);
         $response->assertSee('pagination-desktop hidden-xs hidden-sm', false);
-        $response->assertSee('btn-load-more', false);
+        $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertDontSee('class="btn btn-load-more"', false);
         $response->assertSee('data-container="#seller-products-grid"', false);
         $response->assertSee(route('seller.loadMore', ['alias' => $seller->alias]), false);
     }

@@ -748,26 +748,6 @@
                         <div class="header-sub-element row">
                             <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}" title="Войти продавцу" aria-label="Войти продавцу"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
                             <a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
-                            
-                            <div class="cart">
-                                
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" id="label5">
-                                    <img src="{{ asset('img/icon-cart.png') }}" alt="">
-                                    
-                                </a>
-                                <div class="dropdown-menu dropdown-cart">
-                                    <div class="bottom-cart">
-                                        <div class="cart-price">
-                                            <span>Чтобы оформить заказ, свяжитесь с продавцом по телефону.</span>
-                                        </div>
-                                        <div class="button-cart">
-                                            <a href="{{ $regionalUrl->route('shops') }}" class="cart-btn btn-viewcart">Магазины</a>
-                                            <a href="{{ $regionalUrl->route('catalog.index') }}" class="cart-btn e-checkout btn-gradient">Каталог</a>
-                                        </div>
-                                    </div>
-                                </div> 
-                            </div> 
-                            
                             <a href="#" class="hidden-md hidden-lg icon-pushmenu js-push-menu">
                                 <i class="fa fa-bars f-15"></i>
                             </a>

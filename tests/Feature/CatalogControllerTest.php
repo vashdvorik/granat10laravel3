@@ -392,6 +392,27 @@ class CatalogControllerTest extends TestCase
         $this->assertStringContainsString('margin-top: 14px;', $css);
     }
 
+    public function test_sale_page_uses_market_load_more_button(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->count(13)->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'lowprice' => 700,
+            'sale_started_at' => now(),
+        ]);
+
+        $response = $this->get(route('catalog.sale'));
+
+        $response->assertOk();
+        $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertDontSee('class="btn btn-load-more"', false);
+    }
+
     public function test_load_more_search_returns_products_partial(): void
     {
         $package  = Package::factory()->withLimits(50, 10)->create();
@@ -409,6 +430,26 @@ class CatalogControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('LoadMoreSearchProduct_UNIQ');
+    }
+
+    public function test_search_page_uses_market_load_more_button(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+        Product::factory()->count(13)->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'MarketLoadMoreSearchProduct',
+        ]);
+
+        $response = $this->get(route('search', ['q' => 'MarketLoadMoreSearch']));
+
+        $response->assertOk();
+        $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
     public function test_search_page_accepts_cyrillic_query(): void
