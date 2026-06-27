@@ -139,6 +139,8 @@ class CatalogControllerTest extends TestCase
         // Пагинация 12 товаров на страницу — первая страница не должна содержать все 15
         $products = $response->viewData('products');
         $this->assertLessThanOrEqual(12, $products->count());
+        $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
     // =========================================================================
@@ -417,6 +419,15 @@ class CatalogControllerTest extends TestCase
         $response = $this->get(route('search', ['q' => 'наушники']));
 
         $response->assertOk();
-        $response->assertSee('Беспроводные наушники');
+        $response
+            ->assertSee('Беспроводные наушники')
+            ->assertSee('class="market-search search-page-form"', false)
+            ->assertSee('id="search-page-query"', false)
+            ->assertSee('--market-search-action: #8750b4', false)
+            ->assertSee('background: linear-gradient(90deg, #b965ed, #4ed9ee)', false)
+            ->assertSee('class="home-product"', false)
+            ->assertSee('search-products-grid', false)
+            ->assertDontSee('#ff7a00', false)
+            ->assertDontSee('class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item"', false);
     }
 }

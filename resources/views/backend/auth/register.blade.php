@@ -1,5 +1,5 @@
 @extends('backend.auth.login_layouts')
-@section('title', 'Регистрация | Маркетплейс ПМР')
+@section('title', 'Стать продавцом | Маркетплейс ПМР')
 
 @section('content')
 {{--
@@ -17,7 +17,7 @@
         <div class="mb-4 text-center mx-auto">
         <!--    <img class="inline-block" src="{{ asset('auth/assets/images/icons/icon-landing-success-1.svg') }}" alt="landing success"> -->
         </div>
-        <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Создать аккаунт</h3>
+        <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Стать продавцом</h3>
         <p class="text-sm text-gray-500 mb-[30px] dark:text-gray-dark-500">Вы создаете аккаунт продавца</p>
 
         @if ($errors->any())
@@ -105,7 +105,7 @@
             </div>
         </div>
         
-        <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Зарегистрироваться</button>
+        <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Создать кабинет продавца</button>
     {{--    <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="#">Или зарегистрируйтесь через соцсети</a>
         <div class="flex items-center gap-x-2 justify-between mb-[20px]">
             <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
@@ -118,8 +118,8 @@
             </a>
         </div> --}}
         <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">
-            Уже есть аккаунт?
-            <a class="text-color-brands" href="{{ route('login') }}">Войти</a>
+            Уже есть кабинет продавца?
+            <a class="text-color-brands" href="{{ route('login') }}">Войти продавцу</a>
         </p>
     </form>
 </div>

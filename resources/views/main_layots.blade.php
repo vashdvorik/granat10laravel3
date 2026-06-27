@@ -525,12 +525,59 @@
     <div class="menu-push">
         <span class="close-left js-close"><i class="icon-close f-20"></i></span>
         <div class="clearfix"></div>
-        <form role="search" method="get" id="searchform" class="searchform" action="/search">
+        <div class="mobile-menu-heading">
+            <div class="mobile-menu-heading__title">Меню маркетплейса</div>
+            <div class="mobile-menu-heading__subtitle">Товары, магазины и вход для продавцов</div>
+        </div>
+        <form role="search" method="get" id="searchform" class="searchform mobile-menu-search" action="{{ $regionalUrl->route('search') }}">
            <div>
-              <label class="screen-reader-text" for="q"></label>
-              <input type="text" placeholder="Я ищу ..." value="" name="q" id="q" autocomplete="off"><input type="hidden" name="type" value="product"><button type="submit" id="searchsubmit"><i class="ion-ios-search-strong"></i></button>
+              <label class="screen-reader-text" for="mobile-menu-query">Поиск товаров</label>
+              <input type="text" placeholder="Что ищем?" value="{{ request('q') }}" name="q" id="mobile-menu-query" autocomplete="off"><input type="hidden" name="type" value="product"><button type="submit" id="searchsubmit" aria-label="Найти">Найти</button>
            </div>
         </form>
+        <div class="mobile-menu-region">
+            @include('components.regional-selector', ['variant' => 'push-menu'])
+        </div>
+        <div class="mobile-menu-section-title">Покупателям</div>
+        <nav class="mobile-menu-quick" aria-label="Быстрые ссылки покупателя">
+            <a href="{{ $regionalUrl->route('home') }}" class="mobile-menu-quick__item">
+                <i class="fa fa-home"></i>
+                <span>Главная</span>
+            </a>
+            <a href="{{ $regionalUrl->route('catalog.index') }}" class="mobile-menu-quick__item">
+                <i class="fa fa-th"></i>
+                <span>Каталог</span>
+            </a>
+            <a href="{{ $regionalUrl->route('shops') }}" class="mobile-menu-quick__item">
+                <i class="fa fa-shopping-bag"></i>
+                <span>Магазины</span>
+            </a>
+            <a href="{{ $regionalUrl->route('favorites') }}" class="mobile-menu-quick__item">
+                <i class="fa fa-heart"></i>
+                <span>Избранное</span>
+            </a>
+            <a href="{{ $regionalUrl->route('catalog.sale') }}" class="mobile-menu-quick__item">
+                <i class="fa fa-percent"></i>
+                <span>Распродажи</span>
+            </a>
+        </nav>
+        <div class="mobile-seller-entry">
+            <div>
+                <div class="mobile-seller-entry__title">Продавцам</div>
+                <div class="mobile-seller-entry__text">Управляйте товарами и магазином в кабинете продавца.</div>
+            </div>
+            <div class="mobile-seller-entry__actions">
+                <a href="{{ route('account.index') }}">Войти продавцу</a>
+                <a href="{{ route('register') }}">Стать продавцом</a>
+            </div>
+        </div>
+        <div class="mobile-menu-categories-head">
+            <div>
+                <span class="mobile-menu-section-title">Категории товаров</span>
+                <p>Выберите раздел или откройте весь каталог.</p>
+            </div>
+            <a href="{{ $regionalUrl->route('catalog.index') }}">Весь каталог</a>
+        </div>
         <ul class="nav-home5 js-menubar">
             @include('components.menu-tree', ['items' => $menuRootCategories, 'level' => 1])
             <!--
@@ -591,6 +638,11 @@
             {{-- Меню категорий (рекурсивно через components.menu-tree) --}}
             <!--<li class="level1 active dropdown"><a href="#">Mega Menu</a></li>-->
         </ul>
+        <nav class="mobile-menu-links" aria-label="Дополнительные разделы">
+            <a href="{{ $regionalUrl->route('shops') }}"><i class="fa fa-shopping-bag" aria-hidden="true"></i> Магазины</a>
+            <a href="{{ $regionalUrl->route('catalog.sale') }}"><i class="fa fa-percent" aria-hidden="true"></i> Распродажи</a>
+            <a href="{{ $regionalUrl->route('favorites') }}"><i class="fa fa-heart" aria-hidden="true"></i> Избранное</a>
+        </nav>
     </div>
 </div>
 
@@ -628,7 +680,7 @@
                             <a href="{{ route('gobuyer') }}">Помощь продавцам</a>
                         </div>
                         <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('account.index') }}"><i class="fa fa-user" style="margin-right:5px;"></i><span>Войти в аккаунт</span></a>
+                            <a href="{{ route('account.index') }}"><i class="fa fa-user" style="margin-right:5px;"></i><span>Войти продавцу</span></a>
                         </div>
                 <!--    <div class="element element-currency">
                             <a id="label3" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
@@ -694,7 +746,7 @@
                         </div>
                 <!-- Иконки -->
                         <div class="header-sub-element row">
-                            <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
+                            <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}" title="Войти продавцу" aria-label="Войти продавцу"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
                             <a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
                             
                             <div class="cart">
@@ -783,8 +835,8 @@
                 <section>
                     <h2>Продавцам</h2>
                     <ul>
-                        <li><a href="{{ route('register') }}">Зарегистрироваться</a></li>
-                        <li><a href="{{ route('account.index') }}">Войти в кабинет</a></li>
+                        <li><a href="{{ route('register') }}">Стать продавцом</a></li>
+                        <li><a href="{{ route('account.index') }}">Войти продавцу</a></li>
                         <li><a href="{{ route('gobuyer') }}">Как продавать</a></li>
                         <li><a href="{{ route('help') }}">Помощь</a></li>
                     </ul>
@@ -816,31 +868,7 @@
         </div>
     </div>
 </footer>
-<!-- МОБИЛЬНОЕ МЕНЮ ВНИЗУ (Bottom Navbar) -->
-<div class="mobile-bottom-navbar hidden-md hidden-lg">
-    <div class="mobile-navbar-wrapper">
-        <a href="{{ route('account.index') }}" class="mobile-nav-item " title="Меню">
-            <i class="fa fa-user f-18"></i>
-            <span class="mobile-nav-label">Кабинет</span>
-        </a>
-        <a href="{{ $regionalUrl->route('favorites') }}" class="mobile-nav-item" title="Избранное">
-            <i class="fa fa-heart f-18"></i>
-            <span class="mobile-nav-label">Избранное</span>
-        </a>
-        <a href="{{ $regionalUrl->route('catalog.index') }}" class="mobile-nav-item " title="Меню">
-            <i class="fa fa-th f-18"></i>
-            <span class="mobile-nav-label">Каталог</span>
-        </a>
-        <a href="{{ $regionalUrl->route('catalog.sale') }}" class="mobile-nav-item" title="Распродажи">
-            <img src="{{ asset('img/skidka-logo.png') }}" alt="Распродажи" style="width:20px; height:20px;">
-            <span class="mobile-nav-label">Распродажи</span>
-        </a>
-        <a href="{{ $regionalUrl->route('shops') }}" class="mobile-nav-item" title="Магазины">
-            <img src="{{ asset('img/icon-ship.png') }}" alt="Магазины" style="width:20px; height:20px;">
-            <span class="mobile-nav-label">Магазины</span>
-        </a>
-    </div>
-</div>
+@include('components.mobile-bottom-nav', ['regionalUrl' => $regionalUrl])
 <!-- /// -->
 </div>
 

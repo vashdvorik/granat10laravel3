@@ -18,6 +18,7 @@
 | [product_moderation_policy_ru.md](product_moderation_policy_ru.md) | Бизнес-политика проверки товаров |
 | [architecture_hardening_plan_ru.md](architecture_hardening_plan_ru.md) | Оставшиеся архитектурные улучшения |
 | [site_design_audit_ru.md](site_design_audit_ru.md) | Аудит интерфейса и статус исправлений |
+| [mobile_navigation_redesign_plan_ru.md](mobile_navigation_redesign_plan_ru.md) | Поэтапный план переделки мобильной навигации клиента и входа продавца |
 | [design_rules_ru.md](design_rules_ru.md) | Обязательные правила публичного интерфейса и изображений |
 | [filament_manual_acceptance_checklist_ru.md](filament_manual_acceptance_checklist_ru.md) | Ручная приёмка административной панели |
 | [BACKLOG.md](BACKLOG.md) | Нерешённые пользовательские и технические задачи |

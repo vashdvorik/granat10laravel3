@@ -199,6 +199,31 @@
       z-index: 20;
    }
 
+   .cabinet-marketplace-top-link {
+      align-items: center;
+      background: #fff7ec;
+      border: 1px solid #ffd8a8;
+      border-radius: 8px;
+      color: #5f3b00;
+      display: inline-flex;
+      font-size: 14px;
+      font-weight: 600;
+      gap: 8px;
+      line-height: 1.2;
+      padding: 10px 14px;
+      text-decoration: none;
+   }
+
+   .cabinet-marketplace-top-link:hover {
+      color: #ff7a00;
+   }
+
+   .sidebar_nav .marketplace-return-link {
+      background: #fff7ec;
+      color: #5f3b00;
+      font-weight: 600;
+   }
+
    @media (max-width: 575.98px) {
       .product-moderation-issues__body {
          flex-direction: column;
@@ -258,6 +283,11 @@
          margin: 0;
          width: 100%;
       }
+
+      .cabinet-marketplace-top-link {
+         font-size: 12px;
+         padding: 8px 10px;
+      }
    }
 </style>
 
@@ -291,6 +321,10 @@
                   <img class="svg" src="{{ asset('cabinet/img/svg/align-center-alt.svg') }}" alt="img"></a>
             </div>
          </div>
+         <a href="{{ url('/') }}" class="cabinet-marketplace-top-link">
+            <span class="uil uil-store"></span>
+            Вернуться в маркетплейс
+         </a>
          <div class="navbar-right">
             <ul class="navbar-right__menu">
                @php
@@ -645,7 +679,7 @@
                   </li>
                   @endif
                   <li class="">
-                     <a href="{{ url('/') }}">
+                     <a href="{{ url('/') }}" class="marketplace-return-link">
                         <span class="nav-icon uil uil-signin"></span>
                         <span class="menu-text">Вернуться в маркетплейс</span>
                      </a>

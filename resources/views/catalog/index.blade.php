@@ -270,9 +270,9 @@
                         </div>
                         
                         <!-- Кнопка "Загрузить еще" для мобильных -->
-                        <div class="load-more-wrapper hidden-md hidden-lg text-center">
+                        <div class="load-more-wrapper market-pagination hidden-md hidden-lg text-center">
                             @if($products->currentPage() < $products->lastPage())
-                                <button class="btn btn-load-more" 
+                                <button class="market-btn market-btn--secondary btn-load-more"
                                         data-url="{{ $regionalUrl->route('catalog.loadMore') }}"
                                         data-current-page="{{ $products->currentPage() }}"
                                         data-last-page="{{ $products->lastPage() }}"

@@ -57,6 +57,19 @@ class HomeControllerTest extends TestCase
             ->assertSee(route('shops'), false)
             ->assertSee(route('catalog.sale'), false)
             ->assertSee(route('favorites'), false)
+            ->assertSee(route('search'), false)
+            ->assertSee('title="Главная"', false)
+            ->assertSee('title="Поиск"', false)
+            ->assertSee('class="mobile-menu-region"', false)
+            ->assertSee('regional-selector--push-menu', false)
+            ->assertSee('id="mobile-menu-query"', false)
+            ->assertSee('class="mobile-menu-categories-head"', false)
+            ->assertSee('class="mobile-menu-links"', false)
+            ->assertSee('class="mobile-seller-entry"', false)
+            ->assertSee('Категории товаров')
+            ->assertSee('Товары, магазины и вход для продавцов')
+            ->assertSee('Войти продавцу')
+            ->assertSee('Стать продавцом')
             ->assertSee('Оплата проходит напрямую продавцу')
             ->assertSee('Наличие, цену и доставку уточняйте у продавца перед покупкой.')
             ->assertDontSee('Contact@yourcompany.com')
@@ -66,5 +79,15 @@ class HomeControllerTest extends TestCase
             ->assertDontSee('Скидки и акции')
             ->assertDontSee('Power to the pro')
             ->assertDontSee('Shop now');
+
+        $css = file_get_contents(public_path('css/marketplace-design.css'));
+        $this->assertStringContainsString('.menu-home5.pushmenu-open', $css);
+        $this->assertStringContainsString('body.pushmenu-push-toleft', $css);
+        $this->assertStringContainsString('left: 0;', $css);
+        $this->assertStringContainsString('transform: translate3d(-100%, 0, 0);', $css);
+        $this->assertStringContainsString('transform: translate3d(0, 0, 0) !important;', $css);
+        $this->assertStringContainsString('transform: none !important;', $css);
+        $this->assertStringContainsString('.pushmenu.menu-home5 .screen-reader-text', $css);
+        $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) 86px;', $css);
     }
 }

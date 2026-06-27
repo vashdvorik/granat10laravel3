@@ -6,7 +6,7 @@
 @endif
 
 @extends('backend.auth.login_layouts')
-@section('title', 'Войти | Маркетплейс ПМР')
+@section('title', 'Войти продавцу | Маркетплейс ПМР')
 
 @section('content')
 <div>
@@ -16,7 +16,7 @@
         <div class="mb-4 text-center mx-auto">
         {{--    <img class="inline-block" src="{{ asset('auth/assets/images/icons/icon-landing-success-1.svg') }}" alt="landing success">--}}
         </div>
-        <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Войти </h3>
+        <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Войти в кабинет продавца</h3>
         <p class="text-sm text-gray-500 mb-[30px] dark:text-gray-dark-500">Аккаунт продавца</p>
 
         @if ($errors->any())
@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Войти</button>
+        <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Войти продавцу</button>
         <div class="form-control mb-[20px] flex justify-end items-center gap-6">
             <div class="flex items-center gap-2">
                 <input type="checkbox" id="remember" name="remember">
@@ -88,7 +88,7 @@
                 <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Facebook аккаунт</span>
             </a>
         </div> --}}
-        <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">У вас нет аккаунта?<a class="text-color-brands" href="{{ route('register') }}">&nbsp;Зарегистрироваться</a></p>
+        <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">Нет аккаунта продавца?<a class="text-color-brands" href="{{ route('register') }}">&nbsp;Стать продавцом</a></p>
     </form>
 </div>
 
