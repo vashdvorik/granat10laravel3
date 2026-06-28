@@ -9,8 +9,12 @@ use Illuminate\Http\Request;
 
 class PageController extends Controller
 {
-    public function gobuyer(){
+    public function sellerHelp(){
         return view('gobuyer');
+    }
+
+    public function gobuyer(){
+        return $this->sellerHelp();
     }
 
     public function help(){

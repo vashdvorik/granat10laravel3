@@ -677,7 +677,7 @@
                 <div class="col-md-6 col-sm-6 col-xs-8 flex-right">
                     <div class="topbar-right">
                         <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('gobuyer') }}">Помощь продавцам</a>
+                            <a href="{{ route('seller.help') }}">Помощь продавцам</a>
                         </div>
                         <div class="element hidden-xs hidden-sm">
                             <a href="{{ route('account.index') }}"><i class="fa fa-user" style="margin-right:5px;"></i><span>Войти продавцу</span></a>
@@ -823,7 +823,7 @@
                     <ul>
                         <li><a href="{{ route('register') }}">Стать продавцом</a></li>
                         <li><a href="{{ route('account.index') }}">Войти продавцу</a></li>
-                        <li><a href="{{ route('gobuyer') }}">Как продавать</a></li>
+                        <li><a href="{{ route('seller.help') }}">Как продавать</a></li>
                         <li><a href="{{ route('help') }}">Помощь</a></li>
                     </ul>
                 </section>

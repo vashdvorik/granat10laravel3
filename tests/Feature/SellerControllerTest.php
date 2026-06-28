@@ -197,6 +197,33 @@ class SellerControllerTest extends TestCase
         $response->assertDontSee('blog-banner.png', false);
     }
 
+    public function test_seller_social_links_are_grouped_for_mobile(): void
+    {
+        $seller = Seller::factory()->create([
+            'alias' => 'seller-socials-mobile',
+            'telegram' => '@seller_test',
+            'instagram' => '@seller_test',
+            'viber' => '+37377993603',
+        ]);
+
+        $response = $this->get(route('seller', $seller->alias));
+
+        $response->assertOk()
+            ->assertSee('class="seller-socials"', false)
+            ->assertSee('aria-label="', false)
+            ->assertSee('aria-label="Telegram"', false)
+            ->assertSee('aria-label="Instagram"', false)
+            ->assertSee('aria-label="Viber"', false);
+
+        $css = file_get_contents(public_path('css/marketplace-design.css'));
+
+        $this->assertStringContainsString('.seller-socials {', $css);
+        $this->assertStringContainsString(
+            '.seller-socials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }',
+            $css
+        );
+    }
+
     public function test_inactive_product_not_shown_on_seller_page(): void
     {
         $package  = Package::factory()->withLimits(50, 10)->create();

@@ -523,6 +523,12 @@
     font-size: 19px;
 }
 
+.seller-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .seller-products { padding: 34px 0 44px; }
 
 .market-section-heading {
@@ -581,8 +587,9 @@
     .seller-profile h1 { font-size: 29px; }
     .seller-profile__header .market-count { display: inline-flex; margin-top: 12px; }
     .seller-contact-list { grid-template-columns: 1fr; }
-    .seller-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .seller-actions { display: grid; grid-template-columns: 1fr; }
     .seller-actions .market-btn { padding: 0 12px; }
+    .seller-socials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     .seller-social { width: 100%; }
     .seller-products { padding: 24px 0 34px; }
     .market-section-heading { align-items: flex-start; flex-direction: column; gap: 6px; }

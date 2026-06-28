@@ -68,6 +68,10 @@ Route::get('/shops/load-more', [SellerController::class, 'loadMoreShops'])->name
 Route::get('/shops/{alias}', [SellerController::class, 'seller'])->name('seller');
 Route::get('/shops/{alias}/load-more', [SellerController::class, 'loadMoreSellerProducts'])->name('seller.loadMore');
 
+Route::get('/seller-help', [PageController::class, 'sellerHelp'])->name('seller.help');
+Route::get('/gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
+Route::get('/help', [PageController::class, 'help'])->name('help');
+
 if (config('regionality.urls_enabled')) {
     $reservedLocations = implode('|', array_map(
         static fn (string $slug): string => preg_quote($slug, '/'),
@@ -98,8 +102,6 @@ if (config('regionality.urls_enabled')) {
         });
 }
 // роутs для обычных страниц
-Route::get('gobuyer', [PageController::class, 'gobuyer'])->name('gobuyer');
-Route::get('help', [PageController::class, 'help'])->name('help');
 
 /*
 // роут для личного кабинета

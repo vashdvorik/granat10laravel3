@@ -8,8 +8,8 @@
         <div class="container container-240">
             <div class="home-hero__panel home-hero__panel--search">
                 <div class="home-hero__content">
-                    <span class="home-eyebrow">Все товары Приднестровья в одном месте</span>
-                    <h1>Где купить? Смотри на BIMM.</h1>
+                    <span class="home-eyebrow">Где купить? Смотри на BIMM.</span>
+                    <h1>Все товары из Приднестровья в одном месте</h1>
                     <p>BIMM собирает товары продавцов из Приднестровья в одном месте. Ищите товар, смотрите, где он есть, уточняйте наличие и оформляйте заказ напрямую.</p>
 
                     <form class="home-search" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">

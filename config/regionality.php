@@ -9,5 +9,6 @@ return [
     'reserved_slugs' => [
         'admin', 'account', 'login', 'register', 'api', 'storage',
         'catalog', 'search', 'sale', 'shops', 'product', 'control', 'sitemap.xml',
+        'gobuyer', 'seller-help', 'help',
     ],
 ];

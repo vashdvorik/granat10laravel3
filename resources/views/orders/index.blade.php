@@ -15,9 +15,9 @@
 
     <section class="customer-orders-hero" aria-labelledby="customer-orders-title">
         <div>
-            <span class="home-eyebrow">История этого браузера</span>
+            
             <h1 id="customer-orders-title">Мои заказы</h1>
-            <p>Здесь сохраняются заказы, оформленные с этого устройства. Откройте заказ, чтобы посмотреть подробности.</p>
+            <p>Здесь сохраняются заказы, оформленные с этого устройства.</p>
         </div>
 
         @if($orders->isNotEmpty())

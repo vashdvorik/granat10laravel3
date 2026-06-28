@@ -101,20 +101,24 @@
                                     <i class="fa fa-external-link" aria-hidden="true"></i> Сайт
                                 </a>
                             @endif
-                            @if($telegramLink)
-                                <a class="seller-social" href="{{ $telegramLink }}" target="_blank" rel="noopener" aria-label="Telegram">
-                                    <i class="fab fa-telegram" aria-hidden="true"></i>
-                                </a>
-                            @endif
-                            @if($instagramLink)
-                                <a class="seller-social" href="{{ $instagramLink }}" target="_blank" rel="noopener" aria-label="Instagram">
-                                    <i class="fab fa-instagram" aria-hidden="true"></i>
-                                </a>
-                            @endif
-                            @if($viberLink)
-                                <a class="seller-social" href="{{ $viberLink }}" aria-label="Viber">
-                                    <i class="fab fa-viber" aria-hidden="true"></i>
-                                </a>
+                            @if($telegramLink || $instagramLink || $viberLink)
+                                <div class="seller-socials" aria-label="Социальные сети магазина">
+                                    @if($telegramLink)
+                                        <a class="seller-social" href="{{ $telegramLink }}" target="_blank" rel="noopener" aria-label="Telegram">
+                                            <i class="fab fa-telegram" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+                                    @if($instagramLink)
+                                        <a class="seller-social" href="{{ $instagramLink }}" target="_blank" rel="noopener" aria-label="Instagram">
+                                            <i class="fab fa-instagram" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+                                    @if($viberLink)
+                                        <a class="seller-social" href="{{ $viberLink }}" aria-label="Viber">
+                                            <i class="fab fa-viber" aria-hidden="true"></i>
+                                        </a>
+                                    @endif
+                                </div>
                             @endif
                         </div>
                     @endif
