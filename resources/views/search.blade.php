@@ -39,7 +39,7 @@
             @endif
         </div>
 
-        <form class="market-search search-page-form" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">
+        <form class="market-search search-page-form hidden-md hidden-lg" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">
             <label class="sr-only" for="search-page-query">Поиск товаров</label>
             <i class="fa fa-search" aria-hidden="true"></i>
             <input id="search-page-query"
@@ -52,7 +52,17 @@
                 <input type="hidden" name="category" value="{{ $categoryAlias }}">
             @endif
             <button type="submit">Найти</button>
+            @if(request('sort'))
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
         </form>
+
+        <div class="pd-middle search-mobile-filters hidden-md hidden-lg">
+            <div class="pd-sort">
+                @include('components.catalog-region-selector')
+                @include('components.catalog-sort-dropdown')
+            </div>
+        </div>
 
         @if($products->count() > 0)
             <div class="product-collection-grid product-grid catalog-products-grid search-products-grid" id="search-products-grid">
@@ -72,10 +82,11 @@
                 @if($products->currentPage() < $products->lastPage())
                     <div class="load-more-wrapper market-pagination hidden-md hidden-lg text-center">
                         <button class="market-btn market-btn--secondary btn-load-more"
-                                data-url="{{ $regionalUrl->route('search.loadMore', ['q' => $q, 'category' => $categoryAlias]) }}"
+                                data-url="{{ $regionalUrl->route('search.loadMore', ['q' => $q, 'category' => $categoryAlias, 'sort' => request('sort')]) }}"
                                 data-current-page="{{ $products->currentPage() }}"
                                 data-last-page="{{ $products->lastPage() }}"
-                                data-container="#search-products-grid">
+                                data-container="#search-products-grid"
+                                data-sort="{{ request('sort') }}">
                             <i class="ion-load-c"></i> Загрузить еще
                         </button>
                     </div>
@@ -176,6 +187,15 @@
 
     .search-products-grid {
         margin-top: 14px;
+    }
+
+    .search-mobile-filters {
+        margin: -6px 0 18px;
+    }
+
+    .search-mobile-filters .pd-sort {
+        display: grid;
+        gap: 10px;
     }
 
     @media (max-width: 767px) {

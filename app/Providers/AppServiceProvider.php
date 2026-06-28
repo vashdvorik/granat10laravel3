@@ -7,6 +7,7 @@ use App\Contracts\ProductImageModerationClient;
 use App\Contracts\TelegramBotClient;
 use App\Models\Category;
 use App\Services\CatalogCacheService;
+use App\Services\CustomerOrderListService;
 use App\Services\FakeAiModerationClient;
 use App\Services\GoogleGeminiImageModerationClient;
 use App\Services\GoogleGeminiModerationClient;
@@ -58,6 +59,17 @@ class AppServiceProvider extends ServiceProvider
         $this->composeBackendUser();
         $this->composeRegionalContext();
         $this->composeSeo();
+        $this->composeCustomerOrders();
+    }
+
+    private function composeCustomerOrders(): void
+    {
+        View::composer('main_layots', function ($view) {
+            $view->with(
+                'customerOrdersCount',
+                app(CustomerOrderListService::class)->count(request())
+            );
+        });
     }
 
     private function composeSeo(): void

@@ -39,20 +39,8 @@
         </div>
     </section>
 
-    <section class="shops-section" aria-labelledby="shops-list-title">
+    <section class="shops-section" aria-label="Магазины">
         <div class="container container-240">
-            <div class="market-section-heading">
-                <div>
-                    <span class="market-eyebrow">Каталог продавцов</span>
-                    <h2 id="shops-list-title">Выберите магазин</h2>
-                </div>
-                @if($sellers->total() > 0)
-                    <span class="market-count">
-                        {{ $sellers->firstItem() }}–{{ $sellers->lastItem() }} из {{ $sellers->total() }}
-                    </span>
-                @endif
-            </div>
-
             @if($sellers->isNotEmpty())
                 <div class="shops-grid" id="shops-grid">
                     @foreach($sellers as $seller)

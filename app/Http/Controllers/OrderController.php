@@ -7,6 +7,7 @@ use App\Exceptions\OrderUnavailableException;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\CustomerOrderListService;
 use App\Services\OrderService;
 use App\Services\OrderTokenService;
 use Illuminate\Http\RedirectResponse;
@@ -19,6 +20,7 @@ class OrderController extends Controller
         StoreOrderRequest $request,
         Product $product,
         OrderService $orders,
+        CustomerOrderListService $customerOrders,
     ): RedirectResponse {
         try {
             $created = $orders->create($product, new OrderCreationData(
@@ -42,19 +44,32 @@ class OrderController extends Controller
             $this->sessionKey($created->order->public_id),
             $created->accessToken,
         );
+        $customerOrders->remember($request, $created->order->public_id, $created->accessToken);
 
         return redirect()->route('orders.show', $created->order->public_id);
+    }
+
+    public function index(
+        Request $request,
+        CustomerOrderListService $customerOrders,
+        OrderTokenService $tokens,
+    ): View {
+        $orders = $customerOrders->authorizedOrders($request, $tokens);
+
+        return view('orders.index', compact('orders'));
     }
 
     public function show(
         Request $request,
         string $publicId,
         OrderTokenService $tokens,
+        CustomerOrderListService $customerOrders,
     ): View {
         $order = Order::query()
             ->where('public_id', $publicId)
             ->firstOrFail();
-        $accessToken = $request->session()->get($this->sessionKey($publicId));
+        $accessToken = $request->session()->get($this->sessionKey($publicId))
+            ?? $customerOrders->accessTokenFor($request, $publicId);
 
         abort_unless(
             is_string($accessToken)
@@ -63,6 +78,27 @@ class OrderController extends Controller
         );
 
         return view('orders.show', compact('order'));
+    }
+
+    public function destroy(
+        Request $request,
+        string $publicId,
+        CustomerOrderListService $customerOrders,
+    ): RedirectResponse {
+        $customerOrders->forget($request, $publicId);
+
+        return redirect()
+            ->route('orders.index')
+            ->with('status', 'Заказ удалён из списка.');
+    }
+
+    public function clear(Request $request, CustomerOrderListService $customerOrders): RedirectResponse
+    {
+        $customerOrders->clear($request);
+
+        return redirect()
+            ->route('orders.index')
+            ->with('status', 'Список заказов очищен.');
     }
 
     private function sessionKey(string $publicId): string

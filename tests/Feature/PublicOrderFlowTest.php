@@ -8,6 +8,7 @@ use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
+use App\Services\CustomerOrderListService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -72,14 +73,74 @@ class PublicOrderFlowTest extends TestCase
         $order = Order::query()->sole();
 
         $response->assertRedirect(route('orders.show', $order->public_id));
+        $response->assertCookie(CustomerOrderListService::COOKIE_NAME);
 
         $this->get(route('orders.show', $order->public_id))
             ->assertOk()
             ->assertSee('Заказ принят')
             ->assertSee($order->number)
+            ->assertSee('Мои заказы')
             ->assertSee('window.print()', false)
             ->assertSee('@media print', false)
             ->assertSee('noindex, nofollow', false);
+    }
+
+    public function test_guest_can_see_created_orders_list(): void
+    {
+        $product = $this->createOrderableProduct();
+
+        $this->post(route('orders.store', $product), $this->validPayload())->assertRedirect();
+        $order = Order::query()->sole();
+
+        $this->get(route('orders.index'))
+            ->assertOk()
+            ->assertSee('Мои заказы')
+            ->assertSee($order->number)
+            ->assertSee($order->product_name)
+            ->assertSee($order->seller_name)
+            ->assertSee(route('orders.show', $order->public_id), false)
+            ->assertSee('Удалить из списка');
+    }
+
+    public function test_customer_can_remove_order_from_saved_list(): void
+    {
+        $product = $this->createOrderableProduct();
+
+        $this->post(route('orders.store', $product), $this->validPayload())->assertRedirect();
+        $order = Order::query()->sole();
+
+        $this->delete(route('orders.destroy', $order->public_id))->assertRedirect(route('orders.index'));
+
+        $this->get(route('orders.index'))
+            ->assertOk()
+            ->assertSee('У вас пока нет сохранённых заказов')
+            ->assertDontSee($order->number);
+    }
+
+    public function test_saved_orders_cookie_restores_orders_after_session_is_lost(): void
+    {
+        $product = $this->createOrderableProduct();
+
+        $response = $this->post(route('orders.store', $product), $this->validPayload());
+        $order = Order::query()->sole();
+        $cookieValue = null;
+
+        foreach ($response->headers->getCookies() as $cookie) {
+            if ($cookie->getName() === CustomerOrderListService::COOKIE_NAME) {
+                $cookieValue = $cookie->getValue();
+                break;
+            }
+        }
+
+        $this->assertNotNull($cookieValue);
+
+        Session::flush();
+
+        $this->withUnencryptedCookie(CustomerOrderListService::COOKIE_NAME, $cookieValue)
+            ->get(route('orders.index'))
+            ->assertOk()
+            ->assertSee($order->number)
+            ->assertSee(route('orders.show', $order->public_id), false);
     }
 
     public function test_order_result_is_not_available_without_session_token(): void

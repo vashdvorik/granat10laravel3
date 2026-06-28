@@ -57,7 +57,10 @@ Route::get('product/{alias}', [ProductController::class, 'show'])->name('product
 Route::post('product/{product}/order', [OrderController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('orders.store');
+Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+Route::delete('orders', [OrderController::class, 'clear'])->name('orders.clear');
 Route::get('orders/{publicId}', [OrderController::class, 'show'])->name('orders.show');
+Route::delete('orders/{publicId}', [OrderController::class, 'destroy'])->name('orders.destroy');
 
 // роутs для SellerController
 Route::get('/shops', [SellerController::class, 'shops'])->name('shops');

@@ -61,7 +61,8 @@ class CatalogController extends Controller
     {
         $q = trim($request->input('q', ''));
         $categoryAlias = $request->input('category', '') ?? '';
-        $products = $catalogPageService->getSearchProducts($q, $categoryAlias);
+        $sort = $request->input('sort', 'new');
+        $products = $catalogPageService->getSearchProducts($q, $categoryAlias, $sort);
 
         return view('components.products-load-more', compact('products'))->render();
     }

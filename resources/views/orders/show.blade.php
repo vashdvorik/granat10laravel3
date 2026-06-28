@@ -16,6 +16,7 @@
         <p>Сумма: <strong>{{ number_format((float) $order->unit_price * $order->quantity, 2, ',', ' ') }} руб.</strong></p>
         <p>Продавец свяжется с вами по указанному телефону.</p>
         <button type="button" onclick="window.print()">Распечатать</button>
+        <a href="{{ route('orders.index') }}">Мои заказы</a>
         <a href="{{ route('catalog.index') }}">Вернуться в каталог</a>
     </div>
 </div>

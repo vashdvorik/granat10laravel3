@@ -748,6 +748,12 @@
                         <div class="header-sub-element row">
                             <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}" title="Войти продавцу" aria-label="Войти продавцу"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
                             <a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
+                            <a href="{{ route('orders.index') }}" class="header-orders-link" title="Мои заказы" aria-label="Мои заказы">
+                                <i class="fa-regular fa-clipboard" aria-hidden="true"></i>
+                                @if(($customerOrdersCount ?? 0) > 0)
+                                    <span class="header-orders-link__count">{{ $customerOrdersCount }}</span>
+                                @endif
+                            </a>
                             <a href="#" class="hidden-md hidden-lg icon-pushmenu js-push-menu">
                                 <i class="fa fa-bars f-15"></i>
                             </a>
@@ -791,10 +797,10 @@
     <div class="container container-240">
         <div class="site-footer__top">
             <div class="site-footer__brand">
-                <a href="{{ $regionalUrl->route('home') }}" class="site-footer__logo" aria-label="Гранат — на главную">
-                    <img src="{{ asset('img/logo.png') }}" alt="Гранат маркетплейс ПМР">
+                <a href="{{ $regionalUrl->route('home') }}" class="site-footer__logo" aria-label="BIMM — на главную">
+                    <img src="{{ asset('img/logo.png') }}" alt="BIMM — товары Приднестровья">
                 </a>
-                <p>Маркетплейс товаров и местных магазинов ПМР. Выбирайте товар, связывайтесь с продавцом и оформляйте заказ напрямую.</p>
+                <p>BIMM собирает товары продавцов из Приднестровья в одном месте. Ищите товар, смотрите, где он есть, и связывайтесь с продавцом напрямую.</p>
                 <div class="site-footer__contacts">
                     <a href="tel:+37377993603"><i class="fa fa-phone" aria-hidden="true"></i> +(373) 779 93-603</a>
                     <span><i class="fa fa-map-marker" aria-hidden="true"></i> ПМР, Тирасполь</span>
@@ -835,16 +841,16 @@
                     <h2>Как работает сайт</h2>
                     <ul>
                         <li>Оплата проходит напрямую продавцу.</li>
-                        <li>Доставка и самовывоз согласовываются с магазином.</li>
-                        <li>Гранат помогает найти товар и связаться с продавцом.</li>
+                        <li>Наличие, цену и получение уточняйте у магазина.</li>
+                        <li>Не ищите по чатам: смотрите товары и продавцов на BIMM.</li>
                     </ul>
                 </section>
             </nav>
         </div>
 
         <div class="site-footer__bottom">
-            <span>© {{ now()->year }} ГРАНАТ маркетплейс ПМР</span>
-            <span class="site-footer__disclaimer">Наличие, цену и доставку уточняйте у продавца перед покупкой.</span>
+            <span>© {{ now()->year }} BIMM — товары Приднестровья в одном месте</span>
+            <span class="site-footer__disclaimer">Всё, что продаётся рядом, должно быть видно.</span>
         </div>
     </div>
 </footer>

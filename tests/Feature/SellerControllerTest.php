@@ -62,6 +62,9 @@ class SellerControllerTest extends TestCase
         $response->assertSee('МагазинТестXYZUnique789');
         $response->assertSee('class="shop-card"', false);
         $response->assertDontSee('shop-banner.jpg', false);
+        $response->assertDontSee('class="market-section-heading"', false);
+        $response->assertDontSee('id="shops-list-title"', false);
+        $response->assertDontSee('class="market-count"', false);
     }
 
     public function test_shops_page_paginates_sellers(): void

@@ -75,6 +75,33 @@ class CatalogControllerTest extends TestCase
         $response->assertViewHas('maxPrice');
     }
 
+    public function test_catalog_sidebar_does_not_show_top_or_vip_products_block(): void
+    {
+        $package = Package::factory()->withLimits(50, 10)->create();
+        $seller = Seller::factory()->create(['name' => 'VIP Sidebar Seller']);
+        $category = Category::factory()->create();
+        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
+
+        Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+            'is_vip' => true,
+            'name' => 'VIP Sidebar Product Unique',
+            'price' => 777,
+        ]);
+
+        Cache::flush();
+
+        $response = $this->get(route('catalog.index'));
+
+        $response->assertOk();
+        $response->assertDontSee('catalog-vip-products', false);
+        $response->assertDontSee('VIP товары');
+        $response->assertDontSee('Топ товары');
+        $response->assertDontSee('Epson Home Cinema');
+    }
+
     public function test_catalog_shows_only_visible_products(): void
     {
         $seller   = Seller::factory()->create(); // без пакета — товар не виден
@@ -116,6 +143,22 @@ class CatalogControllerTest extends TestCase
         $response->assertSee('VisibleProductName_UNIQUE_ZZZ');
         $response->assertSee('class="home-product"', false);
         $response->assertDontSee('class="col-xs-6 col-sm-6 col-md-4 col-lg-4 product-item"', false);
+    }
+
+    public function test_product_card_seller_name_is_not_link(): void
+    {
+        $seller = Seller::factory()->create([
+            'name' => 'Catalog Card Seller',
+            'alias' => 'catalog-card-seller',
+        ]);
+        $this->createVisibleProductWithSeller($seller);
+
+        $response = $this->get(route('catalog.index'));
+
+        $response->assertOk()
+            ->assertSee('<span class="home-product__seller">', false)
+            ->assertSee('Catalog Card Seller')
+            ->assertDontSee('<a class="home-product__seller"', false);
     }
 
     public function test_catalog_paginates_products(): void
@@ -445,10 +488,13 @@ class CatalogControllerTest extends TestCase
             'name' => 'MarketLoadMoreSearchProduct',
         ]);
 
-        $response = $this->get(route('search', ['q' => 'MarketLoadMoreSearch']));
+        $response = $this->get(route('search', ['q' => 'MarketLoadMoreSearch', 'sort' => 'price_asc']));
 
         $response->assertOk();
         $response->assertSee('class="market-btn market-btn--secondary btn-load-more"', false);
+        $response->assertSee('class="pd-middle search-mobile-filters hidden-md hidden-lg"', false);
+        $response->assertSee('class="filter-show"', false);
+        $response->assertSee('data-sort="price_asc"', false);
         $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
@@ -462,7 +508,7 @@ class CatalogControllerTest extends TestCase
         $response->assertOk();
         $response
             ->assertSee('Беспроводные наушники')
-            ->assertSee('class="market-search search-page-form"', false)
+            ->assertSee('class="market-search search-page-form hidden-md hidden-lg"', false)
             ->assertSee('id="search-page-query"', false)
             ->assertSee('--market-search-action: #8750b4', false)
             ->assertSee('background: linear-gradient(90deg, #b965ed, #4ed9ee)', false)

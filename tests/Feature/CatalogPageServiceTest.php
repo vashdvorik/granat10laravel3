@@ -164,6 +164,27 @@ class CatalogPageServiceTest extends TestCase
         $this->assertTrue($products->contains($descriptionMatch));
     }
 
+    public function test_search_products_can_be_sorted_by_effective_price(): void
+    {
+        $seller = $this->createSellerWithPackage();
+        $category = Category::factory()->create();
+        $expensiveProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Search Sort Phone Expensive',
+            'price' => 3000,
+            'lowprice' => null,
+        ]);
+        $cheapProduct = $this->createVisibleProduct($seller, $category, [
+            'name' => 'Search Sort Phone Cheap',
+            'price' => 2000,
+            'lowprice' => 500,
+        ]);
+
+        $products = $this->service->getSearchProducts('Search Sort Phone', '', 'price_asc');
+
+        $this->assertSame($cheapProduct->id, $products->first()->id);
+        $this->assertTrue($products->contains($expensiveProduct));
+    }
+
     public function test_search_treats_sql_wildcards_as_regular_characters(): void
     {
         $seller = $this->createSellerWithPackage();

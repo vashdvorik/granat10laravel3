@@ -23,21 +23,23 @@ class SearchProducts
     public function execute(
         string $query,
         ?string $categoryAlias = null,
+        string $sort = 'new',
         int $perPage = 12
     ): LengthAwarePaginator {
         $normalizedQuery = $this->normalize($query);
         $tokens = $this->tokens($normalizedQuery);
         $categoryIds = $this->categoryIds($categoryAlias);
+        $sort = $this->normalizeSort($sort);
 
-        if ($normalizedQuery !== '' && config('scout.driver') === 'meilisearch') {
+        if ($sort === 'new' && $normalizedQuery !== '' && config('scout.driver') === 'meilisearch') {
             try {
-                return $this->meilisearch($normalizedQuery, $categoryAlias, $categoryIds, $perPage);
+                return $this->meilisearch($normalizedQuery, $categoryAlias, $categoryIds, $sort, $perPage);
             } catch (Throwable $exception) {
                 report($exception);
             }
         }
 
-        return $this->database($normalizedQuery, $tokens, $categoryAlias, $categoryIds, $perPage);
+        return $this->database($normalizedQuery, $tokens, $categoryAlias, $categoryIds, $sort, $perPage);
     }
 
     private function database(
@@ -45,20 +47,24 @@ class SearchProducts
         array $tokens,
         ?string $categoryAlias,
         array $categoryIds,
+        string $sort,
         int $perPage
     ): LengthAwarePaginator {
         return Product::visible()
             ->forRegionalContext()
             ->when($tokens !== [], fn (Builder $builder) => $this->applyTokens($builder, $tokens))
             ->when($categoryIds !== [], fn (Builder $builder) => $builder->whereIn('category_id', $categoryIds))
-            ->when($normalizedQuery !== '', fn (Builder $builder) => $this->applyRelevance($builder, $normalizedQuery))
-            ->orderByDesc('is_vip')
-            ->orderByDesc('push_at')
+            ->when(
+                $normalizedQuery !== '' && $sort === 'new',
+                fn (Builder $builder) => $this->applyRelevance($builder, $normalizedQuery)
+            )
+            ->tap(fn (Builder $builder) => $this->applySorting($builder, $sort))
             ->with(['images', 'seller'])
             ->paginate($perPage)
             ->appends([
                 'q' => $normalizedQuery,
                 'category' => $categoryAlias ?? '',
+                'sort' => $sort,
             ]);
     }
 
@@ -66,6 +72,7 @@ class SearchProducts
         string $query,
         ?string $categoryAlias,
         array $categoryIds,
+        string $sort,
         int $perPage
     ): LengthAwarePaginator {
         $search = Product::search($query)
@@ -90,6 +97,7 @@ class SearchProducts
             ->appends([
                 'q' => $query,
                 'category' => $categoryAlias ?? '',
+                'sort' => $sort,
             ]);
     }
 
@@ -157,6 +165,33 @@ class SearchProducts
                 '%'.$escaped.'%',
             ]
         );
+    }
+
+    private function applySorting(Builder $query, string $sort): void
+    {
+        match ($sort) {
+            'price_asc' => $query
+                ->orderByRaw(
+                    'CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN lowprice ELSE price END ASC'
+                )
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+            'sale' => $query
+                ->orderByRaw('CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN 1 ELSE 0 END DESC')
+                ->orderByRaw('CASE WHEN lowprice IS NOT NULL AND lowprice > 0 AND lowprice < price THEN (price - lowprice) / NULLIF(price, 0) ELSE 0 END DESC')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+            default => $query
+                ->orderByDesc('is_vip')
+                ->orderByDesc('push_at')
+                ->orderByDesc('created_at')
+                ->orderByDesc('id'),
+        };
+    }
+
+    private function normalizeSort(string $sort): string
+    {
+        return in_array($sort, ['new', 'price_asc', 'sale'], true) ? $sort : 'new';
     }
 
     private function categoryIds(?string $categoryAlias): array

@@ -140,6 +140,73 @@
     margin-right: 0;
 }
 
+.header-sub .right-panel {
+    align-items: flex-end;
+}
+
+.header-sub .header-sub-element.row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    margin: 0;
+}
+
+.header-sub .header-sub-element.row > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: #222228;
+    line-height: 1;
+}
+
+.header-sub .header-sub-element.row img {
+    display: block;
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.header-sub .icon-pushmenu {
+    font-size: 18px;
+}
+
+.header-orders-link {
+    position: relative;
+    color: #222228;
+    font-size: 18px;
+    line-height: 1;
+    transition: color .2s ease, transform .2s ease;
+}
+
+.header-orders-link:hover,
+.header-orders-link:focus {
+    color: var(--market-accent);
+    transform: translateY(-1px);
+}
+
+.header-orders-link__count {
+    position: absolute;
+    top: -8px;
+    right: -9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: var(--market-accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .market-search {
     --market-search-action: #8750b4;
     display: grid;
@@ -492,6 +559,11 @@
 
 @media (max-width: 767px) {
     .market-page,.home-page { padding-bottom: 95px; }
+    .header-sub .header-sub-element.row { gap: 12px; }
+    .header-sub .header-sub-element.row > a { width: 30px; height: 30px; }
+    .header-sub .header-sub-element.row img { width: 21px; height: 21px; }
+    .header-orders-link { font-size: 17px; }
+    .header-sub .icon-pushmenu { font-size: 17px; }
     .shops-hero { padding: 12px 0 18px; }
     .shops-hero__panel { grid-template-columns: 1fr; gap: 20px; padding: 28px 20px; border-radius: 16px; }
     .shops-hero h1 { font-size: 30px; }
@@ -617,12 +689,13 @@
     height: 100vh;
     padding: 0;
     background: #fff;
-    box-shadow: 18px 0 45px rgba(30, 30, 40, .16);
+    box-shadow: none;
     transform: translate3d(-100%, 0, 0);
     z-index: 10020;
 }
 
 .menu-home5.pushmenu-open {
+    box-shadow: 18px 0 45px rgba(30, 30, 40, .16);
     -webkit-transform: translate3d(0, 0, 0) !important;
     transform: translate3d(0, 0, 0) !important;
 }
@@ -641,6 +714,8 @@ body.pushmenu-push-toleft {
 .pushmenu-push-toleft .wrappage:after {
     position: fixed;
     z-index: 10010;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 .pushmenu.menu-home5 .menu-push {

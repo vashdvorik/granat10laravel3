@@ -199,6 +199,32 @@ class ProductControllerTest extends TestCase
             ->assertDontSee('js-click-product');
     }
 
+    public function test_product_gallery_shows_placeholder_when_product_has_no_images(): void
+    {
+        $product = $this->createVisibleProduct();
+
+        $response = $this->get(route('product.show', $product->alias));
+
+        $response->assertOk()
+            ->assertSee('class="product-gallery__slide active"', false)
+            ->assertSee('data-product-gallery-slide', false)
+            ->assertSee('src="' . asset('img/no-image.jpg') . '"', false);
+    }
+
+    public function test_product_summary_elements_are_aligned(): void
+    {
+        $product = $this->createVisibleProduct();
+
+        $response = $this->get(route('product.show', $product->alias));
+
+        $response->assertOk()
+            ->assertSee('.product-summary__heading{display:flex;align-items:center;gap:18px}', false)
+            ->assertSee('.product-favorite{display:flex;align-items:center;justify-content:center;', false)
+            ->assertSee('.product-summary .product-price{display:flex;align-items:center;flex-wrap:wrap;', false)
+            ->assertSee('.product-meta>div{display:grid;grid-template-columns:92px minmax(0,1fr);align-items:center;', false)
+            ->assertSee('.product-meta dd{display:flex;align-items:center;gap:8px;', false);
+    }
+
     public function test_product_order_form_uses_full_width_section(): void
     {
         $product = $this->createVisibleProduct(['can_order' => true]);

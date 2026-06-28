@@ -39,11 +39,16 @@ class HomeControllerTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Популярные категории')
-            ->assertSee('Новые товары')
-            ->assertSee('Выгодные предложения')
-            ->assertSee('Магазины рядом')
-            ->assertSee('Часто ищут')
+            ->assertSee('Где купить? Смотри на BIMM.')
+            ->assertSee('Все товары Приднестровья в одном месте')
+            ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
+            ->assertSee('Товары, которые уже есть на BIMM')
+            ->assertSee('Новые товары продавцов')
+            ->assertSee('Товары со скидкой')
+            ->assertSee('Продавцы на BIMM')
+            ->assertSee('Не ищи по чатам. Смотри:')
+            ->assertSee('Всё, что продаётся рядом, должно быть видно')
+            ->assertSee('Как BIMM помогает купить')
             ->assertSee($category->name)
             ->assertSee(route('catalog.show', ['alias' => $category->alias]), false)
             ->assertDontSee('class="tags"', false)
@@ -62,6 +67,8 @@ class HomeControllerTest extends TestCase
             ->assertSee('title="Поиск"', false)
             ->assertSee('icon-heart.png', false)
             ->assertSee('class="hidden-md hidden-lg icon-pushmenu js-push-menu"', false)
+            ->assertSee('class="header-orders-link"', false)
+            ->assertSee(route('orders.index'), false)
             ->assertDontSee('icon-cart.png', false)
             ->assertDontSee('class="cart"', false)
             ->assertDontSee('dropdown-cart', false)
@@ -76,7 +83,9 @@ class HomeControllerTest extends TestCase
             ->assertSee('Войти продавцу')
             ->assertSee('Стать продавцом')
             ->assertSee('Оплата проходит напрямую продавцу')
-            ->assertSee('Наличие, цену и доставку уточняйте у продавца перед покупкой.')
+            ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
+            ->assertSee('Не ищите по чатам: смотрите товары и продавцов на BIMM.')
+            ->assertSee('Всё, что продаётся рядом, должно быть видно.')
             ->assertDontSee('Contact@yourcompany.com')
             ->assertDontSee('Гранат в Instagram')
             ->assertDontSee('Открыть каталог')
@@ -89,10 +98,18 @@ class HomeControllerTest extends TestCase
         $this->assertStringContainsString('.menu-home5.pushmenu-open', $css);
         $this->assertStringContainsString('body.pushmenu-push-toleft', $css);
         $this->assertStringContainsString('left: 0;', $css);
+        $this->assertStringContainsString("box-shadow: none;\n    transform: translate3d(-100%, 0, 0);", $css);
+        $this->assertStringContainsString("box-shadow: 18px 0 45px rgba(30, 30, 40, .16);\n    -webkit-transform: translate3d(0, 0, 0) !important;", $css);
         $this->assertStringContainsString('transform: translate3d(-100%, 0, 0);', $css);
         $this->assertStringContainsString('transform: translate3d(0, 0, 0) !important;', $css);
         $this->assertStringContainsString('transform: none !important;', $css);
         $this->assertStringContainsString('.pushmenu.menu-home5 .screen-reader-text', $css);
         $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) 86px;', $css);
+        $this->assertStringContainsString('.header-sub .header-sub-element.row > a', $css);
+        $this->assertStringContainsString('gap: 18px;', $css);
+        $this->assertStringContainsString('width: 32px;', $css);
+        $this->assertStringContainsString('height: 32px;', $css);
+        $this->assertStringContainsString('.header-sub .header-sub-element.row { gap: 12px; }', $css);
+        $this->assertStringContainsString('.header-sub .header-sub-element.row > a { width: 30px; height: 30px; }', $css);
     }
 }

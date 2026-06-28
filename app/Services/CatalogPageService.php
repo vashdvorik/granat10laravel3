@@ -78,18 +78,24 @@ class CatalogPageService
     {
         $q = trim($request->input('q', ''));
         $categoryAlias = $request->input('category', '') ?? '';
+        $sort = $request->input('sort', 'new');
 
         return [
-            'products' => $this->getSearchProducts($q, $categoryAlias),
+            'products' => $this->getSearchProducts($q, $categoryAlias, $sort),
             'q' => $q,
             'selectedCategory' => $this->getSearchCategory($categoryAlias),
             'categoryAlias' => $categoryAlias,
         ];
     }
 
-    public function getSearchProducts(string $q, ?string $categoryAlias = '', int $perPage = 12): LengthAwarePaginator
+    public function getSearchProducts(
+        string $q,
+        ?string $categoryAlias = '',
+        string $sort = 'new',
+        int $perPage = 12
+    ): LengthAwarePaginator
     {
-        return app(SearchProducts::class)->execute($q, $categoryAlias, $perPage);
+        return app(SearchProducts::class)->execute($q, $categoryAlias, $sort, $perPage);
     }
 
     public function findActiveCategoryByAlias(string $alias): Category

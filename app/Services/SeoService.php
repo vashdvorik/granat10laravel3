@@ -116,6 +116,7 @@ class SeoService
             'search.loadMore',
             'regional.search',
             'regional.search.loadMore',
+            'orders.*',
             '*.loadMore',
             '*.loadMoreCategory',
             '*.loadMoreSale'

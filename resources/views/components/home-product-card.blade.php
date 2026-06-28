@@ -32,10 +32,9 @@
     </button>
 
     <div class="home-product__body">
-        <a class="home-product__seller"
-            href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">
+        <span class="home-product__seller">
             {{ trim($product->seller->name, '" ') }}
-        </a>
+        </span>
         <h3>
             <a href="{{ $regionalUrl->route('product.show', ['alias' => $product->alias]) }}">
                 {{ $product->name }}
