@@ -140,6 +140,92 @@
     margin-right: 0;
 }
 
+.header-v1 .header-center {
+    border-bottom-color: var(--market-border);
+}
+
+.header-v1 .header-logo {
+    margin-top: 0 !important;
+    position: relative;
+    z-index: 2;
+    overflow: visible;
+}
+
+.header-v1 .header-logo a {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.header-v1 .header-logo img {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 197px;
+    min-width: 150px;
+    max-width: 100%;
+    height: auto;
+    max-height: 36px;
+    object-fit: contain;
+}
+
+@media (min-width: 992px) {
+    .header-v1 .header-center {
+        padding-top: 22px !important;
+        padding-bottom: 22px !important;
+    }
+
+    .header-v1 .header-center .row.flex {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 24px;
+    }
+
+    .header-v1 .header-logo {
+        display: flex !important;
+        float: none;
+        flex: 0 0 210px !important;
+        align-items: center;
+        justify-content: flex-start;
+        width: 210px !important;
+        max-width: 210px;
+        min-height: 44px;
+        padding-right: 0;
+        margin-bottom: 0;
+    }
+
+    .header-v1 .header-search {
+        float: none;
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .header-v1 .header-search form {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
+    .header-v1 .header-sub {
+        display: flex;
+        float: none;
+        flex: 0 0 172px;
+        align-items: center;
+        justify-content: flex-end;
+        width: auto;
+        max-width: 172px;
+        min-width: 0;
+        padding-left: 0;
+    }
+}
+
 .header-sub .right-panel {
     align-items: flex-end;
 }
@@ -699,6 +785,13 @@
     box-shadow: none;
     transform: translate3d(-100%, 0, 0);
     z-index: 10020;
+}
+
+body:not(.pushmenu-push-toleft) .pushmenu.menu-home5 {
+    box-shadow: none !important;
+    pointer-events: none;
+    -webkit-transform: translate3d(-100%, 0, 0) !important;
+    transform: translate3d(-100%, 0, 0) !important;
 }
 
 .menu-home5.pushmenu-open {

@@ -112,4 +112,25 @@ class HomeControllerTest extends TestCase
         $this->assertStringContainsString('.header-sub .header-sub-element.row { gap: 12px; }', $css);
         $this->assertStringContainsString('.header-sub .header-sub-element.row > a { width: 30px; height: 30px; }', $css);
     }
+
+    public function test_public_header_logo_uses_stable_desktop_layout(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('aria-label="BIMM — на главную"', false)
+            ->assertSee('alt="BIMM — товары Приднестровья"', false)
+            ->assertSee('class="img-responsive"', false)
+            ->assertDontSee('class="img-reponsive"', false);
+
+        $css = file_get_contents(public_path('css/marketplace-design.css'));
+
+        $this->assertStringContainsString('.header-v1 .header-logo', $css);
+        $this->assertStringContainsString('margin-top: 0 !important;', $css);
+        $this->assertStringContainsString('.header-v1 .header-center .row.flex', $css);
+        $this->assertStringContainsString('flex-wrap: nowrap;', $css);
+        $this->assertStringContainsString('display: flex !important;', $css);
+        $this->assertStringContainsString('float: none;', $css);
+        $this->assertStringContainsString('visibility: visible !important;', $css);
+        $this->assertStringContainsString('width: 197px;', $css);
+    }
 }

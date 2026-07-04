@@ -529,6 +529,22 @@ class BackendProductControllerProductsTest extends TestCase
         $this->assertTrue((bool) $newMain->fresh()->is_main);
     }
 
+    public function test_product_show_outputs_pushed_design_styles(): void
+    {
+        [$user, $seller] = $this->createUserWithSeller();
+        $category = Category::factory()->create();
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.products.show', $product))
+            ->assertOk()
+            ->assertSee('css/seller-cabinet.css', false)
+            ->assertSee('.list-thumb-gallery .thumbnail', false);
+    }
+
     private function createUserWithSeller(): array
     {
         $user = User::factory()->create();

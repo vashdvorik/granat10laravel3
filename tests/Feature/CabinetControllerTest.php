@@ -63,6 +63,52 @@ class CabinetControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_cabinet_uses_seller_design_system_styles(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('account.index'));
+
+        $response
+            ->assertStatus(200)
+            ->assertSee('css/seller-cabinet.css', false)
+            ->assertSee('?v=', false)
+            ->assertSee('seller-cabinet-body', false)
+            ->assertSee('syncSellerSidebarState', false)
+            ->assertSee('seller-sidebar-collapsed', false);
+
+        $css = file_get_contents(public_path('css/seller-cabinet.css'));
+
+        $this->assertStringContainsString('--seller-cabinet-accent: #9152c7;', $css);
+        $this->assertStringContainsString('--seller-cabinet-font: "Inter"', $css);
+        $this->assertStringContainsString('--seller-cabinet-font-size: 16px;', $css);
+        $this->assertStringContainsString('--seller-cabinet-heading-weight: 700;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .btn-primary', $css);
+        $this->assertStringContainsString('background-clip: padding-box;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .card > .card-header:first-child', $css);
+        $this->assertStringContainsString('border-top-left-radius: calc(var(--seller-cabinet-radius) - 1px) !important;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .card > .card-footer:last-child', $css);
+        $this->assertStringContainsString('border-bottom-right-radius: calc(var(--seller-cabinet-radius) - 1px) !important;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .header-top', $css);
+        $this->assertStringContainsString('z-index: 10020;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .logo-area', $css);
+        $this->assertStringContainsString('width: 280px;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body.seller-sidebar-collapsed .logo-area', $css);
+        $this->assertStringContainsString('overflow: hidden;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .navbar-left .navbar-brand .dark', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body.seller-sidebar-collapsed .navbar-left .navbar-brand', $css);
+        $this->assertStringContainsString('display: none !important;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .sidebar__menu-group ul.sidebar_nav li ul li > a', $css);
+        $this->assertStringContainsString('margin-left: 0 !important;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .sidebar-wrapper', $css);
+        $this->assertStringContainsString('top: 72px;', $css);
+        $this->assertStringContainsString('height: calc(100vh - 72px);', $css);
+        $this->assertStringContainsString('margin-top: 16px;', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body:has(.contents.expanded) .logo-area', $css);
+        $this->assertStringContainsString('@media (max-width: 767.98px)', $css);
+        $this->assertStringContainsString('body.seller-cabinet-body .sidebar.collapsed', $css);
+    }
+
     public function test_create_shop_form_returns_200_when_no_shop(): void
     {
         $user = User::factory()->create();

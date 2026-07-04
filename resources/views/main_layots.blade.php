@@ -652,7 +652,7 @@
 <header id="header" class="header-v1">
     <!--Баннер вверху страницы  -->
     <!--   <div class="header-top-banner>
-        <a href="#"><img src="img/banner-top2.jpg" alt="" class="img-reponsive"></a>
+        <a href="#"><img src="img/banner-top2.jpg" alt="" class="img-responsive"></a>
         </div>-->
 
 
@@ -709,7 +709,7 @@
             <div class="row flex">
                 <!-- логотип -->
                 <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6 v-center header-logo">
-                    <a href="{{ $regionalUrl->route('home') }}"><img src="{{ asset('img/logo.png') }}" alt="" class="img-reponsive"></a>
+                    <a href="{{ $regionalUrl->route('home') }}" aria-label="BIMM — на главную"><img src="{{ asset('img/logo.png') }}" alt="BIMM — товары Приднестровья" class="img-responsive"></a>
                 </div>
     <!-- поиск по сайту -->
                 <div class="col-lg-7 col-md-7 v-center header-search hidden-xs hidden-sm">

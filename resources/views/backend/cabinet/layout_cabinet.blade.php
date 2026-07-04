@@ -7,7 +7,7 @@
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
    <title>Кабинет продавца | Маркетплейс Гранат</title>
 
-   <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
 
    <!-- inject:css-->
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/bootstrap/bootstrap.css') }}">
@@ -28,6 +28,7 @@
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/trumbowyg.min.css') }}">
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/wickedpicker.min.css') }}">
 <link rel="stylesheet" href="{{ asset('cabinet/assets/style.css') }}">
+<link rel="stylesheet" href="{{ asset('css/seller-cabinet.css') }}?v={{ filemtime(public_path('css/seller-cabinet.css')) }}">
 <style>
    body.side-menu .btn,
    body.side-menu button,
@@ -297,10 +298,11 @@
 
    <!-- Fonts -->
    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+   @stack('styles')
 
 </head>
 
-<body class="layout-light side-menu">
+<body class="layout-light side-menu seller-cabinet-body">
    <div class="mobile-search">
       <form action="/" class="search-form">
          <img src="{{ asset('cabinet/img/svg/search.svg') }}" alt="search" class="svg">
@@ -795,6 +797,51 @@
 <script src="{{ asset('cabinet/assets/theme_assets/js/jvectormap-init.js') }}"></script>
 <script src="{{ asset('cabinet/assets/theme_assets/js/leaflet-init.js') }}"></script>
 <script src="{{ asset('cabinet/assets/theme_assets/js/main.js') }}"></script>
+<script>
+   (function() {
+      function syncSellerSidebarState() {
+         var sidebar = document.querySelector('.seller-cabinet-body .sidebar');
+         document.body.classList.toggle('seller-sidebar-collapsed', !!sidebar && sidebar.classList.contains('collapsed'));
+      }
+
+      function bootSellerSidebarState() {
+         var sidebar = document.querySelector('.seller-cabinet-body .sidebar');
+         var sidebarToggle = document.querySelector('.seller-cabinet-body .sidebar-toggle');
+         var sidebarOverlay = document.querySelector('.seller-cabinet-body .overlay-dark-sidebar');
+
+         syncSellerSidebarState();
+
+         if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+               window.setTimeout(syncSellerSidebarState, 0);
+            });
+         }
+
+         if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+               window.setTimeout(syncSellerSidebarState, 0);
+            });
+         }
+
+         window.addEventListener('resize', function() {
+            window.setTimeout(syncSellerSidebarState, 0);
+         });
+
+         if (sidebar && window.MutationObserver) {
+            new MutationObserver(syncSellerSidebarState).observe(sidebar, {
+               attributes: true,
+               attributeFilter: ['class']
+            });
+         }
+      }
+
+      if (document.readyState === 'loading') {
+         document.addEventListener('DOMContentLoaded', bootSellerSidebarState);
+      } else {
+         bootSellerSidebarState();
+      }
+   })();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
    
 <!--Подтверждение выхода из аккаунта -->
