@@ -19,6 +19,7 @@ use App\Services\ProductActionService;
 use App\Services\ProductLimitService;
 use App\Services\ProductModerationIssuePresenter;
 use App\Services\ProductModerationService;
+use App\Services\SellerCabinetStateService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -32,7 +33,11 @@ class ProductController extends Controller
     /**
      * Список товаров продавца
      */
-    public function index(Request $request, ListSellerProducts $listSellerProducts)
+    public function index(
+        Request $request,
+        ListSellerProducts $listSellerProducts,
+        SellerCabinetStateService $sellerCabinetStateService
+    )
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -42,13 +47,15 @@ class ProductController extends Controller
                 ->with('error', 'Сначала создайте магазин');
         }
 
+        $sellerCabinetState = $sellerCabinetStateService->make($seller);
+
         return view('backend.cabinet.store.products', array_merge(
             $listSellerProducts->execute(
                 $seller,
                 $request->filled('category') ? $request->integer('category') : null,
                 $request->query()
             ),
-            compact('seller', 'user')
+            compact('seller', 'user', 'sellerCabinetState')
         ));
     }
 

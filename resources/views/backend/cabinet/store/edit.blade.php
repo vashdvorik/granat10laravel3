@@ -1,4 +1,4 @@
-{{-- РЕДАКТИРОВАНИЕ МАГАЗИНА --}}
+{{-- Редактирование магазина --}}
 
 @extends('backend.cabinet.layout_cabinet')
 
@@ -16,7 +16,7 @@
     </div>
 @endif
 
-<div class="contents">
+<div class="contents store-edit-page">
     <div class="container-fluid">
         @if(!$seller)
             @include('backend.cabinet.store.nostore')
@@ -41,70 +41,13 @@
                 </div>
             </div>
 
-            <form action="{{ route('account.store.update', $seller->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('account.store.update', $seller->id) }}" method="POST" enctype="multipart/form-data" class="store-edit-form">
                 @csrf
                 @method('PUT')
 
-                <div class="row">
-                    <div class="col-lg-8">
-                        {{-- Основная информация --}}
-                        <div class="card mb-25">
-                            <div class="card-header">
-                                <h6 class="fw-500 mb-0">Заказы и доставка</h6>
-                            </div>
-                            <div class="card-body">
-                                @if(!$hasOrderSystem)
-                                    <div class="alert alert-warning">Текущий тариф не поддерживает заказы через сайт.</div>
-                                @endif
-                                <div class="form-check form-switch mb-3">
-                                    <input type="hidden" name="can_order" value="0">
-                                    <input class="form-check-input @error('can_order') is-invalid @enderror"
-                                           type="checkbox" id="can_order" name="can_order" value="1"
-                                           @checked(old('can_order', $seller->can_order))
-                                           @disabled(!$hasOrderSystem)>
-                                    <label class="form-check-label" for="can_order">Принимать заказы через сайт</label>
-                                    <small class="text-muted d-block">На карточках разрешённых товаров появится форма заказа.</small>
-                                    @error('can_order')<div class="text-danger small">{{ $message }}</div>@enderror
-                                </div>
-                                <div class="form-check form-switch mb-3">
-                                    <input type="hidden" name="delivery_enabled" value="0">
-                                    <input class="form-check-input" type="checkbox"
-                                           id="delivery_enabled" name="delivery_enabled" value="1"
-                                           @checked(old('delivery_enabled', $seller->delivery_enabled))
-                                           @disabled(!$hasOrderSystem)>
-                                    <label class="form-check-label" for="delivery_enabled">Предлагать доставку</label>
-                                    <small class="text-muted d-block">Доставка появится только у товаров, где она также разрешена.</small>
-                                </div>
-                                <label for="delivery_terms" class="form-label">Условия доставки</label>
-                                <textarea class="form-control @error('delivery_terms') is-invalid @enderror"
-                                          id="delivery_terms" name="delivery_terms" rows="4" maxlength="2000"
-                                          @disabled(!$hasOrderSystem)>{{ old('delivery_terms', $seller->delivery_terms) }}</textarea>
-                                <small class="text-muted">Например: районы доставки, стоимость и сроки.</small>
-                                @error('delivery_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                <hr>
-                                <h6>Telegram-уведомления</h6>
-                                @if($seller->telegram_verified_at)
-                                    <p class="text-success mb-2">
-                                        Telegram подключён {{ $seller->telegram_verified_at->format('d.m.Y H:i') }}.
-                                    </p>
-                                    <form method="POST" action="{{ route('account.store.telegram.disconnect') }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Отключить Telegram</button>
-                                    </form>
-                                @else
-                                    <p class="text-muted">
-                                        После подключения бот будет присылать сообщения о новых заказах.
-                                    </p>
-                                    <form method="POST" action="{{ route('account.store.telegram.connect') }}">
-                                        @csrf
-                                        <button type="submit" class="btn btn-outline-primary btn-sm">Подключить Telegram</button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="card mb-25">
+                <div class="row store-edit-layout">
+                    <div class="col-lg-8 store-edit-main">
+                        <div class="card mb-25 store-edit-card store-edit-main-card">
                             <div class="card-header">
                                 <h6 class="fw-500 mb-0">Основная информация</h6>
                             </div>
@@ -179,134 +122,186 @@
                             </div>
                         </div>
 
+                        {{-- Заказы и доставка --}}
+                        <div class="card mb-25 store-edit-card store-edit-orders-card">
+                            <div class="card-header">
+                                <h6 class="fw-500 mb-0">Заказы и доставка</h6>
+                            </div>
+                            <div class="card-body">
+                                @if(!$hasOrderSystem)
+                                    <div class="alert alert-warning">Текущий тариф не поддерживает заказы через сайт.</div>
+                                @endif
+                                <div class="form-check form-switch mb-3">
+                                    <input type="hidden" name="can_order" value="0">
+                                    <input class="form-check-input @error('can_order') is-invalid @enderror"
+                                           type="checkbox" id="can_order" name="can_order" value="1"
+                                           @checked(old('can_order', $seller->can_order))
+                                           @disabled(!$hasOrderSystem)>
+                                    <label class="form-check-label" for="can_order">Принимать заказы через сайт</label>
+                                    <small class="text-muted d-block">На карточках разрешённых товаров появится форма заказа.</small>
+                                    @error('can_order')<div class="text-danger small">{{ $message }}</div>@enderror
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input type="hidden" name="delivery_enabled" value="0">
+                                    <input class="form-check-input" type="checkbox"
+                                           id="delivery_enabled" name="delivery_enabled" value="1"
+                                           @checked(old('delivery_enabled', $seller->delivery_enabled))
+                                           @disabled(!$hasOrderSystem)>
+                                    <label class="form-check-label" for="delivery_enabled">Предлагать доставку</label>
+                                    <small class="text-muted d-block">Доставка появится только у товаров, где она также разрешена.</small>
+                                </div>
+                                <label for="delivery_terms" class="form-label">Условия доставки</label>
+                                <textarea class="form-control @error('delivery_terms') is-invalid @enderror"
+                                          id="delivery_terms" name="delivery_terms" rows="4" maxlength="2000"
+                                          @disabled(!$hasOrderSystem)>{{ old('delivery_terms', $seller->delivery_terms) }}</textarea>
+                                <small class="text-muted">Например: районы доставки, стоимость и сроки.</small>
+                                @error('delivery_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <hr>
+                                <h6>Telegram-уведомления</h6>
+                                @if($seller->telegram_verified_at)
+                                    <p class="text-success mb-2">
+                                        Telegram подключён {{ $seller->telegram_verified_at->format('d.m.Y H:i') }}.
+                                    </p>
+                                    <button type="submit" form="store-telegram-disconnect-form" class="btn btn-outline-danger btn-sm">Отключить Telegram</button>
+                                @else
+                                    <p class="text-muted">
+                                        После подключения бот будет присылать сообщения о новых заказах.
+                                    </p>
+                                    <button type="submit" form="store-telegram-connect-form" class="btn btn-outline-primary btn-sm">Подключить Telegram</button>
+                                @endif
+                            </div>
+                        </div>
+
                         {{-- Контакты и соцсети --}}
-                        <div class="card mb-25">
+                        <div class="card mb-25 store-edit-card store-edit-contacts-card">
                             <div class="card-header">
                                 <h6 class="fw-500 mb-0">Контакты и соцсети</h6>
                             </div>
                             <div class="card-body">
                                 {{-- Предупреждение об ограничениях --}}
-                                @if(!$hasWebsiteLink || !$hasSocialLinks)
-                                    <div class="alert alert-warning d-flex align-items-center mb-3">
-                                        <i class="uil uil-exclamation-triangle me-2"></i>
-                                        <div>
-                                            <strong>Ограничения тарифа:</strong>
-                                            @if(!$hasWebsiteLink) Ссылка на сайт недоступна на вашем тарифе. @endif
-                                            @if(!$hasSocialLinks) Подключение соцсетей недоступно на вашем тарифе. @endif
-                
+                                @include('backend.cabinet.partials.store-feature-grid', [
+                                    'seller' => $seller,
+                                    'sellerCabinetState' => $sellerCabinetState ?? null,
+                                ])
+
+
+                                <div class="store-edit-visibility-note">
+                                    <i class="uil uil-info-circle"></i>
+                                    <div>
+                                        <strong>Заполнить можно сейчас.</strong>
+                                        <span>Google Maps показывается всегда. Сайт и соцсети сохраняются в профиле, но покупатели увидят их только на тарифе, где эти возможности доступны.</span>
+                                    </div>
+                                </div>
+
+                                <div class="store-edit-contact-group">
+                                    <div class="store-edit-contact-group__head">
+                                        <h6>Ссылки магазина</h6>
+                                        <p>Адрес на карте помогает покупателю понять, где находится продавец. Сайт показывается по тарифу.</p>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="link_map" class="form-label">
+                                                <i class="uil uil-map"></i> Google Maps
+                                            </label>
+                                            <input type="url"
+                                                   class="form-control @error('link_map') is-invalid @enderror"
+                                                   id="link_map"
+                                                   name="link_map"
+                                                   value="{{ old('link_map', $seller->link_map) }}"
+                                                   placeholder="https://maps.app.goo.gl/pP9mUgkPdA5BnkF25">
+                                            <small class="text-muted">Показывается покупателям на всех тарифах.</small>
+                                            @error('link_map')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="link" class="form-label">
+                                                <i class="uil uil-globe"></i> Веб-сайт
+                                            </label>
+                                            <input type="url"
+                                                   class="form-control @error('link') is-invalid @enderror"
+                                                   id="link"
+                                                   name="link"
+                                                   value="{{ old('link', $seller->link) }}"
+                                                   placeholder="https://example.com">
+                                            <small class="text-muted">
+                                                @if($hasWebsiteLink)
+                                                    Показывается покупателям на текущем тарифе.
+                                                @else
+                                                    Можно сохранить сейчас; покупатели увидят сайт после смены тарифа.
+                                                @endif
+                                            </small>
+                                            @error('link')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
-                                @endif
+                                </div>
 
-                                <div class="row g-3">
-                                    {{-- Веб-сайт --}}
-                                    <div class="col-md-6">
-                                        <label for="link" class="form-label">
-                                            <i class="uil uil-globe"></i> Веб-сайт
-                                            @if(!$hasWebsiteLink)
-                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
-                                            @endif
-                                        </label>
-                                        <input type="url" 
-                                               class="form-control @error('link') is-invalid @enderror" 
-                                               id="link" 
-                                               name="link" 
-                                               value="{{ old('link', $seller->link) }}"
-                                               placeholder="https://example.com"
-                                               @if(!$hasWebsiteLink) disabled @endif>
-                                        @if(!$hasWebsiteLink)
-                                            <small class="text-muted">Доступно на платных тарифах</small>
-                                        @endif
-                                        @error('link')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                <div class="store-edit-contact-group">
+                                    <div class="store-edit-contact-group__head">
+                                        <h6>Соцсети и мессенджеры</h6>
+                                        <p>Эти поля нужны для связи с магазином. Они не отключаются при заполнении, но публичная видимость зависит от тарифа.</p>
                                     </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="telegram" class="form-label">
+                                                <i class="uil uil-telegram"></i> Telegram
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control @error('telegram') is-invalid @enderror"
+                                                   id="telegram"
+                                                   name="telegram"
+                                                   value="{{ old('telegram', $seller->telegram) }}"
+                                                   placeholder="@username">
+                                            @error('telegram')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
 
-                                    {{-- Google Maps --}}
-                                    <div class="col-md-6">
-                                        <label for="link_map" class="form-label">
-                                            <i class="uil uil-map"></i> Google Maps
-                                        </label>
-                                        <input type="url" 
-                                               class="form-control @error('link_map') is-invalid @enderror" 
-                                               id="link_map" 
-                                               name="link_map" 
-                                               value="{{ old('link_map', $seller->link_map) }}"
-                                               placeholder="https://maps.app.goo.gl/pP9mUgkPdA5BnkF25">
-                                        <small class="text-muted">Доступно на всех тарифах</small>
-                                        @error('link_map')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                        <div class="col-md-4">
+                                            <label for="instagram" class="form-label">
+                                                <i class="uil uil-instagram"></i> Instagram
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control @error('instagram') is-invalid @enderror"
+                                                   id="instagram"
+                                                   name="instagram"
+                                                   value="{{ old('instagram', $seller->instagram) }}"
+                                                   placeholder="@username">
+                                            @error('instagram')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
 
-                                    {{-- Telegram --}}
-                                    <div class="col-md-4">
-                                        <label for="telegram" class="form-label">
-                                            <i class="uil uil-telegram"></i> Telegram
-                                            @if(!$hasSocialLinks)
-                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
-                                            @endif
-                                        </label>
-                                        <input type="text" 
-                                               class="form-control @error('telegram') is-invalid @enderror" 
-                                               id="telegram" 
-                                               name="telegram" 
-                                               value="{{ old('telegram', $seller->telegram) }}"
-                                               placeholder="@username"
-                                               @if(!$hasSocialLinks) disabled @endif>
-                                        @error('telegram')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <div class="col-md-4">
+                                            <label for="viber" class="form-label">
+                                                <i class="uil uil-phone-volume"></i> Viber
+                                            </label>
+                                            <input type="text"
+                                                   class="form-control @error('viber') is-invalid @enderror"
+                                                   id="viber"
+                                                   name="viber"
+                                                   value="{{ old('viber', $seller->viber) }}"
+                                                   placeholder="+7 (___) ___-__-__">
+                                            @error('viber')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
                                     </div>
-
-                                    {{-- Instagram --}}
-                                    <div class="col-md-4">
-                                        <label for="instagram" class="form-label">
-                                            <i class="uil uil-instagram"></i> Instagram
-                                            @if(!$hasSocialLinks)
-                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
-                                            @endif
-                                        </label>
-                                        <input type="text" 
-                                               class="form-control @error('instagram') is-invalid @enderror" 
-                                               id="instagram" 
-                                               name="instagram" 
-                                               value="{{ old('instagram', $seller->instagram) }}"
-                                               placeholder="@username"
-                                               @if(!$hasSocialLinks) disabled @endif>
-                                        @error('instagram')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    {{-- Viber --}}
-                                    <div class="col-md-4">
-                                        <label for="viber" class="form-label">
-                                            <i class="uil uil-phone-volume"></i> Viber
-                                            @if(!$hasSocialLinks)
-                                                <span class="badge badge-round badge-danger badge-lg">Недоступно</span>
-                                            @endif
-                                        </label>
-                                        <input type="text" 
-                                               class="form-control @error('viber') is-invalid @enderror" 
-                                               id="viber" 
-                                               name="viber" 
-                                               value="{{ old('viber', $seller->viber) }}"
-                                               placeholder="+7 (___) ___-__-__"
-                                               @if(!$hasSocialLinks) disabled @endif>
-                                        @error('viber')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                    @unless($hasSocialLinks)
+                                        <div class="store-edit-contact-note">Соцсети сохранятся в кабинете, но будут скрыты от покупателей до смены тарифа.</div>
+                                    @endunless
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     {{-- Боковая панель --}}
-                    <div class="col-lg-4">
+                    <div class="col-lg-4 store-edit-aside">
                         {{-- Фото / логотип магазина --}}
-                        <div class="card mb-25">
+                        <div class="card mb-25 store-edit-card store-edit-logo-card">
                             <div class="card-header">
                                 <h6 class="fw-500">Фото магазина</h6>
                             </div>
@@ -332,23 +327,8 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="card mb-25">
-                            <div class="card-header">
-                                <h6 class="fw-500">Действия</h6>
-                            </div>
-                            <div class="card-body">
-                                <button type="submit" class="btn btn-primary w-100 mb-2">
-                                    <i class="uil uil-save"></i> Сохранить изменения
-                                </button>
-                                <a href="{{ route('account.store.index') }}" class="btn btn-secondary w-100">
-                                    <i class="uil uil-times"></i> Отмена
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Текущий тариф --}}
                         @if($activePackage && $activePackage->package)
-                            <div class="card mb-25">
+                            <div class="card mb-25 store-edit-card store-edit-tariff-card">
                                 <div class="card-header">
                                     <h6 class="fw-500">Текущий тариф</h6>
                                 </div>
@@ -356,7 +336,7 @@
                                     <div class="text-center mb-3">
                                         <h5 class="text-primary">{{ $activePackage->package->name }}</h5>
                                         @if($activePackage->package->price > 0)
-                                            <div class="text-success fw-bold">{{ number_format($activePackage->package->price, 0) }} ₽</div>
+                                            <div class="text-success fw-bold">{{ number_format($activePackage->package->price, 0) }} руб.</div>
                                         @else
                                             <div class="text-muted">Бесплатно</div>
                                         @endif
@@ -394,7 +374,26 @@
                         @endif
                     </div>
                 </div>
+                <div class="store-edit-submit-bar">
+                    <a href="{{ route('account.store.index') }}" class="btn btn-secondary">
+                        <i class="uil uil-times"></i> Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="uil uil-save"></i> Сохранить изменения
+                    </button>
+                </div>
             </form>
+
+            @if($seller->telegram_verified_at)
+                <form id="store-telegram-disconnect-form" method="POST" action="{{ route('account.store.telegram.disconnect') }}" class="d-none">
+                    @csrf
+                    @method('DELETE')
+                </form>
+            @else
+                <form id="store-telegram-connect-form" method="POST" action="{{ route('account.store.telegram.connect') }}" class="d-none">
+                    @csrf
+                </form>
+            @endif
         @endif
     </div>
 </div>

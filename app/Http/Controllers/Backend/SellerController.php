@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Backend;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateSellerRequest;
 use App\Models\Seller;
+use App\Services\SellerCabinetStateService;
 use App\Services\SellerProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +20,7 @@ class SellerController extends Controller
     /**
      * Показывает магазин (общая информация)
      */
-    public function index()
+    public function index(SellerCabinetStateService $sellerCabinetStateService)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -29,7 +30,9 @@ class SellerController extends Controller
                 ->with('info', 'Создайте магазин для начала работы');
         }
         
-        return view('backend.cabinet.store.index', compact('user', 'seller'));
+        $sellerCabinetState = $sellerCabinetStateService->make($seller);
+
+        return view('backend.cabinet.store.index', compact('user', 'seller', 'sellerCabinetState'));
     }
 
     /**
@@ -59,18 +62,19 @@ class SellerController extends Controller
     /**
      * Форма редактирования магазина (О магазине)
      */
-    public function edit(Seller $seller)
+    public function edit(Seller $seller, SellerCabinetStateService $sellerCabinetStateService)
     {
         $this->authorize('update', $seller);
         
         $user = Auth::user();
+        $sellerCabinetState = $sellerCabinetStateService->make($seller);
         $regions = \App\Models\Region::query()
             ->active()
             ->ordered()
             ->with(['settlements' => fn ($query) => $query->active()->ordered()])
             ->get();
         
-        return view('backend.cabinet.store.edit', compact('seller', 'user', 'regions'));
+        return view('backend.cabinet.store.edit', compact('seller', 'user', 'regions', 'sellerCabinetState'));
     }
 
     /**

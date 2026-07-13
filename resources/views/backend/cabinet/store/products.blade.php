@@ -6,7 +6,7 @@
 @section('content_cabinet')
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success<i class="uil uil-ellipsis-v" style="font-size: 20px;"></i>') }}
+        {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
@@ -35,8 +35,23 @@
                 </div>
             </div>
 
-            <div class="products_page product_page--grid mb-30">
+            @php
+                $currentStatusKey = $currentProductStatus ?? 'all';
+                $currentStatusFilter = collect($productStatusFilters ?? [])->firstWhere('key', $currentStatusKey);
+                $allProductsCount = (int) (collect($productStatusFilters ?? [])->firstWhere('key', 'all')['count'] ?? $seller->products()->count());
+                $hasAnyProducts = $allProductsCount > 0;
+                $resetFilterQuery = request()->except('page', 'product_status', 'category');
+            @endphp
+
+            <div class="products_page product_page--grid seller-products-page mb-30">
                 <div class="container-fluid">
+                        @isset($sellerCabinetState)
+                            @include('backend.cabinet.partials.seller-state-card', [
+                                'sellerCabinetState' => $sellerCabinetState,
+                                'seller' => $seller,
+                            ])
+                        @endisset
+
                         {{-- Уведомление если товары скрыты от покупателей --}}
                         @php
                             $packageStatus = $sellerPackageStatusService->getStatus($seller);
@@ -54,10 +69,10 @@
                                 </div>
                             </div>
                         @endif
-                    <div class="row justify-content-center">
+                    <div class="seller-products-layout">
 
                         {{-- БОКОВАЯ ПАНЕЛЬ С КАТЕГОРИЯМИ --}}
-                        <div class="columns-1 col-lg-3 col-sm-10 mb-lg-0 mb-30">
+                        <aside class="seller-products-filters">
                             <div class="widget mb-lg-30 mt-25">  {{-- ДОБАВИЛ mt-25 --}}
                                 <div class="widget-header-title px-20 py-15">
                                     <h6 class="d-flex align-content-center fw-500">
@@ -65,6 +80,38 @@
                                     </h6>
                                 </div>
                                 <div class="category_sidebar">
+                                    @if(isset($productStatusFilters))
+                                        <aside class="product-sidebar-widget mb-30">
+                                            <div class="widget_title" data-bs-toggle="collapse" data-bs-target="#productStatusFilters" role="button" aria-expanded="true">
+                                                <h6>Статус товаров</h6>
+                                            </div>
+                                            <div class="card border-0 shadow-none multi-collapse mt-10 collapse show" id="productStatusFilters">
+                                                <div class="product-category">
+                                                    <ul class="category-list">
+                                                        @foreach($productStatusFilters as $statusFilter)
+                                                            @php
+                                                                $statusQuery = request()->except('page');
+
+                                                                if($statusFilter['key'] === 'all') {
+                                                                    unset($statusQuery['product_status']);
+                                                                } else {
+                                                                    $statusQuery['product_status'] = $statusFilter['key'];
+                                                                }
+                                                            @endphp
+                                                            <li>
+                                                                <a href="{{ route('account.store.products.index', $statusQuery) }}"
+                                                                   class="d-flex justify-content-between align-items-center category-link {{ ($currentProductStatus ?? 'all') === $statusFilter['key'] ? 'active' : '' }}">
+                                                                    <span class="category-name">{{ $statusFilter['label'] }}</span>
+                                                                    <span class="item-numbers">{{ $statusFilter['count'] }}</span>
+                                                                </a>
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </aside>
+                                    @endif
+
                                     <aside class="product-sidebar-widget mb-30">
                                         <div class="widget_title" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample2" role="button" aria-expanded="true">
                                             <h6>Категории</h6>
@@ -74,7 +121,7 @@
                                                 <ul class="category-list">
                                                     {{-- Показать все товары --}}
                                                     <li>
-                                                        <a href="{{ route('account.store.products.index') }}" 
+                                                        <a href="{{ route('account.store.products.index', request()->except('page', 'category')) }}"
                                                            class="d-flex justify-content-between align-items-center category-link {{ !request('category') ? 'active' : '' }}">
                                                             <span class="category-name">
                                                                 <i class="uil uil-apps"></i> Все товары
@@ -100,44 +147,52 @@
                                     </aside>
                                 </div>
                             </div>
-                        </div>
+                        </aside>
 
                         {{-- ОСНОВНАЯ ОБЛАСТЬ С ТОВАРАМИ --}}
-                        <div class="columns-2 col-lg-9">
+                        <main class="seller-products-main">
                             <div class="tab-content mt-25" id="ap-tabContent">
                                 <div class="tab-pane fade show active" id="ap-overview" role="tabpanel" aria-labelledby="ap-overview-tab">
                                     
+
                                     @if($products->count() > 0)
                                         {{-- КАРТОЧКИ ТОВАРОВ --}}
-                                        <div class="row product-page-list justify-content-start">
+                                        <div class="product-page-list">
                                             @foreach($products as $product)
-                                                <div class="cus-xl-3 col-lg-4 col-md-6 col-12 mb-30 px-10">
-                                                    <div class="card product product--grid position-relative">
+                                                @php
+                                                    $productCabinetState = $product->cabinet_state;
+                                                    $nextStepUrl = match ($productCabinetState->primaryAction) {
+                                                        'add_images', 'remove_vip' => route('account.store.products.edit', $product->id),
+                                                        'choose_package', 'choose_visible_products' => route('account.packages.index'),
+                                                        default => null,
+                                                    };
+                                                @endphp
+                                                <div class="seller-product-card-col">
+                                                    <div class="card product product--grid position-relative seller-product-card">
                                                         <div
-                                                            class="position-absolute"
-                                                            style="top: 8px; right: 8px; left: auto; z-index: 30;"
+                                                            class="position-absolute seller-product-card__menu"
                                                         >
                                                             <x-product-moderation-actions :product="$product" compact />
                                                         </div>
                                                         <div class="h-100">
                                                             <div class="product-item">
                                                                 {{-- ИЗОБРАЖЕНИЕ ТОВАРА --}}
-                                                                <div class="product-item__image">
+                                                                <div class="product-item__image seller-product-card__media">
                                                                     {{-- Статусы: VIP и Активность --}}
-                                                                    <div class="position-absolute top-0 start-0 m-2 d-flex gap-2" style="max-width: calc(100% - 58px);">
+                                                                    <div class="position-absolute top-0 start-0 m-2 d-flex gap-2 seller-product-card__badges">
                                                                         @if($product->is_vip)
-                                                                            <span class="badge badge-round badge-danger badge-lg" style="font-size: 11px; font-weight: 600;">
+                                                                            <span class="seller-product-card__badge seller-product-card__badge--vip">
                                                                                 <i class="uil uil-star"></i> VIP
                                                                             </span>
                                                                         @endif
 
-                                                                        @if($product->view_state->isPublic)
-                                                                            <span class="badge badge-round badge-success badge-lg" style="font-size: 11px; font-weight: 600;">
-                                                                                <i class="uil uil-check"></i> Опубликован
+                                                                        @if($productCabinetState->visibleToBuyers)
+                                                                            <span class="seller-product-card__badge seller-product-card__badge--success">
+                                                                                <i class="uil uil-check"></i> Виден
                                                                             </span>
                                                                         @else
-                                                                            <span class="badge badge-round badge-light badge-lg badge-outlined" style="font-size: 11px; font-weight: 600; background-color: #f8f9fa; color: #000; border-color: #dee2e6;">
-                                                                                <i class="uil uil-pause"></i> Не опубликован
+                                                                            <span class="seller-product-card__badge seller-product-card__badge--muted">
+                                                                                <i class="uil uil-pause"></i> {{ $productCabinetState->label }}
                                                                             </span>
                                                                         @endif
                                                                     </div>
@@ -161,30 +216,42 @@
                                                                 </div>
 
                                                                 {{-- ИНФОРМАЦИЯ О ТОВАРЕ --}}
-                                                                <div class="card-body px-20 pb-25 pt-25">
+                                                                <div class="card-body px-20 pb-25 pt-25 seller-product-card__body">
                                                                     <div class="product-item__body">
                                                                         <a href="{{ route('account.store.products.show', $product->id) }}">
-                                                                            <h6 class="card-title">{{ $product->name }}</h6>
+                                                                            <h6 class="card-title seller-product-card__title">{{ $product->name }}</h6>
                                                                         </a>
                                                                         
                                                                         {{-- Категория --}}
                                                                         @if($product->category)
-                                                                            <small class="text-muted d-block mb-2">
+                                                                            <small class="text-muted d-block mb-2 seller-product-card__meta">
                                                                                 <i class="uil uil-tag-alt"></i> {{ $product->category->name }}
                                                                             </small>
                                                                         @endif
 
-                                                                        <small class="text-muted d-block mb-2">
+                                                                        <small class="text-muted d-block mb-2 seller-product-card__legacy-state">
                                                                             <i class="uil uil-shield-check"></i>
                                                                             <strong>Модерация:</strong>
                                                                             {{ $product->view_state->moderationLabel }}
                                                                             <br>
-                                                                            <strong>Публикация:</strong>
-                                                                            {{ $product->view_state->publicationLabel }}
+                                                                            <strong>Покупателям:</strong>
+                                                                            {{ $productCabinetState->label }}
                                                                         </small>
-                                                                        <small class="text-muted d-block mb-2">
-                                                                            {{ \Illuminate\Support\Str::limit($product->view_state->description, 100) }}
+                                                                        <small class="text-muted d-block mb-2 seller-product-card__legacy-state">
+                                                                            {{ \Illuminate\Support\Str::limit($productCabinetState->description, 100) }}
                                                                         </small>
+                                                                        <div class="seller-product-card__state seller-product-card__state--{{ $productCabinetState->color }}">
+                                                                            <div class="seller-product-card__state-title">
+                                                                                <i class="uil uil-shield-check"></i>
+                                                                                {{ $productCabinetState->label }}
+                                                                            </div>
+                                                                            <div class="seller-product-card__state-text">
+                                                                                {{ \Illuminate\Support\Str::limit($productCabinetState->description, 120) }}
+                                                                            </div>
+                                                                            <div class="seller-product-card__state-meta">
+                                                                                Модерация: {{ $product->view_state->moderationLabel }}
+                                                                            </div>
+                                                                        </div>
 
                                                                         {{-- Дата последнего поднятия --}}
                                                                         @if($product->push_at)
@@ -212,7 +279,7 @@
                                                                             </div>
                                                                         </div>
 
-                                                                        <div class="d-flex mt-20 flex-wrap gap-2">
+                                                                        <div class="d-flex mt-20 flex-wrap gap-2 seller-product-card__actions">
                                                                             <div class="flex-fill">
                                                                                 <x-product-moderation-actions :product="$product" />
                                                                             </div>
@@ -249,8 +316,23 @@
                                         {{-- ПУСТОЕ СОСТОЯНИЕ (когда нет товаров) --}}
                                         <div class="row">
                                             <div class="col-12">
-                                                <div class="card">
+                                                <div class="card seller-products-empty">
                                                     <div class="card-body text-center py-5">
+                                                        @if($hasAnyProducts)
+                                                            <div class="seller-products-empty__icon">
+                                                                <i class="uil uil-filter-slash"></i>
+                                                            </div>
+                                                            <h5>По выбранным фильтрам товаров нет</h5>
+                                                            <p>Сбросьте фильтры или выберите другой статус, чтобы увидеть остальные товары.</p>
+                                                            <div class="seller-products-empty__actions">
+                                                                <a href="{{ route('account.store.products.index', $resetFilterQuery) }}" class="btn btn-primary">
+                                                                    Сбросить фильтры
+                                                                </a>
+                                                                <a href="{{ route('account.store.products.create') }}" class="btn btn-light">
+                                                                    Добавить товар
+                                                                </a>
+                                                            </div>
+                                                        @else
                                                         <i class="uil uil-box fs-40 text-muted mb-3 d-block"></i>
                                                         <h5 class="text-muted mb-3">У вас пока нет товаров</h5>
                                                         <p class="text-muted mb-4">Добавьте первый товар, чтобы начать продажи</p>
@@ -258,6 +340,7 @@
                                                            class="btn btn-primary">
                                                             <i class="uil uil-plus"></i> Добавить первый товар
                                                         </a>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -266,7 +349,7 @@
 
                                 </div>
                             </div>
-                        </div>
+                        </main>
                     </div>
                 </div>
             </div>
@@ -276,7 +359,9 @@
 
 {{-- ДОПОЛНИТЕЛЬНЫЕ СТИЛИ --}}
 <style>
+/*
 /* Placeholder для товаров без изображения */
+/*
 .no-image-placeholder {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -293,6 +378,7 @@
 }
 
 /* Отступы между кнопками */
+/*
 .product-item__button.gap-2 {
     gap: 0.5rem;
 }
@@ -370,13 +456,18 @@
     background: #5F63F2;
     color: white;
 }
-</style>
+*/
 </style>
 @endsection
 
 @push('scripts')
 <script>
 $(document).ready(function() {
+    if (window.matchMedia('(max-width: 767.98px)').matches) {
+        $('.seller-products-filters .multi-collapse.show').removeClass('show');
+        $('.seller-products-filters .widget_title[aria-expanded="true"]').attr('aria-expanded', 'false');
+    }
+
     // Настройка CSRF токена для всех AJAX запросов
     $.ajaxSetup({
         headers: {

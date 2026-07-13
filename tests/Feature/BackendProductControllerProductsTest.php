@@ -49,7 +49,35 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertViewHas('products');
         $response->assertViewHas('categoryTree');
         $response->assertViewHas('sellerCategoryIds');
+        $response->assertViewHas('productStatusFilters');
+        $response->assertViewHas('currentProductStatus', 'all');
         $response->assertSee('BackendIndexProduct_UNIQ');
+        $response->assertSee('seller-products-layout', false);
+        $response->assertSee('seller-products-filters', false);
+        $response->assertSee('seller-products-main', false);
+        $response->assertDontSee('seller-products-toolbar', false);
+        $response->assertSee("window.matchMedia('(max-width: 767.98px)')", false);
+        $response->assertSee('seller-product-card__state', false);
+        $response->assertSee('Статус товаров');
+        $response->assertSee('Видны покупателям');
+        $response->assertSee('Скрыты из-за тарифа');
+    }
+
+    public function test_products_index_shows_filtered_empty_state(): void
+    {
+        [$user, $seller] = $this->createUserWithSeller();
+        Product::factory()->draft()->create([
+            'seller_id' => $seller->id,
+            'name' => 'FilteredDraftProduct_UNIQ',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.products.index', ['product_status' => 'visible']))
+            ->assertOk()
+            ->assertDontSee('FilteredDraftProduct_UNIQ')
+            ->assertSee('seller-products-empty', false)
+            ->assertSee('uil-filter-slash', false)
+            ->assertSee('seller-products-empty__actions', false);
     }
 
     public function test_products_create_returns_root_categories(): void
@@ -155,7 +183,11 @@ class BackendProductControllerProductsTest extends TestCase
             ->get(route('account.store.products.create'))
             ->assertOk()
             ->assertSee('product-form-page', false)
+            ->assertSee('product-create-page', false)
+            ->assertSee('product-create-form', false)
             ->assertSee('product-form-column', false)
+            ->assertSee('product-form-guide', false)
+            ->assertSee('product-form-guide__steps', false)
             ->assertDontSee('col-xxl-7 col-lg-10', false)
             ->assertDontSee('mx-sm-30 mx-20', false)
             ->assertSee('name="save_action"', false)
@@ -171,6 +203,10 @@ class BackendProductControllerProductsTest extends TestCase
             ->get(route('account.store.products.edit', $product))
             ->assertOk()
             ->assertSee('product-form-page', false)
+            ->assertSee('product-edit-page', false)
+            ->assertSee('product-edit-form', false)
+            ->assertSee('product-form-guide--status', false)
+            ->assertSee('product-form-status', false)
             ->assertDontSee('col-xxl-7 col-lg-10', false)
             ->assertSee('name="expected_moderation_version"', false)
             ->assertSee('value="'.$product->moderation_version.'"', false);
@@ -542,6 +578,9 @@ class BackendProductControllerProductsTest extends TestCase
             ->get(route('account.store.products.show', $product))
             ->assertOk()
             ->assertSee('css/seller-cabinet.css', false)
+            ->assertSee('product-show-overview', false)
+            ->assertSee('product-show-card', false)
+            ->assertSee('product-show-actions', false)
             ->assertSee('.list-thumb-gallery .thumbnail', false);
     }
 

@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Models\Package;
 use App\Models\Seller;
+use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -25,6 +27,44 @@ class BackendOrderControllerTest extends TestCase
             ->assertOk()
             ->assertSee($ownOrder->number)
             ->assertDontSee($foreignOrder->number);
+    }
+
+    public function test_order_index_explains_when_tariff_disallows_new_orders_but_keeps_history(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'can_order' => true,
+        ]);
+        $package = Package::factory()->create(['has_order_system' => false]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+        $order = Order::factory()->create(['seller_id' => $seller->id]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.orders.index'))
+            ->assertOk()
+            ->assertSee($order->number)
+            ->assertSee('order-intake-card--disabled', false)
+            ->assertSee('Тариф не принимает новые заказы')
+            ->assertSee('История заказов сохраняется');
+    }
+
+    public function test_order_show_keeps_existing_order_available_when_new_orders_are_disabled(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create(['user_id' => $user->id]);
+        $order = Order::factory()->create(['seller_id' => $seller->id]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.orders.show', $order))
+            ->assertOk()
+            ->assertSee($order->number)
+            ->assertSee('order-show-hero', false)
+            ->assertSee('order-intake-card--disabled', false);
     }
 
     public function test_seller_cannot_open_foreign_order(): void

@@ -199,6 +199,8 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
         Route::delete('telegram', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'disconnect'])
             ->name('telegram.disconnect');
 
+        Route::get('events', App\Http\Controllers\Backend\EventJournalController::class)
+            ->name('events.index');
         Route::get('orders', [App\Http\Controllers\Backend\OrderController::class, 'index'])
             ->name('orders.index');
         Route::get('orders/{order}', [App\Http\Controllers\Backend\OrderController::class, 'show'])
@@ -224,6 +226,8 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     // === РАЗДЕЛ ТАРИФОВ ===
     Route::prefix('packages')->name('packages.')->group(function () {
         Route::get('/', [App\Http\Controllers\Backend\PackageController::class, 'index'])->name('index');
+        Route::get('{package}/prepare', [App\Http\Controllers\Backend\PackageController::class, 'prepare'])->name('prepare');
+        Route::post('{package}/prepare', [App\Http\Controllers\Backend\PackageController::class, 'applyPreparation'])->name('prepare.apply');
         Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
     });
 });

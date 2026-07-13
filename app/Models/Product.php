@@ -171,6 +171,11 @@ class Product extends Model
         return app(ProductViewStateFactory::class)->make($this);
     }
 
+    public function getCabinetStateAttribute(): \App\Data\ProductCabinetState
+    {
+        return app(\App\Services\ProductCabinetStateService::class)->make($this);
+    }
+
     /**
      * Scope: только товары от продавцов с активными пакетами
      */

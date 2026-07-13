@@ -4,7 +4,7 @@
 
 @section('content_cabinet')
 
-<div class="contents product-form-page">
+<div class="contents product-form-page product-create-page">
     <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
@@ -30,8 +30,34 @@
                                 <form action="{{ route('account.store.products.store') }}" 
                                       method="POST" 
                                       enctype="multipart/form-data"
+                                      class="product-create-form"
                                       novalidate>
                                     @csrf
+
+                                    <div class="product-form-guide">
+                                        <div class="product-form-guide__main">
+                                            <span class="product-form-guide__eyebrow">Новый товар</span>
+                                            <h5>Заполните карточку так, чтобы покупатель сразу понял, где и что он покупает.</h5>
+                                            <p>Минимум для публикации: название, категория, цена и фото. После отправки товар попадёт на проверку.</p>
+                                        </div>
+                                        <div class="product-form-guide__steps" aria-label="Этапы публикации товара">
+                                            <div class="product-form-guide__step">
+                                                <span>1</span>
+                                                <strong>Данные</strong>
+                                                <small>Название, цена, категория</small>
+                                            </div>
+                                            <div class="product-form-guide__step">
+                                                <span>2</span>
+                                                <strong>Фото</strong>
+                                                <small>До 5 изображений</small>
+                                            </div>
+                                            <div class="product-form-guide__step">
+                                                <span>3</span>
+                                                <strong>Проверка</strong>
+                                                <small>Отправка на модерацию</small>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     {{-- Основная информация --}}
                                     <div class="card add-product product-form-section mb-24">

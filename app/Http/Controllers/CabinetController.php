@@ -9,6 +9,7 @@ use App\Http\Requests\ToggleAutoRenewRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Services\AccountSecurityService;
 use App\Services\CabinetStatsService;
+use App\Services\SellerCabinetStateService;
 use App\Services\SellerSettingsService;
 use App\Services\ShopService;
 
@@ -19,7 +20,7 @@ class CabinetController extends Controller
     пользователя с информацией о магазине 
     */
 
-    public function cabinet()
+    public function cabinet(SellerCabinetStateService $sellerCabinetStateService)
     {
         $user = Auth::user(); 
         $seller = $user->seller; // из модели user получили селлер
@@ -28,7 +29,9 @@ class CabinetController extends Controller
             $this->authorize('view', $seller);
         }
 
-        return view('backend.cabinet.cabinet', compact('seller'));
+        $sellerCabinetState = $sellerCabinetStateService->make($seller);
+
+        return view('backend.cabinet.cabinet', compact('seller', 'sellerCabinetState'));
     }
 
     /*

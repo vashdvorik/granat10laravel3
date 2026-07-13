@@ -4,7 +4,7 @@
 
 @section('content_cabinet')
 
-<div class="contents">
+<div class="contents package-page">
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-12">
@@ -28,10 +28,22 @@
             </div>
         @endif
 
+        <div class="package-page-hero">
+            <div>
+                <span class="package-page-hero__eyebrow">Тарифы магазина</span>
+                <h5>Выберите тариф, который подходит текущему количеству товаров.</h5>
+                <p>Если новый тариф меньше текущего набора товаров, кабинет заранее покажет, что нужно подготовить. Товары не удаляются — лишние позиции только снимаются с публикации.</p>
+            </div>
+            <div class="package-page-hero__balance">
+                <span>Баланс</span>
+                <strong>{{ number_format(auth()->user()->balance ?? 0, 0, '.', ' ') }} ₽</strong>
+            </div>
+        </div>
+
         <!-- Информация о балансе -->
         <div class="row mb-30">
             <div class="col-12">
-                <div class="card card-default card-md">
+                <div class="card card-default card-md package-balance-card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
@@ -39,7 +51,9 @@
                                 <h4 class="mb-0">{{ number_format(auth()->user()->balance ?? 0, 0, '.', ' ') }} ₽</h4>
                             </div>
                             <div>
-                                <a href="#" class="btn btn-success btn-squared">Пополнить баланс</a>
+                                <button type="button" class="btn btn-outline-secondary btn-squared" disabled>
+                                    Пополнение пока не подключено
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -52,10 +66,11 @@
             @foreach($packages as $package)
                 @php
                     $isCurrentPackage = $currentPackage && $currentPackage->package_id == $package->id;
+                    $compatibility = $packageCompatibilities[$package->id] ?? null;
                 @endphp
                 
                 <div class="col-xxl-3 col-lg-4 col-sm-6 mb-30">
-                    <div class="card h-100">
+                    <div class="card h-100 package-card package-card--{{ $compatibility?->status ?? 'unknown' }} {{ $isCurrentPackage ? 'package-card--current' : '' }}">
                         <div class="card-body p-30">
                             <div class="pricing d-flex align-items-center">
                                 <span class="pricing__tag {{ $isCurrentPackage ? 'color-success order-bg-opacity-success' : 'color-primary order-bg-opacity-primary' }} rounded-pill">
@@ -104,18 +119,95 @@
                                     </li>
                                 </ul>
                             </div>
+
+                            @if($compatibility)
+                                <div class="mt-3 pt-3 border-top package-compatibility">
+                                    <small class="text-muted d-block mb-2">Совместимость с магазином</small>
+
+                                    @if($compatibility->status === 'available')
+                                        <div class="alert alert-success py-2 px-3 mb-2">
+                                            Тариф можно подключить сейчас.
+                                        </div>
+                                    @elseif($compatibility->status === 'current')
+                                        <div class="alert alert-info py-2 px-3 mb-2">
+                                            Это текущий тариф магазина.
+                                        </div>
+                                    @elseif($compatibility->status === 'feature_downgrade')
+                                        <div class="alert alert-warning py-2 px-3 mb-2">
+                                            Тариф можно подключить, но часть функций станет недоступна.
+                                        </div>
+                                    @elseif($compatibility->status === 'needs_preparation')
+                                        <div class="alert alert-warning py-2 px-3 mb-2">
+                                            Перед переходом нужно подготовить товары.
+                                        </div>
+                                    @elseif($compatibility->status === 'insufficient_balance')
+                                        <div class="alert alert-danger py-2 px-3 mb-2">
+                                            Баланса недостаточно для подключения.
+                                        </div>
+                                    @endif
+
+                                    <ul class="mb-0 ps-3 small">
+                                        <li>
+                                            Активные товары:
+                                            {{ $compatibility->activeProductsCount }}
+                                            @if($compatibility->activeProductsLimit !== null)
+                                                / {{ $compatibility->activeProductsLimit }}
+                                            @else
+                                                / безлимит
+                                            @endif
+                                        </li>
+                                        <li>
+                                            VIP:
+                                            {{ $compatibility->vipProductsCount }}
+                                            @if($compatibility->vipProductsLimit !== null)
+                                                / {{ $compatibility->vipProductsLimit }}
+                                            @else
+                                                / безлимит
+                                            @endif
+                                        </li>
+                                    </ul>
+
+                                    @if($compatibility->reasons !== [])
+                                        <div class="mt-2">
+                                            @foreach($compatibility->reasons as $reason)
+                                                <small class="text-danger d-block">{{ $reason }}</small>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    @if($compatibility->warnings !== [])
+                                        <div class="mt-2">
+                                            @foreach($compatibility->warnings as $warning)
+                                                <small class="text-warning d-block">{{ $warning }}</small>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
                         </div>
                         
-                        <div class="price_action d-flex pb-30 ps-30">
-                            @if($isCurrentPackage)
+                        <div class="price_action d-flex pb-30 ps-30 package-card__action">
+                            @if(!$seller)
+                                <a href="{{ route('account.store.create') }}" class="btn btn-primary btn-squared text-capitalize px-30 fw-500">
+                                    Сначала создать магазин
+                                </a>
+                            @elseif($isCurrentPackage)
                                 <button class="btn btn-default btn-squared color-light btn-outline-light text-capitalize px-30 color-gray fw-500" disabled>
                                     Текущий тариф
+                                </button>
+                            @elseif($compatibility && $compatibility->status === 'needs_preparation')
+                                <a href="{{ route('account.packages.prepare', $package) }}" class="btn btn-outline-warning btn-squared text-capitalize px-30 fw-500">
+                                    {{ $compatibility->actionLabel }}
+                                </a>
+                            @elseif($compatibility && $compatibility->status === 'insufficient_balance')
+                                <button class="btn btn-outline-secondary btn-squared text-capitalize px-30 fw-500" disabled>
+                                    {{ $compatibility->actionLabel }}
                                 </button>
                             @else
                                 <form action="{{ route('account.packages.purchase', $package) }}" method="POST" class="w-100 package-purchase-form" data-package-name="{{ $package->name }}" data-package-price="{{ $package->price }}">
                                     @csrf
                                     <button type="button" class="btn btn-primary btn-squared text-capitalize px-30 fw-500 purchase-btn">
-                                        {{ $package->price == 0 ? 'Выбрать' : 'Купить за ' . number_format($package->price, 0, '.', ' ') . ' ₽' }}
+                                        {{ $compatibility?->actionLabel ?? ($package->price == 0 ? 'Выбрать' : 'Купить за ' . number_format($package->price, 0, '.', ' ') . ' ₽') }}
                                     </button>
                                 </form>
                             @endif
@@ -155,16 +247,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p>Ваш баланс: <strong>${userBalance.toLocaleString()} ₽</strong></p>
                         <p>Не хватает: <strong>${(packagePrice - userBalance).toLocaleString()} ₽</strong></p>
                     `,
-                    confirmButtonText: 'Пополнить баланс',
-                    showCancelButton: true,
-                    cancelButtonText: 'Закрыть',
-                    confirmButtonColor: '#10b981',
-                    cancelButtonColor: '#6c757d'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Перенаправление на страницу пополнения баланса
-                        window.location.href = '#'; // Замените на реальный URL
-                    }
+                    confirmButtonText: 'Понятно',
+                    confirmButtonColor: '#5046e4'
                 });
                 return;
             }

@@ -4,11 +4,19 @@
 
 @section('content_cabinet')
 
-<div class="contents">
+<div class="contents product-show-page">
     <div class="container-fluid">
         @if(!$seller)
             @include('backend.cabinet.store.nostore')
         @else
+        @php
+            $productCabinetState = $product->cabinet_state;
+            $nextStepUrl = match ($productCabinetState->primaryAction) {
+                'add_images', 'remove_vip' => route('account.store.products.edit', $product->id),
+                'choose_package', 'choose_visible_products' => route('account.packages.index'),
+                default => null,
+            };
+        @endphp
         <div class="row">
             <div class="col-lg-12">
                 <div class="shop-breadcrumb">
@@ -28,15 +36,32 @@
         </div>
     </div>
 
-    <div class="products mb-30">
+    <div class="products product-show-page__content mb-30">
         <div class="container-fluid">
+            <div class="product-show-overview">
+                <div class="product-show-overview__main">
+                    <span class="product-show-overview__eyebrow">Карточка товара</span>
+                    <h5>{{ $product->name }}</h5>
+                    <p>{{ $productCabinetState->description }}</p>
+                </div>
+                <div class="product-show-overview__status product-show-overview__status--{{ $productCabinetState->color }}">
+                    <span>{{ $productCabinetState->label }}</span>
+                    @if($productCabinetState->primaryActionLabel)
+                        @if($nextStepUrl)
+                            <a href="{{ $nextStepUrl }}">{{ $productCabinetState->primaryActionLabel }}</a>
+                        @else
+                            <strong>{{ $productCabinetState->primaryActionLabel }}</strong>
+                        @endif
+                    @endif
+                </div>
+            </div>
             <!-- Start: Card -->
-            <div class="card h-100 border-0">
-                <div class="product-item d-flex p-sm-50 p-20">
+            <div class="card h-100 border-0 product-show-card">
+                <div class="product-item d-flex p-sm-50 p-20 product-show-layout">
                     <div class="row">
                         <div class="col-lg-5">
                             <!-- Start: Product Slider -->
-                            <div class="product-item__image">
+                            <div class="product-item__image product-show-gallery">
                                 @if($product->images->count() > 0)
                                     <div class="wrap-gallery-article carousel slide carousel-fade" id="carouselProductImages" data-bs-ride="carousel">
                                         <div>
@@ -65,7 +90,7 @@
                                                                  alt="{{ $product->name }}">
                                                         </a>
                                                         @if($image->is_main)
-                                                            <span class="position-absolute top-0 end-0 m-1" style="background: rgba(95, 99, 242, 0.9); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
+                                                            <span class="position-absolute top-0 end-0 m-1 product-show-main-badge" style="background: rgba(95, 99, 242, 0.9); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
                                                                 <i class="uil uil-star" style="font-size: 14px;"></i>
                                                             </span>
                                                         @endif
@@ -75,7 +100,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <div class="no-image-placeholder text-center p-5 bg-light rounded">
+                                    <div class="no-image-placeholder product-show-no-image text-center p-5 bg-light rounded">
                                         <i class="uil uil-image-slash" style="font-size: 80px; color: #adb5bd;"></i>
                                         <p class="text-muted mt-3">Нет изображений</p>
                                     </div>
@@ -103,7 +128,7 @@
                                             <span class="product-details-brandName">Категория: <span>{{ $product->category->name }}</span></span>
                                         @endif
                                         <!-- Start: Product Status Badges -->
-                                        <div class="d-flex gap-2 mb-3 mt-3">
+                                        <div class="d-flex gap-2 mb-3 mt-3 product-show-badges">
                                             @if($product->is_vip)
                                                 <span class="badge badge-round badge-warning badge-lg">
                                                     <i class="uil uil-star"></i> VIP
@@ -172,11 +197,11 @@
                                         @endif
                                         <!-- End: Product Characteristics -->
                                     {{-- Кнопки действий --}}
-                                        <div class="mb-3">
+                                        <div class="mb-3 product-show-primary-action">
                                             <x-product-moderation-actions :product="$product" />
                                         </div>
                                         {{-- КНОПКИ УДАЛИТЬ И ИЗМЕНИТЬ --}}
-                                        <div class="d-flex mt-20 flex-wrap gap-2">
+                                        <div class="d-flex mt-20 flex-wrap gap-2 product-show-actions">
                                             @if($product->view_state->canUnpublish)
                                             <form action="{{ route('account.store.products.deactivate', $product) }}"
                                                   method="POST"
@@ -221,7 +246,7 @@
                             </div>
                             
                             <!-- Start: Additional Info -->
-                            <div class="product-details__availability">
+                            <div class="product-details__availability product-show-meta">
                                 @if($product->push_at)
                                     <div class="title">
                                         <p>Поднятие:</p>
@@ -291,7 +316,7 @@ $(document).ready(function() {
                 <h5 class="mt-2 mb-2 text-danger">${productName}</h5>
                 <p class="text-muted mb-0">Это действие невозможно отменить</p>
             `,
-            icon: 'warning',
+            icon = 'warning';
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',

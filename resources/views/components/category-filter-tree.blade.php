@@ -12,7 +12,7 @@
         <li style="margin-left: {{ ($level - 1) * 15 }}px;">
             {{-- Если есть товары - делаем ссылкой --}}
             @if($hasProducts)
-                <a href="{{ route('account.store.products.index', ['category' => $category->id]) }}" 
+                <a href="{{ route('account.store.products.index', array_merge(request()->except('page'), ['category' => $category->id])) }}"
                    class="d-flex justify-content-between align-items-center category-link {{ request('category') == $category->id ? 'active' : '' }}">
                     <span class="category-name">{{ $category->name }}</span>
                     <span class="item-numbers">{{ $productCount }}</span>

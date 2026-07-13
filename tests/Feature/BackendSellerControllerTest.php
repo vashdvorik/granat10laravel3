@@ -33,6 +33,89 @@ class BackendSellerControllerTest extends TestCase
         $response->assertSessionHas('info');
     }
 
+    public function test_store_index_uses_overview_design_system_blocks(): void
+    {
+        $user = User::factory()->create();
+        Seller::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->get(route('account.store.index'));
+
+        $response->assertOk();
+        $response->assertSee('store-overview-page', false);
+        $response->assertSee('store-overview-hero', false);
+        $response->assertSee('store-overview-hero__stats', false);
+        $response->assertSee('store-info-tile', false);
+        $response->assertSee('store-tariff-card', false);
+    }
+
+    public function test_store_index_separates_filled_contacts_from_tariff_visibility(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'link' => 'https://seller.example.com',
+            'telegram' => '@seller',
+            'can_order' => true,
+        ]);
+        $package = Package::factory()->create([
+            'has_website_link' => false,
+            'has_social_links' => false,
+            'has_order_system' => false,
+        ]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.store.index'));
+
+        $response->assertOk();
+        $response->assertSee('store-feature-grid', false);
+        $response->assertSee('store-feature-card--blocked', false);
+        $response->assertSee('Сохранено, скрыто тарифом');
+        $response->assertSee('Данные можно заполнить, но покупатели увидят их только после смены тарифа');
+    }
+
+    public function test_store_edit_keeps_website_and_social_inputs_editable_when_tariff_hides_them(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'link' => 'https://seller.example.com',
+            'telegram' => '@seller',
+        ]);
+        $package = Package::factory()->create([
+            'has_website_link' => false,
+            'has_social_links' => false,
+        ]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.store.edit', $seller));
+
+        $response->assertOk();
+        $response->assertSee('store-edit-page', false);
+        $response->assertSee('store-edit-form', false);
+        $response->assertSee('store-edit-layout', false);
+        $response->assertSee('store-edit-card', false);
+        $response->assertSee('store-edit-submit-bar', false);
+        $response->assertSee('store-edit-visibility-note', false);
+        $response->assertSee('store-edit-contact-group', false);
+        $response->assertSee('store-telegram-connect-form', false);
+        $response->assertDontSee('store-edit-actions-card', false);
+        $response->assertSee('store-feature-grid', false);
+        $html = $response->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/id="link"[^>]*disabled/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="telegram"[^>]*disabled/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="instagram"[^>]*disabled/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="viber"[^>]*disabled/s', $html);
+    }
+
     public function test_update_seller_profile_updates_fields(): void
     {
         $user = User::factory()->create();

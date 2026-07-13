@@ -640,6 +640,9 @@
                         <li class="{{ request()->routeIs('account.store.orders.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.orders.index') }}">Заказы</a>
                         </li>
+                        <li class="{{ request()->routeIs('account.store.events.*') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.events.index') }}">Журнал событий</a>
+                        </li>
                         @if(auth()->check() && auth()->user()->seller)
                         <li class="{{ request()->routeIs('account.packages.index') ? 'active' : '' }}">
                            <a href="{{ route('account.packages.index') }}">Тарифы</a>

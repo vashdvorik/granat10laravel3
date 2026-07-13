@@ -109,6 +109,33 @@ class CabinetControllerTest extends TestCase
         $this->assertStringContainsString('body.seller-cabinet-body .sidebar.collapsed', $css);
     }
 
+    public function test_cabinet_shows_unified_renewal_block_instead_of_legacy_package_alert(): void
+    {
+        $user = User::factory()->create(['balance' => 500]);
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'auto_renew' => true,
+        ]);
+        $package = Package::factory()->create([
+            'price' => 200,
+            'duration_days' => 30,
+        ]);
+        SellerPackage::factory()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+            'is_active' => true,
+            'end_date' => now()->addDays(3)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.index'));
+
+        $response->assertOk();
+        $response->assertSee('seller-cabinet-renewal', false);
+        $response->assertSee('seller-cabinet-renewal-note', false);
+        $response->assertDontSee('autoRenewSwitch', false);
+        $response->assertDontSee('toggleAutoRenew(this)', false);
+    }
+
     public function test_create_shop_form_returns_200_when_no_shop(): void
     {
         $user = User::factory()->create();

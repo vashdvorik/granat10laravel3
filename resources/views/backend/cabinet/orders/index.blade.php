@@ -1,50 +1,103 @@
 @extends('backend.cabinet.layout_cabinet')
 
 @section('content_cabinet')
-<div class="contents">
+@php
+    $statusTone = fn (\App\Enums\OrderStatus $orderStatus): string => match ($orderStatus) {
+        \App\Enums\OrderStatus::New => 'new',
+        \App\Enums\OrderStatus::Accepted,
+        \App\Enums\OrderStatus::Processing => 'active',
+        \App\Enums\OrderStatus::ReadyForPickup,
+        \App\Enums\OrderStatus::OutForDelivery => 'progress',
+        \App\Enums\OrderStatus::Completed => 'done',
+        \App\Enums\OrderStatus::Cancelled => 'cancelled',
+    };
+@endphp
+
+<div class="contents orders-page">
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center flex-wrap mb-25">
-            <h4 class="mb-0">Заказы</h4>
-            <form method="GET" action="{{ route('account.store.orders.index') }}">
-                <select name="status" class="form-control" onchange="this.form.submit()">
-                    <option value="">Все статусы</option>
-                    @foreach(\App\Enums\OrderStatus::cases() as $orderStatus)
-                        <option value="{{ $orderStatus->value }}" @selected($status === $orderStatus->value)>
-                            {{ $orderStatus->label() }}
-                        </option>
-                    @endforeach
-                </select>
-            </form>
+        <div class="orders-hero">
+            <div class="orders-hero__main">
+                <span class="orders-hero__eyebrow">Заказы магазина</span>
+                <h4>История заказов не зависит от тарифа</h4>
+                <p>Новые заказы могут быть отключены тарифом или настройками магазина, но уже созданные заказы остаются здесь.</p>
+            </div>
+            <div class="orders-hero__stats">
+                <div>
+                    <span>Всего</span>
+                    <strong>{{ $totalOrders }}</strong>
+                </div>
+                <div>
+                    <span>В работе</span>
+                    <strong>{{ $activeOrders }}</strong>
+                </div>
+                <div>
+                    <span>Новые</span>
+                    <strong>{{ (int) ($statusCounts[\App\Enums\OrderStatus::New->value] ?? 0) }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-intake-card order-intake-card--{{ $orderIntakeStatus['enabled'] ? 'enabled' : 'disabled' }}">
+            <div>
+                <span>{{ $orderIntakeStatus['enabled'] ? 'Приём включён' : 'Приём ограничен' }}</span>
+                <h5>{{ $orderIntakeStatus['label'] }}</h5>
+                <p>{{ $orderIntakeStatus['description'] }}</p>
+            </div>
+            <a href="{{ $orderIntakeStatus['action'] }}" class="btn btn-sm {{ $orderIntakeStatus['enabled'] ? 'btn-outline-primary' : 'btn-primary' }}">
+                {{ $orderIntakeStatus['action_label'] }}
+            </a>
         </div>
 
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        <div class="card">
-            <div class="card-body p-0">
-                @forelse($orders as $order)
-                    <a href="{{ route('account.store.orders.show', $order) }}"
-                       class="d-block p-3 border-bottom text-dark text-decoration-none">
-                        <div class="d-flex justify-content-between gap-3 flex-wrap">
-                            <div>
-                                <strong>{{ $order->number }}</strong>
-                                <div>{{ $order->product_name }} × {{ $order->quantity }}</div>
-                                <small class="text-muted">{{ $order->customer_name }} · {{ $order->customer_phone }}</small>
-                            </div>
-                            <div class="text-md-end">
-                                <span class="badge badge-round badge-primary">{{ $order->status->label() }}</span>
-                                <div class="fw-600 mt-1">
-                                    {{ number_format((float) $order->unit_price * $order->quantity, 2, ',', ' ') }} руб.
-                                </div>
-                                <small class="text-muted">{{ $order->created_at->format('d.m.Y H:i') }}</small>
-                            </div>
-                        </div>
-                    </a>
-                @empty
-                    <div class="p-4 text-center text-muted">Заказов пока нет.</div>
-                @endforelse
+        <div class="orders-toolbar">
+            <div>
+                <strong>Фильтр по статусу</strong>
+                <span>Показываем только заказы этого магазина.</span>
             </div>
+            <div class="orders-status-filter">
+                <a href="{{ route('account.store.orders.index') }}" class="{{ $status === '' ? 'is-active' : '' }}">
+                    Все
+                    <span>{{ $totalOrders }}</span>
+                </a>
+                @foreach(\App\Enums\OrderStatus::cases() as $orderStatus)
+                    <a href="{{ route('account.store.orders.index', ['status' => $orderStatus->value]) }}"
+                       class="{{ $status === $orderStatus->value ? 'is-active' : '' }}">
+                        {{ $orderStatus->label() }}
+                        <span>{{ (int) ($statusCounts[$orderStatus->value] ?? 0) }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="orders-list">
+            @forelse($orders as $order)
+                <a href="{{ route('account.store.orders.show', $order) }}" class="order-list-card">
+                    <div class="order-list-card__main">
+                        <div class="order-list-card__top">
+                            <strong>{{ $order->number }}</strong>
+                            <span class="order-status-badge order-status-badge--{{ $statusTone($order->status) }}">
+                                {{ $order->status->label() }}
+                            </span>
+                        </div>
+                        <h5>{{ $order->product_name }}</h5>
+                        <p>{{ $order->customer_name }} · {{ $order->customer_phone }}</p>
+                    </div>
+                    <div class="order-list-card__meta">
+                        <strong>{{ number_format((float) $order->unit_price * $order->quantity, 2, ',', ' ') }} руб.</strong>
+                        <span>{{ $order->quantity }} шт.</span>
+                        <small>{{ $order->created_at->format('d.m.Y H:i') }}</small>
+                    </div>
+                </a>
+            @empty
+                <div class="orders-empty">
+                    <span class="uil uil-receipt"></span>
+                    <h5>Заказов пока нет</h5>
+                    <p>Когда покупатели оформят заказ через сайт, он появится здесь. Если приём заказов отключён, история уже созданных заказов всё равно сохранится.</p>
+                </div>
+            @endforelse
         </div>
 
         @if($orders->hasPages())
