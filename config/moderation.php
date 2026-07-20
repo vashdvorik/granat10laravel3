@@ -1,5 +1,7 @@
 <?php
 
+$imageProvider = env('AI_IMAGE_MODERATION_PROVIDER', 'gemini');
+
 return [
     'ai_enabled' => env('PRODUCT_MODERATION_AI_ENABLED', false),
     'provider' => env('PRODUCT_MODERATION_AI_PROVIDER', 'fake'),
@@ -41,7 +43,49 @@ return [
     ],
     'images' => [
         'enabled' => (bool) env('AI_IMAGE_MODERATION_ENABLED', false),
-        'provider' => env('AI_IMAGE_MODERATION_PROVIDER', 'google'),
+        'provider' => $imageProvider,
+        'api_key' => env(
+            'AI_IMAGE_MODERATION_API_KEY',
+            env('AI_IMAGE_GEMINI_API_KEY', env('AI_IMAGE_GOOGLE_API_KEY', env('AI_IMAGE_OPENAI_COMPATIBLE_API_KEY', env('AI_IMAGE_OPENAI_MODERATION_API_KEY'))))
+        ),
+        'model' => env(
+            'AI_IMAGE_MODERATION_MODEL',
+            match ($imageProvider) {
+                'gemini', 'google' => env('AI_IMAGE_GEMINI_MODEL', env('AI_IMAGE_GOOGLE_MODEL', 'gemini-3.1-flash-lite')),
+                'openai_moderation' => env('AI_IMAGE_OPENAI_MODERATION_MODEL', env('AI_IMAGE_OPENAI_MODEL', 'omni-moderation-latest')),
+                default => env('AI_IMAGE_OPENAI_COMPATIBLE_MODEL', env('AI_IMAGE_OPENAI_MODEL', 'gpt-4o-mini')),
+            }
+        ),
+        'base_url' => env(
+            'AI_IMAGE_MODERATION_BASE_URL',
+            match ($imageProvider) {
+                'gemini', 'google' => env('AI_IMAGE_GEMINI_BASE_URL', env('AI_IMAGE_GOOGLE_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta')),
+                'openai_moderation' => env('AI_IMAGE_OPENAI_MODERATION_BASE_URL', env('AI_IMAGE_OPENAI_BASE_URL', 'https://api.openai.com/v1')),
+                default => env('AI_IMAGE_OPENAI_COMPATIBLE_BASE_URL', env('AI_IMAGE_OPENAI_BASE_URL', 'https://api.openai.com/v1')),
+            }
+        ),
+        'endpoint_path' => env(
+            'AI_IMAGE_MODERATION_ENDPOINT_PATH',
+            match ($imageProvider) {
+                'gemini', 'google' => '/models/{model}:generateContent',
+                'openai_moderation' => '/moderations',
+                default => '/chat/completions',
+            }
+        ),
+        'auth_header' => env(
+            'AI_IMAGE_MODERATION_AUTH_HEADER',
+            match ($imageProvider) {
+                'gemini', 'google' => 'x-goog-api-key',
+                default => 'Authorization',
+            }
+        ),
+        'auth_prefix' => env(
+            'AI_IMAGE_MODERATION_AUTH_PREFIX',
+            match ($imageProvider) {
+                'gemini', 'google' => '',
+                default => 'Bearer',
+            }
+        ),
         'queue' => env('AI_IMAGE_MODERATION_QUEUE', env('PRODUCT_MODERATION_QUEUE', 'moderation')),
         'timeout' => (int) env('AI_IMAGE_MODERATION_TIMEOUT', env('PRODUCT_MODERATION_TIMEOUT', 60)),
         'max_attempts' => (int) env('AI_IMAGE_MODERATION_MAX_ATTEMPTS', env('PRODUCT_MODERATION_MAX_ATTEMPTS', 3)),

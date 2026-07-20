@@ -24,9 +24,9 @@ class ProductImageModerationRetryService
             'moderation_source' => 'ai_image',
         ])->save();
 
-        $provider = (string) config('moderation.images.provider', 'google');
-        $model = (string) config("moderation.images.{$provider}.model");
-        $baseUrl = (string) config("moderation.images.{$provider}.base_url");
+        $provider = (string) config('moderation.images.provider', 'gemini');
+        $model = (string) config('moderation.images.model');
+        $baseUrl = (string) config('moderation.images.base_url');
         $latestRun = ProductModerationRun::query()
             ->where('product_id', $product->id)
             ->where('content_version', $product->moderation_version)

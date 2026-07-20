@@ -25,8 +25,8 @@ class ModerationConnectionTesterTest extends TestCase
     public function test_openai_image_connection_reports_authentication_failure_without_leaking_body(): void
     {
         config()->set('moderation.images.provider', 'openai_moderation');
-        config()->set('moderation.images.openai_moderation.api_key', 'bad-secret');
-        config()->set('moderation.images.openai_moderation.base_url', 'https://api.openai.com/v1');
+        config()->set('moderation.images.api_key', 'bad-secret');
+        config()->set('moderation.images.base_url', 'https://api.openai.com/v1');
         Http::fake(['*' => Http::response(['error' => ['message' => 'sensitive provider body']], 401)]);
 
         $result = app(ModerationConnectionTester::class)->images();
@@ -39,8 +39,8 @@ class ModerationConnectionTesterTest extends TestCase
     public function test_openai_image_connection_reports_rate_limit_separately(): void
     {
         config()->set('moderation.images.provider', 'openai_moderation');
-        config()->set('moderation.images.openai_moderation.api_key', 'openai-secret');
-        config()->set('moderation.images.openai_moderation.base_url', 'https://api.openai.com/v1');
+        config()->set('moderation.images.api_key', 'openai-secret');
+        config()->set('moderation.images.base_url', 'https://api.openai.com/v1');
         Http::fake(['*' => Http::response(['error' => ['message' => 'rate limited']], 429)]);
 
         $result = app(ModerationConnectionTester::class)->images();

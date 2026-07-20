@@ -53,6 +53,7 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
             $this->provider ?? (string) config('moderation.images.provider'),
             $this->model ?? '',
             $this->baseUrl ?? '',
+            (string) config('moderation.images.endpoint_path'),
             $this->mode ?? (string) config('moderation.mode'),
         ]));
 
@@ -95,12 +96,12 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $imageProvider = $this->provider ?? (string) config('moderation.images.provider', 'google');
-        $imageModel = $this->model ?? (string) config("moderation.images.{$imageProvider}.model");
+        $imageProvider = $this->provider ?? (string) config('moderation.images.provider', 'gemini');
+        $imageModel = $this->model ?? (string) config('moderation.images.model');
         config()->set('moderation.images.provider', $imageProvider);
-        config()->set("moderation.images.{$imageProvider}.model", $imageModel);
+        config()->set('moderation.images.model', $imageModel);
         if ($this->baseUrl !== null) {
-            config()->set("moderation.images.{$imageProvider}.base_url", $this->baseUrl);
+            config()->set('moderation.images.base_url', $this->baseUrl);
         }
         if ($this->provider !== null) {
             $client = ($clientResolver ?? app(ModerationClientResolver::class))->images($imageProvider);

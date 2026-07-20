@@ -663,6 +663,10 @@ $(document).ready(function() {
                             existingImagesCount--; // ✅ УМЕНЬШАЕМ СЧЕТЧИК
                             updateImageCount();
                         });
+
+                        if (response.current_version) {
+                            $('input[name="expected_moderation_version"]').val(response.current_version);
+                        }
                         
                         Swal.fire({
                             icon: 'success',

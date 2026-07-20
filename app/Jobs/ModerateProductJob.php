@@ -278,14 +278,14 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
         ]);
 
         if (($waitingForImages ?? false) && config('moderation.images.enabled', false)) {
-            $imageProvider = (string) config('moderation.images.provider', 'google');
-            $imageModel = (string) config("moderation.images.{$imageProvider}.model");
+            $imageProvider = (string) config('moderation.images.provider', 'gemini');
+            $imageModel = (string) config('moderation.images.model');
             ModerateProductImagesJob::dispatch(
                 $this->productId,
                 $this->contentVersion,
                 $imageProvider,
                 $imageModel,
-                (string) config("moderation.images.{$imageProvider}.base_url"),
+                (string) config('moderation.images.base_url'),
                 $this->mode ?? (string) config('moderation.mode'),
                 $this->configurationHash($imageProvider, $imageModel, 'image'),
             )->afterCommit();

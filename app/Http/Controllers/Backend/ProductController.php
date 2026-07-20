@@ -261,7 +261,7 @@ class ProductController extends Controller
         $this->authorize('manageImages', $product);
 
         try {
-            $productActionService->deleteImage($image);
+            $updatedProduct = $productActionService->deleteImage($image);
         } catch (ProductImageDeletionException $exception) {
             if (request()->ajax()) {
                 return response()->json([
@@ -276,6 +276,7 @@ class ProductController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Изображение удалено',
+                'current_version' => $updatedProduct->moderation_version,
             ]);
         }
 

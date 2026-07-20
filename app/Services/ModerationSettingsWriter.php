@@ -18,10 +18,14 @@ class ModerationSettingsWriter
     public function save(array $data): void
     {
         $provider = (string) ($data['provider'] ?? 'google');
-        $imageProvider = (string) ($data['image_provider'] ?? 'google');
-        $nativeOpenAiImageModeration = $imageProvider === 'openai_moderation';
-        $imageModel = $nativeOpenAiImageModeration ? 'omni-moderation-latest' : ($data['image_model'] ?? 'gemini-2.5-flash');
-        $imageBaseUrl = $nativeOpenAiImageModeration ? 'https://api.openai.com/v1' : ($data['image_base_url'] ?? 'https://generativelanguage.googleapis.com/v1beta');
+        $imageProvider = $this->normalizeImageProvider((string) ($data['image_provider'] ?? 'gemini'));
+        $imageModel = (string) ($data['image_model'] ?? $this->defaultImageModel($imageProvider));
+        $imageBaseUrl = (string) ($data['image_base_url'] ?? $this->defaultImageBaseUrl($imageProvider));
+        $imageEndpointPath = (string) ($data['image_endpoint_path'] ?? $this->defaultImageEndpointPath($imageProvider));
+        $imageAuthHeader = (string) ($data['image_auth_header'] ?? $this->defaultImageAuthHeader($imageProvider));
+        $imageAuthPrefix = filled($data['image_auth_prefix'] ?? null)
+            ? (string) $data['image_auth_prefix']
+            : $this->defaultImageAuthPrefix($imageProvider);
 
         if ($provider === 'google' && (str_starts_with((string) ($data['model'] ?? ''), 'deepseek-') || str_contains((string) ($data['base_url'] ?? ''), 'deepseek.com'))) {
             throw ValidationException::withMessages([
@@ -35,7 +39,6 @@ class ModerationSettingsWriter
         }
 
         $textPrefix = $this->textEnvironmentPrefix($provider);
-        $imagePrefix = $imageProvider === 'google' ? 'AI_IMAGE_GOOGLE' : 'AI_IMAGE_OPENAI';
         $textKeyChanged = filled($data['api_key'] ?? null);
         $imageKeyChanged = filled($data['image_api_key'] ?? null);
         $textKeyAvailable = filled($data['api_key'] ?? null)
@@ -45,8 +48,19 @@ class ModerationSettingsWriter
             || ($provider === 'google' && $this->settings->hasValue('GEMINI_API_KEY'));
         $imageKeyAvailable = filled($data['image_api_key'] ?? null)
             || $this->secrets->has($this->imageSecretName($imageProvider))
-            || $this->settings->hasValue($imagePrefix.'_API_KEY')
-            || $this->settings->hasValue('AI_IMAGE_MODERATION_API_KEY');
+            || $this->settings->hasValue('AI_IMAGE_MODERATION_API_KEY')
+            || ($imageProvider === 'gemini' && (
+                $this->settings->hasValue('AI_IMAGE_GEMINI_API_KEY')
+                || $this->settings->hasValue('AI_IMAGE_GOOGLE_API_KEY')
+            ))
+            || ($imageProvider === 'openai_compatible' && (
+                $this->settings->hasValue('AI_IMAGE_OPENAI_COMPATIBLE_API_KEY')
+                || $this->settings->hasValue('AI_IMAGE_OPENAI_API_KEY')
+            ))
+            || ($imageProvider === 'openai_moderation' && (
+                $this->settings->hasValue('AI_IMAGE_OPENAI_MODERATION_API_KEY')
+                || $this->settings->hasValue('AI_IMAGE_OPENAI_API_KEY')
+            ));
 
         if ($data['ai_enabled'] && ! $textKeyAvailable) {
             throw ValidationException::withMessages([
@@ -82,16 +96,17 @@ class ModerationSettingsWriter
             'AI_MODERATION_DAILY_REQUEST_LIMIT' => $data['daily_request_limit'] ?? 500,
             'AI_IMAGE_MODERATION_ENABLED' => (bool) $data['image_moderation_enabled'],
             'AI_IMAGE_MODERATION_PROVIDER' => $imageProvider,
+            'AI_IMAGE_MODERATION_MODEL' => $imageModel,
+            'AI_IMAGE_MODERATION_BASE_URL' => $imageBaseUrl,
+            'AI_IMAGE_MODERATION_ENDPOINT_PATH' => $imageEndpointPath,
+            'AI_IMAGE_MODERATION_AUTH_HEADER' => $imageAuthHeader,
+            'AI_IMAGE_MODERATION_AUTH_PREFIX' => $imageAuthPrefix,
             'AI_IMAGE_MODERATION_QUEUE' => $data['image_queue'] ?? 'moderation',
             'AI_IMAGE_MODERATION_TIMEOUT' => $data['image_timeout'] ?? 60,
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS' => $data['image_max_attempts'] ?? 3,
-            'AI_IMAGE_MODERATION_MODEL' => $imageModel,
-            'AI_IMAGE_MODERATION_BASE_URL' => $imageBaseUrl,
             $textPrefix.'_MODEL' => $data['model'] ?? '',
             $textPrefix.'_BASE_URL' => $data['base_url'] ?? '',
             'AI_TEXT_OPENAI_COMPATIBLE_CHAT_COMPLETIONS_PATH' => $data['chat_completions_path'] ?? '/chat/completions',
-            $imagePrefix.'_MODEL' => $imageModel,
-            $imagePrefix.'_BASE_URL' => $imageBaseUrl,
         ];
 
         if ($provider !== 'google') {
@@ -132,6 +147,62 @@ class ModerationSettingsWriter
 
     private function imageSecretName(string $provider): string
     {
-        return 'image.'.($provider === 'google' ? 'google' : 'openai_moderation');
+        return match ($provider) {
+            'gemini' => 'image.gemini',
+            'openai_compatible' => 'image.openai_compatible',
+            'openai_moderation' => 'image.openai_moderation',
+            default => 'image.openai_compatible',
+        };
+    }
+
+    private function normalizeImageProvider(string $provider): string
+    {
+        return match ($provider) {
+            'google' => 'gemini',
+            'openai' => 'openai_compatible',
+            default => $provider,
+        };
+    }
+
+    private function defaultImageModel(string $provider): string
+    {
+        return match ($provider) {
+            'gemini' => 'gemini-3.1-flash-lite',
+            'openai_moderation' => 'omni-moderation-latest',
+            default => 'gpt-4o-mini',
+        };
+    }
+
+    private function defaultImageBaseUrl(string $provider): string
+    {
+        return match ($provider) {
+            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
+            default => 'https://api.openai.com/v1',
+        };
+    }
+
+    private function defaultImageEndpointPath(string $provider): string
+    {
+        return match ($provider) {
+            'gemini' => '/models/{model}:generateContent',
+            'openai_moderation' => '/moderations',
+            default => '/chat/completions',
+        };
+    }
+
+    private function defaultImageAuthHeader(string $provider): string
+    {
+        return match ($provider) {
+            'gemini' => 'x-goog-api-key',
+            default => 'Authorization',
+        };
+    }
+
+    private function defaultImageAuthPrefix(string $provider): string
+    {
+        return match ($provider) {
+            'gemini' => '',
+            default => 'Bearer',
+        };
     }
 }

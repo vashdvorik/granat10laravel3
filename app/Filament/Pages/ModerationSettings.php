@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Data\ModerationSettingsSnapshot;
 use App\Services\AiModerationRequestBudget;
 use App\Services\AiProviderUrlValidator;
+use App\Services\ModerationConnectionTester;
 use App\Services\ModerationOperationsStatus;
 use App\Services\ModerationSettingsSnapshotFactory;
 use App\Services\ModerationSettingsWriter;
@@ -14,6 +15,7 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\HtmlString;
 
 class ModerationSettings extends Page implements HasForms
 {
@@ -53,6 +55,14 @@ class ModerationSettings extends Page implements HasForms
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('Краткая инструкция')
+                    ->description('Коротко о том, как пользоваться параметрами ниже.')
+                    ->schema([
+                        Forms\Components\Placeholder::make('moderation_help')
+                            ->content(new HtmlString('<div style="display:grid;gap:.5rem;font-size:.92rem;line-height:1.55;color:#4b5563"><div><strong>Включить ИИ-модерацию</strong> — общий выключатель. Если он выключен, новые товары идут на ручную проверку администратора.</div><div><strong>Режим работы</strong> — <strong>shadow</strong> только пишет решение ИИ, <strong>auto</strong> автоматически публикует безопасные товары.</div><div><strong>Максимальный риск для автопубликации</strong> — порог от 0 до 100. Чем ниже число, тем строже фильтр.</div><div><strong>Категории без автопубликации</strong> — укажите алиасы через запятую. Для этих категорий автопубликация не включается.</div><div><strong>Формат API</strong> — схема подключения для модерации изображений. После смены провайдера проверьте модель, URL и заголовок авторизации.</div><div><strong>Префикс ключа</strong> — обычно <strong>Bearer</strong>. Для заголовка <strong>x-goog-api-key</strong> поле нужно оставить пустым.</div><div><strong>Очередь, таймаут, попытки</strong> — параметры работы воркера. Если очередь не запущена, проверки будут зависать или не выполняться.</div></div>'))
+                    ])
+                    ->compact(),
+
                 Forms\Components\Section::make('Основной режим')
                     ->schema([
                         Forms\Components\Toggle::make('ai_enabled')
@@ -169,40 +179,55 @@ class ModerationSettings extends Page implements HasForms
                     ])->columns(2),
 
                 Forms\Components\Section::make('Модерация изображений')
-                    ->description('Отдельная проверка фото товара. Нужна модель, которая умеет анализировать изображения.')
+                    ->description('Одна универсальная схема подходит для Gemini, OpenAI-compatible и native moderation endpoint.')
                     ->schema([
                         Forms\Components\Select::make('image_provider')
-                            ->label('��������� ��������� �����������')
+                            ->label('Формат API')
                             ->options([
-                                'google' => 'Google Gemini vision',
-                                'openai_moderation' => 'OpenAI Moderation',
+                                'gemini' => 'Gemini API',
+                                'openai_compatible' => 'OpenAI-compatible API',
+                                'openai_moderation' => 'Native moderation endpoint',
                             ])
                             ->live()
                             ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
+                                if ($state === 'gemini') {
+                                    $set('image_model', 'gemini-3.1-flash-lite');
+                                    $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                                    $set('image_endpoint_path', '/models/{model}:generateContent');
+                                    $set('image_auth_header', 'x-goog-api-key');
+                                    $set('image_auth_prefix', '');
+                                }
+
+                                if ($state === 'openai_compatible') {
+                                    $set('image_model', 'gpt-4o-mini');
+                                    $set('image_base_url', 'https://api.openai.com/v1');
+                                    $set('image_endpoint_path', '/chat/completions');
+                                    $set('image_auth_header', 'Authorization');
+                                    $set('image_auth_prefix', 'Bearer');
+                                }
+
                                 if ($state === 'openai_moderation') {
                                     $set('image_model', 'omni-moderation-latest');
                                     $set('image_base_url', 'https://api.openai.com/v1');
-                                }
-
-                                if ($state === 'google') {
-                                    $set('image_model', 'gemini-2.5-flash');
-                                    $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                                    $set('image_endpoint_path', '/moderations');
+                                    $set('image_auth_header', 'Authorization');
+                                    $set('image_auth_prefix', 'Bearer');
                                 }
                             })
                             ->required(),
                         Forms\Components\Toggle::make('image_moderation_enabled')
                             ->label('Включить проверку фото')
-                            ->helperText('Если включено, товар не будет автопубликован, пока фото не пройдут проверку.'),
+                            ->helperText('Если включено, товар не будет публиковаться, пока фото не пройдут проверку.'),
                         Forms\Components\TextInput::make('image_api_key')
-                            ->label('Новый API-ключ для фото')
+                            ->label('API-ключ')
                             ->password()->revealable()->autocomplete(false)
-                            ->helperText('Можно оставить пустым: тогда сохранится текущий ключ для проверки фото.'),
+                            ->helperText('Можно оставить пустым, если ключ уже сохранён в настройках.'),
                         Forms\Components\TextInput::make('image_model')
-                            ->label('Модель для проверки фото')
+                            ->label('Модель')
                             ->required()
-                            ->helperText('Нужна vision-модель. Например: gemini-2.5-flash.'),
+                            ->helperText('Например: gemini-3.1-flash-lite, qwen/qwen3.6-flash, gpt-4o-mini.'),
                         Forms\Components\TextInput::make('image_base_url')
-                            ->label('Базовый URL API для фото')
+                            ->label('Базовый URL API')
                             ->url()->required()
                             ->rule(function (AiProviderUrlValidator $validator): \Closure {
                                 return function (string $attribute, mixed $value, \Closure $fail) use ($validator): void {
@@ -212,11 +237,24 @@ class ModerationSettings extends Page implements HasForms
                                         $fail($exception->getMessage());
                                     }
                                 };
-                            }),
+                            })
+                            ->helperText('Например: https://api.openai.com/v1 или https://generativelanguage.googleapis.com/v1beta.'),
+                        Forms\Components\TextInput::make('image_endpoint_path')
+                            ->label('Путь endpoint')
+                            ->required()
+                            ->helperText('Можно использовать {model}. Пример: /chat/completions, /moderations или /models/{model}:generateContent.'),
+                        Forms\Components\TextInput::make('image_auth_header')
+                            ->label('Заголовок авторизации')
+                            ->required()
+                            ->helperText('Например: Authorization или x-goog-api-key.'),
+                        Forms\Components\TextInput::make('image_auth_prefix')
+                            ->label('Префикс ключа')
+                            ->placeholder('Bearer')
+                            ->helperText('Например: Bearer. Для x-goog-api-key оставьте пустым.'),
                         Forms\Components\TextInput::make('image_queue')
                             ->label('Очередь проверки фото')
                             ->required()
-                            ->helperText('Можно оставить moderation, чтобы один worker обрабатывал текст и фото.'),
+                            ->helperText('Обычно moderation.'),
                         Forms\Components\TextInput::make('image_timeout')
                             ->label('Таймаут фото, секунд')
                             ->numeric()->minValue(5)->maxValue(300)->required(),
@@ -261,9 +299,29 @@ class ModerationSettings extends Page implements HasForms
 
         $this->form->fill($snapshot->data);
     }
+
+    public function testTextConnection(ModerationConnectionTester $tester): void
+    {
+        $this->sendConnectionTestResult('Текстовая модерация', $tester->text());
+    }
+
+    public function testImageConnection(ModerationConnectionTester $tester): void
+    {
+        $this->sendConnectionTestResult('Модерация изображений', $tester->images());
+    }
+
+    private function sendConnectionTestResult(string $label, array $result): void
+    {
+        $notification = Notification::make()
+            ->title($result['ok'] ? "{$label}: подключение успешно" : "{$label}: подключение не удалось")
+            ->body((string) $result['message']);
+
+        if ($result['ok']) {
+            $notification->success();
+        } else {
+            $notification->danger();
+        }
+
+        $notification->send();
+    }
 }
-
-
-
-
-

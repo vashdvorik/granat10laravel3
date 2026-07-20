@@ -16,8 +16,9 @@ class ModerationOperationsStatusTest extends TestCase
     {
         config()->set('queue.default', 'sync');
         config()->set('moderation.images.enabled', true);
-        config()->set('moderation.images.google.api_key', 'test-image-key');
-        config()->set('moderation.images.google.model', 'gemini-2.5-flash');
+        config()->set('moderation.images.provider', 'gemini');
+        config()->set('moderation.images.api_key', 'test-image-key');
+        config()->set('moderation.images.model', 'gemini-3.1-flash-lite');
         config()->set('moderation.images.queue', 'moderation');
         $product = Product::factory()->create();
 
@@ -32,7 +33,7 @@ class ModerationOperationsStatusTest extends TestCase
         $this->assertTrue($status['queue_ok']);
         $this->assertTrue($status['image_moderation_enabled']);
         $this->assertTrue($status['image_api_key_configured']);
-        $this->assertSame('gemini-2.5-flash', $status['image_model']);
+        $this->assertSame('gemini-3.1-flash-lite', $status['image_model']);
         $this->assertSame('moderation', $status['image_queue']);
         $this->assertSame(2, $status['failed_runs']);
         $this->assertSame(2, $status['stuck_runs']);

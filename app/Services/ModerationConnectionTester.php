@@ -37,32 +37,33 @@ class ModerationConnectionTester
     /** @return array{ok: bool, message: string} */
     public function images(): array
     {
-        $provider = (string) config('moderation.images.provider');
+        $provider = $this->normalizeImageProvider((string) config('moderation.images.provider', 'gemini'));
+        $baseUrl = rtrim((string) config('moderation.images.base_url'), '/');
+        $apiKey = (string) config('moderation.images.api_key');
 
-        if ($provider === 'google') {
-            return $this->google(
-                (string) config('moderation.images.google.base_url'),
-                (string) config('moderation.images.google.model'),
-                (string) config('moderation.images.google.api_key'),
-            );
-        }
+        return match ($provider) {
+            'gemini' => $this->request(function () use ($baseUrl, $apiKey) {
+                $this->validate($baseUrl, $apiKey);
 
-        if ($provider !== 'openai_moderation') {
-            return ['ok' => false, 'message' => 'Выбранный image-провайдер не поддерживает проверку соединения.'];
-        }
+                return $this->imageRequest('gemini', $apiKey)
+                    ->timeout(15)
+                    ->get($baseUrl.'/models/'.(string) config('moderation.images.model'));
+            }),
+            'openai_moderation' => $this->request(function () use ($baseUrl, $apiKey) {
+                $this->validate($baseUrl, $apiKey);
 
-        $baseUrl = rtrim((string) config('moderation.images.openai_moderation.base_url'), '/');
-        $apiKey = (string) config('moderation.images.openai_moderation.api_key');
+                return $this->imageRequest('openai_moderation', $apiKey)->timeout(15)
+                    ->post($baseUrl.'/moderations', [
+                        'model' => (string) config('moderation.images.model'),
+                        'input' => 'Connection test.',
+                    ]);
+            }, fn (Response $response): string => $this->openAiModerationMessage($response)),
+            default => $this->request(function () use ($baseUrl, $apiKey) {
+                $this->validate($baseUrl, $apiKey);
 
-        return $this->request(function () use ($baseUrl, $apiKey) {
-            $this->validate($baseUrl, $apiKey);
-
-            return Http::acceptJson()->asJson()->withToken($apiKey)->timeout(15)
-                ->post($baseUrl.'/moderations', [
-                    'model' => 'omni-moderation-latest',
-                    'input' => 'Connection test.',
-                ]);
-        }, fn (Response $response): string => $this->openAiModerationMessage($response));
+                return $this->imageRequest('openai_compatible', $apiKey)->timeout(15)->get($baseUrl.'/models');
+            }),
+        };
     }
 
     /** @return array{ok: bool, message: string} */
@@ -127,5 +128,37 @@ class ModerationConnectionTester
             429 => 'OpenAI вернул HTTP 429. Подключение к API есть, но сработал rate limit или исчерпана квота. Проверьте лимиты, биллинг и повторите попытку позже.',
             default => 'OpenAI moderation API вернул HTTP '.$response->status().'. Проверьте ключ, endpoint и доступность аккаунта.',
         };
+    }
+
+    private function normalizeImageProvider(string $provider): string
+    {
+        return match ($provider) {
+            'google' => 'gemini',
+            'openai' => 'openai_compatible',
+            default => $provider,
+        };
+    }
+
+    private function imageRequest(string $provider, string $apiKey)
+    {
+        $authHeader = (string) config('moderation.images.auth_header', $this->defaultImageAuthHeader($provider));
+        $authPrefix = (string) config('moderation.images.auth_prefix', $this->defaultImageAuthPrefix($provider));
+        $headerValue = $authHeader === 'x-goog-api-key'
+            ? $apiKey
+            : (trim($authPrefix) === '' ? $apiKey : rtrim($authPrefix).' '.$apiKey);
+
+        return Http::acceptJson()
+            ->asJson()
+            ->withHeaders([$authHeader => $headerValue]);
+    }
+
+    private function defaultImageAuthHeader(string $provider): string
+    {
+        return $provider === 'gemini' ? 'x-goog-api-key' : 'Authorization';
+    }
+
+    private function defaultImageAuthPrefix(string $provider): string
+    {
+        return $provider === 'gemini' ? '' : 'Bearer';
     }
 }

@@ -545,6 +545,32 @@ class BackendProductControllerProductsTest extends TestCase
         $this->assertDatabaseHas('images', ['id' => $image->id]);
     }
 
+    public function test_destroy_image_returns_current_moderation_version(): void
+    {
+        [$user, $seller] = $this->createUserWithSeller();
+        $category = Category::factory()->create();
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'is_active' => false,
+            'moderation_version' => 3,
+            'moderation_status' => ProductModerationStatus::ChangesRequired,
+            'moderation_summary' => 'Need photo update',
+        ]);
+        $image = Image::factory()->main()->create(['product_id' => $product->id]);
+        Image::factory()->create(['product_id' => $product->id]);
+
+        $response = $this->actingAs($user)
+            ->withHeader('X-Requested-With', 'XMLHttpRequest')
+            ->delete(route('account.store.products.images.destroy', $image));
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'current_version' => 4,
+            ]);
+    }
+
     public function test_set_main_image_returns_ajax_success(): void
     {
         [$user, $seller] = $this->createUserWithSeller();

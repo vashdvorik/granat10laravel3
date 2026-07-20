@@ -248,9 +248,6 @@
                                                                             <div class="seller-product-card__state-text">
                                                                                 {{ \Illuminate\Support\Str::limit($productCabinetState->description, 120) }}
                                                                             </div>
-                                                                            <div class="seller-product-card__state-meta">
-                                                                                Модерация: {{ $product->view_state->moderationLabel }}
-                                                                            </div>
                                                                         </div>
 
                                                                         {{-- Дата последнего поднятия --}}

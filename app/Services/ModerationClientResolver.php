@@ -20,10 +20,6 @@ class ModerationClientResolver
 
     public function images(string $provider): ProductImageModerationClient
     {
-        return match ($provider) {
-            'google' => app(GoogleGeminiImageModerationClient::class),
-            'openai_moderation' => app(OpenAiModerationImageClient::class),
-            default => throw new RuntimeException('Unsupported image moderation provider.'),
-        };
+        return app(UniversalImageModerationClient::class);
     }
 }

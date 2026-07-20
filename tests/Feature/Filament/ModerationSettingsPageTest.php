@@ -7,6 +7,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\ModerationConnectionTester;
 use App\Services\ModerationSecretStore;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,13 +50,16 @@ class ModerationSettingsPageTest extends TestCase
             'AI_MODERATION_HOURLY_REQUEST_LIMIT=60',
             'AI_MODERATION_DAILY_REQUEST_LIMIT=500',
             'AI_IMAGE_MODERATION_ENABLED=false',
-            'AI_IMAGE_MODERATION_PROVIDER=google',
+            'AI_IMAGE_MODERATION_PROVIDER=gemini',
             'AI_IMAGE_MODERATION_QUEUE=moderation',
             'AI_IMAGE_MODERATION_TIMEOUT=60',
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS=3',
             'AI_IMAGE_MODERATION_API_KEY=existing-image-secret',
-            'AI_IMAGE_MODERATION_MODEL=gemini-2.5-flash',
+            'AI_IMAGE_MODERATION_MODEL=gemini-3.1-flash-lite',
             'AI_IMAGE_MODERATION_BASE_URL=https://generativelanguage.googleapis.com/v1beta',
+            'AI_IMAGE_MODERATION_ENDPOINT_PATH=/models/{model}:generateContent',
+            'AI_IMAGE_MODERATION_AUTH_HEADER=x-goog-api-key',
+            'AI_IMAGE_MODERATION_AUTH_PREFIX=',
             '',
         ]));
         config()->set('environment-settings.path', $this->environmentPath);
@@ -113,8 +117,12 @@ class ModerationSettingsPageTest extends TestCase
                 'daily_request_limit' => 300,
                 'image_moderation_enabled' => true,
                 'image_api_key' => '',
-                'image_model' => 'gemini-2.5-flash',
+                'image_provider' => 'gemini',
+                'image_model' => 'gemini-3.1-flash-lite',
                 'image_base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+                'image_endpoint_path' => '/models/{model}:generateContent',
+                'image_auth_header' => 'x-goog-api-key',
+                'image_auth_prefix' => '',
                 'image_queue' => 'moderation',
                 'image_timeout' => 80,
                 'image_max_attempts' => 2,
@@ -139,12 +147,33 @@ class ModerationSettingsPageTest extends TestCase
         $this->assertStringContainsString('AI_MODERATION_HOURLY_REQUEST_LIMIT=40', $contents);
         $this->assertStringContainsString('AI_MODERATION_DAILY_REQUEST_LIMIT=300', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_ENABLED=true', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=google', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=gemini', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_QUEUE=moderation', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_TIMEOUT=80', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_MAX_ATTEMPTS=2', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_API_KEY=existing-image-secret', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=gemini-2.5-flash', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=gemini-3.1-flash-lite', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_BASE_URL=https://generativelanguage.googleapis.com/v1beta', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_ENDPOINT_PATH="/models/{model}:generateContent"', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_HEADER=x-goog-api-key', $contents);
+    }
+
+    public function test_administrator_can_test_text_connection(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        $this->mock(ModerationConnectionTester::class, function ($mock): void {
+            $mock->shouldReceive('text')
+                ->once()
+                ->andReturn([
+                    'ok' => true,
+                    'message' => 'Connection test passed.',
+                ]);
+        });
+
+        Livewire::test(ModerationSettings::class)
+            ->call('testTextConnection')
+            ->assertNotified('Текстовая модерация: подключение успешно');
     }
 
     public function test_image_settings_do_not_inherit_text_provider_endpoint(): void
@@ -170,9 +199,11 @@ class ModerationSettingsPageTest extends TestCase
             'AI_MODERATION_HOURLY_REQUEST_LIMIT=60',
             'AI_MODERATION_DAILY_REQUEST_LIMIT=500',
             'AI_IMAGE_MODERATION_ENABLED=false',
+            'AI_IMAGE_MODERATION_PROVIDER=gemini',
             'AI_IMAGE_MODERATION_QUEUE=moderation',
             'AI_IMAGE_MODERATION_TIMEOUT=60',
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS=3',
+            'AI_IMAGE_MODERATION_ENDPOINT_PATH=/models/{model}:generateContent',
             '',
         ]));
 
@@ -181,8 +212,11 @@ class ModerationSettingsPageTest extends TestCase
         Livewire::test(ModerationSettings::class)
             ->assertSet('data.model', 'deepseek-v4-flash')
             ->assertSet('data.base_url', 'https://api.deepseek.com')
-            ->assertSet('data.image_model', 'gemini-2.5-flash')
-            ->assertSet('data.image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+            ->assertSet('data.image_model', 'gemini-3.1-flash-lite')
+            ->assertSet('data.image_base_url', 'https://generativelanguage.googleapis.com/v1beta')
+            ->assertSet('data.image_endpoint_path', '/models/{model}:generateContent')
+            ->assertSet('data.image_auth_header', 'x-goog-api-key')
+            ->assertSet('data.image_auth_prefix', '');
     }
 
     public function test_administrator_can_switch_image_moderation_to_native_openai(): void
@@ -193,6 +227,11 @@ class ModerationSettingsPageTest extends TestCase
             ->fillForm([
                 'image_provider' => 'openai_moderation',
                 'image_api_key' => 'openai-test-key',
+                'image_model' => 'omni-moderation-latest',
+                'image_base_url' => 'https://api.openai.com/v1',
+                'image_endpoint_path' => '/moderations',
+                'image_auth_header' => 'Authorization',
+                'image_auth_prefix' => 'Bearer',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
@@ -203,6 +242,9 @@ class ModerationSettingsPageTest extends TestCase
         $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=openai_moderation', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=omni-moderation-latest', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_BASE_URL=https://api.openai.com/v1', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_ENDPOINT_PATH=/moderations', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_HEADER=Authorization', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_PREFIX=Bearer', $contents);
         $this->assertSame('openai-test-key', app(ModerationSecretStore::class)->get('image.openai_moderation'));
         $this->assertStringNotContainsString('openai-test-key', $contents);
         $this->assertNotSame(
@@ -251,23 +293,34 @@ class ModerationSettingsPageTest extends TestCase
 
         Livewire::test(ModerationSettings::class)
             ->fillForm([
-                'image_provider' => 'google',
+                'image_provider' => 'gemini',
                 'image_api_key' => 'google-image-key',
+                'image_model' => 'gemini-3.1-flash-lite',
+                'image_base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+                'image_endpoint_path' => '/models/{model}:generateContent',
+                'image_auth_header' => 'x-goog-api-key',
+                'image_auth_prefix' => '',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
         Livewire::test(ModerationSettings::class)
             ->fillForm([
-                'image_provider' => 'openai_moderation',
+                'image_provider' => 'openai_compatible',
                 'image_api_key' => 'openai-image-key',
+                'image_model' => 'gpt-4o-mini',
+                'image_base_url' => 'https://api.openai.com/v1',
+                'image_endpoint_path' => '/chat/completions',
+                'image_auth_header' => 'Authorization',
+                'image_auth_prefix' => 'Bearer',
             ])
             ->call('save')
             ->assertHasNoFormErrors();
 
         $store = app(ModerationSecretStore::class);
+        $this->assertSame('google-image-key', $store->get('image.gemini'));
         $this->assertSame('google-image-key', $store->get('image.google'));
-        $this->assertSame('openai-image-key', $store->get('image.openai_moderation'));
+        $this->assertSame('openai-image-key', $store->get('image.openai_compatible'));
         $this->assertStringNotContainsString('google-image-key', file_get_contents($this->environmentPath));
         $this->assertStringNotContainsString('openai-image-key', file_get_contents($this->environmentPath));
     }

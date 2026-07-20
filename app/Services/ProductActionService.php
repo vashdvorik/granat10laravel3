@@ -56,7 +56,7 @@ class ProductActionService
         $product->delete();
     }
 
-    public function deleteImage(ProductImage $image): void
+    public function deleteImage(ProductImage $image): Product
     {
         $product = $image->product;
 
@@ -68,7 +68,8 @@ class ProductActionService
         }
 
         $this->productImageService->deleteImage($image);
-        $this->productModerationService->invalidate($product);
+
+        return $this->productModerationService->invalidate($product);
     }
 
     public function setMainImage(ProductImage $image): void

@@ -134,10 +134,11 @@ class ProductActionServiceTest extends TestCase
         Storage::disk('public')->put($mainImage->path, 'main');
         Storage::disk('public')->put($nextImage->path, 'next');
 
-        $this->service->deleteImage($mainImage);
+        $updatedProduct = $this->service->deleteImage($mainImage);
 
         $this->assertDatabaseMissing('images', ['id' => $mainImage->id]);
         $this->assertTrue((bool) $nextImage->fresh()->is_main);
+        $this->assertSame($product->fresh()->moderation_version, $updatedProduct->moderation_version);
         Storage::disk('public')->assertMissing($mainImage->path);
     }
 
@@ -171,10 +172,11 @@ class ProductActionServiceTest extends TestCase
             ]],
         ]);
 
-        $this->service->deleteImage($image);
+        $updatedProduct = $this->service->deleteImage($image);
 
         $product->refresh();
         $this->assertSame(5, $product->moderation_version);
+        $this->assertSame(5, $updatedProduct->moderation_version);
         $this->assertSame(ProductModerationStatus::Draft, $product->moderation_status);
         $this->assertNull($product->moderation_summary);
         $this->assertSame([], app(ProductModerationIssuePresenter::class)->forProduct($product));
