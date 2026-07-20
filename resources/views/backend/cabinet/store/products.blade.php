@@ -1,4 +1,4 @@
-{{-- КАТАЛОГ ТОВАРОВ --}}
+﻿{{-- КАТАЛОГ ТОВАРОВ --}}
 
 @extends('backend.cabinet.layout_cabinet')
 @inject('sellerPackageStatusService', 'App\Services\SellerPackageStatusService')
@@ -477,13 +477,13 @@ $(document).ready(function() {
         e.preventDefault();
         const form = $(this).closest('.delete-product-form');
         const productName = form.data('product-name');
-        
+
         Swal.fire({
             title: 'Удалить товар?',
             html: `
-                <p>Вы уверены, что хотите удалить товар</p>
+                <p>Вы уверены, что хотите удалить товар?</p>
                 <h5 class="mt-2 mb-2 text-danger">${productName}</h5>
-                <p class="text-muted mb-0">Это действие невозможно отменить</p>
+                <p class="text-muted mb-0">Это действие нельзя отменить</p>
             `,
             icon: 'warning',
             showCancelButton: true,
@@ -504,7 +504,7 @@ $(document).ready(function() {
                         Swal.showLoading();
                     }
                 });
-                
+
                 // Отправляем форму
                 form.submit();
             }
@@ -512,27 +512,59 @@ $(document).ready(function() {
     });
 
     // Обработка активации/деактивации товара
+    function updateProductCardFragments(card, fragments) {
+        if (!card.length || !fragments) {
+            return;
+        }
+
+        let updated = false;
+
+        if (fragments.badge_html && card.find('.seller-product-card__badges').length) {
+            card.find('.seller-product-card__badges').html(fragments.badge_html);
+            updated = true;
+        }
+
+        if (fragments.menu_html && card.find('.seller-product-card__menu').length) {
+            card.find('.seller-product-card__menu').html(fragments.menu_html);
+            updated = true;
+        }
+
+        if (fragments.body_html && card.find('.seller-product-card__body').length) {
+            card.find('.seller-product-card__body').html(fragments.body_html);
+            updated = true;
+        }
+
+        if (!updated && fragments.card_html) {
+            card.replaceWith(fragments.card_html);
+        }
+    }
+
     $(document).on('click', '.status-change-btn', function(e) {
         e.preventDefault();
         const button = $(this);
         const form = button.closest('.status-change-form');
         const action = form.data('action');
         const productName = form.data('product-name');
-        
+
         let title, text, icon, confirmText;
-        
+
         if (action === 'activate') {
-            title = 'Опубликовать товар?';
-            text = `Товар "${productName}" будет опубликован и станет доступен для покупателей`;
+            title = 'Включить товар?';
+            text = `Товар "${productName}" снова станет доступен покупателям в каталоге и поиске.`;
             icon = 'question';
-            confirmText = '<i class="uil uil-play me-1"></i> Да, опубликовать';
+            confirmText = '<i class="uil uil-play me-1"></i> Да, включить';
+        } else if (action === 'submit') {
+            title = 'Отправить на модерацию?';
+            text = `Товар "${productName}" будет отправлен на проверку администратору.`;
+            icon = 'question';
+            confirmText = '<i class="uil uil-shield-check me-1"></i> Да, отправить';
         } else {
-            title = 'Снять с публикации товар?';
-            text = `Товар "${productName}" будет снят с публикации и скрыт от покупателей`;
+            title = 'Скрыть товар?';
+            text = `Товар "${productName}" будет скрыт из каталога и поиска.`;
             icon = 'warning';
-            confirmText = '<i class="uil uil-pause me-1"></i> Да, снять с публикации';
+            confirmText = '<i class="uil uil-pause me-1"></i> Да, скрыть';
         }
-        
+
         Swal.fire({
             title: title,
             text: text,
@@ -545,32 +577,32 @@ $(document).ready(function() {
             reverseButtons: true
         }).then((result) => {
             if (result.isConfirmed) {
-                // Отправляем AJAX запрос
                 $.ajax({
                     url: form.attr('action'),
                     method: 'POST',
+                    dataType: 'json',
                     data: form.serialize(),
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'Accept': 'application/json'
                     },
                     success: function(response) {
-                        // Просто перезагружаем страницу
+                        const card = form.closest('.seller-product-card');
+                        updateProductCardFragments(card, response.fragments || {});
+
                         Swal.fire({
                             icon: 'success',
-                            title: 'Выполнено',
+                            title: 'Готово',
                             text: response.message,
                             timer: 1500,
                             showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
                         });
                     },
                     error: function(xhr) {
                         console.log('Error response:', xhr);
-                        
-                        let errorMessage = 'Произошла ошибка';
-                        
+
+                        let errorMessage = 'Не удалось изменить статус товара';
+
                         if (xhr.responseJSON && xhr.responseJSON.error) {
                             errorMessage = xhr.responseJSON.error;
                         } else if (xhr.responseJSON && xhr.responseJSON.message) {
@@ -578,7 +610,7 @@ $(document).ready(function() {
                         } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                             errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
                         }
-                        
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Ошибка',
@@ -590,51 +622,53 @@ $(document).ready(function() {
             }
         });
     });
-// Обработчик поднятия товара
-$(document).on('click', '.push-up-btn', function(e) {
-    e.preventDefault();
-    const form = $(this).closest('.push-up-form');
-    const productName = form.data('product-name');
-    const pushAt = form.data('push-at');
-    
-    Swal.fire({
-        title: 'Поднять товар?',
-        html: `<p>Товар "<strong>${productName}</strong>" окажется на первых позициях в поиске и каталоге, как будто вы только что его добавили. Покупатели увидят его первым, но использовать эту возможность можно только один раз в день.</p>
+
+    $(document).on('click', '.push-up-btn', function(e) {
+        e.preventDefault();
+        const form = $(this).closest('.push-up-form');
+        const productName = form.data('product-name');
+        const pushAt = form.data('push-at');
+
+        Swal.fire({
+            title: 'Поднять товар?',
+            html: `<p>Товар "<strong>${productName}</strong>" окажется на первых позициях в поиске и каталоге, как будто вы только что его добавили. Покупатели увидят его первым, но использовать эту возможность можно только один раз в день.</p>
                ${pushAt ? `<small class="text-muted">Последнее поднятие: ${pushAt}</small>` : ''}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#5F63F2',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Да, поднять',
-        cancelButtonText: 'Отмена'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: form.attr('action'),
-                method: 'POST',
-                data: form.serialize(),
-                success: function(response) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Готово!',
-                        text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        location.reload();
-                    });
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Ошибка',
-                        text: xhr.responseJSON?.error || 'Не удалось поднять товар'
-                    });
-                }
-            });
-        }
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#5F63F2',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Да, поднять',
+            cancelButtonText: 'Отмена'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    dataType: 'json',
+                    data: form.serialize(),
+                    success: function(response) {
+                        const card = form.closest('.seller-product-card');
+                        updateProductCardFragments(card, response.fragments || {});
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Готово!',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ошибка',
+                            text: xhr.responseJSON?.error || 'Не удалось поднять товар'
+                        });
+                    }
+                });
+            }
+        });
     });
 });
-}); 
 </script>
 @endpush

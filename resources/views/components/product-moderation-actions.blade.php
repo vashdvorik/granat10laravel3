@@ -44,9 +44,13 @@
                     </button>
                 </form>
             @elseif($state->canSubmit)
-                <form action="{{ route('account.store.products.submit-moderation', $product) }}" method="POST">
+                <form action="{{ route('account.store.products.submit-moderation', $product) }}"
+                      method="POST"
+                      class="status-change-form m-0"
+                      data-action="submit"
+                      data-product-name="{{ $product->name }}">
                     @csrf
-                    <button type="submit" class="dropdown-item">
+                    <button type="button" class="dropdown-item status-change-btn">
                         <i class="uil uil-shield-check me-2"></i> Отправить на модерацию
                     </button>
                 </form>
@@ -96,10 +100,12 @@
     @elseif($state->primaryAction === \App\Enums\ProductPrimaryAction::Submit)
         <form action="{{ route('account.store.products.submit-moderation', $product) }}"
               method="POST"
-              class="m-0 flex-fill">
+              class="status-change-form m-0 flex-fill"
+              data-action="submit"
+              data-product-name="{{ $product->name }}">
             @csrf
-            <button type="submit"
-                    class="btn btn-sm btn-primary btn-default btn-squared btn-transparent-primary w-100">
+            <button type="button"
+                    class="btn btn-sm btn-primary btn-default btn-squared btn-transparent-primary status-change-btn w-100">
                 <i class="uil uil-shield-check"></i> Отправить на модерацию
             </button>
         </form>

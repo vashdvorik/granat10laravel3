@@ -223,9 +223,12 @@ class ProductController extends Controller
         }
 
         if (request()->ajax()) {
+            $product->refresh();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Товар "'.$product->name.'" опубликован',
+                'fragments' => $this->renderProductCardFragments($product),
             ]);
         }
 
@@ -242,9 +245,12 @@ class ProductController extends Controller
         $productActionService->deactivate($product);
 
         if (request()->ajax()) {
+            $product->refresh();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Товар "'.$product->name.'" снят с публикации',
+                'fragments' => $this->renderProductCardFragments($product),
             ]);
         }
 
@@ -325,11 +331,14 @@ class ProductController extends Controller
         }
 
         if (request()->ajax()) {
+            $product->refresh();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Товар "'.$product->name.'" поднят в списке',
                 'push_at' => $result['pushed_at']->format('d.m.Y в H:i'),
                 'next_available_at' => $result['next_available_at']->toIso8601String(),
+                'fragments' => $this->renderProductCardFragments($product),
             ]);
         }
 
@@ -355,9 +364,50 @@ class ProductController extends Controller
         try {
             $productModerationService->submit($product, Auth::user());
         } catch (ProductModerationException $exception) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'error' => $exception->getMessage(),
+                ], 422);
+            }
+
             return redirect()->back()->with('error', $exception->getMessage());
         }
 
+        if (request()->ajax()) {
+            $product->refresh();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Товар отправлен на модерацию',
+                'fragments' => $this->renderProductCardFragments($product),
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Товар отправлен на модерацию');
+    }
+
+    private function renderProductCardFragments(Product $product): array
+    {
+        $product->loadMissing(['category', 'images', 'seller']);
+        $productCabinetState = $product->cabinet_state;
+
+        return [
+            'card_html' => view('backend.cabinet.store.partials.product-card', [
+                'product' => $product,
+                'productCabinetState' => $productCabinetState,
+            ])->render(),
+            'badge_html' => view('backend.cabinet.store.partials.product-card-badge', [
+                'product' => $product,
+                'productCabinetState' => $productCabinetState,
+            ])->render(),
+            'body_html' => view('backend.cabinet.store.partials.product-card-body', [
+                'product' => $product,
+                'productCabinetState' => $productCabinetState,
+            ])->render(),
+            'menu_html' => view('components.product-moderation-actions', [
+                'product' => $product,
+                'compact' => true,
+            ])->render(),
+        ];
     }
 }

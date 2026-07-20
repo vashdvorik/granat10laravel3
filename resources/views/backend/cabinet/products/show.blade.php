@@ -316,7 +316,7 @@ $(document).ready(function() {
                 <h5 class="mt-2 mb-2 text-danger">${productName}</h5>
                 <p class="text-muted mb-0">Это действие невозможно отменить</p>
             `,
-            icon = 'warning';
+            icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
@@ -357,7 +357,7 @@ $(document).ready(function() {
         } else {
             title = 'Снять с публикации товар?';
             text = `Товар "${productName}" будет снят с публикации и скрыт от покупателей`;
-            icon: 'warning',
+            icon = 'warning';
             confirmText = '<i class="uil uil-pause me-1"></i> Да, снять с публикации';
         }
         

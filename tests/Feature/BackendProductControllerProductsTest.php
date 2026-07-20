@@ -397,6 +397,7 @@ class BackendProductControllerProductsTest extends TestCase
             ->patch(route('account.store.products.activate', $product));
 
         $response->assertOk()->assertJson(['success' => true]);
+        $this->assertStringContainsString('Виден покупателям', (string) $response->json('fragments.card_html'));
         $this->assertTrue((bool) $product->fresh()->is_active);
     }
 
