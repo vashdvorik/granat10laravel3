@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Jobs\ModerateProductJob;
 use App\Enums\ProductModerationStatus;
+use App\Jobs\ModerateProductJob;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
 
@@ -11,8 +11,7 @@ class ProductModerationRetryService
 {
     public function __construct(
         private readonly ProductLimitService $productLimitService
-    ) {
-    }
+    ) {}
 
     public function retry(Product $product): bool
     {
@@ -32,18 +31,34 @@ class ProductModerationRetryService
             'moderation_source' => 'ai',
         ])->save();
 
-        ProductModerationRun::query()
+        $provider = (string) config('moderation.provider');
+        $model = (string) config("moderation.{$provider}.model", $provider === 'fake' ? 'fake' : '');
+        $baseUrl = (string) config("moderation.{$provider}.base_url", '');
+        $endpointPath = in_array($provider, ['openai_compatible', 'deepseek'], true)
+            ? (string) config("moderation.{$provider}.chat_completions_path", '/chat/completions')
+            : null;
+        $latestRun = ProductModerationRun::query()
             ->where('product_id', $product->id)
             ->where('content_version', $product->moderation_version)
-            ->where('status', 'failed')
-            ->update([
+            ->where('provider', $provider)
+            ->latest('attempt_number')
+            ->first();
+        if ($latestRun !== null) {
+            ProductModerationRun::query()->create([
+                'product_id' => $product->id,
+                'content_version' => $product->moderation_version,
+                'retry_of_id' => $latestRun->id,
+                'attempt_number' => ((int) $latestRun->attempt_number) + 1,
+                'configuration_version' => hash('sha256', "text|{$provider}|{$model}"),
+                'trigger' => 'manual_retry',
+                'provider' => $provider,
+                'model' => $model,
+                'prompt_version' => $latestRun->prompt_version,
                 'status' => 'retrying',
-                'error_code' => null,
-                'error_message' => null,
-                'finished_at' => null,
+                'request_fingerprint' => $latestRun->request_fingerprint,
             ]);
-
-        ModerateProductJob::dispatch($product->id, $product->moderation_version)
+        }
+        ModerateProductJob::dispatch($product->id, $product->moderation_version, $provider, $model, $baseUrl, $endpointPath, (string) config('moderation.mode'), null, true)
             ->afterCommit();
 
         return true;

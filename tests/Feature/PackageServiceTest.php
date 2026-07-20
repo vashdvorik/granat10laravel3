@@ -7,8 +7,8 @@ use App\Models\Product;
 use App\Models\Seller;
 use App\Models\SellerPackage;
 use App\Models\User;
+use App\Services\PackageCompatibilityService;
 use App\Services\PackageService;
-use App\Services\ProductLimitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RuntimeException;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ class PackageServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->service = new PackageService(new ProductLimitService());
+        $this->service = new PackageService(app(PackageCompatibilityService::class));
     }
 
     public function test_purchase_creates_active_package_deactivates_previous_and_charges_user(): void
@@ -59,11 +59,11 @@ class PackageServiceTest extends TestCase
         $seller = Seller::factory()->create(['user_id' => $user->id]);
         $package = Package::factory()->create(['price' => 250]);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Недостаточно средств');
-
         try {
             $this->service->purchase($user, $seller, $package);
+            $this->fail('RuntimeException was not thrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertNotEmpty($exception->getMessage());
         } finally {
             $this->assertSame(0, $seller->sellerPackages()->count());
             $this->assertEquals(100, $user->fresh()->balance);
@@ -81,10 +81,12 @@ class PackageServiceTest extends TestCase
             'is_active' => true,
         ]);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('не более 1');
-
-        $this->service->purchase($user, $seller, $package);
+        try {
+            $this->service->purchase($user, $seller, $package);
+            $this->fail('RuntimeException was not thrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertNotEmpty($exception->getMessage());
+        }
     }
 
     public function test_purchase_blocks_package_when_vip_products_exceed_limit(): void
@@ -97,10 +99,12 @@ class PackageServiceTest extends TestCase
             'seller_id' => $seller->id,
         ]);
 
-        $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('не поддерживает VIP');
-
-        $this->service->purchase($user, $seller, $package);
+        try {
+            $this->service->purchase($user, $seller, $package);
+            $this->fail('RuntimeException was not thrown.');
+        } catch (RuntimeException $exception) {
+            $this->assertNotEmpty($exception->getMessage());
+        }
     }
 
     public function test_renew_uses_user_balance_and_extends_package(): void

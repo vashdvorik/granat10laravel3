@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ProductModerationStatus;
 use App\Services\CatalogCacheService;
+use App\Services\ProductVisibilityResolver;
 use App\Services\ProductViewStateFactory;
 use App\Services\RegionalContext;
 use Illuminate\Database\Eloquent\Builder;
@@ -196,11 +197,7 @@ class Product extends Model
      */
     public function scopeVisible($query)
     {
-        return $query
-            ->where('is_active', true)
-            ->where('moderation_status', ProductModerationStatus::Approved->value)
-            ->whereColumn('moderated_version', 'moderation_version')
-            ->fromActiveSellerPackage();
+        return app(ProductVisibilityResolver::class)->applyPublicVisibility($query);
     }
 
     public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder

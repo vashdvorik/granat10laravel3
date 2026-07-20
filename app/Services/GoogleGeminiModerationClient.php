@@ -45,7 +45,9 @@ class GoogleGeminiModerationClient implements AiModerationClient
 
         $url = "{$baseUrl}/models/{$model}:generateContent";
 
-        $images = $this->imagePreparer->prepare($payload->imagePaths);
+        $images = $this->shouldIncludeImages()
+            ? $this->imagePreparer->prepare($payload->imagePaths)
+            : [];
         $response = $this->send($url, $apiKey, $payload, $images);
 
         if (! $response->successful()) {
@@ -98,7 +100,7 @@ class GoogleGeminiModerationClient implements AiModerationClient
         $lastConnectionException = null;
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
-            $this->requestThrottle->wait();
+            $this->requestThrottle->forScope('text:google')->wait();
 
             try {
                 $response = Http::withHeaders([
@@ -144,6 +146,11 @@ class GoogleGeminiModerationClient implements AiModerationClient
     private function isRetryableStatus(int $status): bool
     {
         return $status === 429 || $status >= 500;
+    }
+
+    private function shouldIncludeImages(): bool
+    {
+        return ! config('moderation.images.enabled', false);
     }
 
     /**

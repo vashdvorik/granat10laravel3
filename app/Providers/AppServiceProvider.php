@@ -8,10 +8,9 @@ use App\Contracts\TelegramBotClient;
 use App\Models\Category;
 use App\Services\CatalogCacheService;
 use App\Services\CustomerOrderListService;
-use App\Services\FakeAiModerationClient;
-use App\Services\GoogleGeminiImageModerationClient;
-use App\Services\GoogleGeminiModerationClient;
-use App\Services\OpenAiCompatibleModerationClient;
+use App\Services\DesignManager;
+use App\Services\ModerationClientResolver;
+use App\Services\ModerationSecretStore;
 use App\Services\RegionalContext;
 use App\Services\RegionalUrlService;
 use App\Services\SeoService;
@@ -30,21 +29,14 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(TelegramBotClient::class, TelegramHttpBotClient::class);
+        $this->app->scoped(DesignManager::class);
         $this->app->scoped(RegionalContext::class);
         $this->app->scoped(RegionalUrlService::class);
         $this->app->bind(AiModerationClient::class, function () {
-            return match (config('moderation.provider')) {
-                'fake' => app(FakeAiModerationClient::class),
-                'google' => app(GoogleGeminiModerationClient::class),
-                'openai_compatible' => app(OpenAiCompatibleModerationClient::class),
-                default => throw new \RuntimeException('Unsupported AI moderation provider.'),
-            };
+            return app(ModerationClientResolver::class)->text((string) config('moderation.provider'));
         });
         $this->app->bind(ProductImageModerationClient::class, function () {
-            return match (config('moderation.images.provider')) {
-                'google' => app(GoogleGeminiImageModerationClient::class),
-                default => throw new \RuntimeException('Unsupported image moderation provider.'),
-            };
+            return app(ModerationClientResolver::class)->images((string) config('moderation.images.provider'));
         });
     }
 
@@ -54,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+
+        app(ModerationSecretStore::class)->applyToConfig();
 
         $this->composeMenuCategories();
         $this->composeBackendUser();

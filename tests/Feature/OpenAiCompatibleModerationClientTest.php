@@ -104,6 +104,33 @@ class OpenAiCompatibleModerationClientTest extends TestCase
         Http::assertSent(fn (Request $request): bool => is_string(data_get($request->data(), 'messages.1.content')));
     }
 
+    public function test_client_omits_images_when_separate_image_moderation_is_enabled(): void
+    {
+        $this->configureClient();
+        config()->set('moderation.openai_compatible.vision_enabled', true);
+        config()->set('moderation.images.enabled', true);
+        Storage::fake('public');
+        Storage::disk('public')->put('products/test.png', base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII='
+        ));
+        Http::fake(['*' => Http::response([
+            'choices' => [[
+                'message' => ['content' => json_encode([
+                    'decision' => 'allow',
+                    'risk_score' => 0,
+                    'violations' => [],
+                    'seller_message' => null,
+                ])],
+            ]],
+        ])]);
+
+        $result = app(OpenAiCompatibleModerationClient::class)
+            ->moderate($this->payload(['products/test.png']));
+
+        $this->assertFalse($result->imagesAnalyzed);
+        Http::assertSent(fn (Request $request): bool => is_string(data_get($request->data(), 'messages.1.content')));
+    }
+
     public function test_client_includes_api_error_body_in_exception_message(): void
     {
         $this->configureClient();

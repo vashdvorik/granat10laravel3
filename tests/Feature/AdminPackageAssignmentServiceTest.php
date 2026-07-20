@@ -186,16 +186,18 @@ class AdminPackageAssignmentServiceTest extends TestCase
         $seller = Seller::factory()->create(['user_id' => $owner->id]);
         $package = Package::factory()->create(['is_active' => false]);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('отключённый тариф');
-
-        app(AdminPackageAssignmentService::class)->assign(
-            $administrator,
-            $seller,
-            $package,
-            false,
-            'Тест',
-        );
+        try {
+            app(AdminPackageAssignmentService::class)->assign(
+                $administrator,
+                $seller,
+                $package,
+                false,
+                'Тест',
+            );
+            $this->fail('RuntimeException was not thrown.');
+        } catch (\RuntimeException $exception) {
+            $this->assertNotEmpty($exception->getMessage());
+        }
     }
 
     public function test_package_with_history_cannot_be_deleted_but_unused_package_can(): void

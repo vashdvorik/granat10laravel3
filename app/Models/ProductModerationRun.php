@@ -13,6 +13,9 @@ class ProductModerationRun extends Model
     protected $fillable = [
         'product_id',
         'content_version',
+        'retry_of_id',
+        'attempt_number',
+        'configuration_version',
         'trigger',
         'provider',
         'model',
@@ -55,5 +58,10 @@ class ProductModerationRun extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function retryOf(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'retry_of_id');
     }
 }

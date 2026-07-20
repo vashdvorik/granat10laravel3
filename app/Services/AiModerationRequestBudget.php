@@ -7,9 +7,9 @@ use Illuminate\Support\Facades\Cache;
 
 class AiModerationRequestBudget
 {
-    public function consume(): void
+    public function consume(?string $scope = null): void
     {
-        $provider = (string) config('moderation.provider', 'unknown');
+        $provider = $scope ?? 'text:'.(string) config('moderation.provider', 'unknown');
         $hourlyLimit = max(0, (int) config('moderation.budget.hourly_requests', 60));
         $dailyLimit = max(0, (int) config('moderation.budget.daily_requests', 500));
 
@@ -37,9 +37,9 @@ class AiModerationRequestBudget
     /**
      * @return array{hourly_used: int, hourly_limit: int, daily_used: int, daily_limit: int}
      */
-    public function usage(): array
+    public function usage(?string $scope = null): array
     {
-        $provider = (string) config('moderation.provider', 'unknown');
+        $provider = $scope ?? 'text:'.(string) config('moderation.provider', 'unknown');
 
         return [
             'hourly_used' => (int) Cache::get(

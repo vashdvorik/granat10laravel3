@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\PackageCompatibility;
 use App\Models\Package;
 use App\Models\Seller;
 use App\Models\SellerPackage;
@@ -12,7 +13,7 @@ use RuntimeException;
 
 class PackageService
 {
-    public function __construct(private readonly ProductLimitService $productLimitService) {}
+    public function __construct(private readonly PackageCompatibilityService $packageCompatibilityService) {}
 
     public function purchase(User $user, Seller $seller, Package $package): SellerPackage
     {
@@ -59,11 +60,11 @@ class PackageService
         $sellerPackage->loadMissing(['seller.user', 'package']);
 
         return match (true) {
-            ! $autoRenewEnabled => 'Р°РІС‚РѕРїСЂРѕРґР»РµРЅРёРµ РЅРµ РІРєР»СЋС‡РµРЅРѕ РІ РєРѕРјР°РЅРґРµ',
-            ! $sellerPackage->seller->auto_renew => 'РїСЂРѕРґР°РІРµС† РѕС‚РєР»СЋС‡РёР» Р°РІС‚РѕРїСЂРѕРґР»РµРЅРёРµ',
-            ! $sellerPackage->seller->user => 'Сѓ РїСЂРѕРґР°РІС†Р° РЅРµС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ',
-            $sellerPackage->seller->user->balance < $sellerPackage->package->price => "РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃСЂРµРґСЃС‚РІ (Р±Р°Р»Р°РЅСЃ: {$sellerPackage->seller->user->balance} СЂСѓР±)",
-            default => 'РЅРµРёР·РІРµСЃС‚РЅР°СЏ РїСЂРёС‡РёРЅР°',
+            ! $autoRenewEnabled => 'автопродление не включено в команде',
+            ! $sellerPackage->seller->auto_renew => 'продавец отключил автопродление',
+            ! $sellerPackage->seller->user => 'у продавца нет пользователя',
+            $sellerPackage->seller->user->balance < $sellerPackage->package->price => "недостаточно средств (баланс: {$sellerPackage->seller->user->balance} руб)",
+            default => 'неизвестная причина',
         };
     }
 
@@ -79,11 +80,9 @@ class PackageService
             $lockedPackage = Package::query()->lockForUpdate()->findOrFail($package->id);
 
             $this->ensurePackageIsActive($lockedPackage);
-            $this->ensureSellerFitsPackage($lockedSeller, $lockedPackage);
 
-            if ($chargeBalance) {
-                $this->ensureEnoughBalance($lockedUser, $lockedPackage);
-            }
+            $compatibility = $this->packageCompatibilityService->make($lockedUser, $lockedSeller, $lockedPackage);
+            $this->ensurePurchaseConditions($lockedPackage, $compatibility, $lockedUser, $chargeBalance);
 
             $lockedSeller->sellerPackages()
                 ->where('is_active', true)
@@ -143,39 +142,42 @@ class PackageService
     private function ensurePackageIsActive(Package $package): void
     {
         if (! $package->is_active) {
-            throw new RuntimeException('РќРµР»СЊР·СЏ Р°РєС‚РёРІРёСЂРѕРІР°С‚СЊ РѕС‚РєР»СЋС‡С‘РЅРЅС‹Р№ С‚Р°СЂРёС„');
+            throw new RuntimeException('Нельзя активировать отключённый тариф');
+        }
+    }
+
+    private function ensurePurchaseConditions(
+        Package $package,
+        PackageCompatibility $compatibility,
+        User $user,
+        bool $chargeBalance
+    ): void {
+        if ($chargeBalance && ! $compatibility->hasEnoughBalance) {
+            $this->ensureEnoughBalance($user, $package);
+        }
+
+        if (! $compatibility->activeProductsFit) {
+            $excess = $compatibility->requiredActiveDeactivations;
+
+            throw new RuntimeException("Тариф \"{$package->name}\" позволяет публиковать не более {$compatibility->activeProductsLimit} товаров. У вас сейчас активно {$compatibility->activeProductsCount} товаров. Пожалуйста, отключите {$excess} " . $this->productsWord($excess) . ', чтобы активировать этот пакет.');
+        }
+
+        if (! $compatibility->vipProductsFit) {
+            $maxVipProducts = $compatibility->vipProductsLimit ?? PHP_INT_MAX;
+            $excessVip = $compatibility->requiredVipDeactivations;
+
+            if ($maxVipProducts === 0) {
+                throw new RuntimeException("Тариф \"{$package->name}\" не поддерживает VIP товары. У вас сейчас {$compatibility->vipProductsCount} VIP " . $this->productsWord($compatibility->vipProductsCount) . '. Пожалуйста, снимите VIP-статус со всех товаров, чтобы активировать этот пакет.');
+            }
+
+            throw new RuntimeException("Тариф \"{$package->name}\" позволяет иметь не более {$maxVipProducts} VIP " . $this->productsWord($maxVipProducts) . ". У вас сейчас {$compatibility->vipProductsCount} VIP " . $this->productsWord($compatibility->vipProductsCount) . ". Пожалуйста, снимите VIP-статус с {$excessVip} " . $this->productsWord($excessVip) . ', чтобы активировать этот пакет.');
         }
     }
 
     private function ensureEnoughBalance(User $user, Package $package): void
     {
         if ($package->price > 0 && $user->balance < $package->price) {
-            throw new RuntimeException('РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃСЂРµРґСЃС‚РІ РЅР° Р±Р°Р»Р°РЅСЃРµ');
-        }
-    }
-
-    private function ensureSellerFitsPackage(Seller $seller, Package $package): void
-    {
-        $activeProductsCount = $this->productLimitService->activeProductsCount($seller);
-        $maxProducts = $package->active_products_limit ?? PHP_INT_MAX;
-
-        if ($maxProducts !== PHP_INT_MAX && $activeProductsCount > $maxProducts) {
-            $excess = $activeProductsCount - $maxProducts;
-
-            throw new RuntimeException("РўР°СЂРёС„ \"{$package->name}\" РїРѕР·РІРѕР»СЏРµС‚ РѕРїСѓР±Р»РёРєРѕРІР°С‚СЊ РЅРµ Р±РѕР»РµРµ {$maxProducts} С‚РѕРІР°СЂРѕРІ. РЈ РІР°СЃ СЃРµР№С‡Р°СЃ Р°РєС‚РёРІРЅРѕ {$activeProductsCount} С‚РѕРІР°СЂРѕРІ. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РѕС‚РєР»СЋС‡РёС‚Рµ {$excess} ".$this->productsWord($excess).', С‡С‚РѕР±С‹ Р°РєС‚РёРІРёСЂРѕРІР°С‚СЊ СЌС‚РѕС‚ РїР°РєРµС‚.');
-        }
-
-        $vipProductsCount = $this->productLimitService->vipProductsCount($seller);
-        $maxVipProducts = $package->vip_products_limit ?? PHP_INT_MAX;
-
-        if ($maxVipProducts !== PHP_INT_MAX && $vipProductsCount > $maxVipProducts) {
-            $excessVip = $vipProductsCount - $maxVipProducts;
-
-            if ($maxVipProducts === 0) {
-                throw new RuntimeException("РўР°СЂРёС„ \"{$package->name}\" РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚ VIP С‚РѕРІР°СЂС‹. РЈ РІР°СЃ СЃРµР№С‡Р°СЃ {$vipProductsCount} VIP ".$this->productsWord($vipProductsCount).'. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СЃРЅРёРјРёС‚Рµ VIP-СЃС‚Р°С‚СѓСЃ СЃРѕ РІСЃРµС… С‚РѕРІР°СЂРѕРІ, С‡С‚РѕР±С‹ Р°РєС‚РёРІРёСЂРѕРІР°С‚СЊ СЌС‚РѕС‚ РїР°РєРµС‚.');
-            }
-
-            throw new RuntimeException("РўР°СЂРёС„ \"{$package->name}\" РїРѕР·РІРѕР»СЏРµС‚ РёРјРµС‚СЊ РЅРµ Р±РѕР»РµРµ {$maxVipProducts} VIP ".$this->productsWord($maxVipProducts).". РЈ РІР°СЃ СЃРµР№С‡Р°СЃ {$vipProductsCount} VIP ".$this->productsWord($vipProductsCount).". РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СЃРЅРёРјРёС‚Рµ VIP-СЃС‚Р°С‚СѓСЃ СЃ {$excessVip} ".$this->productsWord($excessVip).', С‡С‚РѕР±С‹ Р°РєС‚РёРІРёСЂРѕРІР°С‚СЊ СЌС‚РѕС‚ РїР°РєРµС‚.');
+            throw new RuntimeException('Недостаточно средств на балансе');
         }
     }
 
@@ -195,6 +197,6 @@ class PackageService
 
     private function productsWord(int $count): string
     {
-        return $count === 1 ? 'С‚РѕРІР°СЂ' : ($count < 5 ? 'С‚РѕРІР°СЂР°' : 'С‚РѕРІР°СЂРѕРІ');
+        return $count === 1 ? 'товар' : ($count < 5 ? 'товара' : 'товаров');
     }
 }

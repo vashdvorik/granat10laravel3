@@ -106,7 +106,7 @@ class GoogleGeminiImageModerationClient implements ProductImageModerationClient
         array $images,
     ): Response {
         try {
-            $this->requestThrottle->wait();
+            $this->requestThrottle->forScope('image:google')->wait();
 
             return Http::withHeaders(['x-goog-api-key' => $apiKey])
                 ->acceptJson()

@@ -143,3 +143,36 @@ php artisan test tests/Feature/ModerateProductImagesJobTest.php
 php artisan test tests/Feature/ProductImageModerationFlowTest.php
 php artisan test tests/Feature/ProductViewStateTest.php
 ```
+
+## Зашифрованные API-ключи
+
+Ключи, введённые через Filament, сохраняются в `site_settings` с шифрованием Laravel Crypt. Значения ключей не записываются в журнал действий и не возвращаются в форму.
+
+Для однократного переноса существующих ключей из `.env` выполните:
+
+```bash
+php artisan moderation:migrate-secrets
+```
+
+Legacy-переменные остаются fallback на период перехода. Общий legacy-ключ импортируется только для активного провайдера, чтобы не смешивать ключи Gemini, DeepSeek и OpenAI.
+
+В Filament доступны независимые кнопки проверки подключения текста и изображений. Проверка подтверждает доступность endpoint, ключа и модели, не выводя тело ошибки провайдера.
+
+## Локальный OCR и QR-коды
+
+Локальный сканер изображений работает до платного AI-запроса и ищет телефоны, ссылки, мессенджеры и данные QR-кодов. Используются внешние утилиты:
+
+- `tesseract` — распознавание текста;
+- `zbarimg` — чтение QR- и штрихкодов.
+
+Если утилиты не установлены, модерация продолжает работать через выбранный AI-провайдер. Управление выполняется переменными:
+
+```dotenv
+AI_IMAGE_LOCAL_SCAN_ENABLED=true
+AI_IMAGE_LOCAL_SCAN_TIMEOUT=15
+AI_IMAGE_TESSERACT_BINARY=tesseract
+AI_IMAGE_TESSERACT_LANGUAGE=eng
+AI_IMAGE_ZBAR_BINARY=zbarimg
+```
+
+Для распознавания русскоязычного текста после установки языковых данных можно задать `AI_IMAGE_TESSERACT_LANGUAGE=eng+rus`.

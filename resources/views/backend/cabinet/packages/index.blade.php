@@ -145,6 +145,32 @@
                                             Р‘Р°Р»Р°РЅСЃР° РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґР»СЏ РїРѕРґРєР»СЋС‡РµРЅРёСЏ.
                                         </div>
                                     @endif
+                                    @php
+                                        $impactLabels = [];
+
+                                        if ($compatibility->willDisableWebsite) {
+                                            $impactLabels[] = 'Сайт скроется';
+                                        }
+
+                                        if ($compatibility->willDisableSocialLinks) {
+                                            $impactLabels[] = 'Соцсети скроются';
+                                        }
+
+                                        if ($compatibility->willDisableOrders) {
+                                            $impactLabels[] = 'Заказы отключатся';
+                                        }
+                                    @endphp
+
+                                    @if($impactLabels !== [])
+                                        <div class="package-compatibility__impact mb-2">
+                                            <small class="text-muted d-block mb-2">Что изменится</small>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach($impactLabels as $impactLabel)
+                                                    <span class="badge bg-light text-dark border">{{ $impactLabel }}</span>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     <ul class="mb-0 ps-3 small">
                                         <li>
@@ -295,3 +321,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+

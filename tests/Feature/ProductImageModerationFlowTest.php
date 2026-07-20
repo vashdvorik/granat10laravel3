@@ -109,6 +109,45 @@ class ProductImageModerationFlowTest extends TestCase
             'decision' => 'review',
             'status' => 'completed',
         ]);
+
+        $run = ProductModerationRun::query()
+            ->where('product_id', $product->id)
+            ->where('provider', 'image_google')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($run);
+        $this->assertSame(64, strlen((string) $run->request_fingerprint));
+    }
+
+    public function test_shadow_mode_runs_image_pipeline_without_changing_product_state(): void
+    {
+        Queue::fake();
+        config()->set('moderation.mode', 'shadow');
+        config()->set('moderation.images.enabled', true);
+
+        $seller = Seller::factory()->create();
+        $product = Product::factory()->pendingModeration()->create([
+            'seller_id' => $seller->id,
+            'category_id' => Category::factory()->create()->id,
+            'moderation_version' => 3,
+            'is_active' => false,
+            'publication_requested' => true,
+        ]);
+        Image::factory()->create(['product_id' => $product->id]);
+        $this->createLocalAllowRun($product);
+        $originalStatus = $product->moderation_status;
+
+        $this->handleTextModeration($product, new ProductModerationResult(
+            decision: 'allow',
+            riskScore: 0.01,
+            providerRequestId: 'shadow-text-request',
+        ));
+
+        $product->refresh();
+        $this->assertSame($originalStatus, $product->moderation_status);
+        $this->assertFalse((bool) $product->is_active);
+        Queue::assertPushed(ModerateProductImagesJob::class);
     }
 
     private function handleTextModeration(Product $product, ProductModerationResult $result): void

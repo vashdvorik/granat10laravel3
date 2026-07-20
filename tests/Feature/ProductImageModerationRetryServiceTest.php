@@ -46,7 +46,9 @@ class ProductImageModerationRetryServiceTest extends TestCase
 
         $this->assertTrue($retried);
         $this->assertSame(ProductModerationStatus::Processing, $product->refresh()->moderation_status);
-        $this->assertSame('retrying', ProductModerationRun::query()->first()->status);
+        $this->assertSame('completed', ProductModerationRun::query()->oldest('id')->first()->status);
+        $this->assertSame('retrying', ProductModerationRun::query()->latest('id')->first()->status);
+        $this->assertSame(2, ProductModerationRun::query()->count());
         Queue::assertPushed(
             ModerateProductImagesJob::class,
             fn (ModerateProductImagesJob $job): bool => $job->productId === $product->id

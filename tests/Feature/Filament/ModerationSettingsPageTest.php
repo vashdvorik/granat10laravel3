@@ -5,7 +5,9 @@ namespace Tests\Feature\Filament;
 use App\Filament\Pages\ModerationSettings;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\SiteSetting;
 use App\Models\User;
+use App\Services\ModerationSecretStore;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -181,6 +183,93 @@ class ModerationSettingsPageTest extends TestCase
             ->assertSet('data.base_url', 'https://api.deepseek.com')
             ->assertSet('data.image_model', 'gemini-2.5-flash')
             ->assertSet('data.image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+    }
+
+    public function test_administrator_can_switch_image_moderation_to_native_openai(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm([
+                'image_provider' => 'openai_moderation',
+                'image_api_key' => 'openai-test-key',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $contents = file_get_contents($this->environmentPath);
+
+        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=google', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=openai_moderation', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=omni-moderation-latest', $contents);
+        $this->assertStringContainsString('AI_IMAGE_MODERATION_BASE_URL=https://api.openai.com/v1', $contents);
+        $this->assertSame('openai-test-key', app(ModerationSecretStore::class)->get('image.openai_moderation'));
+        $this->assertStringNotContainsString('openai-test-key', $contents);
+        $this->assertNotSame(
+            'openai-test-key',
+            SiteSetting::query()->where('key', 'moderation.secret.image.openai_moderation')->value('value')
+        );
+    }
+
+    public function test_administrator_can_select_deepseek_as_text_provider(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->set('data.provider', 'deepseek')
+            ->assertSet('data.model', 'deepseek-chat')
+            ->assertSet('data.base_url', 'https://api.deepseek.com')
+            ->fillForm(['api_key' => 'deepseek-test-key'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $contents = file_get_contents($this->environmentPath);
+        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=deepseek', $contents);
+        $this->assertStringContainsString('AI_TEXT_DEEPSEEK_MODEL=deepseek-chat', $contents);
+        $this->assertStringContainsString('AI_TEXT_DEEPSEEK_BASE_URL=https://api.deepseek.com', $contents);
+        $this->assertSame('deepseek-test-key', app(ModerationSecretStore::class)->get('text.deepseek'));
+        $this->assertStringNotContainsString('deepseek-test-key', $contents);
+    }
+
+    public function test_google_provider_rejects_deepseek_model(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm([
+                'provider' => 'google',
+                'model' => 'deepseek-chat',
+                'base_url' => 'https://api.deepseek.com',
+            ])
+            ->call('save')
+            ->assertHasFormErrors(['provider']);
+    }
+
+    public function test_provider_specific_image_keys_are_preserved_when_switching_provider(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm([
+                'image_provider' => 'google',
+                'image_api_key' => 'google-image-key',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm([
+                'image_provider' => 'openai_moderation',
+                'image_api_key' => 'openai-image-key',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $store = app(ModerationSecretStore::class);
+        $this->assertSame('google-image-key', $store->get('image.google'));
+        $this->assertSame('openai-image-key', $store->get('image.openai_moderation'));
+        $this->assertStringNotContainsString('google-image-key', file_get_contents($this->environmentPath));
+        $this->assertStringNotContainsString('openai-image-key', file_get_contents($this->environmentPath));
     }
 
     public function test_administrator_cannot_save_private_provider_url(): void

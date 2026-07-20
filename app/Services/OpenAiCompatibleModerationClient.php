@@ -24,13 +24,14 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
 
     public function moderate(ProductModerationPayload $payload): ProductModerationResult
     {
-        $model = (string) config('moderation.openai_compatible.model');
+        $configuration = $this->configurationKey();
+        $model = (string) config("moderation.{$configuration}.model");
 
         if ($model === '') {
             throw new AiModerationProviderException('AI model is not configured.');
         }
 
-        $baseUrl = rtrim((string) config('moderation.openai_compatible.base_url'), '/');
+        $baseUrl = rtrim((string) config("moderation.{$configuration}.base_url"), '/');
 
         try {
             $this->urlValidator->validate($baseUrl);
@@ -42,7 +43,7 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
             );
         }
 
-        $path = '/'.ltrim((string) config('moderation.openai_compatible.chat_completions_path'), '/');
+        $path = '/'.ltrim((string) config("moderation.{$configuration}.chat_completions_path"), '/');
         $images = $this->supportsVision()
             ? $this->imagePreparer->prepare($payload->imagePaths)
             : [];
@@ -89,11 +90,12 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
         $response = null;
 
         for ($attempt = 1; $attempt <= $attempts; $attempt++) {
-            $this->requestThrottle->wait();
+            $configuration = $this->configurationKey();
+            $this->requestThrottle->forScope('text:'.$configuration)->wait();
 
             try {
                 $request = Http::acceptJson()->asJson()->timeout((int) config('moderation.timeout', 60));
-                $apiKey = (string) config('moderation.openai_compatible.api_key');
+                $apiKey = (string) config("moderation.{$configuration}.api_key");
 
                 if ($apiKey !== '') {
                     $request = $request->withToken($apiKey);
@@ -128,6 +130,11 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
         }
 
         return $response;
+    }
+
+    private function configurationKey(): string
+    {
+        return config('moderation.provider') === 'deepseek' ? 'deepseek' : 'openai_compatible';
     }
 
     private function requestBody(ProductModerationPayload $payload, array $images): array
@@ -186,7 +193,8 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
     private function supportsVision(): bool
     {
         return (bool) config('moderation.vision.enabled', true)
-            && (bool) config('moderation.openai_compatible.vision_enabled', false);
+            && (bool) config('moderation.openai_compatible.vision_enabled', false)
+            && ! config('moderation.images.enabled', false);
     }
 
     private function responseContract(): string

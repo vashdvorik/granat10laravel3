@@ -7,6 +7,10 @@ use App\Models\Product;
 
 class ProductStateTransitionService
 {
+    public function __construct(
+        private readonly ProductVisibilityResolver $visibilityResolver
+    ) {}
+
     public function canSubmit(Product $product): bool
     {
         return in_array($product->moderation_status, [
@@ -48,10 +52,7 @@ class ProductStateTransitionService
 
     public function isPublic(Product $product): bool
     {
-        return (bool) $product->is_active
-            && $product->moderation_status === ProductModerationStatus::Approved
-            && $product->moderated_version === $product->moderation_version
-            && $product->seller?->activePackage() !== null;
+        return $this->visibilityResolver->isPublic($product);
     }
 
     public function publicationBlockedReason(Product $product): ?string

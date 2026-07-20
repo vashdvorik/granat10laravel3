@@ -86,7 +86,13 @@ class ProductModerationService
             $this->recordAction($product, $actor, 'submitted', $previousStatus, $newStatus);
 
             if (config('moderation.ai_enabled')) {
-                ModerateProductJob::dispatch($product->id, $product->moderation_version)
+                $provider = (string) config('moderation.provider');
+                $model = (string) config("moderation.{$provider}.model", $provider === 'fake' ? 'fake' : '');
+                $baseUrl = (string) config("moderation.{$provider}.base_url", '');
+                $endpointPath = in_array($provider, ['openai_compatible', 'deepseek'], true)
+                    ? (string) config("moderation.{$provider}.chat_completions_path", '/chat/completions')
+                        : null;
+                ModerateProductJob::dispatch($product->id, $product->moderation_version, $provider, $model, $baseUrl, $endpointPath, (string) config('moderation.mode'))
                     ->afterCommit();
             }
 

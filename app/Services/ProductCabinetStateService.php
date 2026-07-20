@@ -9,28 +9,24 @@ use App\Models\Product;
 class ProductCabinetStateService
 {
     public function __construct(
-        private readonly ProductStateTransitionService $transitions
+        private readonly ProductStateTransitionService $transitions,
+        private readonly ProductVisibilityResolver $visibilityResolver
     ) {}
 
     public function make(Product $product): ProductCabinetState
     {
+        $visibility = $this->visibilityResolver->snapshot($product);
         $product->loadMissing('seller');
 
-        $enabledBySeller = (bool) $product->is_active;
+        $enabledBySeller = $visibility->isActive;
         $publicationRequested = (bool) $product->publication_requested;
-        $moderationActual = $product->moderation_status === ProductModerationStatus::Approved
-            && $product->moderated_version === $product->moderation_version;
-        $hasImages = $this->hasImages($product);
-        $hasActivePackage = $product->seller?->activePackage() !== null;
-        $withinActiveLimit = $this->withinActiveLimit($product);
-        $withinVipLimit = $this->withinVipLimit($product);
+        $moderationActual = $visibility->isModerationCurrent;
+        $hasImages = $visibility->hasImages;
+        $hasActivePackage = $visibility->hasActivePackage;
+        $withinActiveLimit = $visibility->withinActiveLimit;
+        $withinVipLimit = $visibility->withinVipLimit;
         $canBeOrdered = $this->canBeOrdered($product, $hasActivePackage);
-        $visibleToBuyers = $enabledBySeller
-            && $moderationActual
-            && $hasImages
-            && $hasActivePackage
-            && $withinActiveLimit
-            && $withinVipLimit;
+        $visibleToBuyers = $visibility->buyerVisible;
 
         [$status, $label, $description, $color, $hiddenReason, $action] = $this->state(
             product: $product,
@@ -57,14 +53,7 @@ class ProductCabinetStateService
             canBeOrdered: $canBeOrdered,
             visibleToBuyers: $visibleToBuyers,
             hiddenReason: $hiddenReason,
-            secondaryReasons: $this->secondaryReasons(
-                product: $product,
-                moderationActual: $moderationActual,
-                hasImages: $hasImages,
-                hasActivePackage: $hasActivePackage,
-                withinActiveLimit: $withinActiveLimit,
-                withinVipLimit: $withinVipLimit,
-            ),
+            secondaryReasons: $visibility->buyerBlockingReasons,
             primaryAction: $action,
             primaryActionLabel: $this->actionLabel($action),
         );
@@ -135,81 +124,6 @@ class ProductCabinetStateService
         }
 
         return ['hidden_not_enabled', 'Снят с публикации', 'Товар сейчас не показывается покупателям.', 'gray', 'not_enabled_by_seller', 'publish'];
-    }
-
-    private function secondaryReasons(
-        Product $product,
-        bool $moderationActual,
-        bool $hasImages,
-        bool $hasActivePackage,
-        bool $withinActiveLimit,
-        bool $withinVipLimit,
-    ): array {
-        $reasons = [];
-
-        if (! in_array($product->moderation_status, [ProductModerationStatus::Approved], true)) {
-            $reasons[] = 'moderation_not_approved';
-        } elseif (! $moderationActual) {
-            $reasons[] = 'moderation_outdated';
-        }
-
-        if (! $product->is_active) {
-            $reasons[] = 'not_enabled_by_seller';
-        }
-
-        if (! $hasImages) {
-            $reasons[] = 'no_images';
-        }
-
-        if (! $hasActivePackage) {
-            $reasons[] = 'no_active_package';
-        }
-
-        if (! $withinActiveLimit) {
-            $reasons[] = 'active_limit_exceeded';
-        }
-
-        if (! $withinVipLimit) {
-            $reasons[] = 'vip_limit_exceeded';
-        }
-
-        return array_values(array_unique($reasons));
-    }
-
-    private function hasImages(Product $product): bool
-    {
-        return $product->relationLoaded('images')
-            ? $product->images->isNotEmpty()
-            : $product->images()->exists();
-    }
-
-    private function withinActiveLimit(Product $product): bool
-    {
-        if (! $product->is_active || $product->seller === null) {
-            return true;
-        }
-
-        $package = $product->seller->activePackage()?->package;
-        $limit = $package?->active_products_limit;
-
-        return $limit === null
-            || $product->seller->products()->where('is_active', true)->count() <= $limit;
-    }
-
-    private function withinVipLimit(Product $product): bool
-    {
-        if (! $product->is_active || ! $product->is_vip || $product->seller === null) {
-            return true;
-        }
-
-        $package = $product->seller->activePackage()?->package;
-        $limit = $package?->vip_products_limit;
-
-        return $limit === null
-            || $product->seller->products()
-                ->where('is_active', true)
-                ->where('is_vip', true)
-                ->count() <= $limit;
     }
 
     private function canBeOrdered(Product $product, bool $hasActivePackage): bool

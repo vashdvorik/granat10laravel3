@@ -7,13 +7,24 @@ use Illuminate\Support\Facades\Cache;
 
 class GeminiRequestThrottle
 {
+    private ?string $scope = null;
+
     public function __construct(
         private readonly ?AiModerationRequestBudget $requestBudget = null,
     ) {}
 
+    public function forScope(string $scope): self
+    {
+        $this->scope = $scope;
+
+        return $this;
+    }
+
     public function wait(): void
     {
-        ($this->requestBudget ?? app(AiModerationRequestBudget::class))->consume();
+        $scope = $this->scope;
+        $this->scope = null;
+        ($this->requestBudget ?? app(AiModerationRequestBudget::class))->consume($scope);
 
         $requestsPerMinute = (int) (
             config('moderation.google.requests_per_minute')
@@ -29,11 +40,13 @@ class GeminiRequestThrottle
                 config('moderation.google.rate_limit_safety_seconds')
                 ?? config('moderation.http.rate_limit_safety_seconds', 1)
             );
-        $lock = Cache::lock('moderation:gemini:rate-limit-lock', 120);
+        $lockScope = str_replace([':', '/'], '-', $scope ?? 'shared');
+        $lock = Cache::lock("moderation:{$lockScope}:rate-limit-lock", 120);
 
         try {
-            $lock->block(120, function () use ($intervalSeconds): void {
-                $lastRequestAt = (float) Cache::get('moderation:gemini:last-request-at', 0);
+            $lock->block(120, function () use ($intervalSeconds, $lockScope): void {
+                $lastRequestKey = "moderation:{$lockScope}:last-request-at";
+                $lastRequestAt = (float) Cache::get($lastRequestKey, 0);
                 $waitMicroseconds = (int) max(
                     0,
                     (($lastRequestAt + $intervalSeconds) - microtime(true)) * 1_000_000
@@ -43,7 +56,7 @@ class GeminiRequestThrottle
                     usleep($waitMicroseconds);
                 }
 
-                Cache::put('moderation:gemini:last-request-at', microtime(true), 300);
+                Cache::put($lastRequestKey, microtime(true), 300);
             });
         } catch (LockTimeoutException) {
             sleep((int) ceil($intervalSeconds));

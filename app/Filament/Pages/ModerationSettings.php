@@ -2,16 +2,17 @@
 
 namespace App\Filament\Pages;
 
+use App\Data\ModerationSettingsSnapshot;
 use App\Services\AiModerationRequestBudget;
 use App\Services\AiProviderUrlValidator;
-use App\Services\EnvironmentSettingsService;
 use App\Services\ModerationOperationsStatus;
+use App\Services\ModerationSettingsSnapshotFactory;
+use App\Services\ModerationSettingsWriter;
 use Filament\Forms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 
 class ModerationSettings extends Page implements HasForms
@@ -43,47 +44,9 @@ class ModerationSettings extends Page implements HasForms
         return Gate::allows('access-admin');
     }
 
-    public function mount(EnvironmentSettingsService $settings): void
+    public function mount(ModerationSettingsSnapshotFactory $factory): void
     {
-        $values = $settings->values();
-        $this->apiKeyConfigured = $settings->hasValue('AI_MODERATION_API_KEY')
-            || $settings->hasValue('AI_IMAGE_MODERATION_API_KEY')
-            || $settings->hasValue('GEMINI_API_KEY');
-        $this->budgetUsage = app(AiModerationRequestBudget::class)->usage();
-        $this->operationsStatus = app(ModerationOperationsStatus::class)->current();
-
-        $provider = $values['PRODUCT_MODERATION_AI_PROVIDER'] ?: 'google';
-        $legacyGoogle = $provider === 'google';
-
-        $this->form->fill([
-            'queue_connection' => $values['QUEUE_CONNECTION'] ?: 'database',
-            'ai_enabled' => filter_var($values['PRODUCT_MODERATION_AI_ENABLED'], FILTER_VALIDATE_BOOL),
-            'provider' => $provider === 'fake' ? 'google' : $provider,
-            'mode' => $values['PRODUCT_MODERATION_AI_MODE'] ?: 'shadow',
-            'queue' => $values['PRODUCT_MODERATION_QUEUE'] ?: 'moderation',
-            'timeout' => (int) ($values['PRODUCT_MODERATION_TIMEOUT'] ?: 60),
-            'max_attempts' => (int) ($values['PRODUCT_MODERATION_MAX_ATTEMPTS'] ?: 3),
-            'max_risk' => round((float) ($values['PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK'] ?: 0.10) * 100, 2),
-            'excluded_categories' => $values['PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES'] ?? '',
-            'model' => $values['AI_MODERATION_MODEL']
-                ?: ($legacyGoogle ? ($values['GEMINI_MODEL'] ?: 'gemini-3.5-flash') : ''),
-            'base_url' => $values['AI_MODERATION_BASE_URL']
-                ?: ($legacyGoogle ? ($values['GEMINI_BASE_URL'] ?: 'https://generativelanguage.googleapis.com/v1beta') : 'https://api.openai.com/v1'),
-            'chat_completions_path' => $values['AI_MODERATION_CHAT_COMPLETIONS_PATH'] ?: '/chat/completions',
-            'max_output_tokens' => (int) ($values['AI_MODERATION_MAX_OUTPUT_TOKENS'] ?: $values['GEMINI_MAX_OUTPUT_TOKENS'] ?: 1200),
-            'retry_times' => (int) ($values['AI_MODERATION_RETRY_TIMES'] ?? $values['GEMINI_RETRY_TIMES'] ?? 0),
-            'retry_sleep_ms' => (int) ($values['AI_MODERATION_RETRY_SLEEP_MS'] ?: $values['GEMINI_RETRY_SLEEP_MS'] ?: 500),
-            'requests_per_minute' => (int) ($values['AI_MODERATION_REQUESTS_PER_MINUTE'] ?: $values['GEMINI_REQUESTS_PER_MINUTE'] ?: 5),
-            'rate_limit_safety_seconds' => (int) ($values['AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS'] ?: $values['GEMINI_RATE_LIMIT_SAFETY_SECONDS'] ?: 1),
-            'hourly_request_limit' => (int) ($values['AI_MODERATION_HOURLY_REQUEST_LIMIT'] ?: 60),
-            'daily_request_limit' => (int) ($values['AI_MODERATION_DAILY_REQUEST_LIMIT'] ?: 500),
-            'image_moderation_enabled' => filter_var($values['AI_IMAGE_MODERATION_ENABLED'], FILTER_VALIDATE_BOOL),
-            'image_queue' => $values['AI_IMAGE_MODERATION_QUEUE'] ?: ($values['PRODUCT_MODERATION_QUEUE'] ?: 'moderation'),
-            'image_timeout' => (int) ($values['AI_IMAGE_MODERATION_TIMEOUT'] ?: $values['PRODUCT_MODERATION_TIMEOUT'] ?: 60),
-            'image_max_attempts' => (int) ($values['AI_IMAGE_MODERATION_MAX_ATTEMPTS'] ?: $values['PRODUCT_MODERATION_MAX_ATTEMPTS'] ?: 3),
-            'image_model' => $values['AI_IMAGE_MODERATION_MODEL'] ?: 'gemini-2.5-flash',
-            'image_base_url' => $values['AI_IMAGE_MODERATION_BASE_URL'] ?: 'https://generativelanguage.googleapis.com/v1beta',
-        ]);
+        $this->applySnapshot($factory->make());
     }
 
     public function form(Form $form): Form
@@ -135,9 +98,23 @@ class ModerationSettings extends Page implements HasForms
                             ->label('Протокол API')
                             ->options([
                                 'google' => 'Google Gemini / Gemma',
+                                'deepseek' => 'DeepSeek',
                                 'openai_compatible' => 'OpenAI-compatible API',
                             ])
                             ->live()
+                            ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
+                                if ($state === 'deepseek') {
+                                    $set('model', 'deepseek-chat');
+                                    $set('base_url', 'https://api.deepseek.com');
+                                    $set('chat_completions_path', '/chat/completions');
+                                }
+
+                                if ($state === 'google') {
+                                    $set('model', 'gemini-3.5-flash');
+                                    $set('base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                                    $set('chat_completions_path', '/chat/completions');
+                                }
+                            })
                             ->required()
                             ->helperText('Выбирается формат запросов API, а не конкретная компания.'),
                         Forms\Components\TextInput::make('api_key')
@@ -194,6 +171,25 @@ class ModerationSettings extends Page implements HasForms
                 Forms\Components\Section::make('Модерация изображений')
                     ->description('Отдельная проверка фото товара. Нужна модель, которая умеет анализировать изображения.')
                     ->schema([
+                        Forms\Components\Select::make('image_provider')
+                            ->label('��������� ��������� �����������')
+                            ->options([
+                                'google' => 'Google Gemini vision',
+                                'openai_moderation' => 'OpenAI Moderation',
+                            ])
+                            ->live()
+                            ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
+                                if ($state === 'openai_moderation') {
+                                    $set('image_model', 'omni-moderation-latest');
+                                    $set('image_base_url', 'https://api.openai.com/v1');
+                                }
+
+                                if ($state === 'google') {
+                                    $set('image_model', 'gemini-2.5-flash');
+                                    $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                                }
+                            })
+                            ->required(),
                         Forms\Components\Toggle::make('image_moderation_enabled')
                             ->label('Включить проверку фото')
                             ->helperText('Если включено, товар не будет автопубликован, пока фото не пройдут проверку.'),
@@ -232,58 +228,42 @@ class ModerationSettings extends Page implements HasForms
             ->statePath('data');
     }
 
-    public function save(EnvironmentSettingsService $settings): void
+    public function save(ModerationSettingsWriter $writer, ModerationSettingsSnapshotFactory $factory): void
     {
         $data = $this->form->getState();
-        $values = [
-            'QUEUE_CONNECTION' => $data['queue_connection'],
-            'PRODUCT_MODERATION_AI_ENABLED' => (bool) $data['ai_enabled'],
-            'PRODUCT_MODERATION_AI_PROVIDER' => $data['provider'],
-            'PRODUCT_MODERATION_AI_MODE' => $data['mode'],
-            'PRODUCT_MODERATION_QUEUE' => $data['queue'],
-            'PRODUCT_MODERATION_TIMEOUT' => $data['timeout'],
-            'PRODUCT_MODERATION_MAX_ATTEMPTS' => $data['max_attempts'],
-            'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK' => round((float) $data['max_risk'] / 100, 4),
-            'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES' => $data['excluded_categories'] ?? '',
-            'AI_MODERATION_MODEL' => $data['model'],
-            'AI_MODERATION_BASE_URL' => $data['base_url'],
-            'AI_MODERATION_CHAT_COMPLETIONS_PATH' => $data['chat_completions_path'] ?? '/chat/completions',
-            'AI_MODERATION_MAX_OUTPUT_TOKENS' => $data['max_output_tokens'],
-            'AI_MODERATION_RETRY_TIMES' => $data['retry_times'],
-            'AI_MODERATION_RETRY_SLEEP_MS' => $data['retry_sleep_ms'],
-            'AI_MODERATION_REQUESTS_PER_MINUTE' => $data['requests_per_minute'],
-            'AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS' => $data['rate_limit_safety_seconds'],
-            'AI_MODERATION_HOURLY_REQUEST_LIMIT' => $data['hourly_request_limit'],
-            'AI_MODERATION_DAILY_REQUEST_LIMIT' => $data['daily_request_limit'],
-            'AI_IMAGE_MODERATION_ENABLED' => (bool) $data['image_moderation_enabled'],
-            'AI_IMAGE_MODERATION_PROVIDER' => 'google',
-            'AI_IMAGE_MODERATION_QUEUE' => $data['image_queue'],
-            'AI_IMAGE_MODERATION_TIMEOUT' => $data['image_timeout'],
-            'AI_IMAGE_MODERATION_MAX_ATTEMPTS' => $data['image_max_attempts'],
-            'AI_IMAGE_MODERATION_MODEL' => $data['image_model'],
-            'AI_IMAGE_MODERATION_BASE_URL' => $data['image_base_url'],
-        ];
-
-        if (filled($data['api_key'] ?? null)) {
-            $values['AI_MODERATION_API_KEY'] = $data['api_key'];
-        }
-
-        if (filled($data['image_api_key'] ?? null)) {
-            $values['AI_IMAGE_MODERATION_API_KEY'] = $data['image_api_key'];
-        }
-
-        $settings->update($values);
-        Artisan::call('config:clear');
-        $this->apiKeyConfigured = $settings->hasValue('AI_MODERATION_API_KEY')
-            || $settings->hasValue('AI_IMAGE_MODERATION_API_KEY')
-            || $settings->hasValue('GEMINI_API_KEY');
-        $this->data['api_key'] = null;
-        $this->data['image_api_key'] = null;
+        $writer->save($data);
+        $this->applySnapshot($factory->make());
 
         Notification::make()
             ->title('Настройки сохранены')
             ->body('Новые параметры применятся к следующим заданиям модерации.')
             ->success()
             ->send();
+
+        activity('moderation_settings')
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'text_provider' => $data['provider'],
+                'image_provider' => $data['image_provider'],
+                'mode' => $data['mode'],
+                'ai_enabled' => (bool) $data['ai_enabled'],
+                'image_enabled' => (bool) $data['image_moderation_enabled'],
+            ])
+            ->log('Изменены настройки AI-модерации');
+    }
+
+    private function applySnapshot(ModerationSettingsSnapshot $snapshot): void
+    {
+        $this->data = $snapshot->data;
+        $this->apiKeyConfigured = $snapshot->apiKeyConfigured;
+        $this->budgetUsage = $snapshot->budgetUsage;
+        $this->operationsStatus = $snapshot->operationsStatus;
+
+        $this->form->fill($snapshot->data);
     }
 }
+
+
+
+
+

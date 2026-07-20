@@ -31,4 +31,15 @@ class ModerationProviderMetadataResolverTest extends TestCase
 
         $this->assertSame('vendor/model', $metadata->model);
     }
+
+    public function test_deepseek_metadata_uses_deepseek_model(): void
+    {
+        config()->set('moderation.provider', 'deepseek');
+        config()->set('moderation.deepseek.model', 'deepseek-chat');
+
+        $metadata = app(ModerationProviderMetadataResolver::class)->resolve();
+
+        $this->assertSame('deepseek', $metadata->provider);
+        $this->assertSame('deepseek-chat', $metadata->model);
+    }
 }

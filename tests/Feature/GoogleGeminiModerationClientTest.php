@@ -206,6 +206,36 @@ class GoogleGeminiModerationClientTest extends TestCase
         ) === 'image/png');
     }
 
+    public function test_client_omits_images_when_separate_image_moderation_is_enabled(): void
+    {
+        config()->set('moderation.images.enabled', true);
+        Storage::fake('public');
+        Storage::disk('public')->put('products/test.png', base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZQmcAAAAASUVORK5CYII='
+        ));
+        Http::fake(['*' => Http::response([
+            'candidates' => [[
+                'content' => ['parts' => [[
+                    'text' => json_encode([
+                        'decision' => 'allow',
+                        'risk_score' => 0,
+                        'violations' => [],
+                        'seller_message' => null,
+                    ]),
+                ]]],
+            ]],
+        ])]);
+
+        $result = app(GoogleGeminiModerationClient::class)
+            ->moderate($this->payload(['products/test.png']));
+
+        $this->assertFalse($result->imagesAnalyzed);
+        Http::assertSent(fn (Request $request): bool => data_get(
+            $request->data(),
+            'contents.0.parts.1.inlineData'
+        ) === null);
+    }
+
     private function payload(array $imagePaths = []): ProductModerationPayload
     {
         return new ProductModerationPayload(

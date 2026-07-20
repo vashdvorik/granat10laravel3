@@ -26,11 +26,11 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Неудачные проверки</div>
-                <div class="font-semibold">{{ $operationsStatus['failed_runs'] ?? 0 }}</div>
+                <div class="font-semibold">{{ $operationsStatus['failed_text_runs'] ?? 0 }}</div>
             </div>
             <div>
                 <div class="text-sm text-gray-500">Зависшие проверки</div>
-                <div class="font-semibold">{{ $operationsStatus['stuck_runs'] ?? 0 }}</div>
+                <div class="font-semibold">{{ $operationsStatus['stuck_text_runs'] ?? 0 }}</div>
             </div>
         </div>
     </x-filament::section>
@@ -43,6 +43,10 @@
                 <div class="font-semibold {{ ($operationsStatus['image_moderation_enabled'] ?? false) ? 'text-success-600' : 'text-gray-500' }}">
                     {{ ($operationsStatus['image_moderation_enabled'] ?? false) ? 'Включена' : 'Выключена' }}
                 </div>
+            </div>
+            <div>
+                <div class="text-sm text-gray-500">Провайдер</div>
+                <div class="font-semibold">{{ $operationsStatus['image_provider'] ?? '—' }}</div>
             </div>
             <div>
                 <div class="text-sm text-gray-500">API-ключ</div>
@@ -74,6 +78,12 @@
 
         <x-filament::button type="submit">
             Сохранить настройки
+        </x-filament::button>
+        <x-filament::button type="button" color="gray" wire:click="testTextConnection">
+            Проверить подключение текста
+        </x-filament::button>
+        <x-filament::button type="button" color="gray" wire:click="testImageConnection">
+            Проверить подключение изображений
         </x-filament::button>
     </form>
 </x-filament-panels::page>

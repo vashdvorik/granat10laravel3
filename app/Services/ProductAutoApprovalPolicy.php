@@ -120,6 +120,7 @@ class ProductAutoApprovalPolicy
         return match (config('moderation.provider')) {
             'google' => true,
             'openai_compatible' => (bool) config('moderation.openai_compatible.vision_enabled', false),
+            'deepseek' => false,
             default => false,
         };
     }

@@ -24,19 +24,31 @@ class ProductImageModerationRetryService
             'moderation_source' => 'ai_image',
         ])->save();
 
-        ProductModerationRun::query()
+        $provider = (string) config('moderation.images.provider', 'google');
+        $model = (string) config("moderation.images.{$provider}.model");
+        $baseUrl = (string) config("moderation.images.{$provider}.base_url");
+        $latestRun = ProductModerationRun::query()
             ->where('product_id', $product->id)
             ->where('content_version', $product->moderation_version)
-            ->where('provider', 'like', 'image_%')
-            ->whereIn('status', ['failed', 'completed'])
-            ->update([
+            ->where('provider', 'image_'.$provider)
+            ->latest('attempt_number')
+            ->first();
+        if ($latestRun !== null) {
+            ProductModerationRun::query()->create([
+                'product_id' => $product->id,
+                'content_version' => $product->moderation_version,
+                'retry_of_id' => $latestRun->id,
+                'attempt_number' => ((int) $latestRun->attempt_number) + 1,
+                'configuration_version' => hash('sha256', "image|{$provider}|{$model}"),
+                'trigger' => 'manual_retry',
+                'provider' => 'image_'.$provider,
+                'model' => $model,
+                'prompt_version' => $latestRun->prompt_version,
                 'status' => 'retrying',
-                'error_code' => null,
-                'error_message' => null,
-                'finished_at' => null,
+                'request_fingerprint' => $latestRun->request_fingerprint,
             ]);
-
-        ModerateProductImagesJob::dispatch($product->id, $product->moderation_version)
+        }
+        ModerateProductImagesJob::dispatch($product->id, $product->moderation_version, $provider, $model, $baseUrl, (string) config('moderation.mode'), null, true)
             ->afterCommit();
 
         return true;

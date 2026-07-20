@@ -15,6 +15,7 @@ class ModerationProviderMetadataResolver
             model: match ($provider) {
                 'google' => (string) config('moderation.google.model'),
                 'openai_compatible' => (string) config('moderation.openai_compatible.model'),
+                'deepseek' => (string) config('moderation.deepseek.model'),
                 'fake' => 'fake',
                 default => 'unknown',
             },
