@@ -7,7 +7,6 @@ use App\Events\OrderStatusChanged;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class OrderManagementService
 {
@@ -21,17 +20,16 @@ class OrderManagementService
             $lockedOrder = Order::query()->lockForUpdate()->findOrFail($order->id);
             $fromStatus = $lockedOrder->status;
 
-            if (! $fromStatus->canTransitionTo($toStatus)) {
-                throw ValidationException::withMessages([
-                    'status' => 'Переход из статуса «'.$fromStatus->label()
-                        .'» в статус «'.$toStatus->label().'» недоступен.',
-                ]);
+            if ($fromStatus === $toStatus) {
+                return $lockedOrder;
             }
 
             $now = now();
             $attributes = [
                 'status' => $toStatus,
                 'status_changed_at' => $now,
+                'completed_at' => null,
+                'cancelled_at' => null,
             ];
 
             if ($toStatus === OrderStatus::Completed) {

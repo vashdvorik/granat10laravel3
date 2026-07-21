@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        @if($sellerCabinetState->hasActivePackage)
+        @if(($showRenewalDetails ?? true) && $sellerCabinetState->hasActivePackage)
             <div class="seller-cabinet-renewal mt-3">
                 <div class="seller-cabinet-renewal__item">
                     <small>Срок тарифа</small>

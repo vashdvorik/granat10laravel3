@@ -355,6 +355,61 @@ class ProductController extends Controller
         );
     }
 
+    public function refreshStatuses(Request $request)
+    {
+        $seller = Auth::user()->seller;
+
+        if (! $seller) {
+            return response()->json([
+                'products' => [],
+            ]);
+        }
+
+        $productIds = collect($request->input('product_ids', []))
+            ->map(fn ($productId) => (int) $productId)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $clientSignatures = collect($request->input('signatures', []))
+            ->mapWithKeys(fn ($signature, $productId) => [(int) $productId => (string) $signature]);
+
+        if ($productIds->isEmpty()) {
+            return response()->json([
+                'products' => [],
+            ]);
+        }
+
+        $products = Product::query()
+            ->with(['category', 'images', 'seller'])
+            ->where('seller_id', $seller->id)
+            ->whereIn('id', $productIds)
+            ->get();
+
+        $changedProducts = [];
+
+        foreach ($products as $product) {
+            $currentSignature = $product->cabinet_state_signature;
+
+            if ($clientSignatures->get($product->id) === $currentSignature) {
+                continue;
+            }
+
+            $changedProducts[] = [
+                'id' => $product->id,
+                'signature' => $currentSignature,
+                'card_html' => view('backend.cabinet.store.partials.product-card', [
+                    'product' => $product,
+                    'productCabinetState' => $product->cabinet_state,
+                ])->render(),
+            ];
+        }
+
+        return response()->json([
+            'products' => $changedProducts,
+        ]);
+    }
+
     public function submitForModeration(
         Product $product,
         ProductModerationService $productModerationService

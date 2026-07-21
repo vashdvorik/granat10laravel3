@@ -177,6 +177,37 @@ class Product extends Model
         return app(\App\Services\ProductCabinetStateService::class)->make($this);
     }
 
+    public function getCabinetStateSignatureAttribute(): string
+    {
+        $state = $this->cabinet_state;
+
+        return sha1(implode('|', [
+            $state->status,
+            $state->label,
+            $state->color,
+            (int) $state->enabledBySeller,
+            (int) $state->publicationRequested,
+            (int) $state->moderationActual,
+            (int) $state->hasImages,
+            (int) $state->hasActivePackage,
+            (int) $state->withinActiveLimit,
+            (int) $state->withinVipLimit,
+            (int) $state->canBeOrdered,
+            (int) $state->visibleToBuyers,
+            (string) ($state->hiddenReason ?? ''),
+            implode(',', $state->secondaryReasons),
+            (string) ($state->primaryAction ?? ''),
+            (string) ($state->primaryActionLabel ?? ''),
+            (string) ($this->moderation_status?->value ?? ''),
+            (string) ($this->moderation_version ?? ''),
+            (string) ($this->moderated_version ?? ''),
+            (int) $this->is_active,
+            (int) $this->publication_requested,
+            (string) ($this->push_at?->timestamp ?? ''),
+            (string) ($this->updated_at?->timestamp ?? ''),
+        ]));
+    }
+
     /**
      * Scope: только товары от продавцов с активными пакетами
      */

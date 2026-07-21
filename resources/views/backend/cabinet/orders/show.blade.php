@@ -11,6 +11,43 @@
         \App\Enums\OrderStatus::Completed => 'done',
         \App\Enums\OrderStatus::Cancelled => 'cancelled',
     };
+    $statusOptions = [
+        [
+            'status' => \App\Enums\OrderStatus::New,
+            'tone' => 'new',
+            'hint' => 'Только что создан',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::Accepted,
+            'tone' => 'active',
+            'hint' => 'Заказ принят в работу',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::Processing,
+            'tone' => 'active',
+            'hint' => 'Сейчас обрабатывается',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::ReadyForPickup,
+            'tone' => 'progress',
+            'hint' => 'Можно выдавать покупателю',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::OutForDelivery,
+            'tone' => 'progress',
+            'hint' => 'Передан в доставку',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::Completed,
+            'tone' => 'done',
+            'hint' => 'Заказ закрыт',
+        ],
+        [
+            'status' => \App\Enums\OrderStatus::Cancelled,
+            'tone' => 'cancelled',
+            'hint' => 'Заказ отменён',
+        ],
+    ];
 @endphp
 
 <div class="contents orders-page order-show-page">
@@ -105,28 +142,36 @@
             </div>
 
             <div class="col-lg-5">
-                @if(!$order->isFinal())
-                    <div class="order-detail-card">
-                        <div class="order-detail-card__header">
-                            <h6>Следующее действие</h6>
-                        </div>
-                        <div class="order-detail-card__body">
-                            <form method="POST" action="{{ route('account.store.orders.status', $order) }}">
-                                @csrf
-                                @method('PATCH')
-                                <label for="status" class="form-label">Новый статус</label>
-                                <select id="status" name="status" class="form-control mb-3" required>
-                                    @foreach($order->status->allowedTransitions() as $nextStatus)
-                                        <option value="{{ $nextStatus->value }}">{{ $nextStatus->label() }}</option>
-                                    @endforeach
-                                </select>
-                                <label for="comment" class="form-label">Комментарий</label>
-                                <textarea id="comment" name="comment" class="form-control mb-3" rows="3" maxlength="1000"></textarea>
-                                <button type="submit" class="btn btn-primary w-100">Сохранить статус</button>
-                            </form>
-                        </div>
+                <div class="order-detail-card">
+                    <div class="order-detail-card__header">
+                        <h6>Изменить статус</h6>
                     </div>
-                @endif
+                    <div class="order-detail-card__body">
+                        <form method="POST" action="{{ route('account.store.orders.status', $order) }}">
+                            @csrf
+                            @method('PATCH')
+                            <div class="order-status-picker-label">
+                                Выберите новый статус
+                            </div>
+                            <div class="order-status-picker">
+                                @foreach($statusOptions as $option)
+                                    <button type="submit"
+                                            name="status"
+                                            value="{{ $option['status']->value }}"
+                                            class="order-status-option order-status-option--{{ $option['tone'] }} {{ $order->status === $option['status'] ? 'is-active' : '' }}">
+                                        <span class="order-status-option__title">{{ $option['status']->label() }}</span>
+                                        <span class="order-status-option__hint">{{ $option['hint'] }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                            <label for="comment" class="form-label">Комментарий</label>
+                            <textarea id="comment" name="comment" class="form-control mb-3" rows="3" maxlength="1000"></textarea>
+                            <div class="order-status-picker__note">
+                                Нажмите на нужный статус. Комментарий добавится вместе с ним.
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
                 <div class="order-detail-card">
                     <div class="order-detail-card__header">

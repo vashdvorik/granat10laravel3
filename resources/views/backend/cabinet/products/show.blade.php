@@ -9,14 +9,6 @@
         @if(!$seller)
             @include('backend.cabinet.store.nostore')
         @else
-        @php
-            $productCabinetState = $product->cabinet_state;
-            $nextStepUrl = match ($productCabinetState->primaryAction) {
-                'add_images', 'remove_vip' => route('account.store.products.edit', $product->id),
-                'choose_package', 'choose_visible_products' => route('account.packages.index'),
-                default => null,
-            };
-        @endphp
         <div class="row">
             <div class="col-lg-12">
                 <div class="shop-breadcrumb">
@@ -38,23 +30,6 @@
 
     <div class="products product-show-page__content mb-30">
         <div class="container-fluid">
-            <div class="product-show-overview">
-                <div class="product-show-overview__main">
-                    <span class="product-show-overview__eyebrow">Карточка товара</span>
-                    <h5>{{ $product->name }}</h5>
-                    <p>{{ $productCabinetState->description }}</p>
-                </div>
-                <div class="product-show-overview__status product-show-overview__status--{{ $productCabinetState->color }}">
-                    <span>{{ $productCabinetState->label }}</span>
-                    @if($productCabinetState->primaryActionLabel)
-                        @if($nextStepUrl)
-                            <a href="{{ $nextStepUrl }}">{{ $productCabinetState->primaryActionLabel }}</a>
-                        @else
-                            <strong>{{ $productCabinetState->primaryActionLabel }}</strong>
-                        @endif
-                    @endif
-                </div>
-            </div>
             <!-- Start: Card -->
             <div class="card h-100 border-0 product-show-card">
                 <div class="product-item d-flex p-sm-50 p-20 product-show-layout">

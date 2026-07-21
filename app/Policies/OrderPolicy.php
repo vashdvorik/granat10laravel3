@@ -24,6 +24,6 @@ class OrderPolicy
 
     public function updateStatus(User $user, Order $order): bool
     {
-        return $this->view($user, $order) && ! $order->isFinal();
+        return $this->view($user, $order);
     }
 }

@@ -45,20 +45,6 @@
                                     <input type="hidden"
                                            name="expected_moderation_version"
                                            value="{{ $product->moderation_version }}">
-                                    @php($productCabinetState = $product->cabinet_state)
-                                    <div class="product-form-guide product-form-guide--status">
-                                        <div class="product-form-guide__main">
-                                            <span class="product-form-guide__eyebrow">Редактирование товара</span>
-                                            <h5>{{ $product->name }}</h5>
-                                            <p>{{ $productCabinetState->description }}</p>
-                                        </div>
-                                        <div class="product-form-status product-form-status--{{ $productCabinetState->color }}">
-                                            <span class="product-form-status__label">{{ $productCabinetState->label }}</span>
-                                            @if($productCabinetState->primaryActionLabel)
-                                                <strong>{{ $productCabinetState->primaryActionLabel }}</strong>
-                                            @endif
-                                        </div>
-                                    </div>
                                     <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
                                     <x-product-moderation-issues :issues="$moderationIssues" />
 
@@ -216,11 +202,6 @@
                                                     @error('lowprice')
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror
-                                                </div>
-
-                                                <div class="alert alert-light border mb-20">
-                                                    Изменение названия, категории, цены, описания,
-                                                    характеристик или фотографий требует новой проверки.
                                                 </div>
 
                                                 {{-- ✅ VIP ТОВАР С ИНФОРМАЦИОННЫМ БЛОКОМ --}}

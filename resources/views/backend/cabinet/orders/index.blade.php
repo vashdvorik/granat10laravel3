@@ -15,28 +15,6 @@
 
 <div class="contents orders-page">
     <div class="container-fluid">
-        <div class="orders-hero">
-            <div class="orders-hero__main">
-                <span class="orders-hero__eyebrow">Заказы магазина</span>
-                <h4>История заказов не зависит от тарифа</h4>
-                <p>Новые заказы могут быть отключены тарифом или настройками магазина, но уже созданные заказы остаются здесь.</p>
-            </div>
-            <div class="orders-hero__stats">
-                <div>
-                    <span>Всего</span>
-                    <strong>{{ $totalOrders }}</strong>
-                </div>
-                <div>
-                    <span>В работе</span>
-                    <strong>{{ $activeOrders }}</strong>
-                </div>
-                <div>
-                    <span>Новые</span>
-                    <strong>{{ (int) ($statusCounts[\App\Enums\OrderStatus::New->value] ?? 0) }}</strong>
-                </div>
-            </div>
-        </div>
-
         <div class="order-intake-card order-intake-card--{{ $orderIntakeStatus['enabled'] ? 'enabled' : 'disabled' }}">
             <div>
                 <span>{{ $orderIntakeStatus['enabled'] ? 'Приём включён' : 'Приём ограничен' }}</span>

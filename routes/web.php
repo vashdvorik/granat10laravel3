@@ -171,6 +171,8 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
             Route::get('create', [App\Http\Controllers\Backend\ProductController::class, 'create'])->name('create');
             Route::post('/', [App\Http\Controllers\Backend\ProductController::class, 'store'])->name('store');
             Route::get('{product}/edit', [App\Http\Controllers\Backend\ProductController::class, 'edit'])->name('edit');
+            Route::get('refresh-statuses', [App\Http\Controllers\Backend\ProductController::class, 'refreshStatuses'])
+                ->name('refresh-statuses');
             Route::get('{product}', [App\Http\Controllers\Backend\ProductController::class, 'show'])->name('show');
             Route::put('{product}', [App\Http\Controllers\Backend\ProductController::class, 'update'])->name('update');
             Route::delete('{product}', [App\Http\Controllers\Backend\ProductController::class, 'destroy'])->name('destroy');

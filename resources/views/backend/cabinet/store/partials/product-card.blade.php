@@ -1,6 +1,8 @@
 @php($productCabinetState = $productCabinetState ?? $product->cabinet_state)
 
-<div class="card product product--grid position-relative seller-product-card" data-product-id="{{ $product->id }}">
+<div class="card product product--grid position-relative seller-product-card"
+     data-product-id="{{ $product->id }}"
+     data-card-signature="{{ $product->cabinet_state_signature }}">
     <div class="position-absolute seller-product-card__menu">
         <x-product-moderation-actions :product="$product" compact />
     </div>

@@ -49,6 +49,7 @@
                             @include('backend.cabinet.partials.seller-state-card', [
                                 'sellerCabinetState' => $sellerCabinetState,
                                 'seller' => $seller,
+                                'showRenewalDetails' => false,
                             ])
                         @endisset
 
@@ -71,80 +72,76 @@
                         @endif
                     <div class="seller-products-layout">
 
-                        {{-- БОКОВАЯ ПАНЕЛЬ С КАТЕГОРИЯМИ --}}
+                        {{-- ФИЛЬТРЫ СВЕРХУ КАРТОЧЕК --}}
                         <aside class="seller-products-filters">
-                            <div class="widget mb-lg-30 mt-25">  {{-- ДОБАВИЛ mt-25 --}}
-                                <div class="widget-header-title px-20 py-15">
-                                    <h6 class="d-flex align-content-center fw-500">
-                                        <img src="{{ asset('cabinet/img/svg/sliders.svg') }}" alt="sliders" class="svg"> Фильтр
-                                    </h6>
+                            <div class="orders-toolbar seller-products-toolbar">
+                                <div class="seller-products-toolbar__info">
+                                    <strong>Фильтр по товарам</strong>
+                                    <span>Показываем товары только этого магазина</span>
                                 </div>
-                                <div class="category_sidebar">
-                                    @if(isset($productStatusFilters))
-                                        <aside class="product-sidebar-widget mb-30">
-                                            <div class="widget_title" data-bs-toggle="collapse" data-bs-target="#productStatusFilters" role="button" aria-expanded="true">
-                                                <h6>Статус товаров</h6>
-                                            </div>
-                                            <div class="card border-0 shadow-none multi-collapse mt-10 collapse show" id="productStatusFilters">
-                                                <div class="product-category">
-                                                    <ul class="category-list">
-                                                        @foreach($productStatusFilters as $statusFilter)
-                                                            @php
-                                                                $statusQuery = request()->except('page');
+                                <div class="orders-status-filter seller-products-status-filter">
+                                    <a href="{{ route('account.store.products.index') }}"
+                                       class="{{ ($currentProductStatus ?? 'all') === 'all' ? 'is-active' : '' }}">
+                                        Все
+                                        <span>{{ $allProductsCount }}</span>
+                                    </a>
+                                    @foreach($productStatusFilters as $statusFilter)
+                                        @if($statusFilter['key'] !== 'all')
+                                            @php
+                                                $statusQuery = request()->except('page');
+                                                $statusQuery['product_status'] = $statusFilter['key'];
+                                            @endphp
+                                            <a href="{{ route('account.store.products.index', $statusQuery) }}"
+                                               class="{{ ($currentProductStatus ?? 'all') === $statusFilter['key'] ? 'is-active' : '' }}">
+                                                {{ $statusFilter['label'] }}
+                                                <span>{{ $statusFilter['count'] }}</span>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
 
-                                                                if($statusFilter['key'] === 'all') {
-                                                                    unset($statusQuery['product_status']);
-                                                                } else {
-                                                                    $statusQuery['product_status'] = $statusFilter['key'];
-                                                                }
-                                                            @endphp
-                                                            <li>
-                                                                <a href="{{ route('account.store.products.index', $statusQuery) }}"
-                                                                   class="d-flex justify-content-between align-items-center category-link {{ ($currentProductStatus ?? 'all') === $statusFilter['key'] ? 'active' : '' }}">
-                                                                    <span class="category-name">{{ $statusFilter['label'] }}</span>
-                                                                    <span class="item-numbers">{{ $statusFilter['count'] }}</span>
-                                                                </a>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </aside>
-                                    @endif
+                            <div class="seller-products-categories-card">
+                                <button
+                                    class="seller-products-categories-card__head seller-products-categories-card__toggle collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#sellerProductsCategoriesCollapse"
+                                    aria-expanded="false"
+                                    aria-controls="sellerProductsCategoriesCollapse"
+                                >
+                                    <span class="seller-products-categories-card__head-text">
+                                        <strong>Категории</strong>
+                                        <span>Быстрый переход по каталогу магазина</span>
+                                    </span>
+                                    <span class="seller-products-categories-card__chevron" aria-hidden="true"></span>
+                                </button>
+                                <div class="seller-products-categories-card__body collapse" id="sellerProductsCategoriesCollapse">
+                                    <div class="product-category">
+                                        <ul class="category-list">
+                                            <li>
+                                                <a href="{{ route('account.store.products.index', request()->except('page', 'category')) }}"
+                                                   class="d-flex justify-content-between align-items-center category-link {{ !request('category') ? 'active' : '' }}">
+                                                    <span class="category-name">
+                                                        <i class="uil uil-apps"></i> Все товары
+                                                    </span>
+                                                    <span class="item-numbers">{{ $seller->products()->count() }}</span>
+                                                </a>
+                                            </li>
 
-                                    <aside class="product-sidebar-widget mb-30">
-                                        <div class="widget_title" data-bs-toggle="collapse" data-bs-target="#multiCollapseExample2" role="button" aria-expanded="true">
-                                            <h6>Категории</h6>
-                                        </div>
-                                        <div class="card border-0 shadow-none multi-collapse mt-10 collapse show" id="multiCollapseExample2">
-                                            <div class="product-category">
-                                                <ul class="category-list">
-                                                    {{-- Показать все товары --}}
-                                                    <li>
-                                                        <a href="{{ route('account.store.products.index', request()->except('page', 'category')) }}"
-                                                           class="d-flex justify-content-between align-items-center category-link {{ !request('category') ? 'active' : '' }}">
-                                                            <span class="category-name">
-                                                                <i class="uil uil-apps"></i> Все товары
-                                                            </span>
-                                                            <span class="item-numbers">{{ $seller->products()->count() }}</span>
-                                                        </a>
-                                                    </li>
-                                                    
-                                                    @if(isset($categoryTree) && $categoryTree->count() > 0)
-                                                        <li class="separator"></li>
-                                                        @include('components.category-filter-tree', [
-                                                            'items' => $categoryTree,
-                                                            'level' => 1,
-                                                            'seller' => $seller,
-                                                            'sellerCategoryIds' => $sellerCategoryIds
-                                                        ])
-                                                    @else
-                                                        <li class="text-muted text-center py-3">Нет товаров</li>
-                                                    @endif
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </aside>
+                                            @if(isset($categoryTree) && $categoryTree->count() > 0)
+                                                <li class="separator"></li>
+                                                @include('components.category-filter-tree', [
+                                                    'items' => $categoryTree,
+                                                    'level' => 1,
+                                                    'seller' => $seller,
+                                                    'sellerCategoryIds' => $sellerCategoryIds
+                                                ])
+                                            @else
+                                                <li class="text-muted text-center py-3">Нет товаров</li>
+                                            @endif
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </aside>
@@ -168,7 +165,9 @@
                                                     };
                                                 @endphp
                                                 <div class="seller-product-card-col">
-                                                    <div class="card product product--grid position-relative seller-product-card">
+                                                    <div class="card product product--grid position-relative seller-product-card"
+                                                         data-product-id="{{ $product->id }}"
+                                                         data-card-signature="{{ $product->cabinet_state_signature }}">
                                                         <div
                                                             class="position-absolute seller-product-card__menu"
                                                         >
@@ -354,117 +353,11 @@
     </div>
 </div>
 
-{{-- ДОПОЛНИТЕЛЬНЫЕ СТИЛИ --}}
-<style>
-/*
-/* Placeholder для товаров без изображения */
-/*
-.no-image-placeholder {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #adb5bd;
-}
-.no-image-placeholder i {
-    font-size: 48px;
-    margin-bottom: 10px;
-}
-
-/* Отступы между кнопками */
-/*
-.product-item__button.gap-2 {
-    gap: 0.5rem;
-}
-.product-category .category-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.product-category .category-list li {
-    margin-bottom: 5px;
-}
-
-.product-category .category-list .separator {
-    border-bottom: 1px solid #e3e6ef;
-    margin: 10px 0;
-}
-
-.product-category .subcategories {
-    list-style: none;
-    padding: 0;
-    margin: 5px 0 0 0;
-}
-
-.product-category .category-link {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 10px;
-    color: #525768;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.product-category .category-link:hover {
-    background: rgba(95, 99, 242, 0.05);
-    color: #5F63F2;
-}
-
-.product-category .category-link.active {
-    background: rgba(95, 99, 242, 0.1);
-    color: #5F63F2;
-    font-weight: 600;
-}
-
-.product-category .category-parent {
-    display: block;
-    padding: 5px 10px;
-    color: #8c90a4;
-    font-weight: 500;
-    font-size: 14px;
-}
-
-.product-category .category-name {
-    font-size: 14px;
-}
-
-.product-category .item-numbers {
-    background: #f4f5f7;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 600;
-    min-width: 25px;
-    text-align: center;
-}
-
-.product-category .category-link.active .item-numbers {
-    background: #5F63F2;
-    color: white;
-}
-
-.product-category .category-link:hover .item-numbers {
-    background: #5F63F2;
-    color: white;
-}
-*/
-</style>
 @endsection
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    if (window.matchMedia('(max-width: 767.98px)').matches) {
-        $('.seller-products-filters .multi-collapse.show').removeClass('show');
-        $('.seller-products-filters .widget_title[aria-expanded="true"]').attr('aria-expanded', 'false');
-    }
-
     // Настройка CSRF токена для всех AJAX запросов
     $.ajaxSetup({
         headers: {
@@ -517,26 +410,104 @@ $(document).ready(function() {
             return;
         }
 
-        let updated = false;
+        if (fragments.card_html) {
+            card.replaceWith(fragments.card_html);
+            return;
+        }
 
         if (fragments.badge_html && card.find('.seller-product-card__badges').length) {
             card.find('.seller-product-card__badges').html(fragments.badge_html);
-            updated = true;
         }
 
         if (fragments.menu_html && card.find('.seller-product-card__menu').length) {
             card.find('.seller-product-card__menu').html(fragments.menu_html);
-            updated = true;
         }
 
         if (fragments.body_html && card.find('.seller-product-card__body').length) {
             card.find('.seller-product-card__body').html(fragments.body_html);
-            updated = true;
+        }
+    }
+
+    const sellerProductStatusRefreshUrl = "{{ route('account.store.products.refresh-statuses') }}";
+    let sellerProductStatusRefreshInFlight = false;
+    let sellerProductStatusRefreshTimer = null;
+
+    function collectSellerProductCards() {
+        return $('.seller-product-card[data-product-id]').map(function() {
+            const card = $(this);
+
+            return {
+                id: Number(card.attr('data-product-id')),
+                signature: card.attr('data-card-signature') || '',
+            };
+        }).get().filter((item) => Number.isFinite(item.id) && item.id > 0);
+    }
+
+    function refreshSellerProductCardStatuses() {
+        const cards = collectSellerProductCards();
+
+        if (!cards.length || sellerProductStatusRefreshInFlight) {
+            return;
         }
 
-        if (!updated && fragments.card_html) {
-            card.replaceWith(fragments.card_html);
+        sellerProductStatusRefreshInFlight = true;
+
+        $.ajax({
+            url: sellerProductStatusRefreshUrl,
+            method: 'GET',
+            dataType: 'json',
+            data: {
+                product_ids: cards.map((item) => item.id),
+                signatures: cards.reduce((carry, item) => {
+                    carry[item.id] = item.signature;
+                    return carry;
+                }, {}),
+            },
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            success: function(response) {
+                if (!response || !Array.isArray(response.products)) {
+                    return;
+                }
+
+                response.products.forEach((item) => {
+                    const card = $(`.seller-product-card[data-product-id="${item.id}"]`);
+
+                    if (!card.length || !item.card_html) {
+                        return;
+                    }
+
+                    card.replaceWith(item.card_html);
+                });
+            },
+            complete: function() {
+                sellerProductStatusRefreshInFlight = false;
+            }
+        });
+    }
+
+    function startSellerProductStatusRefresh() {
+        refreshSellerProductCardStatuses();
+
+        if (sellerProductStatusRefreshTimer) {
+            clearInterval(sellerProductStatusRefreshTimer);
         }
+
+        sellerProductStatusRefreshTimer = setInterval(refreshSellerProductCardStatuses, 25000);
+    }
+
+    if ($('.seller-product-card[data-product-id]').length) {
+        startSellerProductStatusRefresh();
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                refreshSellerProductCardStatuses();
+            }
+        });
+
+        window.addEventListener('focus', refreshSellerProductCardStatuses);
     }
 
     $(document).on('click', '.status-change-btn', function(e) {
