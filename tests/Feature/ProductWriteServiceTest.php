@@ -369,6 +369,47 @@ class ProductWriteServiceTest extends TestCase
         $this->assertSame(2, $updated->moderated_version);
     }
 
+    public function test_price_and_discount_changes_do_not_invalidate_moderation(): void
+    {
+        $seller = Seller::factory()->create();
+        $category = Category::factory()->create();
+        $this->assignActivePackage($seller);
+        $product = Product::factory()->create([
+            'seller_id' => $seller->id,
+            'category_id' => $category->id,
+            'name' => 'Approved Product',
+            'price' => 1000,
+            'lowprice' => 900,
+            'is_active' => true,
+            'publication_requested' => true,
+            'moderation_status' => ProductModerationStatus::Approved,
+            'moderation_version' => 3,
+            'moderated_version' => 3,
+        ]);
+
+        $updated = $this->service->update($product, [
+            'name' => $product->name,
+            'price' => 1200,
+            'lowprice' => 1000,
+            'category_id' => $product->category_id,
+            'desc' => $product->desc,
+            'features1' => $product->features1,
+            'features2' => $product->features2,
+            'features3' => $product->features3,
+            'features4' => $product->features4,
+            'is_vip' => $product->is_vip,
+            'can_order' => $product->can_order,
+            'delivery_enabled' => $product->delivery_enabled,
+            'save_action' => ProductSaveAction::Save->value,
+            'expected_moderation_version' => 3,
+        ]);
+
+        $this->assertSame(3, $updated->moderation_version);
+        $this->assertSame(ProductModerationStatus::Approved, $updated->moderation_status);
+        $this->assertTrue((bool) $updated->is_active);
+        $this->assertTrue((bool) $updated->publication_requested);
+    }
+
     public function test_replacing_photo_increments_version_and_hides_old_image_issue(): void
     {
         $seller = Seller::factory()->create();

@@ -12,6 +12,9 @@
 
 <div class="card mb-25 seller-cabinet-state">
     <div class="card-body">
+        @php
+            $showPrimaryAction = $showPrimaryAction ?? true;
+        @endphp
         <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
             <div>
                 <span class="badge badge-round badge-{{ $sellerCabinetState->alertType }} mb-2">
@@ -20,11 +23,11 @@
                 <p class="mb-0 text-muted">{{ $sellerCabinetState->description }}</p>
             </div>
 
-            @if($stateActionUrl && $sellerCabinetState->primaryActionLabel)
+            @if($showPrimaryAction && $stateActionUrl && $sellerCabinetState->primaryActionLabel)
                 <a href="{{ $stateActionUrl }}" class="btn btn-primary btn-sm btn-squared">
                     {{ $sellerCabinetState->primaryActionLabel }}
                 </a>
-            @elseif($sellerCabinetState->primaryActionLabel)
+            @elseif($showPrimaryAction && $sellerCabinetState->primaryActionLabel)
                 <span class="text-muted small">{{ $sellerCabinetState->primaryActionLabel }}: сценарий ещё не подключён</span>
             @endif
         </div>
@@ -110,9 +113,9 @@
         @endif
 
         @if($sellerCabinetState->blockers !== [])
-            <div class="mt-3 pt-3 border-top">
-                <small class="text-muted d-block mb-2">Что требует внимания</small>
-                <ul class="mb-0 ps-3">
+            <div class="seller-cabinet-state__blockers">
+                <h6>Что требует внимания</h6>
+                <ul>
                     @foreach(array_slice($sellerCabinetState->blockers, 0, 3) as $blocker)
                         <li>{{ $blocker['message'] }}</li>
                     @endforeach

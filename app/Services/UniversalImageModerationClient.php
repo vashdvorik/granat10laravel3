@@ -54,11 +54,11 @@ class UniversalImageModerationClient implements ProductImageModerationClient
                 violations: [[
                     'code' => 'empty_image',
                     'confidence' => 1.0,
-                    'evidence' => 'Изображения товара не удалось подготовить для проверки.',
+                    'evidence' => 'РР·РѕР±СЂР°Р¶РµРЅРёСЏ С‚РѕРІР°СЂР° РЅРµ СѓРґР°Р»РѕСЃСЊ РїРѕРґРіРѕС‚РѕРІРёС‚СЊ РґР»СЏ РїСЂРѕРІРµСЂРєРё.',
                     'field' => 'images',
-                    'suggestion' => 'Загрузите корректное изображение товара.',
+                    'suggestion' => 'Р—Р°РіСЂСѓР·РёС‚Рµ РєРѕСЂСЂРµРєС‚РЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ С‚РѕРІР°СЂР°.',
                 ]],
-                sellerMessage: 'Загрузите корректное изображение товара.',
+                sellerMessage: 'Р—Р°РіСЂСѓР·РёС‚Рµ РєРѕСЂСЂРµРєС‚РЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ С‚РѕРІР°СЂР°.',
                 imagesAnalyzed: false,
             );
         }
@@ -412,7 +412,7 @@ class UniversalImageModerationClient implements ProductImageModerationClient
                 'confidence' => $this->score($scores[$category] ?? $riskScore),
                 'evidence' => "OpenAI Moderation flagged image category: {$category}.",
                 'field' => 'images',
-                'suggestion' => 'Проверьте изображения товара перед публикацией.',
+                'suggestion' => 'РџСЂРѕРІРµСЂСЊС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ С‚РѕРІР°СЂР° РїРµСЂРµРґ РїСѓР±Р»РёРєР°С†РёРµР№.',
             ];
         }
 
@@ -422,7 +422,7 @@ class UniversalImageModerationClient implements ProductImageModerationClient
                 'confidence' => $riskScore,
                 'evidence' => 'OpenAI Moderation flagged product images for manual review.',
                 'field' => 'images',
-                'suggestion' => 'Проверьте изображения товара перед публикацией.',
+                'suggestion' => 'РџСЂРѕРІРµСЂСЊС‚Рµ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ С‚РѕРІР°СЂР° РїРµСЂРµРґ РїСѓР±Р»РёРєР°С†РёРµР№.',
             ];
         }
 
@@ -430,7 +430,7 @@ class UniversalImageModerationClient implements ProductImageModerationClient
             decision: $violations === [] ? 'allow' : 'review',
             riskScore: $riskScore,
             violations: $violations,
-            sellerMessage: $violations === [] ? null : 'Изображения товара требуют дополнительной проверки.',
+            sellerMessage: $violations === [] ? null : 'РР·РѕР±СЂР°Р¶РµРЅРёСЏ С‚РѕРІР°СЂР° С‚СЂРµР±СѓСЋС‚ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕР№ РїСЂРѕРІРµСЂРєРё.',
             providerRequestId: $providerRequestId,
             imagesAnalyzed: $imagesAnalyzed,
         );
@@ -499,6 +499,7 @@ class UniversalImageModerationClient implements ProductImageModerationClient
     private function responseContract(): string
     {
         return 'Верни только JSON. Разрешённые code в violations: '.implode(', ', $this->allowedViolationCodes()).'. '
+            .'Все тексты для продавца пиши только на русском языке: evidence, suggestion и seller_message. '
             .'Формат: {"decision":"allow|review|block","risk_score":0..1,'
             .'"violations":[{"code":"string","confidence":0..1,"evidence":"string",'
             .'"field":"name|description|features|category|images|general","suggestion":"string|null"}],'
@@ -534,3 +535,4 @@ class UniversalImageModerationClient implements ProductImageModerationClient
         ];
     }
 }
+

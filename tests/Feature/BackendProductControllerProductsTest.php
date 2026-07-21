@@ -251,7 +251,7 @@ class BackendProductControllerProductsTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.store.products.index'))
             ->assertOk()
-            ->assertSee('Отправить на модерацию')
+            ->assertSee('Опубликовать')
             ->assertSee('Исправить товар');
     }
 

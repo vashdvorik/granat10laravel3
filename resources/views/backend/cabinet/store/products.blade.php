@@ -50,6 +50,7 @@
                                 'sellerCabinetState' => $sellerCabinetState,
                                 'seller' => $seller,
                                 'showRenewalDetails' => false,
+                                'showPrimaryAction' => false,
                             ])
                         @endisset
 
@@ -525,7 +526,7 @@ $(document).ready(function() {
             icon = 'question';
             confirmText = '<i class="uil uil-play me-1"></i> Да, включить';
         } else if (action === 'submit') {
-            title = 'Отправить на модерацию?';
+            title = 'Опубликовать товар?';
             text = `Товар "${productName}" будет отправлен на проверку администратору.`;
             icon = 'question';
             confirmText = '<i class="uil uil-shield-check me-1"></i> Да, отправить';

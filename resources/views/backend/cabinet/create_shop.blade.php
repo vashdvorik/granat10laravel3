@@ -1,138 +1,172 @@
-{{--Создание магазина--}}
-
 @extends('backend.cabinet.layout_cabinet')
 
 @section('content_cabinet')
-<div class="contents">
-
-<div class="container-fluid">
-   <div class="row">
-      <div class="col-lg-12">
-         <div class="d-flex align-items-center user-member__title mb-30">
-            <h4 class="text-capitalize"></h4>
-         </div>
-      </div>
-   </div>
-   <div class="row">
-      <div class="col-lg-12">
-         <div class="user-info-tab w-100 bg-white global-shadow radius-xl mb-50">
-            <div class="ap-tab-wrapper border-bottom ">
-               <ul class="nav px-30 ap-tab-main text-capitalize" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                  <li class="nav-item">
-                     <a class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" href="#v-pills-home" role="tab" aria-selected="true">
-                        <img src="{{ asset('cabinet/img/svg/briefcase.svg') }}" alt="user" class="svg">Страница магазина</a>
-                  </li>
-               </ul>
+<div class="contents store-edit-page">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="breadcrumb-main">
+                    <h4 class="breadcrumb-title">Создание магазина</h4>
+                </div>
             </div>
-            <div class="tab-content" id="v-pills-tabContent">
-               <div class="tab-pane fade  show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-                  <div class="row justify-content-center">
-                     <div class="col-xxl-4 col-10">
-                        <div class="mt-sm-40 mb-sm-50 mt-20 mb-20">
-                           <div class="user-tab-info-title mb-sm-40 mb-20 text-capitalize">
-                              <h5 class="fw-500">О магазине</h5>
-                           </div>
-                           <div class="account-profile d-flex align-items-center mb-4 ">
-                              <div class="ap-img pro_img_wrapper">
-                                 <input id="file-upload" type="file" name="logo" accept="image/*" class="d-none">
-                                 <!-- Profile picture image-->
-                                 <label for="file-upload">
-                                    <img id="logo-preview" class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="profile">
-                                    <span class="cross" id="remove_pro_pic">
-                                       <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="camera" class="svg">
+        </div>
+
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <div class="row store-edit-layout">
+            <div class="col-lg-8 store-edit-main">
+                <div class="card mb-25 store-edit-card store-edit-main-card">
+                    <div class="card-header">
+                        <h6 class="fw-500 mb-0">Основная информация</h6>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('account.store.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Название магазина <span class="text-danger">*</span></label>
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Телефон</label>
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" name="phone" id="phone" value="{{ old('phone') }}">
+                                    @error('phone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="description" class="form-label">Описание</label>
+                                    <input id="description" type="text" class="form-control @error('description') is-invalid @enderror" name="description" value="{{ old('description') }}">
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="settlement_id" class="form-label">Населённый пункт</label>
+                                    <select class="form-control @error('settlement_id') is-invalid @enderror" id="settlement_id" name="settlement_id" required>
+                                        <option value="">Выберите населённый пункт</option>
+                                        @foreach($regions as $region)
+                                            <optgroup label="{{ $region->name }}">
+                                                @foreach($region->settlements as $settlement)
+                                                    <option value="{{ $settlement->id }}" @selected((string) old('settlement_id') === (string) $settlement->id)>
+                                                        {{ $settlement->name }} ({{ $settlement->type }})
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endforeach
+                                    </select>
+                                    @error('settlement_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="sellerplace" class="form-label">Район / ориентир</label>
+                                    <input
+                                        type="text"
+                                        class="form-control @error('sellerplace') is-invalid @enderror"
+                                        id="sellerplace"
+                                        name="sellerplace"
+                                        value="{{ old('sellerplace') }}"
+                                        maxlength="255"
+                                        placeholder="Например: центр, рынок, микрорайон"
+                                    >
+                                    @error('sellerplace')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="address" class="form-label">Адрес</label>
+                                    <input type="text" class="form-control @error('address') is-invalid @enderror" id="address" name="address" value="{{ old('address') }}">
+                                    @error('address')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="store-edit-submit-bar">
+                                <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared">
+                                    Отмена
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-default btn-squared radius-md shadow2">
+                                    Создать магазин
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 store-edit-aside">
+                <div class="card mb-25 store-edit-card store-edit-logo-card">
+                    <div class="card-header">
+                        <h6 class="fw-500 mb-0">Логотип</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="account-profile justify-content-center d-flex mb-3">
+                            <div class="ap-img pro_img_wrapper">
+                                <input id="shop-logo-upload" type="file" name="logo" accept="image/*" class="d-none">
+                                <label for="shop-logo-upload">
+                                    <img id="logo-preview" class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="logo">
+                                    <span class="cross">
+                                        <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="camera" class="svg">
                                     </span>
-                                 </label>
-                              </div>
-                              <div class="account-profile__title">
-                                 <h6 class="fs-15 ms-20 fw-500 text-capitalize">Добавьте фото</h6>
-                                 @error('logo')
-                                     <div class="text-danger small ms-20">{{ $message }}</div>
-                                 @enderror
-                              </div>
-                           </div>
-                           <div class="edit-profile__body">
-                                <form action="{{ route('account.store.store') }}" method="POST" enctype="multipart/form-data">
-                                @csrf    
-                                    <div class="form-group mb-25">
-                                        <label for="name">Название магазина</label>
-                                        <input id="name" type="text" class="form-control" name="name" value="{{ old('name') }}" required>
-                                        @error('name') <div class="text-danger small">{{ $message }}</div> @enderror
-                                    </div>
-                                    <div class="form-group mb-25">
-                                        <label for="description">Описание</label>
-                                        <input id="description" type="text" class="form-control"  name="description" value="{{ old('description') }}" >
-                                    </div>
-                                    <div class="form-group mb-25">
-                                        <label for="phone">Телефон</label>
-                                        <input type="tel" class="form-control" name="phone" id="phone" value="{{ old('phone') }}" >
-                                    </div>
-                                    <div class="form-group mb-25">
-                                        <div class="countryOption">
-                                        <label for="settlement_id">
-                                            Населённый пункт
-                                        </label>
-                                        <select class="js-example-basic-single js-states form-control @error('settlement_id') is-invalid @enderror" id="settlement_id" name="settlement_id" required>
-                                            <option value="">Выберите населённый пункт</option>
-                                            @foreach($regions as $region)
-                                                <optgroup label="{{ $region->name }}">
-                                                    @foreach($region->settlements as $settlement)
-                                                        <option value="{{ $settlement->id }}" @selected((string) old('settlement_id') === (string) $settlement->id)>
-                                                            {{ $settlement->name }} ({{ $settlement->type }})
-                                                        </option>
-                                                    @endforeach
-                                                </optgroup>
-                                            @endforeach
-                                        </select>
-                                        @error('settlement_id') <div class="text-danger small">{{ $message }}</div> @enderror
-                                        </div>
-                                    </div>
-                                    <div class="form-group mb-25">
-                                        <label for="sellerplace">
-                                            Район / ориентир
-                                        </label>
-                                        <input
-                                            type="text"
-                                            class="form-control @error('sellerplace') is-invalid @enderror"
-                                            id="sellerplace"
-                                            name="sellerplace"
-                                            value="{{ old('sellerplace') }}"
-                                            maxlength="255"
-                                            placeholder="Например: центр, рынок, микрорайон"
-                                        >
-                                        <small class="form-text text-muted">
-                                            Необязательно. Укажите район или понятный ориентир внутри выбранного населённого пункта.
-                                        </small>
-                                        @error('sellerplace') <div class="text-danger small">{{ $message }}</div> @enderror
-                                    </div>
-                                    <div class="form-group mb-25">
-                                        <label for="address">Адресс</label>
-                                        <input type="text" class="form-control" id="address" name="address" value="{{ old('address')}}">
-                                    </div>
-                                    <div class="button-group d-flex pt-sm-25 justify-content-md-end justify-content-start ">
-
-                                        <button type="submit" class="btn btn-primary btn-default btn-squared text-capitalize radius-md shadow2 btn-sm">Создать
-                                        </button>
-                                    </div>
-                                </form>
-                           </div>
+                                </label>
+                            </div>
                         </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-         </div>
-      </div>
-   </div>
-</div>
+                        <h6 class="mb-2">Добавьте фото магазина</h6>
+                        <p class="text-muted mb-0">Логотип будет отображаться в карточке магазина и в каталоге продавцов.</p>
+                        @error('logo')
+                            <div class="text-danger small mt-2">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
 
+                <div class="card mb-25 store-edit-card">
+                    <div class="card-header">
+                        <h6 class="fw-500 mb-0">Что нужно заполнить</h6>
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0 ps-3">
+                            <li>Название магазина</li>
+                            <li>Телефон для связи</li>
+                            <li>Населённый пункт и район</li>
+                            <li>Адрес и краткое описание</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
-    document.getElementById('file-upload').addEventListener('change', function (e) {
-        var file = e.target.files[0];
+    document.getElementById('shop-logo-upload').addEventListener('change', function (e) {
+        const file = e.target.files[0];
         if (!file) return;
-        var reader = new FileReader();
+
+        const reader = new FileReader();
         reader.onload = function (event) {
             document.getElementById('logo-preview').src = event.target.result;
         };
@@ -140,5 +174,4 @@
     });
 </script>
 @endpush
-
 @endsection

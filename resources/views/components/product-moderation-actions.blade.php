@@ -51,7 +51,7 @@
                       data-product-name="{{ $product->name }}">
                     @csrf
                     <button type="button" class="dropdown-item status-change-btn">
-                        <i class="uil uil-shield-check me-2"></i> Отправить на модерацию
+                        <i class="uil uil-shield-check me-2"></i> Опубликовать
                     </button>
                 </form>
             @endif
@@ -106,7 +106,7 @@
             @csrf
             <button type="button"
                     class="btn btn-sm btn-primary btn-default btn-squared btn-transparent-primary status-change-btn w-100">
-                <i class="uil uil-shield-check"></i> Отправить на модерацию
+                <i class="uil uil-shield-check"></i> Опубликовать
             </button>
         </form>
     @elseif($state->primaryAction === \App\Enums\ProductPrimaryAction::Edit)

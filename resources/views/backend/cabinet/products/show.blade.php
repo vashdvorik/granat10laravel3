@@ -43,10 +43,9 @@
                                             <div class="carousel-inner">
                                                 @foreach($product->images as $index => $image)
                                                     <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
-                                                        <img class="img-fluid d-flex bg-opacity-primary" 
+                                                        <img class="img-fluid d-flex bg-opacity-primary product-show-gallery__image" 
                                                              src="{{ asset('storage/' . $image->path) }}" 
-                                                             alt="{{ $product->name }}" 
-                                                             style="width: 100%; height: 100%; object-fit: contain; background-color: #fafafa;">
+                                                             alt="{{ $product->name }}">
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -65,8 +64,8 @@
                                                                  alt="{{ $product->name }}">
                                                         </a>
                                                         @if($image->is_main)
-                                                            <span class="position-absolute top-0 end-0 m-1 product-show-main-badge" style="background: rgba(95, 99, 242, 0.9); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                                                                <i class="uil uil-star" style="font-size: 14px;"></i>
+                                                            <span class="position-absolute top-0 end-0 m-1 product-show-main-badge">
+                                                                <i class="uil uil-star"></i>
                                                             </span>
                                                         @endif
                                                     </li>
@@ -76,7 +75,7 @@
                                     </div>
                                 @else
                                     <div class="no-image-placeholder product-show-no-image text-center p-5 bg-light rounded">
-                                        <i class="uil uil-image-slash" style="font-size: 80px; color: #adb5bd;"></i>
+                                        <i class="uil uil-image-slash product-show-no-image__icon"></i>
                                         <p class="text-muted mt-3">Нет изображений</p>
                                     </div>
                                 @endif
@@ -146,7 +145,7 @@
 
                                         <!-- Start: Product Description -->
                                         @if($product->desc)
-                                            <div class="product-deatils-pera" style="white-space: pre-line;">{{ $product->desc }}</div>
+                                            <div class="product-deatils-pera product-show-description">{{ $product->desc }}</div>
                                         @endif
                                         <!-- End: Product Description -->
 
@@ -252,20 +251,6 @@
 </div>
 
 @endsection
-
-@push('styles')
-<style>
-.list-thumb-gallery .thumbnail {
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.list-thumb-gallery .thumbnail.is-main {
-    border: 3px solid #5F63F2 !important;
-    box-shadow: 0 0 8px rgba(95, 99, 242, 0.4) !important;
-}
-</style>
-@endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

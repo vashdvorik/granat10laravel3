@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Подтверждение покупки
             const priceText = packagePrice == 0 ? 'бесплатно' : `${packagePrice.toLocaleString()} ₽`;
             const cancelWarning = (currentPackageName && currentPackagePrice > 0)
-                ? `<p class="mt-3 mb-0" style="font-size:0.9em;color:#856404;background:#fff3cd;border-radius:6px;padding:8px 12px;">⚠️ Ваш текущий тариф <strong>${currentPackageName}</strong> будет аннулирован без возврата средств.</p>`
+                ? `<p class="package-change-warning">⚠️ Ваш текущий тариф <strong>${currentPackageName}</strong> будет аннулирован без возврата средств.</p>`
                 : '';
 
             Swal.fire({

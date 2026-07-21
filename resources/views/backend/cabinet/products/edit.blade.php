@@ -19,7 +19,7 @@
                                 name="save_action"
                                 value="save_and_submit"
                                 class="btn btn-sm btn-primary">
-                            <i class="uil uil-shield-check"></i> Отправить на модерацию
+                            <i class="uil uil-shield-check"></i> Опубликовать
                         </button>
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                                                     <input type="text"
                                                            class="form-control @error('name') is-invalid @enderror" 
                                                            id="name" 
-                                                           style="scroll-margin-top: 110px;"
+                                                           class="product-form-scroll-anchor"
                                                            name="name" 
                                                            value="{{ old('name', $product->name) }}" 
                                                            placeholder="Введите название товара"
@@ -146,7 +146,7 @@
                                                 {{-- Категория --}}
                                                 <div class="form-group">
                                                     <label>Категория <span class="text-danger">*</span></label>
-                                                    <div id="category-selectors" style="scroll-margin-top: 110px;">
+                                                    <div id="category-selectors" class="product-form-scroll-anchor">
                                                         {{-- Будет заполнено через JS --}}
                                                     </div>
                                                     
@@ -224,8 +224,8 @@
                                                         </div>
 
                                                         {{-- ℹ️ Информационное сообщение --}}
-                                                        <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #5F63F2;">
-                                                            <i class="uil uil-info-circle me-2 mt-1" style="font-size: 18px; color: #5F63F2;"></i>
+                                                        <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--info">
+                                                            <i class="uil uil-info-circle me-2 mt-1 product-form-callout__icon text-primary"></i>
                                                             <div>
                                                                 <small class="d-block mb-0">
                                                                     <strong>VIP товары показываются всегда первыми</strong> в каталоге и в поиске
@@ -233,8 +233,8 @@
                                                             </div>
                                                         </div>
                                                     @else
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
+                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--warning">
+                                                            <i class="uil uil-exclamation-triangle me-2 mt-1 product-form-callout__icon text-warning"></i>
                                                             <div>
                                                                 <small class="d-block mb-0 text-dark">
                                                                     <strong>{{ $vipAvailability['message'] }}</strong>
@@ -245,8 +245,8 @@
 
                                                     {{-- ⚠️ Ошибка лимита VIP товаров --}}
                                                     @error('is_vip')
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0" style="border-left: 4px solid #FA8B0C;">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1" style="font-size: 18px; color: #FA8B0C;"></i>
+                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--warning">
+                                                            <i class="uil uil-exclamation-triangle me-2 mt-1 product-form-callout__icon text-warning"></i>
                                                             <div>
                                                                 <small class="d-block mb-0 text-dark">
                                                                     <strong>{{ $message }}</strong>
@@ -261,7 +261,7 @@
                                                     <label for="desc">Описание товара</label>
                                                     <textarea class="form-control @error('desc') is-invalid @enderror"
                                                               id="desc" 
-                                                              style="scroll-margin-top: 110px;"
+                                                              class="product-form-scroll-anchor"
                                                               name="desc" 
                                                               rows="4" 
                                                               placeholder="Подробное описание товара">{{ old('desc', $product->desc) }}</textarea>
@@ -280,7 +280,7 @@
                                                     <input type="text"
                                                            class="form-control @error('features1') is-invalid @enderror" 
                                                            id="features1" 
-                                                           style="scroll-margin-top: 110px;"
+                                                           class="product-form-scroll-anchor"
                                                            name="features1" 
                                                            value="{{ old('features1', $product->features1) }}" 
                                                            placeholder="Например: Цвет: Красный">
@@ -338,7 +338,7 @@
                                     {{-- Изображения товара --}}
                                     <div class="card add-product product-form-section mb-24"
                                          id="product-images-section"
-                                         style="scroll-margin-top: 110px;">
+                                         class="product-form-scroll-anchor">
                                         <div class="card-body p-0">
                                             <div class="card-header d-flex justify-content-between align-items-center">
                                                 <h6 class="fw-500">Изображения товара</h6>
@@ -359,7 +359,7 @@
                                                                 <div class="upload-media-area d-flex">
                                                                     <img src="{{ asset('storage/' . $image->path) }}" 
                                                                          alt="Product image" 
-                                                                         style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                                                                        class="product-form-preview-thumb">
                                                                     <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
                                                                         <div>
                                                                             <p class="mb-0">{{ Str::limit(basename($image->path), 8, '...') }}</p>
@@ -372,12 +372,11 @@
                                                                 </div>
                                                                 <div class="upload-media-area__btn d-flex gap-2">
                                                                     @if(!$image->is_main && $product->images->count() > 1)
-                                                                        <button type="button" 
-                                                                                class="set-main-image border rounded"
+                                                                        <button type="button"
+                                                                                class="set-main-image product-form-preview-main-button"
                                                                                 data-image-id="{{ $image->id }}"
-                                                                                title="Сделать главным"
-                                                                                style="width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; background: white; border-color: #5F63F2 !important; color: #5F63F2; cursor: pointer;">
-                                                                            <i class="uil uil-star" style="font-size: 16px; line-height: 1;"></i>
+                                                                                title="Сделать главным">
+                                                                            <i class="uil uil-star"></i>
                                                                         </button>
                                                                     @endif
                                                                     <button type="button" 
@@ -424,7 +423,7 @@
                                                         @enderror
                                                         
                                                         <!-- Preview area for new images -->
-                                                        <div id="upload-preview-area" class="mt-25" style="display: none;">
+                                                <div id="upload-preview-area" class="mt-25 product-form-preview-area">
                                                             <!-- Previews will be inserted here -->
                                                         </div>
                                                     </div>
@@ -454,7 +453,7 @@
                                                 name="save_action"
                                                 value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-shield-check"></i> Отправить на модерацию
+                                            <i class="uil uil-shield-check"></i> Опубликовать
                                         </button>
                                     </div>
                                 </form>
@@ -691,12 +690,11 @@ $(document).ready(function() {
                     const setMainBtn = $(this).find('.set-main-image');
                     if (setMainBtn.length === 0 && $(this).data('image-id') !== imageId) {
                         $(this).find('.upload-media-area__btn').prepend(
-                            `<button type="button" 
-                                    class="set-main-image border rounded"
+                            `<button type="button"
+                                    class="set-main-image product-form-preview-main-button"
                                     data-image-id="${$(this).data('image-id')}"
-                                    title="Сделать главным"
-                                    style="width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; background: white; border-color: #5F63F2 !important; color: #5F63F2; cursor: pointer;">
-                                <i class="uil uil-star" style="font-size: 16px; line-height: 1;"></i>
+                                    title="Сделать главным">
+                                <i class="uil uil-star"></i>
                             </button>`
                         );
                     }
@@ -825,7 +823,7 @@ $(document).ready(function() {
             const previewHtml = `
                 <div class="upload-product-media d-flex justify-content-between align-items-center mt-15" data-file-index="${index}">
                     <div class="upload-media-area d-flex">
-                        <img src="${src}" alt="${file.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                        <img src="${src}" alt="${file.name}" class="product-form-preview-thumb">
                         <div class="upload-media-area__title d-flex flex-wrap align-items-center ms-10">
                             <div>
                                 <p class="mb-0">${file.name.length > 8 ? file.name.substring(0, 8) + '...' : file.name}</p>
@@ -921,37 +919,4 @@ $(document).ready(function() {
     });
 });
 </script>
-
-<style>
-.upload-product-img.dragging {
-    border-color: #5F63F2 !important;
-    background-color: rgba(95, 99, 242, 0.05);
-}
-
-.upload-media-area img {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.existing-images .card {
-    transition: all 0.3s ease;
-}
-
-.existing-images .card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.set-main-image {
-    transition: all 0.3s ease;
-}
-
-.set-main-image:hover {
-    background: #5F63F2 !important;
-    color: white !important;
-}
-
-.set-main-image i {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-</style>
 @endpush

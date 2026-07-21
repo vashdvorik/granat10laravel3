@@ -153,7 +153,7 @@
                         </div>
                         @if($productLimit)
                            @php $pct = $productLimit > 0 ? min(100, round($activeProducts / $productLimit * 100)) : 0; @endphp
-                           <div class="progress" style="height: 8px;">
+                           <div class="progress cabinet-progress">
                               <div class="progress-bar {{ $pct >= 90 ? 'bg-danger' : ($pct >= 70 ? 'bg-warning' : 'bg-primary') }}"
                                    role="progressbar"
                                    style="width: {{ $pct }}%"
@@ -164,7 +164,7 @@
                            </div>
                            <small class="text-muted">{{ $pct }}% заполнено</small>
                         @else
-                           <div class="progress" style="height: 8px;">
+                           <div class="progress cabinet-progress">
                               <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
                            </div>
                            <small class="text-success">Безлимитный тариф</small>
@@ -185,7 +185,7 @@
                         </div>
                         @if($vipLimit !== null && $vipLimit > 0)
                            @php $vipPct = $vipLimit > 0 ? min(100, round($vipProducts / $vipLimit * 100)) : 0; @endphp
-                           <div class="progress" style="height: 8px;">
+                           <div class="progress cabinet-progress">
                               <div class="progress-bar {{ $vipPct >= 90 ? 'bg-danger' : ($vipPct >= 70 ? 'bg-warning' : 'bg-warning') }}"
                                    role="progressbar"
                                    style="width: {{ $vipPct }}%">
@@ -193,12 +193,12 @@
                            </div>
                            <small class="text-muted">{{ $vipPct }}% заполнено</small>
                         @elseif($vipLimit === 0)
-                           <div class="progress" style="height: 8px;">
+                           <div class="progress cabinet-progress">
                               <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%"></div>
                            </div>
                            <small class="text-muted">VIP недоступно на текущем тарифе</small>
                         @else
-                           <div class="progress" style="height: 8px;">
+                           <div class="progress cabinet-progress">
                               <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
                            </div>
                            <small class="text-success">Безлимитный тариф</small>

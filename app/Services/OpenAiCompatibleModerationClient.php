@@ -201,8 +201,8 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
     {
         return 'Верни только JSON. '
             .'Разрешённые code в violations: '.implode(', ', $this->allowedViolationCodes()).'. '
-            .'Не возвращай другие code. Формат: '
-            .'{"decision":"allow|review|block","risk_score":0..1,'
+            .'Не возвращай другие code. Все тексты для продавца пиши только на русском языке: evidence, suggestion и seller_message. '
+            .'Формат: {"decision":"allow|review|block","risk_score":0..1,'
             .'"violations":[{"code":"string","confidence":0..1,"evidence":"string",'
             .'"field":"name|description|features|category|images|general","suggestion":"string|null"}],'
             .'"seller_message":"string|null"}.';
@@ -253,3 +253,4 @@ class OpenAiCompatibleModerationClient implements AiModerationClient
         return $status === 429 || $status >= 500;
     }
 }
+

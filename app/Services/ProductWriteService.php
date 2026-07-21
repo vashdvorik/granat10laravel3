@@ -191,8 +191,6 @@ class ProductWriteService
     {
         $fields = [
             'name',
-            'price',
-            'lowprice',
             'desc',
             'features1',
             'features2',

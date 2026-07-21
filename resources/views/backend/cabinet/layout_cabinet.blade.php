@@ -29,25 +29,6 @@
 <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/wickedpicker.min.css') }}">
 <link rel="stylesheet" href="{{ asset('cabinet/assets/style.css') }}">
 <link rel="stylesheet" href="{{ asset('css/seller-cabinet.css') }}?v={{ filemtime(public_path('css/seller-cabinet.css')) }}">
-<style>
-   body.side-menu .btn,
-   body.side-menu button,
-   body.side-menu .dropdown-wrapper__more,
-   body.side-menu .product-moderation-actions,
-   body.side-menu .product-moderation-actions *,
-   body.side-menu .text-capitalize {
-      text-transform: none !important;
-   }
-
-   .sidebar_nav .marketplace-return-link {
-      background: #fff7ec;
-      color: #5f3b00;
-      font-weight: 600;
-   }
-
-   @media (max-width: 575.98px) {
-   }
-</style>
 
    <!-- endinject -->
 
@@ -333,7 +314,7 @@
                                     <a href="{{ route('logout') }}"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                        <i class="uil uil-sign-out-alt"></i> Выйти</a>
-                                       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                       <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                           @csrf
                                        </form>
                                     --}}
@@ -341,7 +322,7 @@
                                        <span class="nav-icon uil uil-sign-out-alt"></span>
                                        <span class="menu-text">Выйти</span>
                                     </a>
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                        @csrf
                                     </form>
                                  </li>
@@ -452,7 +433,7 @@
                      <span class="nav-icon uil uil-sign-out-alt"></span>
                      <span class="menu-text">Выйти из аккаунта</span>
                   </a>
-                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                  <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                      @csrf
                   </form>
 

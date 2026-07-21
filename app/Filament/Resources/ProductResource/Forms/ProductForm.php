@@ -33,7 +33,7 @@ class ProductForm
                     Forms\Components\TextInput::make('lowprice')
                         ->label('Цена со скидкой, RUP')->numeric()->minValue(0)->step(0.01)->lt('price'),
                     Forms\Components\Toggle::make('is_active')
-                        ->label('Отправить на модерацию после сохранения')
+                        ->label('Опубликовать после сохранения')
                         ->helperText('Товар станет виден покупателям только после успешной модерации.')
                         ->default(false),
                     Forms\Components\Toggle::make('is_vip')->label('VIP')->default(false),
