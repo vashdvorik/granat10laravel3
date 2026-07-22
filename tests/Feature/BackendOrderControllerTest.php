@@ -118,7 +118,7 @@ class BackendOrderControllerTest extends TestCase
         $this->assertSame(OrderStatus::Accepted, $order->fresh()->status);
     }
 
-    public function test_owner_cannot_skip_order_status(): void
+    public function test_owner_can_set_any_order_status(): void
     {
         $user = User::factory()->create();
         $seller = Seller::factory()->create(['user_id' => $user->id]);
@@ -131,8 +131,9 @@ class BackendOrderControllerTest extends TestCase
             ->patch(route('account.store.orders.status', $order), [
                 'status' => OrderStatus::Completed->value,
             ])
-            ->assertSessionHasErrors(['status']);
+            ->assertRedirect()
+            ->assertSessionHas('success');
 
-        $this->assertSame(OrderStatus::New, $order->fresh()->status);
+        $this->assertSame(OrderStatus::Completed, $order->fresh()->status);
     }
 }

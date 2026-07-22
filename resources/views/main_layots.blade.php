@@ -14,7 +14,7 @@
     @endif
     @endif
     <link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
-    <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/slick.css') }}">
     <link rel="stylesheet" href="{{ asset('css/slick-theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/owl.theme.default.min.css') }}">
@@ -25,7 +25,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/pagination.css') }}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    @if(Request::is('catalog/*') || Request::is('catalog'))
+    @if(request()->routeIs('catalog.index', 'catalog.show', 'regional.catalog.index', 'regional.catalog.show'))
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -502,13 +502,22 @@
     {{-- Open Graph для соцсетей --}}
     <meta property="og:title" content="{{ $seoTitle ?: trim($__env->yieldContent('title')) }}">
     <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:locale" content="ru_RU">
     <meta property="og:site_name" content="Маркетплейс ПМР">
     @if($seoDescription)
     <meta property="og:description" content="{{ $seoDescription }}">
     @endif
     @hasSection('og_image')
     <meta property="og:image" content="@yield('og_image')">
+    @endif
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle ?: trim($__env->yieldContent('title')) }}">
+    @if($seoDescription)
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    @endif
+    @hasSection('og_image')
+    <meta name="twitter:image" content="@yield('og_image')">
     @endif
     
     {{-- SEO: Pagination meta tags --}}

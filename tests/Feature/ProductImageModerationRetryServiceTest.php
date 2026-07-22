@@ -32,11 +32,11 @@ class ProductImageModerationRetryServiceTest extends TestCase
             'is_main' => true,
             'order' => 1,
         ]);
-        ProductModerationRun::create([
+        $originalRun = ProductModerationRun::create([
             'product_id' => $product->id,
             'content_version' => 5,
             'trigger' => 'image_queue',
-            'provider' => 'image_google',
+            'provider' => 'image_gemini',
             'status' => 'completed',
             'decision' => 'review',
             'request_fingerprint' => hash('sha256', 'image-review'),
@@ -47,7 +47,12 @@ class ProductImageModerationRetryServiceTest extends TestCase
         $this->assertTrue($retried);
         $this->assertSame(ProductModerationStatus::Processing, $product->refresh()->moderation_status);
         $this->assertSame('completed', ProductModerationRun::query()->oldest('id')->first()->status);
-        $this->assertSame('retrying', ProductModerationRun::query()->latest('id')->first()->status);
+        $this->assertDatabaseHas('product_moderation_runs', [
+            'product_id' => $product->id,
+            'retry_of_id' => $originalRun->id,
+            'provider' => 'image_gemini',
+            'trigger' => 'manual_retry',
+        ]);
         $this->assertSame(2, ProductModerationRun::query()->count());
         Queue::assertPushed(
             ModerateProductImagesJob::class,
@@ -75,7 +80,7 @@ class ProductImageModerationRetryServiceTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 2,
             'trigger' => 'image_queue',
-            'provider' => 'image_google',
+            'provider' => 'image_gemini',
             'status' => 'completed',
             'decision' => 'allow',
             'request_fingerprint' => hash('sha256', 'image-allow'),

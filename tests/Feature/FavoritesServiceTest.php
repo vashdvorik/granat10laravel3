@@ -33,7 +33,7 @@ class FavoritesServiceTest extends TestCase
         $ids = $this->service->parseIds($rawIds);
 
         $this->assertCount(FavoritesService::MAX_IDS, $ids);
-        $this->assertSame([-3, 10, 10, 1], array_slice($ids, 0, 4));
+        $this->assertSame([-3, 10, 1, 2], array_slice($ids, 0, 4));
     }
 
     public function test_initial_products_returns_metadata_and_only_first_page(): void

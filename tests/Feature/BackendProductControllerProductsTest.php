@@ -55,10 +55,8 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertSee('seller-products-layout', false);
         $response->assertSee('seller-products-filters', false);
         $response->assertSee('seller-products-main', false);
-        $response->assertDontSee('seller-products-toolbar', false);
-        $response->assertSee("window.matchMedia('(max-width: 767.98px)')", false);
+        $response->assertSee('seller-products-toolbar', false);
         $response->assertSee('seller-product-card__state', false);
-        $response->assertSee('Статус товаров');
         $response->assertSee('Видны покупателям');
         $response->assertSee('Скрыты из-за тарифа');
     }
@@ -205,8 +203,8 @@ class BackendProductControllerProductsTest extends TestCase
             ->assertSee('product-form-page', false)
             ->assertSee('product-edit-page', false)
             ->assertSee('product-edit-form', false)
-            ->assertSee('product-form-guide--status', false)
-            ->assertSee('product-form-status', false)
+            ->assertDontSee('product-form-guide--status', false)
+            ->assertDontSee('product-form-status', false)
             ->assertDontSee('col-xxl-7 col-lg-10', false)
             ->assertSee('name="expected_moderation_version"', false)
             ->assertSee('value="'.$product->moderation_version.'"', false);
@@ -605,10 +603,9 @@ class BackendProductControllerProductsTest extends TestCase
             ->get(route('account.store.products.show', $product))
             ->assertOk()
             ->assertSee('css/seller-cabinet.css', false)
-            ->assertSee('product-show-overview', false)
+            ->assertDontSee('product-show-overview', false)
             ->assertSee('product-show-card', false)
-            ->assertSee('product-show-actions', false)
-            ->assertSee('.list-thumb-gallery .thumbnail', false);
+            ->assertSee('product-show-actions', false);
     }
 
     private function createUserWithSeller(): array

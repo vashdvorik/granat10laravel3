@@ -67,6 +67,19 @@ class SellerControllerTest extends TestCase
         $response->assertDontSee('class="market-count"', false);
     }
 
+    public function test_shop_logo_fills_rounded_frame(): void
+    {
+        $response = $this->get(route('shops'));
+
+        $response->assertOk();
+
+        $css = file_get_contents(public_path('css/marketplace-design.css'));
+
+        $this->assertStringContainsString('.shop-logo img {', $css);
+        $this->assertStringContainsString('padding: 0;', $css);
+        $this->assertStringContainsString('object-fit: cover;', $css);
+    }
+
     public function test_shops_page_paginates_sellers(): void
     {
         Seller::factory()->count(15)->create();

@@ -9,7 +9,7 @@
         <meta name="robots" content="{{ $robotsMeta }}">
         @if($seoDescription)<meta name="description" content="{{ $seoDescription }}">@endif
     @endif
-    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/theme-new.css') }}">

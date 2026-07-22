@@ -50,7 +50,7 @@
                     <div class="seller-profile__header">
                         <div>
                             <span class="market-eyebrow">{{ $location ?: 'Магазин' }}</span>
-                            <h1>{{ $sellerName }}</h1>
+                            <h1 class="blog-heading text-center">{{ $sellerName }}</h1>
                         </div>
                         <span class="market-count">
                             {{ $products->total() }} {{ trans_choice('товар|товара|товаров', $products->total()) }}

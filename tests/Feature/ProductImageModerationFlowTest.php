@@ -105,14 +105,14 @@ class ProductImageModerationFlowTest extends TestCase
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
             'content_version' => 7,
-            'provider' => 'image_google',
+            'provider' => 'image_gemini',
             'decision' => 'review',
             'status' => 'completed',
         ]);
 
         $run = ProductModerationRun::query()
             ->where('product_id', $product->id)
-            ->where('provider', 'image_google')
+            ->where('provider', 'image_gemini')
             ->latest('id')
             ->first();
 

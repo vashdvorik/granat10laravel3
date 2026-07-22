@@ -60,15 +60,9 @@
         '@context' => 'https://schema.org',
         '@type' => 'Product',
         'name' => $product->name,
-        'image' => $images->isNotEmpty()
-            ? $images->map(fn ($image) => url(Storage::url($image->path)))->values()->all()
-            : [$mainImageUrl],
+        'url' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
         'description' => $product->desc ?: $product->name,
         'sku' => (string) $product->id,
-        'brand' => [
-            '@type' => 'Brand',
-            'name' => $product->seller->name,
-        ],
         'offers' => [
             '@type' => 'Offer',
             'url' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
@@ -81,6 +75,13 @@
             ],
         ],
     ];
+
+    if ($images->isNotEmpty()) {
+        $productSchema['image'] = $images
+            ->map(fn ($image) => url(Storage::url($image->path)))
+            ->values()
+            ->all();
+    }
 @endphp
 
 @section('og_image', $mainImageUrl)
@@ -112,7 +113,7 @@
             </ol>
         </nav>
 
-        <section class="product-hero" aria-labelledby="product-title">
+        <section class="product-hero" aria-label="{{ $product->name }}">
             <div class="product-gallery">
                 <div class="product-gallery__main" data-product-gallery>
                     @forelse($images as $index => $image)
@@ -176,7 +177,7 @@
                 @endif
 
                 <div class="product-summary__heading">
-                    <h1 id="product-title">{{ $product->name }}</h1>
+                    <h1 class="product-title">{{ $product->name }}</h1>
                     <button type="button" class="product-favorite wishlist-btn"
                         data-product-id="{{ $product->id }}" aria-label="Добавить товар в избранное">
                         <span class="icon-bg icon-wishlist" aria-hidden="true"></span>

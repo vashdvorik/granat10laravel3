@@ -7,8 +7,8 @@ use App\Models\Product;
 use App\Models\Seller;
 use App\Models\User;
 use App\Services\PackageService;
+use App\Services\PackageCompatibilityService;
 use App\Services\PackageTransitionPreparationService;
-use App\Services\ProductLimitService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -81,7 +81,7 @@ class PackageTransitionPreparationServiceTest extends TestCase
     private function service(): PackageTransitionPreparationService
     {
         return new PackageTransitionPreparationService(
-            new PackageService(new ProductLimitService())
+            new PackageService(app(PackageCompatibilityService::class))
         );
     }
 }

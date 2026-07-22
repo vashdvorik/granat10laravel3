@@ -7,7 +7,7 @@
     <meta name="keywords" content="">
     <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
-    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/x-icon" sizes="16x16"> 
+    <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/x-icon" sizes="16x16">
     <link rel="stylesheet" href="{{ asset('auth/assets/styles/tailwind.min.css?v=5.0') }}">
     <link rel="stylesheet" href="{{ asset('auth/assets/styles/style.min.css?v=5.0') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">

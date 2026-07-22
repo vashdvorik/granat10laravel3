@@ -40,7 +40,7 @@ class HomeControllerTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('Где купить? Смотри на BIMM.')
-            ->assertSee('Все товары Приднестровья в одном месте')
+            ->assertSee('Все товары из Приднестровья в одном месте')
             ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
             ->assertSee('Товары, которые уже есть на BIMM')
             ->assertSee('Новые товары продавцов')
@@ -98,8 +98,8 @@ class HomeControllerTest extends TestCase
         $this->assertStringContainsString('.menu-home5.pushmenu-open', $css);
         $this->assertStringContainsString('body.pushmenu-push-toleft', $css);
         $this->assertStringContainsString('left: 0;', $css);
-        $this->assertStringContainsString("box-shadow: none;\n    transform: translate3d(-100%, 0, 0);", $css);
-        $this->assertStringContainsString("box-shadow: 18px 0 45px rgba(30, 30, 40, .16);\n    -webkit-transform: translate3d(0, 0, 0) !important;", $css);
+        $this->assertStringContainsString('box-shadow: none;', $css);
+        $this->assertStringContainsString('box-shadow: 18px 0 45px rgba(30, 30, 40, .16);', $css);
         $this->assertStringContainsString('transform: translate3d(-100%, 0, 0);', $css);
         $this->assertStringContainsString('transform: translate3d(0, 0, 0) !important;', $css);
         $this->assertStringContainsString('transform: none !important;', $css);

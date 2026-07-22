@@ -6,7 +6,6 @@ use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Services\OrderManagementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class OrderManagementServiceTest extends TestCase
@@ -35,26 +34,26 @@ class OrderManagementServiceTest extends TestCase
         ]);
     }
 
-    public function test_invalid_transition_does_not_change_order(): void
+    public function test_transition_can_set_any_status_and_writes_history(): void
     {
         $order = Order::factory()->create(['status' => OrderStatus::New]);
 
-        try {
-            app(OrderManagementService::class)->transition(
-                $order,
-                OrderStatus::Completed,
-                $order->seller->user,
-            );
-            $this->fail('ValidationException was not thrown.');
-        } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('status', $exception->errors());
-        }
+        $updated = app(OrderManagementService::class)->transition(
+            $order,
+            OrderStatus::Completed,
+            $order->seller->user,
+        );
 
-        $this->assertSame(OrderStatus::New, $order->fresh()->status);
-        $this->assertDatabaseCount('order_status_history', 0);
+        $this->assertSame(OrderStatus::Completed, $updated->status);
+        $this->assertNotNull($updated->completed_at);
+        $this->assertDatabaseHas('order_status_history', [
+            'order_id' => $order->id,
+            'from_status' => OrderStatus::New->value,
+            'to_status' => OrderStatus::Completed->value,
+        ]);
     }
 
-    public function test_final_status_sets_timestamp_and_cannot_transition_further(): void
+    public function test_final_status_sets_timestamp_and_can_be_changed_later(): void
     {
         $order = Order::factory()->create(['status' => OrderStatus::Processing]);
         $service = app(OrderManagementService::class);
@@ -66,8 +65,12 @@ class OrderManagementServiceTest extends TestCase
         );
 
         $this->assertNotNull($completed->completed_at);
-        $this->expectException(ValidationException::class);
 
-        $service->transition($completed, OrderStatus::Cancelled, $order->seller->user);
+        $cancelled = $service->transition($completed, OrderStatus::Cancelled, $order->seller->user);
+
+        $this->assertSame(OrderStatus::Cancelled, $cancelled->status);
+        $this->assertNull($cancelled->completed_at);
+        $this->assertNotNull($cancelled->cancelled_at);
+        $this->assertDatabaseCount('order_status_history', 2);
     }
 }

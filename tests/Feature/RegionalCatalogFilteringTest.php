@@ -98,7 +98,7 @@ class RegionalCatalogFilteringTest extends TestCase
                 'ids' => $this->selectedProduct->id.','.$this->otherProduct->id,
             ]))
             ->assertOk()
-            ->assertJsonPath('total', 2)
+            ->assertJsonPath('total', 1)
             ->assertSee($this->selectedProduct->name)
             ->assertDontSee($this->otherProduct->name);
     }

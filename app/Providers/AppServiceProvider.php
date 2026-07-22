@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Services\CatalogCacheService;
 use App\Services\CustomerOrderListService;
 use App\Services\DesignManager;
+use App\Services\LegacySeoMetadataService;
 use App\Services\ModerationClientResolver;
 use App\Services\ModerationSecretStore;
 use App\Services\RegionalContext;
@@ -69,7 +70,9 @@ class AppServiceProvider extends ServiceProvider
     private function composeSeo(): void
     {
         View::composer('main_layots', function ($view) {
-            $seo = app(SeoService::class);
+            $seo = app(DesignManager::class)->current() === 'legacy'
+                ? app(LegacySeoMetadataService::class)
+                : app(SeoService::class);
             $request = request();
 
             $view

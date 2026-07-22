@@ -47,13 +47,13 @@ class FilamentPanelAccessTest extends TestCase
     {
         config()->set('admin.filament_enabled', false);
 
-        $this->get('/admin')->assertNotFound();
-        $this->get('/admin/login')->assertNotFound();
+        $this->getJson('/admin')->assertNotFound();
+        $this->getJson('/admin/login')->assertNotFound();
     }
 
     public function test_old_control_path_and_legacy_admin_routes_are_not_registered(): void
     {
-        $this->get('/control')->assertNotFound();
+        $this->getJson('/control')->assertNotFound();
 
         $this->assertFalse(app('router')->has('voyager.dashboard'));
         $this->assertFalse(app('router')->has('voyager.media.index'));

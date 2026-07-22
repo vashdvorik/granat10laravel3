@@ -23,6 +23,7 @@ class ModerateProductImagesJobTest extends TestCase
 
     public function test_image_allow_approves_product_after_text_allow(): void
     {
+        config()->set('moderation.mode', 'auto');
         config()->set('moderation.images.enabled', true);
         $product = Product::factory()->pendingModeration()->create([
             'moderation_status' => ProductModerationStatus::Processing,
@@ -47,7 +48,7 @@ class ModerateProductImagesJobTest extends TestCase
         $this->assertSame(3, $product->moderated_version);
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
-            'provider' => 'image_google',
+            'provider' => 'image_gemini',
             'status' => 'completed',
             'decision' => 'allow',
         ]);
@@ -55,6 +56,7 @@ class ModerateProductImagesJobTest extends TestCase
 
     public function test_image_violation_requires_seller_changes(): void
     {
+        config()->set('moderation.mode', 'auto');
         config()->set('moderation.images.enabled', true);
         $product = Product::factory()->pendingModeration()->create([
             'moderation_status' => ProductModerationStatus::Processing,

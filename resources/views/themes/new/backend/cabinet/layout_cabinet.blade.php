@@ -19,7 +19,7 @@
         $cabinetGuestLabel = html_entity_decode('&#1055;&#1088;&#1086;&#1076;&#1072;&#1074;&#1077;&#1094;');
     @endphp
     <title>{{ trim($__env->yieldContent('title', $cabinetDefaultTitle)) }}</title>
-    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/theme-cabinet-new.css') }}">
     @stack('styles')

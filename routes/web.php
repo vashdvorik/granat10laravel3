@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\RegionalSelectionController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SitemapController;
@@ -35,6 +36,7 @@ Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/home', [HomeController::class, 'home']);
 Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
 Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
