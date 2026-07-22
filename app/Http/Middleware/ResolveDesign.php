@@ -15,6 +15,12 @@ class ResolveDesign
 
     public function handle(Request $request, Closure $next): Response
     {
+        $routeName = (string) $request->route()?->getName();
+
+        if ($request->is('account') || $request->is('account/*') || str_starts_with($routeName, 'account.')) {
+            return $next($request);
+        }
+
         $theme = $this->design->current();
 
         View::share('designTheme', $theme);

@@ -111,7 +111,7 @@ Route::get('/account', [CabinetController::class, 'cabinet'])
 
 
 // Группировка роутов личного кабинета с префиксом /account
-Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.')->group(function () {
     Route::prefix('store')->name('store.')->group(function () {
         Route::get('/', [CabinetController::class, 'storeIndex'])->name('index');
         Route::get('products', [CabinetController::class, 'storeProducts'])->name('products');
@@ -136,7 +136,7 @@ Route::middleware('auth')->prefix('cabinet')->group(function () {
 */
 
 // === ЛИЧНЫЙ КАБИНЕТ (BACKEND) ===
-Route::middleware('auth')->prefix('account')->name('account.')->group(function () {
+Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.')->group(function () {
 
     // Главная страница кабинета
     Route::get('/', [CabinetController::class, 'cabinet'])->name('index');

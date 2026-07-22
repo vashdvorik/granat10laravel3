@@ -3,6 +3,7 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Pages\DesignSettings;
+use App\Filament\Pages\CabinetDesignSettings;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\SiteSetting;
@@ -52,6 +53,22 @@ class DesignSettingsPageTest extends TestCase
         $this->assertSame(
             'new',
             SiteSetting::query()->where('key', config('design.setting_key'))->value('value')
+        );
+    }
+
+    public function test_administrator_can_enable_new_cabinet_design(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(CabinetDesignSettings::class)
+            ->fillForm(['theme' => 'new'])
+            ->call('save')
+            ->assertHasNoFormErrors()
+            ->assertNotified('Дизайн кабинета изменён');
+
+        $this->assertSame(
+            'new',
+            SiteSetting::query()->where('key', config('cabinet_design.setting_key'))->value('value')
         );
     }
 

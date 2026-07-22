@@ -80,4 +80,28 @@ class DesignSwitchingTest extends TestCase
             Cache::forget(config('design.cache_key'));
         }
     }
+
+    public function test_new_cabinet_design_renders_the_seller_cabinet_shell(): void
+    {
+        config()->set('cabinet_design.default', 'legacy');
+        SiteSetting::query()->updateOrCreate([
+            'key' => config('cabinet_design.setting_key'),
+        ], [
+            'value' => 'new',
+        ]);
+        Cache::forget(config('cabinet_design.cache_key'));
+
+        $user = \App\Models\User::factory()->create();
+
+        try {
+            $this->actingAs($user)
+                ->get(route('account.index'))
+                ->assertOk()
+                ->assertSee('cabinet-new', false)
+                ->assertSee('theme-cabinet-new.css');
+        } finally {
+            config()->set('cabinet_design.default', 'legacy');
+            Cache::forget(config('cabinet_design.cache_key'));
+        }
+    }
 }
