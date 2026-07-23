@@ -107,17 +107,17 @@
                                                 <div class="form-group">
                                                     <label for="name">Название товара <span class="text-danger">*</span></label>
                                                     <textarea
-                                                           class="form-control product-form-autosize product-form-scroll-anchor @error('name') is-invalid @enderror"
+                                                           class="form-control product-form-name-field product-form-scroll-anchor @error('name') is-invalid @enderror"
                                                            id="name" 
                                                            name="name" 
                                                            rows="1"
                                                            placeholder="Введите название товара"
-                                                           maxlength="255"
+                                                           maxlength="70"
                                                            required>{{ old('name', $product->name) }}</textarea>
                                                     <div class="d-flex justify-content-between align-items-start mt-1">
                                                         <small class="text-muted">Рекомендуемая длина — 35 символов. Более длинные названия могут обрезаться в каталоге</small>
                                                         <small class="ms-2">
-                                                            <span id="name-counter" class="fw-500">{{ strlen(old('name', $product->name)) }}</span>/255
+                                                            <span id="name-counter" class="fw-500">{{ strlen(old('name', $product->name)) }}</span>/70
                                                         </small>
                                                     </div>
                                                     @error('name')
@@ -261,7 +261,8 @@
                                                     <textarea class="form-control product-form-autosize product-form-scroll-anchor @error('desc') is-invalid @enderror"
                                                               id="desc" 
                                                               name="desc" 
-                                                              rows="4" 
+                                                              rows="4"
+                                                              maxlength="500"
                                                               placeholder="Подробное описание товара">{{ old('desc', $product->desc) }}</textarea>
                                                     @error('desc')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -276,10 +277,11 @@
                                                 <div class="form-group">
                                                     <label for="features1">Характеристика 1</label>
                                                     <textarea
-                                                           class="form-control product-form-autosize product-form-scroll-anchor @error('features1') is-invalid @enderror"
+                                                           class="form-control product-form-feature-field product-form-scroll-anchor @error('features1') is-invalid @enderror"
                                                            id="features1" 
                                                            name="features1" 
                                                            rows="1"
+                                                           maxlength="30"
                                                            placeholder="Например: Цвет: Красный">{{ old('features1', $product->features1) }}</textarea>
                                                     @error('features1')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -289,10 +291,11 @@
                                                 <div class="form-group">
                                                     <label for="features2">Характеристика 2</label>
                                                     <textarea
-                                                           class="form-control product-form-autosize @error('features2') is-invalid @enderror"
+                                                           class="form-control product-form-feature-field @error('features2') is-invalid @enderror"
                                                            id="features2" 
                                                            name="features2" 
                                                            rows="1"
+                                                           maxlength="30"
                                                            placeholder="Например: Размер: L">{{ old('features2', $product->features2) }}</textarea>
                                                     @error('features2')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -302,10 +305,11 @@
                                                 <div class="form-group">
                                                     <label for="features3">Характеристика 3</label>
                                                     <textarea
-                                                           class="form-control product-form-autosize @error('features3') is-invalid @enderror"
+                                                           class="form-control product-form-feature-field @error('features3') is-invalid @enderror"
                                                            id="features3" 
                                                            name="features3" 
                                                            rows="1"
+                                                           maxlength="30"
                                                            placeholder="Например: Материал: Хлопок">{{ old('features3', $product->features3) }}</textarea>
                                                     @error('features3')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -315,10 +319,11 @@
                                                 <div class="form-group mb-0">
                                                     <label for="features4">Характеристика 4</label>
                                                     <textarea
-                                                           class="form-control product-form-autosize @error('features4') is-invalid @enderror"
+                                                           class="form-control product-form-feature-field @error('features4') is-invalid @enderror"
                                                            id="features4" 
                                                            name="features4" 
                                                            rows="1"
+                                                           maxlength="30"
                                                            placeholder="Например: Вес: 500г">{{ old('features4', $product->features4) }}</textarea>
                                                     @error('features4')
                                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -905,7 +910,7 @@ $(document).ready(function() {
         counter.text(length);
         
         // Меняем цвет на красный при превышении 35 символов
-        if (length > 35) {
+        if (length >= 70) {
             counter.addClass('text-danger').removeClass('text-success');
         } else {
             counter.addClass('text-success').removeClass('text-danger');
@@ -917,7 +922,7 @@ $(document).ready(function() {
         const initialLength = $('#name').val().length;
         const counter = $('#name-counter');
         
-        if (initialLength > 35) {
+        if (initialLength >= 70) {
             counter.addClass('text-danger');
         } else if (initialLength > 0) {
             counter.addClass('text-success');

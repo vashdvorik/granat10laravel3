@@ -1919,6 +1919,33 @@ body.seller-cabinet-body .product-form-page textarea.product-form-autosize {
     word-break: break-word;
 }
 
+body.seller-cabinet-body .product-form-page textarea.product-form-name-field {
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px;
+    overflow: hidden;
+    resize: none;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    line-height: 1.4;
+}
+
+body.seller-cabinet-body .product-form-page textarea.product-form-feature-field {
+    min-height: 44px !important;
+    height: 44px !important;
+    max-height: 44px;
+    overflow: hidden;
+    resize: none;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+body.seller-cabinet-body .product-form-page textarea.product-form-feature-field + .seller-character-counter {
+    width: 100%;
+}
+
 body.seller-cabinet-body .product-form-page .form-check.form-switch {
     display: flex;
     align-items: center;
@@ -2472,8 +2499,7 @@ body.seller-cabinet-body .product-edit-page .add-product__body > .form-group {
 
 body.seller-cabinet-body .product-edit-page .add-product__body > .form-group:nth-child(1),
 body.seller-cabinet-body .product-edit-page .add-product__body > .form-group:nth-child(2),
-body.seller-cabinet-body .product-edit-page .add-product__body > .form-group:nth-child(6),
-body.seller-cabinet-body .product-edit-page .add-product__body > .form-group:nth-child(7) {
+body.seller-cabinet-body .product-edit-page .add-product__body > .form-group:nth-child(6) {
     grid-column: 1 / -1;
 }
 

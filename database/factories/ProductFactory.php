@@ -25,7 +25,7 @@ class ProductFactory extends Factory
             'price'           => fake()->randomFloat(2, 100, 100_000),
             'lowprice'        => null,
             'desc'            => fake()->paragraph(),
-            'features1'       => fake()->sentence(5),
+            'features1'       => 'Состояние: новое',
             'features2'       => null,
             'features3'       => null,
             'features4'       => null,

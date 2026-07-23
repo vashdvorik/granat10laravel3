@@ -86,6 +86,41 @@ class ProductRequestTest extends TestCase
         $this->assertTrue($validator->errors()->has('lowprice'));
     }
 
+    public function test_store_product_request_rejects_long_feature_text(): void
+    {
+        $category = Category::factory()->create();
+        $request = new StoreProductRequest;
+
+        $validator = Validator::make([
+            'name' => 'Valid product',
+            'price' => 100,
+            'category_id' => $category->id,
+            'save_action' => ProductSaveAction::Draft->value,
+            'features1' => str_repeat('a', 31),
+        ], $request->rules(), $request->messages());
+
+        $this->assertTrue($validator->fails());
+        $this->assertTrue($validator->errors()->has('features1'));
+    }
+
+    public function test_store_product_request_rejects_long_name_and_description(): void
+    {
+        $category = Category::factory()->create();
+        $request = new StoreProductRequest;
+
+        $validator = Validator::make([
+            'name' => str_repeat('a', 71),
+            'price' => 100,
+            'category_id' => $category->id,
+            'save_action' => ProductSaveAction::Draft->value,
+            'desc' => str_repeat('a', 501),
+        ], $request->rules(), $request->messages());
+
+        $this->assertTrue($validator->fails());
+        $this->assertTrue($validator->errors()->has('name'));
+        $this->assertTrue($validator->errors()->has('desc'));
+    }
+
     public function test_update_product_request_uses_base_rules_and_version_control(): void
     {
         $storeRequest = new StoreProductRequest;

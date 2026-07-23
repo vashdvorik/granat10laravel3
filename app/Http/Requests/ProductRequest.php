@@ -16,15 +16,15 @@ abstract class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:70'],
             'price' => ['required', 'numeric', 'min:0'],
             'lowprice' => ['nullable', 'numeric', 'min:0', 'lt:price'],
             'category_id' => ['required', 'exists:categories,id'],
-            'desc' => ['nullable', 'string'],
-            'features1' => ['nullable', 'string', 'max:255'],
-            'features2' => ['nullable', 'string', 'max:255'],
-            'features3' => ['nullable', 'string', 'max:255'],
-            'features4' => ['nullable', 'string', 'max:255'],
+            'desc' => ['nullable', 'string', 'max:500'],
+            'features1' => ['nullable', 'string', 'max:30'],
+            'features2' => ['nullable', 'string', 'max:30'],
+            'features3' => ['nullable', 'string', 'max:30'],
+            'features4' => ['nullable', 'string', 'max:30'],
             'is_vip' => ['boolean'],
             'save_action' => ['required', Rule::enum(ProductSaveAction::class)],
             'can_order' => ['boolean'],
@@ -38,7 +38,7 @@ abstract class ProductRequest extends FormRequest
     {
         return [
             'name.required' => 'Поле "Название товара" обязательно для заполнения',
-            'name.max' => 'Название товара не может быть длиннее 255 символов',
+            'name.max' => 'Название товара не может быть длиннее 70 символов',
             'price.required' => 'Укажите цену товара',
             'price.numeric' => 'Цена должна быть числом',
             'price.min' => 'Цена не может быть отрицательной',
