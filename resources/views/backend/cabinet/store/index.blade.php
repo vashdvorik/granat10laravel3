@@ -56,7 +56,7 @@
                     </div>
                     <div class="store-overview-hero__status store-overview-hero__status--{{ $sellerCabinetState->alertType }}">
                         <span>{{ $sellerCabinetState->label }}</span>
-                        <strong>{{ $sellerCabinetState->packageName ?? 'Нет тарифа' }}</strong>
+                        <strong>Тариф: {{ $sellerCabinetState->packageName ?? 'Не включен' }}</strong>
                     </div>
                     <div class="store-overview-hero__stats">
                         <div>

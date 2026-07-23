@@ -336,9 +336,8 @@
                                     </div>
                                     
                                     {{-- Изображения товара --}}
-                                    <div class="card add-product product-form-section mb-24"
-                                         id="product-images-section"
-                                         class="product-form-scroll-anchor">
+                                    <div class="card add-product product-form-section product-form-scroll-anchor mb-24"
+                                         id="product-images-section">
                                         <div class="card-body p-0">
                                             <div class="card-header d-flex justify-content-between align-items-center">
                                                 <h6 class="fw-500">Изображения товара</h6>
