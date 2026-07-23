@@ -1,86 +1,161 @@
-# Краткое развёртывание на production-сервере
+# Деплой BIMM на production-сервер
 
-## 1. Требования
+Инструкция рассчитана на Linux-сервер с Nginx, PHP-FPM, MySQL/MariaDB,
+Redis и Supervisor. Проект работает на Laravel 10.
 
-- Linux, Nginx или Apache;
-- PHP 8.1+ с расширениями: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `fileinfo`, `gd`;
-- MySQL/MariaDB;
+> Важно: корень сайта Nginx должен указывать на `/var/www/granat/public`, а не
+> на корень репозитория. В репозитории сейчас нет `.env.example` и
+> `package-lock.json`, поэтому команды ниже учитывают это.
+
+## 0. Что понадобится
+
+- домен, направленный DNS-записями на сервер;
+- Ubuntu 22.04/24.04 или совместимый Linux;
+- PHP 8.2 с PHP-FPM;
+- MySQL 8 или MariaDB;
 - Composer 2;
-- Node.js 18+ и npm;
-- корневая директория сайта должна указывать на `public`.
+- Redis 6+;
+- Nginx, Supervisor и Certbot;
+- Git-доступ к репозиторию;
+- API-ключи ИИ-провайдера, если будет включена автоматическая модерация;
+- Telegram-бот, если нужны уведомления продавцам.
 
-Перед развёртыванием сделайте резервную копию базы данных и `storage/app/public`.
+Создайте отдельного пользователя для деплоя, например `deploy`. Не выполняйте
+обычные команды приложения от `root`.
 
-Пример для MySQL:
+## 1. До первого деплоя
+
+1. Направьте `A`/`AAAA` записи домена на сервер.
+2. Подготовьте базу и пароль пользователя БД.
+3. Подготовьте Redis с закрытым доступом только с localhost или внутренней сети.
+4. Решите, какие функции включаются сразу:
+   - `FILAMENT_PANEL_ENABLED` — административная панель;
+   - `REGIONALITY_ENABLED`, `REGIONAL_URLS_ENABLED`, `REGIONAL_SEO_ENABLED` — города и региональные URL;
+   - `PRODUCT_MODERATION_AI_ENABLED` — текстовая ИИ-модерация;
+   - `AI_IMAGE_MODERATION_ENABLED` — отдельная модерация изображений;
+   - Telegram-уведомления.
+5. Сделайте резервные копии существующей базы и `storage/app/public`, если это
+   не новая установка.
+
+Пример резервной копии:
 
 ```bash
-mkdir -p /var/backups/granat
-mysqldump --single-transaction --routines --triggers \
-  -u database_user -p database_name \
-  | gzip > /var/backups/granat/database-$(date +%F-%H%M).sql.gz
+sudo mkdir -p /var/backups/granat
+sudo mysqldump --single-transaction --routines --triggers \
+  -u granat_user -p granat \
+  | gzip | sudo tee /var/backups/granat/database-$(date +%F-%H%M).sql.gz > /dev/null
 
-tar -czf /var/backups/granat/public-storage-$(date +%F-%H%M).tar.gz \
+sudo tar -czf /var/backups/granat/storage-$(date +%F-%H%M).tar.gz \
   -C /var/www/granat storage/app/public
 ```
 
-Проверьте, что архивы созданы и не пустые:
+Проверьте архивы:
 
 ```bash
-ls -lh /var/backups/granat
-gzip -t /var/backups/granat/database-*.sql.gz
-tar -tzf /var/backups/granat/public-storage-*.tar.gz > /dev/null
+sudo gzip -t /var/backups/granat/database-*.sql.gz
+sudo tar -tzf /var/backups/granat/storage-*.tar.gz > /dev/null
 ```
 
-Копии должны храниться вне сервера приложения. Периодически проверяйте
-восстановление на отдельной тестовой базе. Не храните пароль базы в команде или
-репозитории — используйте защищённый клиентский файл MySQL либо ввод пароля.
+## 2. Установка системных пакетов
 
-## 2. Установка проекта
+Для PHP 8.2 на Ubuntu:
 
 ```bash
+sudo apt update
+sudo apt install -y \
+  nginx mysql-server redis-server supervisor git unzip curl \
+  php8.2-cli php8.2-fpm php8.2-mysql php8.2-mbstring php8.2-xml \
+  php8.2-curl php8.2-gd php8.2-zip php8.2-bcmath php8.2-intl
+```
+
+Для локального сканера изображений дополнительно установите нужные бинарники:
+
+```bash
+sudo apt install -y tesseract-ocr zbar-tools
+```
+
+Проверьте версии:
+
+```bash
+php -v
+php -m | grep -E 'bcmath|curl|fileinfo|gd|intl|mbstring|openssl|pdo_mysql|xml|zip'
+composer --version
+redis-cli ping
+```
+
+Ожидаемый ответ Redis — `PONG`.
+
+Node.js для текущей legacy-темы не является обязательным: Blade-шаблоны не
+подключают Vite напрямую. Если в конкретном релизе появятся Vite-ассеты,
+установите Node.js LTS и выполните `npm install && npm run build`. Не используйте
+`npm ci`, пока в репозитории нет `package-lock.json`.
+
+## 3. База данных
+
+Создайте отдельную БД и пользователя:
+
+```bash
+sudo mysql
+```
+
+```sql
+CREATE DATABASE granat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'granat_user'@'localhost' IDENTIFIED BY 'CHANGE_THIS_LONG_PASSWORD';
+GRANT ALL PRIVILEGES ON granat.* TO 'granat_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+## 4. Загрузка кода
+
+```bash
+sudo mkdir -p /var/www
+sudo chown deploy:deploy /var/www
+
 git clone <URL_РЕПОЗИТОРИЯ> /var/www/granat
 cd /var/www/granat
 
 composer install --no-dev --prefer-dist --optimize-autoloader
-npm ci
-npm run build
-
-cp .env.example .env
-php artisan key:generate
 ```
 
-Заполните `.env`:
+Создайте `.env` вручную:
+
+```bash
+cp /dev/null .env
+chmod 600 .env
+nano .env
+```
+
+Минимальная production-конфигурация:
 
 ```env
+APP_NAME="BIMM"
 APP_ENV=production
+APP_KEY=
 APP_DEBUG=false
 APP_URL=https://example.com
+APP_LOCALE=ru
+
+LOG_CHANNEL=daily
+LOG_LEVEL=warning
+MODERATION_LOG_LEVEL=info
+MODERATION_LOG_DAYS=30
 
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=database_name
-DB_USERNAME=database_user
-DB_PASSWORD=strong_password
+DB_DATABASE=granat
+DB_USERNAME=granat_user
+DB_PASSWORD=CHANGE_THIS_LONG_PASSWORD
 
 FILESYSTEM_DISK=public
+
 CACHE_DRIVER=redis
 SESSION_DRIVER=redis
 SESSION_CONNECTION=session
-QUEUE_CONNECTION=redis
-FILAMENT_PANEL_ENABLED=true
-PRODUCT_MODERATION_QUEUE=moderation
-ORDER_NOTIFICATION_QUEUE=orders
-TELEGRAM_BOT_TOKEN=токен_от_BotFather
-TELEGRAM_BOT_USERNAME=имя_бота_без_@
-TELEGRAM_WEBHOOK_SECRET=случайная_секретная_строка
-TELEGRAM_TIMEOUT=10
-PRODUCT_MODERATION_MAX_ATTEMPTS=3
-PRODUCT_MODERATION_TIMEOUT=60
-HEALTH_WORKER_MAX_AGE=180
-ORDER_PERSONAL_DATA_RETENTION_DAYS=365
-ORDER_ANONYMIZATION_BATCH_SIZE=200
+SESSION_LIFETIME=120
 
+QUEUE_CONNECTION=redis
 REDIS_CLIENT=predis
 REDIS_HOST=127.0.0.1
 REDIS_PORT=6379
@@ -89,51 +164,91 @@ REDIS_CACHE_DB=1
 REDIS_SESSION_DB=2
 REDIS_QUEUE_DB=3
 REDIS_QUEUE_CONNECTION=queue
-REDIS_QUEUE=moderation
+REDIS_QUEUE=default
 REDIS_QUEUE_RETRY_AFTER=120
 REDIS_QUEUE_BLOCK_FOR=5
 
-MAIL_MAILER=smtp
-MAIL_HOST=smtp.example.com
-MAIL_PORT=587
-MAIL_USERNAME=user
-MAIL_PASSWORD=password
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=info@example.com
-MAIL_FROM_NAME="${APP_NAME}"
+FILAMENT_PANEL_ENABLED=true
+FILAMENT_PANEL_PATH=admin
+
+REGIONALITY_ENABLED=true
+REGIONAL_URLS_ENABLED=true
+REGIONAL_SEO_ENABLED=true
+DESIGN_DEFAULT=legacy
+CABINET_DESIGN_DEFAULT=legacy
+
+PRODUCT_MODERATION_AI_ENABLED=false
+PRODUCT_MODERATION_AI_PROVIDER=fake
+PRODUCT_MODERATION_AI_MODE=shadow
+PRODUCT_MODERATION_QUEUE=moderation
+PRODUCT_MODERATION_TIMEOUT=60
+PRODUCT_MODERATION_MAX_ATTEMPTS=3
+PRODUCT_MODERATION_FAKE_DECISION=review
+
+AI_IMAGE_MODERATION_ENABLED=false
+AI_IMAGE_MODERATION_PROVIDER=gemini
+AI_IMAGE_MODERATION_QUEUE=moderation
+AI_IMAGE_MODERATION_TIMEOUT=60
+AI_IMAGE_MODERATION_MAX_ATTEMPTS=3
+
+TELEGRAM_TIMEOUT=10
+ORDER_NOTIFICATION_QUEUE=orders
+HEALTH_WORKER_MAX_AGE=180
+ORDER_PERSONAL_DATA_RETENTION_DAYS=365
+ORDER_ANONYMIZATION_BATCH_SIZE=200
 ```
 
-## 3. База данных и файлы
+Сгенерируйте ключ приложения:
 
 ```bash
+php artisan key:generate --force
+```
+
+Не копируйте `.env` в Git, резервные копии и чаты. После первого запуска
+проверьте права:
+
+```bash
+chmod 600 .env
+```
+
+## 5. Настройка файлов и миграций
+
+```bash
+cd /var/www/granat
 php artisan migrate --force
 php artisan storage:link
 
-sudo chown -R www-data:www-data storage bootstrap/cache
-sudo chmod -R 775 storage bootstrap/cache
+mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views
+sudo chown -R deploy:www-data storage bootstrap/cache
+sudo find storage bootstrap/cache -type d -exec chmod 775 {} \;
+sudo find storage bootstrap/cache -type f -exec chmod 664 {} \;
 ```
 
-Не запускайте `migrate:fresh` или полный набор тестовых seeders на production.
+Не запускайте на рабочей базе:
 
-Если разворачивается новая пустая база, отдельно импортируйте справочники категорий и тарифов:
+```bash
+php artisan migrate:fresh
+php artisan db:seed
+```
+
+Для новой пустой базы после миграций загрузите справочники:
 
 ```bash
 php artisan db:seed --class=CategoriesJsonSeeder --force
 php artisan db:seed --class=PackagesTableSeeder --force
 ```
 
-`CategoriesJsonSeeder` идемпотентен: он сохраняет фиксированные ID и alias категорий, восстанавливает Nested Set и пересобирает кеш каталога.
+`PackagesTableSeeder` очищает таблицу тарифов, поэтому на существующей базе его
+не запускайте.
 
-`PackagesTableSeeder` предварительно очищает таблицу тарифов, поэтому запускайте его только для новой пустой базы. На существующей рабочей базе не запускайте этот seeder и обязательно делайте резервную копию перед любым импортом.
-
-## 4. Первый администратор
+## 6. Первый администратор
 
 Временно добавьте в `.env`:
 
 ```env
 ADMIN_NAME=Administrator
 ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=strong-admin-password
+ADMIN_PASSWORD=CHANGE_THIS_ADMIN_PASSWORD
 ```
 
 Затем выполните:
@@ -143,17 +258,67 @@ php artisan config:clear
 php artisan db:seed --class=AdminRoleSeeder --force
 ```
 
-После создания администратора удалите `ADMIN_PASSWORD` из `.env`.
+После этого удалите `ADMIN_PASSWORD` из `.env` и снова выполните:
 
-Адрес Filament:
+```bash
+php artisan config:clear
+```
+
+Адрес панели:
 
 ```text
 https://example.com/admin/login
 ```
 
-Административная панель `/admin` обслуживается только Filament. Voyager удалён из приложения.
+## 7. Nginx и HTTPS
 
-## 5. Production-кеш
+Создайте `/etc/nginx/sites-available/granat`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name example.com www.example.com;
+
+    root /var/www/granat/public;
+    index index.php;
+    client_max_body_size 12M;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+Активируйте сайт и проверьте конфигурацию:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/granat /etc/nginx/sites-enabled/granat
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+После проверки DNS получите сертификат:
+
+```bash
+sudo certbot --nginx -d example.com -d www.example.com
+sudo certbot renew --dry-run
+```
+
+После HTTPS проверьте, что в `.env` указан именно `https://example.com`.
+
+## 8. Кеш Laravel
+
+После заполнения `.env`:
 
 ```bash
 php artisan optimize:clear
@@ -161,86 +326,97 @@ php artisan optimize
 php artisan filament:optimize
 ```
 
-После изменения `.env` обязательно повторите эти команды.
+После каждого изменения `.env` повторяйте эти команды.
 
-## 6. Планировщик
+## 9. Workers очереди
 
-Добавьте в `crontab` пользователя веб-сервера:
+На production не используйте `php artisan granat:work`: эта команда предназначена
+для локальной разработки и запускает несколько процессов в одном терминале.
 
-```cron
-* * * * * cd /var/www/granat && php artisan schedule:run >> /dev/null 2>&1
+Создайте Supervisor-конфигурации из шаблонов:
+
+```bash
+sudo cp deployment/supervisor/granat-moderation-worker.conf.example \
+  /etc/supervisor/conf.d/granat-moderation-worker.conf
+sudo cp deployment/supervisor/granat-orders-worker.conf.example \
+  /etc/supervisor/conf.d/granat-orders-worker.conf
 ```
 
-Планировщик ежедневно проверяет истёкшие тарифы и автопродление, а в 02:00
-анонимизирует персональные данные завершённых и отменённых заказов старше
-`ORDER_PERSONAL_DATA_RETENTION_DAYS`.
+Проверьте в обоих файлах путь `/var/www/granat`, PHP и пользователя `www-data`.
+Для Redis текущие команды должны быть такими:
 
-Проверка без изменения данных:
+```text
+queue:work redis --queue=moderation --sleep=3 --tries=3 --timeout=90
+queue:work redis --queue=orders --sleep=3 --tries=3 --timeout=30
+```
+
+Если Redis временно не используется, в командах замените `redis` на `database` и
+установите `QUEUE_CONNECTION=database`. После этого обязательно должны быть
+выполнены миграции таблиц `jobs` и `failed_jobs`.
+
+Запустите workers:
+
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start granat-moderation-worker:*
+sudo supervisorctl start granat-orders-worker:*
+sudo supervisorctl status
+```
+
+Проверка очередей:
+
+```bash
+php artisan queue:failed
+tail -f storage/logs/worker-moderation.log
+tail -f storage/logs/worker-orders.log
+```
+
+Правильный синтаксис запуска вручную:
+
+```bash
+php artisan queue:work redis --queue=moderation --tries=3 --timeout=90
+```
+
+Не пишите `databaseue=moderation`: это воспринимается Laravel как имя
+подключения и вызывает ошибку `queue connection has not been configured`.
+
+## 10. Планировщик Laravel
+
+В `crontab` пользователя веб-сервера добавьте одну строку:
+
+```bash
+sudo crontab -u www-data -e
+```
+
+```cron
+* * * * * cd /var/www/granat && /usr/bin/php artisan schedule:run >> /dev/null 2>&1
+```
+
+Планировщик выполняет:
+
+- проверку и автопродление истёкших тарифов в `01:00`;
+- обезличивание старых завершённых и отменённых заказов в `02:00`;
+- запись heartbeat worker каждую минуту, если очередь не `sync`.
+
+Проверка без изменения заказов:
 
 ```bash
 php artisan orders:anonymize-expired --dry-run
 ```
 
-## 7. Обновление приложения
+## 11. Telegram-уведомления
 
-```bash
-cd /var/www/granat
-php artisan down
-
-git pull
-composer install --no-dev --prefer-dist --optimize-autoloader
-npm ci
-npm run build
-php artisan migrate --force
-php artisan optimize:clear
-php artisan optimize
-php artisan filament:optimize
-
-php artisan up
-```
-
-Перед `php artisan up` проверьте:
-
-```bash
-php artisan about
-php artisan route:list --path=admin
-tail -n 100 storage/logs/laravel.log
-```
-
-Для production используйте ротацию журналов и отключённый debug:
+Добавьте в `.env`:
 
 ```env
-APP_ENV=production
-APP_DEBUG=false
-LOG_CHANNEL=daily
-LOG_LEVEL=warning
-MODERATION_LOG_LEVEL=info
-MODERATION_LOG_DAYS=30
+TELEGRAM_BOT_TOKEN=токен_от_BotFather
+TELEGRAM_BOT_USERNAME=имя_бота_без_символа_@
+TELEGRAM_WEBHOOK_SECRET=длинная_случайная_строка
 ```
 
-## 8. Постоянный worker модерации
-
-При `QUEUE_CONNECTION=redis` одного запуска команды в терминале недостаточно. Worker должен автоматически запускаться после перезагрузки сервера и перезапускаться после ошибки.
-
-Готовый шаблон находится в:
-
-```text
-deployment/supervisor/granat-moderation-worker.conf.example
-deployment/supervisor/granat-orders-worker.conf.example
-```
-
-Скопируйте его и проверьте пути к PHP и проекту:
-
-```bash
-sudo cp deployment/supervisor/granat-moderation-worker.conf.example /etc/supervisor/conf.d/granat-moderation-worker.conf
-sudo cp deployment/supervisor/granat-orders-worker.conf.example /etc/supervisor/conf.d/granat-orders-worker.conf
-sudo supervisorctl reread
-sudo supervisorctl update
-sudo supervisorctl start granat-moderation-worker:*
-sudo supervisorctl start granat-orders-worker:*
-```
-
-Зарегистрировать Telegram webhook после настройки HTTPS:
+Очередь заказов должна работать постоянно. После включения HTTPS зарегистрируйте
+webhook:
 
 ```bash
 curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
@@ -248,135 +424,166 @@ curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
   -d "secret_token=${TELEGRAM_WEBHOOK_SECRET}"
 ```
 
-Webhook должен использовать только HTTPS. `TELEGRAM_WEBHOOK_SECRET` нельзя
-публиковать или передавать продавцам.
-sudo supervisorctl status
-```
-
-После каждого обновления приложения перезапускайте worker:
+Проверка webhook:
 
 ```bash
-php artisan queue:restart
+curl "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo"
 ```
 
-Проверка готовности:
+Продавец подключает Telegram из кабинета. Уведомление отправляется только после
+проверки чата и при включённом `telegram_notifications_enabled`.
 
-```bash
-curl -f https://example.com/health/live
-curl -f https://example.com/health/ready
-```
+## 12. ИИ-модерация
 
-Основные журналы:
-
-```text
-storage/logs/laravel-YYYY-MM-DD.log
-storage/logs/moderation-YYYY-MM-DD.log
-storage/logs/worker-moderation.log
-storage/logs/worker-orders.log
-```
-
-В журнал модерации записываются идентификатор товара, версия, провайдер, попытка, решение, риск и время ответа. API-ключ и содержимое карточки товара в журнал не записываются.
-
-Если `/health/ready` возвращает HTTP 503:
-
-```bash
-sudo supervisorctl status
-php artisan queue:failed
-tail -n 100 storage/logs/worker-moderation.log
-tail -n 100 storage/logs/worker-orders.log
-tail -n 100 storage/logs/moderation-$(date +%Y-%m-%d).log
-```
-
-## 9. Redis
-
-Установите Redis и запретите публичный доступ к порту `6379`. Redis должен быть доступен только приложению через localhost или закрытую сеть.
-
-```bash
-sudo apt update
-sudo apt install redis-server
-sudo systemctl enable --now redis-server
-redis-cli ping
-```
-
-Ожидаемый ответ:
-
-```text
-PONG
-```
-
-Проект использует отдельные логические базы:
-
-- DB 1 — кеш каталога;
-- DB 2 — пользовательские сессии;
-- DB 3 — фоновые очереди;
-- DB 0 оставлена для общих Redis-операций.
-
-После изменения `.env`:
-
-```bash
-php artisan optimize:clear
-php artisan optimize
-php artisan queue:restart
-sudo supervisorctl restart granat-moderation-worker:*
-sudo supervisorctl restart granat-orders-worker:*
-```
-
-Не выполняйте `redis-cli FLUSHALL` на рабочем сервере: команда удалит кеш, сессии и задачи очереди. Для очистки только кеша приложения используйте:
-
-```bash
-php artisan cache:clear
-```
-
-Безопасный откат при проблеме с Redis:
+Сначала разверните проект с безопасными настройками:
 
 ```env
-CACHE_DRIVER=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=database
+PRODUCT_MODERATION_AI_ENABLED=false
+AI_IMAGE_MODERATION_ENABLED=false
 ```
 
-После отката очистите конфигурационный кеш и запустите worker с подключением `database`.
+После проверки сайта откройте `/admin/moderation-settings` и настройте отдельно:
 
-## 10. Meilisearch
+1. текстовую модерацию;
+2. модерацию изображений;
+3. провайдера, модель, базовый URL, endpoint и заголовок авторизации;
+4. очередь, timeout и число попыток.
 
-Поиск может работать в двух режимах:
-
-- `SCOUT_DRIVER=null` — SQL fallback, не требует отдельного сервиса;
-- `SCOUT_DRIVER=meilisearch` — быстрый поиск с исправлением опечаток и ранжированием.
-
-Пример запуска локально через Docker:
+После включения провайдера убедитесь, что API-ключ сохранён, затем проверьте
+тестовое подключение в панели. Для каждой включённой модерации worker должен
+слушать соответствующую очередь. Ошибки смотрите здесь:
 
 ```bash
-docker run --name granat-meilisearch -d \
-  -p 127.0.0.1:7700:7700 \
-  -e MEILI_MASTER_KEY="replace-with-long-secret" \
-  -v granat_meili_data:/meili_data \
-  getmeili/meilisearch:v1.16
+tail -f storage/logs/moderation-$(date +%Y-%m-%d).log
+php artisan queue:failed
 ```
 
-Не используйте тег `latest` на рабочем сервере. Порт `7700` не должен быть доступен из интернета.
+В production не включайте `PRODUCT_MODERATION_AI_MODE=auto`, пока не проверили
+реальные ответы провайдера на тестовых товарах. При выключенной ИИ-модерации
+новые товары должны переходить на ручную проверку согласно текущей логике проекта.
 
-Настройки приложения:
+## 13. Meilisearch (необязательно)
+
+Без отдельного сервиса проект использует SQL-поиск. Для Meilisearch настройте:
 
 ```env
 SCOUT_DRIVER=meilisearch
 SCOUT_QUEUE=true
 SCOUT_PREFIX=granat_
 MEILISEARCH_HOST=http://127.0.0.1:7700
-MEILISEARCH_KEY=replace-with-long-secret
+MEILISEARCH_KEY=длинный_секретный_ключ
 ```
 
-После первого запуска или изменения структуры поискового документа:
+Порт `7700` не открывайте в интернет. После установки:
 
 ```bash
 php artisan scout:sync-index-settings
-php artisan scout:import "App\Models\Product"
+php artisan scout:import "App\\Models\\Product"
 ```
 
-Индекс содержит только опубликованные товары с актуальным одобрением модерации и действующим тарифом продавца. Категория и выбранный город фильтруются внутри поискового движка до пагинации.
-
-Если Meilisearch временно недоступен, публичный поиск автоматически переключается на SQL fallback. Для полного ручного отключения:
+Если Meilisearch ещё не настроен, оставьте:
 
 ```env
 SCOUT_DRIVER=null
 ```
+
+## 14. Финальная проверка
+
+```bash
+cd /var/www/granat
+php artisan about
+php artisan route:list --path=admin
+php artisan migrate:status
+php artisan config:show queue
+php artisan config:show moderation
+
+curl -f https://example.com/health/live
+curl -f https://example.com/health/ready
+```
+
+Проверьте вручную в браузере:
+
+- главную страницу, каталог, поиск и страницу магазина;
+- регистрацию и вход продавца;
+- создание и редактирование товара;
+- загрузку изображения;
+- оформление заказа;
+- отображение заказа в кабинете продавца;
+- подключение Telegram;
+- `/admin/login` и страницу модерации.
+
+`/health/ready` может вернуть HTTP 503, если worker очереди не записал heartbeat.
+В этом случае проверьте:
+
+```bash
+sudo supervisorctl status
+sudo systemctl status nginx php8.2-fpm redis-server supervisor
+tail -n 100 storage/logs/laravel-$(date +%Y-%m-%d).log
+```
+
+## 15. Обновление проекта
+
+Перед обновлением сделайте backup и включите maintenance mode:
+
+```bash
+cd /var/www/granat
+php artisan down --render="errors::503"
+git pull --ff-only
+composer install --no-dev --prefer-dist --optimize-autoloader
+php artisan migrate --force
+php artisan optimize:clear
+php artisan optimize
+php artisan filament:optimize
+php artisan queue:restart
+sudo supervisorctl restart granat-moderation-worker:*
+sudo supervisorctl restart granat-orders-worker:*
+php artisan up
+```
+
+Если релиз содержит Vite-ассеты, перед кешированием выполните:
+
+```bash
+npm install
+npm run build
+```
+
+После обновления снова выполните раздел «Финальная проверка».
+
+## 16. Откат
+
+Если релиз неработоспособен:
+
+```bash
+cd /var/www/granat
+php artisan down
+git log --oneline -5
+git checkout <PREVIOUS_RELEASE_COMMIT>
+composer install --no-dev --prefer-dist --optimize-autoloader
+php artisan migrate:status
+php artisan optimize:clear
+php artisan optimize
+php artisan queue:restart
+sudo supervisorctl restart granat-moderation-worker:*
+sudo supervisorctl restart granat-orders-worker:*
+php artisan up
+```
+
+Не откатывайте базу автоматически. Восстановление SQL-резервной копии выполняйте
+только после проверки совместимости миграций и остановки записи в приложение.
+
+## 17. Минимальный чек-лист перед передачей сайта
+
+- [ ] `APP_DEBUG=false`, `.env` недоступен из web;
+- [ ] Nginx указывает на `/public`;
+- [ ] HTTPS и автопродление сертификата работают;
+- [ ] миграции применены;
+- [ ] `storage:link` создан;
+- [ ] права на `storage` и `bootstrap/cache` проверены;
+- [ ] Redis отвечает `PONG`;
+- [ ] два worker-процесса Supervisor работают;
+- [ ] cron вызывает `schedule:run` каждую минуту;
+- [ ] `/health/live` и `/health/ready` отвечают успешно;
+- [ ] создан администратор и удалён `ADMIN_PASSWORD`;
+- [ ] Telegram webhook зарегистрирован, если он нужен;
+- [ ] AI-модерация включена только после тестового подключения;
+- [ ] сделан и проверен резервный backup базы и файлов.
