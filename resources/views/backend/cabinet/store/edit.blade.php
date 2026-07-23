@@ -55,8 +55,8 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="name" class="form-label">Название магазина <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                               id="name" name="name" value="{{ old('name', $seller->name) }}" required>
+                                        <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                               id="name" name="name" value="{{ old('name', $seller->name) }}" maxlength="60" required>
                                         @error('name')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -64,9 +64,13 @@
 
                                     <div class="col-md-6">
                                         <label for="phone" class="form-label">Телефон магазина</label>
-                                        <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                                               id="phone" name="phone" value="{{ old('phone', $seller->phone) }}" 
-                                               placeholder="+7 (___) ___-__-__">
+                                        <input type="tel" class="form-control @error('phone') is-invalid @enderror"
+                                               id="phone" name="phone" value="{{ old('phone', $seller->phone) }}"
+                                               maxlength="50"
+                                               inputmode="numeric"
+                                               pattern="[0-9]*"
+                                               data-digits-only
+                                               placeholder="79999999999">
                                         @error('phone')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -94,8 +98,8 @@
 
                                     <div class="col-md-6">
                                         <label for="sellerplace" class="form-label">Район</label>
-                                        <input type="text" class="form-control @error('sellerplace') is-invalid @enderror" 
-                                               id="sellerplace" name="sellerplace" value="{{ old('sellerplace', $seller->sellerplace) }}">
+                                        <input type="text" class="form-control @error('sellerplace') is-invalid @enderror"
+                                               id="sellerplace" name="sellerplace" value="{{ old('sellerplace', $seller->sellerplace) }}" maxlength="60">
                                         @error('sellerplace')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -103,8 +107,8 @@
 
                                     <div class="col-12">
                                         <label for="address" class="form-label">Адрес</label>
-                                        <input type="text" class="form-control @error('address') is-invalid @enderror" 
-                                               id="address" name="address" value="{{ old('address', $seller->address) }}">
+                                        <input type="text" class="form-control @error('address') is-invalid @enderror"
+                                               id="address" name="address" value="{{ old('address', $seller->address) }}" maxlength="1000" data-no-character-counter>
                                         @error('address')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -112,8 +116,8 @@
 
                                     <div class="col-12">
                                         <label for="description" class="form-label">Описание магазина</label>
-                                        <textarea class="form-control @error('description') is-invalid @enderror" 
-                                                  id="description" name="description" rows="4">{{ old('description', $seller->description) }}</textarea>
+                                        <textarea class="form-control @error('description') is-invalid @enderror"
+                                                  id="description" name="description" rows="4" maxlength="2000">{{ old('description', $seller->description) }}</textarea>
                                         @error('description')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -208,6 +212,7 @@
                                                    id="link_map"
                                                    name="link_map"
                                                    value="{{ old('link_map', $seller->link_map) }}"
+                                                   maxlength="2000"
                                                    placeholder="https://maps.app.goo.gl/pP9mUgkPdA5BnkF25">
                                             <small class="text-muted">Показывается покупателям на всех тарифах.</small>
                                             @error('link_map')
@@ -224,6 +229,7 @@
                                                    id="link"
                                                    name="link"
                                                    value="{{ old('link', $seller->link) }}"
+                                                   maxlength="191"
                                                    placeholder="https://example.com">
                                             <small class="text-muted">
                                                 @if($hasWebsiteLink)
@@ -254,6 +260,7 @@
                                                    id="telegram"
                                                    name="telegram"
                                                    value="{{ old('telegram', $seller->telegram) }}"
+                                                   maxlength="255"
                                                    placeholder="@username">
                                             @error('telegram')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -269,6 +276,7 @@
                                                    id="instagram"
                                                    name="instagram"
                                                    value="{{ old('instagram', $seller->instagram) }}"
+                                                   maxlength="255"
                                                    placeholder="@username">
                                             @error('instagram')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -284,6 +292,7 @@
                                                    id="viber"
                                                    name="viber"
                                                    value="{{ old('viber', $seller->viber) }}"
+                                                   maxlength="255"
                                                    placeholder="+7 (___) ___-__-__">
                                             @error('viber')
                                                 <div class="invalid-feedback">{{ $message }}</div>

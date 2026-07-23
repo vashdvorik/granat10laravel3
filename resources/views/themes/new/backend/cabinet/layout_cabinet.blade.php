@@ -94,6 +94,84 @@
 </div>
 
 <script src="{{ asset('cabinet/assets/vendor_assets/js/jquery-3.6.0.min.js') }}"></script>
+<script>
+(function () {
+    function updateCharacterCounter(field, counter, maxLength) {
+        const length = field.value.length;
+        counter.textContent = length + '/' + maxLength;
+        counter.classList.toggle('seller-character-counter--warning', length >= Math.floor(maxLength * 0.9) && length < maxLength);
+        counter.classList.toggle('seller-character-counter--limit', length >= maxLength);
+    }
+
+    function initCharacterCounter(field) {
+        const type = (field.getAttribute('type') || '').toLowerCase();
+        const maxLength = Number(field.getAttribute('maxlength'));
+
+        if (!Number.isFinite(maxLength) || maxLength <= 0 || field.dataset.characterCounterInitialized === '1') {
+            return;
+        }
+
+        if (['hidden', 'file', 'checkbox', 'radio'].includes(type)) {
+            return;
+        }
+
+        if (field.hasAttribute('data-digits-only')) {
+            return;
+        }
+
+        if (field.hasAttribute('data-no-character-counter')) {
+            return;
+        }
+
+        if (field.id && document.getElementById(field.id + '-counter')) {
+            return;
+        }
+
+        const counter = document.createElement('small');
+        counter.className = 'seller-character-counter';
+        counter.setAttribute('aria-live', 'polite');
+
+        const anchor = field.closest('.input-group') || field;
+        anchor.insertAdjacentElement('afterend', counter);
+
+        field.dataset.characterCounterInitialized = '1';
+        field.addEventListener('input', function () {
+            updateCharacterCounter(field, counter, maxLength);
+        });
+        updateCharacterCounter(field, counter, maxLength);
+    }
+
+    function initDigitsOnly(field) {
+        if (field.dataset.digitsOnlyInitialized === '1') {
+            return;
+        }
+
+        const normalize = function () {
+            const digits = field.value.replace(/\D/g, '');
+
+            if (field.value !== digits) {
+                field.value = digits;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        };
+
+        field.dataset.digitsOnlyInitialized = '1';
+        field.addEventListener('input', normalize);
+        normalize();
+    }
+
+    function bootSellerFormHelpers() {
+        document.querySelectorAll('input[maxlength], textarea[maxlength]').forEach(initCharacterCounter);
+        document.querySelectorAll('[data-digits-only]').forEach(initDigitsOnly);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootSellerFormHelpers);
+    } else {
+        bootSellerFormHelpers();
+    }
+})();
+</script>
 @stack('scripts')
 </body>
 </html>

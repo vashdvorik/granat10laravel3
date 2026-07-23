@@ -538,6 +538,24 @@ body.seller-cabinet-body textarea.form-control {
     padding-top: 14px;
 }
 
+body.seller-cabinet-body .seller-character-counter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 6px;
+    color: var(--seller-cabinet-muted);
+    font-size: var(--seller-cabinet-font-size-xs);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+body.seller-cabinet-body .seller-character-counter--warning {
+    color: #a36b00;
+}
+
+body.seller-cabinet-body .seller-character-counter--limit {
+    color: #d14343;
+}
+
 body.seller-cabinet-body .form-control:focus,
 body.seller-cabinet-body .form-select:focus,
 body.seller-cabinet-body .select2-container--default.select2-container--focus .select2-selection--single,
@@ -1890,6 +1908,15 @@ body.seller-cabinet-body .product-form-page small.text-muted {
     display: block;
     margin-top: 7px;
     line-height: 1.45;
+}
+
+body.seller-cabinet-body .product-form-page textarea.product-form-autosize {
+    min-height: 44px;
+    overflow: hidden;
+    resize: none;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 body.seller-cabinet-body .product-form-page .form-check.form-switch {

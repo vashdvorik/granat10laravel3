@@ -35,7 +35,7 @@ class ShopServiceTest extends TestCase
 
         $seller = $this->service->createShop($user, [
             'name' => 'Test Shop',
-            'phone' => '+1',
+            'phone' => '1',
             'settlement_id' => $settlement->id,
             'sellerplace' => 'Market',
             'address' => 'Street',
@@ -64,6 +64,24 @@ class ShopServiceTest extends TestCase
         ]);
 
         $this->assertStringStartsWith('test-shop-', $seller->alias);
+    }
+
+    public function test_create_shop_keeps_long_generated_alias_within_database_limit(): void
+    {
+        Package::factory()->free()->create(['id' => ShopService::BASE_PACKAGE_ID]);
+        $settlement = Settlement::factory()->create();
+        $name = str_repeat('http://127.0.0.1:8000/account/store/create', 4);
+        $existingAlias = $this->service->generateUniqueAlias($name);
+
+        Seller::factory()->create(['alias' => $existingAlias]);
+
+        $seller = $this->service->createShop(User::factory()->create(), [
+            'name' => $name,
+            'settlement_id' => $settlement->id,
+        ]);
+
+        $this->assertLessThanOrEqual(191, strlen($seller->alias));
+        $this->assertStringStartsWith(substr($existingAlias, 0, 170), $seller->alias);
     }
 
     public function test_create_shop_rolls_back_when_base_package_is_missing(): void

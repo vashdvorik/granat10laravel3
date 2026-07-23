@@ -1,6 +1,9 @@
 (function ($) {
 
     $('.btn').on('click', function(e){
+        if (!$(this).hasClass('btn-inc') && !$(this).hasClass('btn-dec')) {
+            return;
+        }
         
         let oldCount = $(this).parent().parent().find('.badge').text();
         let newCount = 0;

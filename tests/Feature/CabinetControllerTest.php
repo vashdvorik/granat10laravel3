@@ -146,6 +146,13 @@ class CabinetControllerTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Район / ориентир')
             ->assertSee('name="sellerplace"', false)
+            ->assertSee('maxlength="60"', false)
+            ->assertSee('maxlength="50"', false)
+            ->assertSee('name="description"', false)
+            ->assertSee('maxlength="2000"', false)
+            ->assertSee('name="address"', false)
+            ->assertSee('maxlength="1000"', false)
+            ->assertSee('data-no-character-counter', false)
             ->assertSee('store-create-logo-upload__placeholder', false)
             ->assertDontSee('cabinet/img/author/profile.png', false)
             ->assertDontSee('<option value="Центр">', false)
@@ -192,7 +199,7 @@ class CabinetControllerTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('account.store.store'), [
             'name'        => 'Мой тестовый магазин Уникальный 99Z',
-            'phone'       => '+7-999-999-99-99',
+            'phone'       => '79999999999',
             'settlement_id' => Settlement::factory()->create(['name' => 'Москва'])->id,
             'sellerplace' => 'Центральный рынок',
             'address'     => 'ул. Тестовая, д. 1',
@@ -234,6 +241,41 @@ class CabinetControllerTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors(['name']);
+    }
+
+    public function test_store_shop_validates_text_field_lengths(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('account.store.store'), [
+            'name' => str_repeat('a', 61),
+            'phone' => str_repeat('1', 51),
+            'settlement_id' => Settlement::factory()->create()->id,
+            'sellerplace' => str_repeat('a', 61),
+            'address' => str_repeat('a', 1001),
+            'description' => str_repeat('a', 2001),
+        ]);
+
+        $response->assertSessionHasErrors([
+            'name',
+            'phone',
+            'sellerplace',
+            'address',
+            'description',
+        ]);
+    }
+
+    public function test_store_shop_validates_phone_digits_only(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('account.store.store'), [
+            'name' => 'Phone Validation Shop',
+            'phone' => 'phone123',
+            'settlement_id' => Settlement::factory()->create()->id,
+        ]);
+
+        $response->assertSessionHasErrors(['phone']);
     }
 
     public function test_store_shop_prevents_duplicate_shop_per_user(): void

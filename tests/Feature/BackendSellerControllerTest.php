@@ -123,7 +123,7 @@ class BackendSellerControllerTest extends TestCase
 
         $response = $this->actingAs($user)->put(route('account.store.update', $seller), [
             'name' => 'Updated Backend Shop',
-            'phone' => '+123456789',
+            'phone' => '123456789',
             'settlement_id' => Settlement::factory()->create(['name' => 'Updated City'])->id,
             'sellerplace' => 'Updated Market',
             'address' => 'Updated Address',
@@ -156,6 +156,20 @@ class BackendSellerControllerTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors(['name']);
+    }
+
+    public function test_update_seller_profile_rejects_phone_with_text(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->put(route('account.store.update', $seller), [
+            'name' => $seller->name,
+            'phone' => 'call-me-123',
+            'settlement_id' => $seller->settlement_id,
+        ]);
+
+        $response->assertSessionHasErrors(['phone']);
     }
 
     public function test_update_seller_profile_replaces_logo(): void

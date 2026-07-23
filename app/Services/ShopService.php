@@ -16,6 +16,8 @@ use RuntimeException;
 class ShopService
 {
     public const BASE_PACKAGE_ID = 1;
+    private const MAX_ALIAS_LENGTH = 191;
+    private const ALIAS_SUFFIX_RESERVE = 12;
 
     public function createShop(User $user, array $data, ?UploadedFile $logoFile = null): Seller
     {
@@ -54,13 +56,16 @@ class ShopService
     public function generateUniqueAlias(string $name): string
     {
         $baseAlias = Str::slug($name);
-        $baseAlias = $baseAlias ? Str::limit($baseAlias, 240, '') : Str::lower(Str::random(6));
+        $baseAlias = $baseAlias
+            ? Str::limit($baseAlias, self::MAX_ALIAS_LENGTH - self::ALIAS_SUFFIX_RESERVE, '')
+            : Str::lower(Str::random(6));
 
         $alias = $baseAlias;
         $suffixLength = 4;
 
         while (Seller::where('alias', $alias)->exists()) {
-            $alias = $baseAlias . '-' . Str::lower(Str::random($suffixLength));
+            $suffix = '-' . Str::lower(Str::random($suffixLength));
+            $alias = Str::limit($baseAlias, self::MAX_ALIAS_LENGTH - strlen($suffix), '') . $suffix;
             $suffixLength++;
         }
 

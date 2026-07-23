@@ -66,7 +66,7 @@ class SellerResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label('Название')
                             ->required()
-                            ->maxLength(255)
+                            ->maxLength(60)
                             ->unique(ignoreRecord: true),
                         Forms\Components\TextInput::make('alias')
                             ->label('Alias')
@@ -102,13 +102,15 @@ class SellerResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('sellerplace')
                             ->label('Район / торговое место')
-                            ->maxLength(255),
+                            ->maxLength(60),
                         Forms\Components\Textarea::make('address')
                             ->label('Адрес')
+                            ->maxLength(1000)
                             ->columnSpanFull(),
                         Forms\Components\Textarea::make('description')
                             ->label('Описание')
                             ->rows(5)
+                            ->maxLength(2000)
                             ->columnSpanFull(),
                     ])
                     ->columns(2),
@@ -117,10 +119,11 @@ class SellerResource extends Resource
                         Forms\Components\TextInput::make('link')
                             ->label('Сайт')
                             ->url()
-                            ->maxLength(255),
+                            ->maxLength(191),
                         Forms\Components\TextInput::make('link_map')
                             ->label('Ссылка на карту')
-                            ->url(),
+                            ->url()
+                            ->maxLength(2000),
                         Forms\Components\TextInput::make('telegram')
                             ->label('Telegram')
                             ->maxLength(255),

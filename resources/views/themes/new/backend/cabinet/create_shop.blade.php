@@ -37,7 +37,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="name" class="form-label">Название магазина <span class="text-danger">*</span></label>
-                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required>
+                                    <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" maxlength="60" required>
                                     @error('name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -45,7 +45,7 @@
 
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label">Телефон</label>
-                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" name="phone" id="phone" value="{{ old('phone') }}">
+                                    <input type="tel" class="form-control @error('phone') is-invalid @enderror" name="phone" id="phone" value="{{ old('phone') }}" maxlength="50" inputmode="numeric" pattern="[0-9]*" data-digits-only>
                                     @error('phone')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -53,7 +53,7 @@
 
                                 <div class="col-12">
                                     <label for="description" class="form-label">Описание</label>
-                                    <input id="description" type="text" class="form-control @error('description') is-invalid @enderror" name="description" value="{{ old('description') }}">
+                                    <textarea id="description" class="form-control @error('description') is-invalid @enderror" name="description" rows="4" maxlength="2000">{{ old('description') }}</textarea>
                                     @error('description')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -86,7 +86,7 @@
                                         id="sellerplace"
                                         name="sellerplace"
                                         value="{{ old('sellerplace') }}"
-                                        maxlength="255"
+                                        maxlength="60"
                                         placeholder="Например: центр, рынок, микрорайон"
                                     >
                                     @error('sellerplace')
@@ -96,7 +96,7 @@
 
                                 <div class="col-12">
                                     <label for="address" class="form-label">Адрес</label>
-                                    <input type="text" class="form-control @error('address') is-invalid @enderror" id="address" name="address" value="{{ old('address') }}">
+                                    <input type="text" class="form-control @error('address') is-invalid @enderror" id="address" name="address" value="{{ old('address') }}" maxlength="1000" data-no-character-counter>
                                     @error('address')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

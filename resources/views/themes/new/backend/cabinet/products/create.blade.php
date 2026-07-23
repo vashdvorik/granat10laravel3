@@ -117,14 +117,14 @@
                                                 {{-- Название --}}
                                                 <div class="form-group">
                                                     <label for="name">Название товара <span class="text-danger">*</span></label>
-                                                    <input type="text" 
-                                                           class="form-control @error('name') is-invalid @enderror" 
+                                                    <textarea
+                                                           class="form-control product-form-autosize @error('name') is-invalid @enderror"
                                                            id="name" 
                                                            name="name" 
-                                                           value="{{ old('name') }}" 
+                                                           rows="1"
                                                            placeholder="Введите название товара"
                                                            maxlength="255"
-                                                           required>
+                                                           required>{{ old('name') }}</textarea>
                                                     <div class="d-flex justify-content-between align-items-start mt-1">
                                                         <small class="text-muted">Рекомендуемая длина — 35 символов. Более длинные названия могут обрезаться в каталоге</small>
                                                         <small class="ms-2">
@@ -272,7 +272,7 @@
                                                 {{-- Описание --}}
                                                 <div class="form-group">
                                                     <label for="desc">Описание товара</label>
-                                                    <textarea class="form-control @error('desc') is-invalid @enderror" 
+                                                    <textarea class="form-control product-form-autosize @error('desc') is-invalid @enderror"
                                                               id="desc" 
                                                               name="desc" 
                                                               rows="4" 
@@ -285,12 +285,12 @@
                                                 {{-- Характеристики --}}
                                                 <div class="form-group">
                                                     <label for="features1">Характеристика 1</label>
-                                                    <input type="text" 
-                                                           class="form-control @error('features1') is-invalid @enderror" 
+                                                    <textarea
+                                                           class="form-control product-form-autosize @error('features1') is-invalid @enderror"
                                                            id="features1" 
                                                            name="features1" 
-                                                           value="{{ old('features1') }}" 
-                                                           placeholder="Например: Цвет: Красный">
+                                                           rows="1"
+                                                           placeholder="Например: Цвет: Красный">{{ old('features1') }}</textarea>
                                                     @error('features1')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -298,12 +298,12 @@
 
                                                 <div class="form-group">
                                                     <label for="features2">Характеристика 2</label>
-                                                    <input type="text" 
-                                                           class="form-control @error('features2') is-invalid @enderror" 
+                                                    <textarea
+                                                           class="form-control product-form-autosize @error('features2') is-invalid @enderror"
                                                            id="features2" 
                                                            name="features2" 
-                                                           value="{{ old('features2') }}" 
-                                                           placeholder="Например: Размер: L">
+                                                           rows="1"
+                                                           placeholder="Например: Размер: L">{{ old('features2') }}</textarea>
                                                     @error('features2')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -311,12 +311,12 @@
 
                                                 <div class="form-group">
                                                     <label for="features3">Характеристика 3</label>
-                                                    <input type="text" 
-                                                           class="form-control @error('features3') is-invalid @enderror" 
+                                                    <textarea
+                                                           class="form-control product-form-autosize @error('features3') is-invalid @enderror"
                                                            id="features3" 
                                                            name="features3" 
-                                                           value="{{ old('features3') }}" 
-                                                           placeholder="Например: Материал: Хлопок">
+                                                           rows="1"
+                                                           placeholder="Например: Материал: Хлопок">{{ old('features3') }}</textarea>
                                                     @error('features3')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -324,12 +324,12 @@
 
                                                 <div class="form-group mb-0">
                                                     <label for="features4">Характеристика 4</label>
-                                                    <input type="text" 
-                                                           class="form-control @error('features4') is-invalid @enderror" 
+                                                    <textarea
+                                                           class="form-control product-form-autosize @error('features4') is-invalid @enderror"
                                                            id="features4" 
                                                            name="features4" 
-                                                           value="{{ old('features4') }}" 
-                                                           placeholder="Например: Вес: 500г">
+                                                           rows="1"
+                                                           placeholder="Например: Вес: 500г">{{ old('features4') }}</textarea>
                                                     @error('features4')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -413,6 +413,16 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.product-form-autosize').forEach((field) => {
+        const resizeField = () => {
+            field.style.height = 'auto';
+            field.style.height = `${field.scrollHeight}px`;
+        };
+
+        field.addEventListener('input', resizeField);
+        resizeField();
+    });
+
     const container = document.getElementById('category-selectors');
     const hiddenInput = document.getElementById('category_id');
     const selectedPath = @json(session('selectedPath', []));
