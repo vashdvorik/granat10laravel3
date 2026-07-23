@@ -57,7 +57,10 @@
         <div class="col-md-9 col-sm-12 col-xs-12 collection-list">
             <div class="e-product">
                 <div class="pd-banner">
-                   <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/shop-banner.jpg') }}" alt="" class="img-reponsive"></a> 
+                   @php
+                       $catalogBanner = app(\App\Services\CatalogBannerManager::class)->forDisplay();
+                   @endphp
+                   <a class="image-bd effect_img2" @if($catalogBanner['link']) href="{{ $catalogBanner['link'] }}" @endif><img src="{{ $catalogBanner['url'] }}" alt="" class="img-reponsive"></a>
                 </div>
                 <div class="pd-top">
                     <h1 class="title">Каталог товаров{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : '' }}</h1>

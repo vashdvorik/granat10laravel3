@@ -4,7 +4,10 @@
 @section('content')
 <div class="container container-240">
       <div class="pd-banner">
-            <a href="#" class="image-bd effect_img2"><img src="img/shop-banner.jpg" alt="" class="img-reponsive"></a> 
+            @php
+                $catalogBanner = app(\App\Services\CatalogBannerManager::class)->forDisplay();
+            @endphp
+            <a class="image-bd effect_img2" @if($catalogBanner['link']) href="{{ $catalogBanner['link'] }}" @endif><img src="{{ $catalogBanner['url'] }}" alt="" class="img-reponsive"></a>
         </div>
     <ul class="breadcrumb v2">
         <li><a href="{{ route('home') }}">Главная</a></li>

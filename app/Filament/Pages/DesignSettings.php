@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Rules\CatalogBannerLink;
+use App\Services\CatalogBannerManager;
 use App\Services\DesignManager;
 use Filament\Forms;
 use Filament\Forms\Contracts\HasForms;
@@ -33,10 +35,11 @@ class DesignSettings extends Page implements HasForms
         return Gate::allows('access-admin');
     }
 
-    public function mount(DesignManager $design): void
+    public function mount(DesignManager $design, CatalogBannerManager $catalogBanner): void
     {
         $this->form->fill([
             'theme' => $design->current(),
+            'catalog_banners' => $catalogBanner->all(),
         ]);
     }
 
@@ -52,14 +55,50 @@ class DesignSettings extends Page implements HasForms
                         'new' => 'Новые шаблоны с автоматическим возвратом к старому дизайну для ещё не перенесённых страниц.',
                     ])
                     ->required(),
+                Forms\Components\Repeater::make('catalog_banners')
+                    ->label('Баннеры каталога и страницы 404')
+                    ->helperText('При каждой загрузке страницы посетителю показывается случайный баннер из этого списка. Рекомендуемый размер каждого изображения: 1398 × 316 px.')
+                    ->schema([
+                        Forms\Components\FileUpload::make('image')
+                            ->label('Изображение баннера')
+                            ->helperText('Для корректного отображения используйте изображение размером 1398 × 316 px.')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->maxSize(5120)
+                            ->disk(config('catalog_banner.disk'))
+                            ->directory(config('catalog_banner.directory'))
+                            ->visibility('public')
+                            ->imagePreviewHeight('180')
+                            ->openable()
+                            ->downloadable()
+                            ->required(),
+                        Forms\Components\TextInput::make('link')
+                            ->label('Ссылка баннера')
+                            ->placeholder('/sale или https://example.com/page')
+                            ->helperText('Можно указать внутренний путь или полный URL. Если оставить поле пустым, баннер не будет выполнять переход.')
+                            ->maxLength(2048)
+                            ->rules(['nullable', new CatalogBannerLink]),
+                    ])
+                    ->columns([
+                        'default' => 1,
+                        'lg' => 2,
+                    ])
+                    ->defaultItems(0)
+                    ->addActionLabel('Добавить баннер')
+                    ->reorderable()
+                    ->collapsible()
+                    ->itemLabel(static fn (array $state): string => filled($state['image'] ?? null)
+                        ? 'Настроенный баннер'
+                        : 'Новый баннер'),
             ])
             ->statePath('data');
     }
 
-    public function save(DesignManager $design): void
+    public function save(DesignManager $design, CatalogBannerManager $catalogBanner): void
     {
         $data = $this->form->getState();
         $design->setActive($data['theme']);
+        $catalogBanner->setBanners($data['catalog_banners'] ?? []);
 
         Notification::make()
             ->title('Дизайн сайта изменён')

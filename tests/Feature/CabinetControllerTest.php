@@ -146,8 +146,21 @@ class CabinetControllerTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Район / ориентир')
             ->assertSee('name="sellerplace"', false)
+            ->assertSee('store-create-logo-upload__placeholder', false)
+            ->assertDontSee('cabinet/img/author/profile.png', false)
             ->assertDontSee('<option value="Центр">', false)
             ->assertDontSee('<option value="Балка">', false);
+
+        $html = $response->getContent();
+        $formStart = strpos($html, 'id="create-shop-form"');
+        $logoInput = strpos($html, 'id="shop-logo-upload"');
+        $formEnd = $formStart === false ? false : strpos($html, '</form>', $formStart);
+
+        $this->assertTrue(
+            $formStart !== false && $logoInput !== false && $formEnd !== false
+                && $formStart < $logoInput && $logoInput < $formEnd,
+            'Логотип должен находиться внутри формы создания магазина.',
+        );
     }
 
     public function test_create_shop_redirects_if_shop_already_exists(): void

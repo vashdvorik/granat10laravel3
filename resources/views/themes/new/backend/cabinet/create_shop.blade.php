@@ -25,14 +25,13 @@
             </div>
         @endif
 
-        <div class="row store-edit-layout">
+        <form action="{{ route('account.store.store') }}" method="POST" enctype="multipart/form-data" class="row store-edit-layout store-edit-form" id="create-shop-form">
             <div class="col-lg-8 store-edit-main">
                 <div class="card mb-25 store-edit-card store-edit-main-card">
                     <div class="card-header">
                         <h6 class="fw-500 mb-0">Основная информация</h6>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('account.store.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
                             <div class="row g-3">
@@ -104,15 +103,6 @@
                                 </div>
                             </div>
 
-                            <div class="store-edit-submit-bar">
-                                <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared">
-                                    Отмена
-                                </a>
-                                <button type="submit" class="btn btn-primary btn-default btn-squared radius-md shadow2">
-                                    Создать магазин
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
@@ -123,13 +113,13 @@
                         <h6 class="fw-500 mb-0">Логотип</h6>
                     </div>
                     <div class="card-body text-center">
-                        <div class="account-profile justify-content-center d-flex mb-3">
+                        <div class="account-profile store-create-logo-upload justify-content-center d-flex mb-3">
                             <div class="ap-img pro_img_wrapper">
                                 <input id="shop-logo-upload" type="file" name="logo" accept="image/*" class="d-none">
-                                <label for="shop-logo-upload">
-                                    <img id="logo-preview" class="ap-img__main rounded-circle wh-120 bg-lighter d-flex" src="{{ asset('cabinet/img/author/profile.png') }}" alt="logo">
-                                    <span class="cross">
-                                        <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="camera" class="svg">
+                                <label for="shop-logo-upload" aria-label="Выбрать логотип магазина">
+                                    <img id="logo-preview" class="store-create-logo-upload__preview" alt="Предпросмотр логотипа" hidden>
+                                    <span id="logo-upload-placeholder" class="store-create-logo-upload__placeholder">
+                                        <img src="{{ asset('cabinet/img/svg/camera.svg') }}" alt="" class="svg">
                                     </span>
                                 </label>
                             </div>
@@ -142,21 +132,19 @@
                     </div>
                 </div>
 
-                <div class="card mb-25 store-edit-card">
-                    <div class="card-header">
-                        <h6 class="fw-500 mb-0">Что нужно заполнить</h6>
-                    </div>
-                    <div class="card-body">
-                        <ul class="mb-0 ps-3">
-                            <li>Название магазина</li>
-                            <li>Телефон для связи</li>
-                            <li>Населённый пункт и район</li>
-                            <li>Адрес и краткое описание</li>
-                        </ul>
-                    </div>
+            </div>
+
+            <div class="col-12 store-edit-actions">
+                <div class="store-edit-submit-bar">
+                    <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared">
+                        Отмена
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-default btn-squared radius-md shadow2">
+                        Создать магазин
+                    </button>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 
@@ -168,7 +156,10 @@
 
         const reader = new FileReader();
         reader.onload = function (event) {
-            document.getElementById('logo-preview').src = event.target.result;
+            const preview = document.getElementById('logo-preview');
+            preview.src = event.target.result;
+            preview.hidden = false;
+            document.getElementById('logo-upload-placeholder').hidden = true;
         };
         reader.readAsDataURL(file);
     });

@@ -37,27 +37,7 @@
             <div class="package-page-hero__balance">
                 <span>Баланс</span>
                 <strong>{{ number_format(auth()->user()->balance ?? 0, 0, '.', ' ') }} ₽</strong>
-            </div>
-        </div>
-
-        <!-- Информация о балансе -->
-        <div class="row mb-30">
-            <div class="col-12">
-                <div class="card card-default card-md package-balance-card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">Ваш баланс</h6>
-                                <h4 class="mb-0">{{ number_format(auth()->user()->balance ?? 0, 0, '.', ' ') }} ₽</h4>
-                            </div>
-                            <div>
-                                <button type="button" class="btn btn-outline-secondary btn-squared" disabled>
-                                    Пополнение пока не подключено
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <small class="package-page-hero__balance-note">Пополнение пока не подключено</small>
             </div>
         </div>
 
@@ -149,21 +129,21 @@
                                         $impactLabels = [];
 
                                         if ($compatibility->willDisableWebsite) {
-                                            $impactLabels[] = '���� ��������';
+                                            $impactLabels[] = 'Сайт будет скрыт';
                                         }
 
                                         if ($compatibility->willDisableSocialLinks) {
-                                            $impactLabels[] = '������� ��������';
+                                            $impactLabels[] = 'Соцсети будут скрыты';
                                         }
 
                                         if ($compatibility->willDisableOrders) {
-                                            $impactLabels[] = '������ ����������';
+                                            $impactLabels[] = 'Приём заказов отключится';
                                         }
                                     @endphp
 
                                     @if($impactLabels !== [])
                                         <div class="package-compatibility__impact mb-2">
-                                            <small class="text-muted d-block mb-2">��� ���������</small>
+                                            <small class="text-muted d-block mb-2">Что изменится</small>
                                             <div class="d-flex flex-wrap gap-2">
                                                 @foreach($impactLabels as $impactLabel)
                                                     <span class="badge bg-light text-dark border">{{ $impactLabel }}</span>
@@ -193,13 +173,7 @@
                                         </li>
                                     </ul>
 
-                                    @if($compatibility->reasons !== [])
-                                        <div class="mt-2">
-                                            @foreach($compatibility->reasons as $reason)
-                                                <small class="text-danger d-block">{{ $reason }}</small>
-                                            @endforeach
-                                        </div>
-                                    @endif
+
 
                                     @if($compatibility->warnings !== [])
                                         <div class="mt-2">
@@ -321,4 +295,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-
