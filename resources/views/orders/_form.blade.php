@@ -49,6 +49,12 @@
 
             @if($orderAvailability->deliveryAllowed)
                 <label class="order-wide" data-delivery-address>
+                    @if(filled($product->seller->delivery_terms))
+                        <div class="order-delivery-terms">
+                            <strong>Условия доставки</strong>
+                            <p>{{ $product->seller->delivery_terms }}</p>
+                        </div>
+                    @endif
                     Адрес доставки
                     <textarea name="delivery_address" maxlength="500" rows="2">{{ old('delivery_address') }}</textarea>
                     @error('delivery_address') <span class="order-error">{{ $message }}</span> @enderror
@@ -76,6 +82,7 @@
 <style>
 .order-form{margin-top:24px;padding:28px;border:1px solid #e8e8e8;border-radius:12px;background:#fff;box-shadow:0 12px 35px rgba(0,0,0,.05)}
 .order-form h2{margin:0 0 18px;font-size:22px}.order-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.order-delivery-terms{margin:0 0 6px;padding:14px 16px;border:1px solid #e8e8e8;border-radius:8px;background:#fafafa;color:#444}.order-delivery-terms strong{display:block;margin-bottom:5px;color:#222}.order-delivery-terms p{margin:0;white-space:pre-line}
 .order-grid label,.order-grid fieldset{display:flex;flex-direction:column;gap:7px;margin:0}.order-grid fieldset{border:0;padding:0}
 .order-grid input[type=text],.order-grid input[type=tel],.order-grid input[type=number],.order-grid textarea{width:100%;border:1px solid #ddd;border-radius:4px;padding:10px}
 .order-wide{grid-column:1/-1}.order-choice,.order-consent{display:flex!important;flex-direction:row!important;align-items:center;gap:8px}

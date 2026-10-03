@@ -3823,6 +3823,80 @@ body.seller-cabinet-body .seller-cabinet-state {
     box-shadow: 0 12px 30px rgba(30, 30, 40, .05) !important;
 }
 
+body.seller-cabinet-body .seller-cabinet-auto-renew {
+    display: block;
+    margin: 0 0 24px;
+    padding: 14px 16px;
+    border: 1px solid var(--seller-cabinet-border) !important;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: none;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__title {
+    display: block;
+    color: var(--seller-cabinet-text);
+    font-size: var(--seller-cabinet-font-size-sm);
+    font-weight: var(--seller-cabinet-strong-weight);
+    line-height: 1.35;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__description {
+    display: block;
+    margin-top: 6px;
+    color: var(--seller-cabinet-muted);
+    font-size: var(--seller-cabinet-font-size-xs);
+    line-height: 1.45;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__control {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__control .form-check-input {
+    width: 42px;
+    height: 24px;
+    margin: 0;
+    cursor: pointer;
+}
+
+body.seller-cabinet-body .cabinet-package-card .seller-cabinet-auto-renew {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+body.seller-cabinet-body .store-tariff-card .seller-cabinet-auto-renew {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__error {
+    display: block;
+    margin-top: 8px;
+    font-size: var(--seller-cabinet-font-size-xs);
+    line-height: 1.45;
+}
+
+body.seller-cabinet-body .seller-cabinet-auto-renew__error.d-none {
+    display: none;
+}
+
 body.seller-cabinet-body .seller-cabinet-renewal {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6511,6 +6585,29 @@ body.seller-cabinet-body .product-edit-page .product-form-preview-main-button i 
 }
 
 @media (max-width: 767.98px) {
+    body.seller-cabinet-body .seller-cabinet-auto-renew {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+    }
+
+    body.seller-cabinet-body .seller-cabinet-auto-renew__layout {
+        align-items: center !important;
+        gap: 12px;
+    }
+
+    body.seller-cabinet-body .seller-cabinet-auto-renew__title {
+        font-size: var(--seller-cabinet-font-size-sm);
+    }
+
+    body.seller-cabinet-body .cabinet-package-card .seller-cabinet-auto-renew {
+        margin-top: 14px;
+        margin-bottom: 0;
+    }
+
+    body.seller-cabinet-body .store-tariff-card .seller-cabinet-auto-renew {
+        margin-bottom: 16px;
+    }
+
     body.seller-cabinet-body .store-edit-submit-bar {
         grid-template-columns: 1fr;
     }

@@ -184,7 +184,7 @@ class SellerCabinetStateService
         if ($this->productsInModerationCount($seller) > 0) {
             $blockers[] = $this->blocker(
                 'products_need_moderation',
-                'Часть товаров ждёт проверки.',
+                'Некоторые товары находяться на модерации.',
                 'open_products'
             );
         }
@@ -192,7 +192,7 @@ class SellerCabinetStateService
         if ($this->productsNeedFixesCount($seller) > 0) {
             $blockers[] = $this->blocker(
                 'products_need_fixes',
-                'В части товаров нужно исправить замечания.',
+                'Некоторые товары требуют исправлений, чтобы их опубликовать.',
                 'open_products'
             );
         }
@@ -200,7 +200,7 @@ class SellerCabinetStateService
         if ($seller->products()->whereDoesntHave('images')->count() > 0) {
             $blockers[] = $this->blocker(
                 'products_without_images',
-                'Некоторые товары нельзя опубликовать без фото.',
+                'Некоторые товары не имеют изображений, поэтому не показываются покупателям.',
                 'open_products'
             );
         }
@@ -208,7 +208,7 @@ class SellerCabinetStateService
         if (filled($seller->link) && ! $canShowWebsite) {
             $blockers[] = $this->blocker(
                 'website_hidden_by_package',
-                'Сайт сохранён, но не показывается на текущем тарифе.',
+                'Ссылка на ваш сайт сохранена, но не показывается клиентам на текущем тарифе.',
                 'choose_package'
             );
         }
@@ -216,7 +216,7 @@ class SellerCabinetStateService
         if ((filled($seller->telegram) || filled($seller->instagram) || filled($seller->viber)) && ! $canShowSocialLinks) {
             $blockers[] = $this->blocker(
                 'social_links_hidden_by_package',
-                'Соцсети сохранены, но не показываются на текущем тарифе.',
+                'Ссылки на соцсети сохранены, но не показываются клиентам на текущем тарифе.',
                 'choose_package'
             );
         }
@@ -224,13 +224,13 @@ class SellerCabinetStateService
         if ($seller->can_order && ! $canAcceptOrdersByPackage) {
             $blockers[] = $this->blocker(
                 'orders_disabled_by_package',
-                'Новые заказы через сайт недоступны на текущем тарифе.',
+                'Новые заказы через сайт недоступны на текущем тарифе. Купите тариф с поддержкой заказов, чтобы клиенты могли оформлять заказы.',
                 'choose_package'
             );
         } elseif ($hasActivePackage && $canAcceptOrdersByPackage && ! $seller->can_order) {
             $blockers[] = $this->blocker(
                 'orders_disabled_by_seller',
-                'Приём заказов выключен в настройках магазина.',
+                'Приём заказов выключен продавцом в настройках магазина.',
                 'edit_store'
             );
         }

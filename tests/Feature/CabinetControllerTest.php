@@ -109,7 +109,7 @@ class CabinetControllerTest extends TestCase
         $this->assertStringContainsString('body.seller-cabinet-body .sidebar.collapsed', $css);
     }
 
-    public function test_cabinet_shows_unified_renewal_block_instead_of_legacy_package_alert(): void
+    public function test_cabinet_shows_auto_renew_control_in_the_package_state(): void
     {
         $user = User::factory()->create(['balance' => 500]);
         $seller = Seller::factory()->create([
@@ -132,8 +132,8 @@ class CabinetControllerTest extends TestCase
         $response->assertOk();
         $response->assertSee('seller-cabinet-renewal', false);
         $response->assertSee('seller-cabinet-renewal-note', false);
-        $response->assertDontSee('autoRenewSwitch', false);
-        $response->assertDontSee('toggleAutoRenew(this)', false);
+        $response->assertSee('sellerAutoRenewToggle', false);
+        $response->assertSee(route('account.store.toggle-auto-renew'), false);
     }
 
     public function test_create_shop_form_returns_200_when_no_shop(): void

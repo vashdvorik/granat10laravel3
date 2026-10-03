@@ -61,44 +61,6 @@
             </div>
         </div>
 
-        @if(($showRenewalDetails ?? true) && $sellerCabinetState->hasActivePackage)
-            <div class="seller-cabinet-renewal mt-3">
-                <div class="seller-cabinet-renewal__item">
-                    <small>Срок тарифа</small>
-                    <strong>
-                        @if($sellerCabinetState->packageIsLifetime)
-                            Бессрочно
-                        @elseif($sellerCabinetState->packageEndsAt)
-                            до {{ $sellerCabinetState->packageEndsAt->format('d.m.Y') }}
-                            @if($sellerCabinetState->packageDaysLeft !== null)
-                                <span>({{ max(0, $sellerCabinetState->packageDaysLeft) }} дн.)</span>
-                            @endif
-                        @else
-                            Не указан
-                        @endif
-                    </strong>
-                </div>
-
-                @if(! $sellerCabinetState->packageIsLifetime)
-                    <div class="seller-cabinet-renewal__item">
-                        <small>Автопродление</small>
-                        <strong class="{{ $sellerCabinetState->autoRenewEnabled ? 'text-success' : 'text-muted' }}">
-                            {{ $sellerCabinetState->autoRenewEnabled ? 'Включено' : 'Выключено' }}
-                        </strong>
-                    </div>
-                    <div class="seller-cabinet-renewal__item">
-                        <small>Спишется при продлении</small>
-                        <strong>{{ number_format((float) $sellerCabinetState->packageRenewalPrice, 0, '.', ' ') }} руб.</strong>
-                    </div>
-                    <div class="seller-cabinet-renewal__item">
-                        <small>Баланс</small>
-                        <strong class="{{ $sellerCabinetState->autoRenewPossible ? 'text-success' : 'text-danger' }}">
-                            {{ number_format((float) $sellerCabinetState->balance, 0, '.', ' ') }} руб.
-                        </strong>
-                    </div>
-                @endif
-            </div>
-
             @if(! $sellerCabinetState->packageIsLifetime && $sellerCabinetState->packageDaysLeft !== null && $sellerCabinetState->packageDaysLeft <= 7)
                 <div class="seller-cabinet-renewal-note seller-cabinet-renewal-note--{{ $sellerCabinetState->autoRenewEnabled && $sellerCabinetState->autoRenewPossible ? 'success' : 'warning' }} mt-3">
                     @if($sellerCabinetState->autoRenewEnabled && $sellerCabinetState->autoRenewPossible)
@@ -110,7 +72,6 @@
                     @endif
                 </div>
             @endif
-        @endif
 
         @if($sellerCabinetState->blockers !== [])
             <div class="seller-cabinet-state__blockers">

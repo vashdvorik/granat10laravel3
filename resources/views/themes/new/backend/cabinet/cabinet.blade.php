@@ -61,6 +61,9 @@
                         <div class="cabinet-progress"><span style="width:{{ max(8, min(100, (($sellerCabinetState->packageDaysLeft ?? 0) / 30) * 100)) }}%"></span></div>
                         <div class="cabinet-package-card__meta"><span>Осталось дней</span><strong>{{ max(0, $sellerCabinetState->packageDaysLeft ?? 0) }}</strong></div>
                     @endif
+                    @include('components.auto-renew-toggle', [
+                        'sellerCabinetState' => $sellerCabinetState,
+                    ])
                     <a class="btn btn-light" href="{{ route('account.packages.index') }}">Управлять тарифом</a>
                 @else
                     <p>Выберите тариф, чтобы открыть товары для покупателей и активировать дополнительные возможности магазина.</p>

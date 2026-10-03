@@ -48,6 +48,27 @@ class BackendSellerControllerTest extends TestCase
         $response->assertSee('store-tariff-card', false);
     }
 
+    public function test_store_index_shows_auto_renew_control_for_expiring_package(): void
+    {
+        $user = User::factory()->create();
+        $seller = Seller::factory()->create([
+            'user_id' => $user->id,
+            'auto_renew' => true,
+        ]);
+        $package = Package::factory()->monthly()->create();
+
+        SellerPackage::factory()->active()->create([
+            'seller_id' => $seller->id,
+            'package_id' => $package->id,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('account.store.index'));
+
+        $response->assertOk()
+            ->assertSee('sellerAutoRenewToggle', false)
+            ->assertSee(route('account.store.toggle-auto-renew'), false);
+    }
+
     public function test_store_index_separates_filled_contacts_from_tariff_visibility(): void
     {
         $user = User::factory()->create();

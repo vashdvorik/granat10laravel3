@@ -122,18 +122,18 @@
                                         </div>
                                     @elseif($compatibility->status === 'insufficient_balance')
                                         <div class="alert alert-danger py-2 px-3 mb-2">
-                                            Баланса недостаточно для подключения.
+                                            Пополните баланс, чтобы подключить тариф.
                                         </div>
                                     @endif
                                     @php
                                         $impactLabels = [];
 
                                         if ($compatibility->willDisableWebsite) {
-                                            $impactLabels[] = 'Сайт будет скрыт';
+                                            $impactLabels[] = 'Указанный сайт будет скрыт';
                                         }
 
                                         if ($compatibility->willDisableSocialLinks) {
-                                            $impactLabels[] = 'Соцсети будут скрыты';
+                                            $impactLabels[] = 'Указанные соцсети будут скрыты';
                                         }
 
                                         if ($compatibility->willDisableOrders) {

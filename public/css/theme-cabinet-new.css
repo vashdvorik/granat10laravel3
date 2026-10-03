@@ -542,6 +542,87 @@ body.cabinet-new {
     color: var(--cab-ink);
 }
 
+.cabinet-new .seller-cabinet-auto-renew {
+    display: block;
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border: 1px solid var(--cab-line);
+    border-radius: 11px;
+    background: var(--cab-card);
+    box-shadow: none;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__copy {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__title {
+    display: block;
+    color: var(--cab-ink);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__description {
+    display: block;
+    margin-top: 6px;
+    color: var(--cab-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__control {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__control .form-check-input {
+    width: 42px;
+    height: 24px;
+    margin: 0;
+    border-color: #d9d4df;
+    cursor: pointer;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__control .form-check-input:checked {
+    border-color: var(--cab-primary);
+    background-color: var(--cab-primary);
+}
+
+.cabinet-new .seller-cabinet-auto-renew__error {
+    display: block;
+    margin-top: 8px;
+    color: #b42318;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.cabinet-new .seller-cabinet-auto-renew__error.d-none {
+    display: none;
+}
+
+.cabinet-new .cabinet-package-card .seller-cabinet-auto-renew {
+    margin-top: 16px;
+    margin-bottom: 0;
+}
+
+.cabinet-new .store-tariff-card .seller-cabinet-auto-renew {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
 .cabinet-progress {
     overflow: hidden;
     height: 7px;
@@ -760,6 +841,25 @@ body.cabinet-new {
 }
 
 @media (max-width: 680px) {
+    .cabinet-new .seller-cabinet-auto-renew {
+        margin-bottom: 16px;
+        padding: 12px 14px;
+    }
+
+    .cabinet-new .seller-cabinet-auto-renew__layout {
+        align-items: center;
+        gap: 12px;
+    }
+
+    .cabinet-new .cabinet-package-card .seller-cabinet-auto-renew {
+        margin-top: 14px;
+        margin-bottom: 0;
+    }
+
+    .cabinet-new .store-tariff-card .seller-cabinet-auto-renew {
+        margin-bottom: 16px;
+    }
+
     .cabinet-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }

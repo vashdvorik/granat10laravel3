@@ -241,6 +241,28 @@ class ProductControllerTest extends TestCase
             ->assertDontSee('.product-order-section{max-width:820px;margin:50px auto 0}', false);
     }
 
+    public function test_product_order_form_shows_seller_delivery_terms(): void
+    {
+        $product = $this->createVisibleProduct([
+            'can_order' => true,
+            'delivery_enabled' => true,
+        ]);
+        $product->seller->update([
+            'can_order' => true,
+            'delivery_enabled' => true,
+            'delivery_terms' => "Доставка по городу.\nСтоимость согласовывается с продавцом.",
+        ]);
+        $product->seller->activePackage()->update([
+            'package_id' => Package::factory()->create(['has_order_system' => true])->id,
+        ]);
+
+        $this->get(route('product.show', $product->alias))
+            ->assertOk()
+            ->assertSee('Условия доставки')
+            ->assertSee('Доставка по городу.')
+            ->assertSee('Стоимость согласовывается с продавцом.');
+    }
+
     public function test_product_mobile_call_action_shows_phone_number(): void
     {
         $product = $this->createVisibleProduct();

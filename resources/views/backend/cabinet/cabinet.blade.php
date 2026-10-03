@@ -403,6 +403,10 @@
                                  @endif
                               </div>
 
+                              @include('components.auto-renew-toggle', [
+                                 'sellerCabinetState' => $sellerCabinetState,
+                              ])
+
                               {{-- Лимиты товаров --}}
                               <div class="mb-20 pb-20 border-bottom">
                                  <h6 class="fw-500 mb-15">Лимиты товаров</h6>
