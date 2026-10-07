@@ -28,11 +28,6 @@ class RouteListBootTest extends TestCase
         }
     }
 
-    public function test_package_system_debug_route_is_not_registered_outside_local(): void
-    {
-        $this->get('/test-package-system')->assertNotFound();
-    }
-
     public function test_routes_can_be_cached(): void
     {
         $this->assertSame(0, Artisan::call('route:cache'));

@@ -40,19 +40,6 @@ class ProductVisibilityResolver
         return $this->snapshot($product)->publicVisible;
     }
 
-    public function buyerVisible(Product $product): bool
-    {
-        return $this->snapshot($product)->buyerVisible;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function buyerBlockingReasons(Product $product): array
-    {
-        return $this->snapshot($product)->buyerBlockingReasons;
-    }
-
     public function applyPublicVisibility(Builder $query): Builder
     {
         return $query

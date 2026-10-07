@@ -19,7 +19,6 @@ class GranatRuntimeCommandTest extends TestCase
         $exitCode = Artisan::call('granat:work', [
             '--dry-run' => true,
             '--serve' => true,
-            '--vite' => true,
         ]);
         $output = Artisan::output();
 
@@ -32,7 +31,6 @@ class GranatRuntimeCommandTest extends TestCase
         $this->assertStringContainsString('--queue=orders', $output);
         $this->assertStringContainsString('scheduler:', $output);
         $this->assertStringContainsString('schedule:work', $output);
-        $this->assertStringContainsString('vite:', $output);
-        $this->assertStringContainsString('run dev', $output);
+        $this->assertStringNotContainsString('vite', $output);
     }
 }

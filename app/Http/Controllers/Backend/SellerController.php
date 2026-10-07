@@ -27,30 +27,6 @@ class SellerController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Seller $seller)
-    {
-        //
-    }
-
-    /**
      * Форма редактирования магазина (О магазине)
      */
     public function edit(Seller $seller, SellerCabinetStateService $sellerCabinetStateService)
@@ -83,12 +59,5 @@ class SellerController extends Controller
 
         return redirect()->route('account.index')
             ->with('success', 'Магазин обновлён');
-    }
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Seller $seller)
-    {
-        //
     }
 }

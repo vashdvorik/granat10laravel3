@@ -9,7 +9,6 @@ class RunGranatRuntime extends Command
 {
     protected $signature = 'granat:work
                             {--serve : Start the local HTTP server}
-                            {--vite : Start Vite dev server}
                             {--host=127.0.0.1 : Host for php artisan serve}
                             {--port=8000 : Port for php artisan serve}
                             {--dry-run : Print planned processes without starting them}';
@@ -109,10 +108,6 @@ class RunGranatRuntime extends Command
             ];
         }
 
-        if ($this->option('vite')) {
-            $commands['vite'] = [$this->npmBinary(), 'run', 'dev'];
-        }
-
         return $commands;
     }
 
@@ -196,10 +191,5 @@ class RunGranatRuntime extends Command
             static fn (string $part): string => str_contains($part, ' ') ? '"'.$part.'"' : $part,
             $command,
         ));
-    }
-
-    private function npmBinary(): string
-    {
-        return PHP_OS_FAMILY === 'Windows' ? 'npm.cmd' : 'npm';
     }
 }

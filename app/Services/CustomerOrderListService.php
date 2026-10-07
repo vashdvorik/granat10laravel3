@@ -90,6 +90,11 @@ class CustomerOrderListService
     {
         $entries = $this->cookieEntries($request);
 
+        // На страницах 404 вне группы web сессии нет: показываем только то, что хранится в cookie.
+        if (! $request->hasSession()) {
+            return $entries;
+        }
+
         foreach ((array) $request->session()->get(self::SESSION_KEY, []) as $publicId) {
             $accessToken = $request->session()->get(self::SESSION_ACCESS_PREFIX.$publicId);
 

@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             AdminRoleSeeder::class,
             RegionsAndSettlementsSeeder::class,
             UsersTableSeeder::class,
-            //CategoriesTableSeeder::class,
             CategoriesJsonSeeder::class,
             SellersTableSeeder::class,
             SellerSettlementBackfillSeeder::class,

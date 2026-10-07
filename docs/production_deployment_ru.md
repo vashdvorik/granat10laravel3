@@ -85,10 +85,8 @@ redis-cli ping
 
 Ожидаемый ответ Redis — `PONG`.
 
-Node.js для текущей legacy-темы не является обязательным: Blade-шаблоны не
-подключают Vite напрямую. Если в конкретном релизе появятся Vite-ассеты,
-установите Node.js LTS и выполните `npm install && npm run build`. Не используйте
-`npm ci`, пока в репозитории нет `package-lock.json`.
+Node.js не нужен: в проекте нет сборки фронтенда, стили и скрипты лежат в `public/`
+в готовом виде.
 
 ## 3. База данных
 
@@ -564,13 +562,6 @@ php artisan queue:restart
 sudo supervisorctl restart granat-moderation-worker:*
 sudo supervisorctl restart granat-orders-worker:*
 php artisan up
-```
-
-Если релиз содержит Vite-ассеты, перед кешированием выполните:
-
-```bash
-npm install
-npm run build
 ```
 
 После обновления снова выполните раздел «Финальная проверка».

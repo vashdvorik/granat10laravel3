@@ -14,12 +14,11 @@ use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Sanctum\HasApiTokens;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -103,33 +102,6 @@ class User extends Authenticatable implements FilamentUser
             ->values();
     }
 
-    public function roles_all(): Collection
-    {
-        return $this->rolesAll();
-    }
-
-    public function hasRole($name): bool
-    {
-        $roleNames = is_array($name) ? $name : [$name];
-
-        return $this->rolesAll()
-            ->pluck('name')
-            ->intersect($roleNames)
-            ->isNotEmpty();
-    }
-
-    public function setRole($name): static
-    {
-        $role = Role::query()->where('name', $name)->first();
-
-        if ($role) {
-            $this->role()->associate($role);
-            $this->save();
-        }
-
-        return $this;
-    }
-
     public function hasPermission($name): bool
     {
         $this->loadMissing(['role.permissions', 'roles.permissions']);
@@ -137,22 +109,6 @@ class User extends Authenticatable implements FilamentUser
         return $this->rolesAll()
             ->flatMap->permissions
             ->contains('key', $name);
-    }
-
-    public function hasPermissionOrFail($name): bool
-    {
-        if (! $this->hasPermission($name)) {
-            throw new UnauthorizedHttpException(null);
-        }
-
-        return true;
-    }
-
-    public function hasPermissionOrAbort($name, $statusCode = 403): bool
-    {
-        abort_unless($this->hasPermission($name), $statusCode);
-
-        return true;
     }
 
     public function getAvatarAttribute(?string $value): string

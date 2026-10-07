@@ -61,7 +61,7 @@ class CabinetNewThemeAssetsTest extends TestCase
             ->assertSee('id="logout-form"', false)
             ->assertSee('bootstrap.min.js', false)
             ->assertSee('sweetalert2', false)
-            ->assertSee('theme-cabinet-shared.css', false)
+            ->assertSee('cabinet-common.css', false)
             ->assertDontSee('fa-grid-2', false);
     }
 
@@ -84,14 +84,15 @@ class CabinetNewThemeAssetsTest extends TestCase
     public function test_orange_cabinet_stylesheets_keep_grid_and_palette_bridge(): void
     {
         $theme = file_get_contents(public_path('css/theme-cabinet-new.css'));
-        $shared = file_get_contents(public_path('css/theme-cabinet-shared.css'));
+        $shared = file_get_contents(public_path('css/cabinet-common.css'));
 
         // Bootstrap-сетка не должна ломаться переопределением .row / .col-*
         $this->assertStringNotContainsString('.cabinet-new .row > [class*=col-]', $theme);
         $this->assertStringContainsString('Cabinet polish (orange)', $theme);
         $this->assertStringContainsString('--seller-cabinet-accent: var(--temu-orange)', $theme);
 
-        // Общие компоненты не привязаны к классу старого кабинета
-        $this->assertStringNotContainsString('seller-cabinet-body {', $shared);
+        // Один общий файл обслуживает обе темы: правила привязаны к классам body обеих тем
+        $this->assertStringContainsString('body.seller-cabinet-body', $shared);
+        $this->assertStringContainsString(':where(body.cabinet-new)', $shared);
     }
 }

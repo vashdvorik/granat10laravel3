@@ -486,7 +486,7 @@ body.cabinet-new {
 
 .cabinet-stat-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 20px;
 }
@@ -2325,7 +2325,7 @@ body.cabinet-new .store-overview-hero {
     }
 }
 
-/* Palette bridge: shared seller-cabinet.css components follow the orange cabinet palette. */
+/* Palette bridge: shared cabinet-common.css components follow the orange cabinet palette. */
 :root {
     --seller-cabinet-text: var(--temu-ink);
     --seller-cabinet-muted: var(--temu-muted);
@@ -2348,7 +2348,7 @@ body.cabinet-new .store-overview-hero {
 /*
  * Итоговый слой оформления кабинета (оранжевая тема).
  * Стоит последним и переопределяет предыдущие слои. Подключаются Bootstrap-сетка
- * и общие компоненты (theme-cabinet-shared.css) — здесь только согласование с палитрой.
+ * и общие компоненты (cabinet-common.css) — здесь только согласование с палитрой.
  */
 
 /* ---------- Каркас ---------- */
@@ -3468,17 +3468,20 @@ body.cabinet-new .cabinet-bell__footer {
 
 body.cabinet-new .cabinet-bell__footer button {
     width: 100%;
-    padding: 12px 16px;
-    border: 0;
-    background: #fff;
-    color: var(--cab-primary, #6a5af9);
+    min-height: 0 !important;
+    padding: 12px 16px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: var(--cab-primary, #ff5a1f) !important;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
 }
 
 body.cabinet-new .cabinet-bell__footer button:hover {
-    background: var(--cab-primary-soft, #f1f1ff);
+    background: var(--cab-primary-soft, #f1f1ff) !important;
 }
 
 @media (max-width: 575.98px) {

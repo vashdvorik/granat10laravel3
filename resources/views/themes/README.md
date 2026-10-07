@@ -21,10 +21,10 @@
 Новый кабинет (`resources/views/themes/new/backend/cabinet`) подключает в `layout_cabinet.blade.php`:
 
 1. Bootstrap (`cabinet/assets/vendor_assets/css/bootstrap/bootstrap.css`) — сетка и утилиты;
-2. `public/css/theme-cabinet-shared.css` — общие компоненты кабинета (карточки товаров, формы,
-   заказы и т.д.). Файл получен из `public/css/seller-cabinet.css`: селекторы
-   `body.seller-cabinet-body` заменены на `:where(body.cabinet-new)`, фиолетовые акценты — на оранжевые.
-   Если `seller-cabinet.css` меняется, этот файл нужно обновить так же;
+2. `public/css/cabinet-common.css` — общие компоненты кабинета (карточки товаров, формы,
+   заказы и т.д.) для обеих тем кабинета. Правила, одинаковые в темах, записаны одним списком
+   селекторов `body.seller-cabinet-body …, :where(body.cabinet-new) …`; отличающиеся (цветовые
+   акценты) — отдельными правилами. Файл правится один раз, дублировать его не нужно;
 3. `public/css/theme-cabinet-new.css` — оформление темы. Блок «Cabinet polish (orange)» в конце файла
    имеет приоритет над предыдущими слоями.
 

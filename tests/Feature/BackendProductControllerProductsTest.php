@@ -582,7 +582,7 @@ class BackendProductControllerProductsTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.store.products.show', $product))
             ->assertOk()
-            ->assertSee('css/seller-cabinet.css', false)
+            ->assertSee('css/cabinet-common.css', false)
             ->assertDontSee('product-show-overview', false)
             ->assertSee('product-show-card', false)
             ->assertSee('product-show-actions', false);

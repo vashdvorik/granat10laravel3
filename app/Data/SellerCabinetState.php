@@ -22,8 +22,4 @@ final readonly class SellerCabinetState
         public bool $canAcceptOrders,
     ) {}
 
-    public function primaryBlocker(): ?array
-    {
-        return $this->blockers[0] ?? null;
-    }
 }

@@ -3,12 +3,14 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "php",
       "runtimeArgs": [
-        "run",
-        "dev"
+        "artisan",
+        "serve",
+        "--host=127.0.0.1",
+        "--port=8000"
       ],
-      "port": 5173
+      "port": 8000
     }
   ]
 }

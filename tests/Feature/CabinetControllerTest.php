@@ -69,13 +69,13 @@ class CabinetControllerTest extends TestCase
 
         $response
             ->assertStatus(200)
-            ->assertSee('css/seller-cabinet.css', false)
+            ->assertSee('css/cabinet-common.css', false)
             ->assertSee('?v=', false)
             ->assertSee('seller-cabinet-body', false)
             ->assertSee('syncSellerSidebarState', false)
             ->assertSee('seller-sidebar-collapsed', false);
 
-        $css = file_get_contents(public_path('css/seller-cabinet.css'));
+        $css = file_get_contents(public_path('css/cabinet-common.css'));
 
         $this->assertStringContainsString('--seller-cabinet-accent: #9152c7;', $css);
         $this->assertStringContainsString('--seller-cabinet-font: "Inter"', $css);

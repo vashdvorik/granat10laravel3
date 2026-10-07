@@ -51,16 +51,6 @@ class Category extends Model
         return $this->hasMany(\App\Models\Product::class);
     }
 
-    /**
-     * Получить все товары включая товары подкатегорий
-     */
-    public function allProducts()
-    {
-        $categoryIds = Category::whereDescendantOrSelf($this->id)->pluck('id');
-
-        return \App\Models\Product::whereIn('category_id', $categoryIds);
-    }
-
     // ==========================================
     // РАБОТА С КЕШЕМ
     // ==========================================

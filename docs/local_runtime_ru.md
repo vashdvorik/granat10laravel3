@@ -14,10 +14,10 @@ php artisan granat:work
 - worker очереди заказов и Telegram-уведомлений;
 - Laravel Scheduler через `schedule:work`.
 
-Если нужно одновременно поднять локальный сайт и Vite:
+Если нужно одновременно поднять локальный сайт:
 
 ```bash
-php artisan granat:work --serve --vite
+php artisan granat:work --serve
 ```
 
 По умолчанию сайт запускается на `127.0.0.1:8000`. Хост и порт можно изменить:
@@ -29,7 +29,7 @@ php artisan granat:work --serve --host=127.0.0.1 --port=8001
 Перед запуском можно посмотреть, какие процессы будут стартовать:
 
 ```bash
-php artisan granat:work --dry-run --serve --vite
+php artisan granat:work --dry-run --serve
 ```
 
 ## Что должно быть настроено
