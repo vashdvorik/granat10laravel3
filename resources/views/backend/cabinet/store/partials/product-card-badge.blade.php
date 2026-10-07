@@ -1,6 +1,6 @@
 @php($productCabinetState = $productCabinetState ?? $product->cabinet_state)
 
-@if($product->is_vip)
+@if($product->isVipActive())
     <span class="seller-product-card__badge seller-product-card__badge--vip">
         <i class="uil uil-star"></i> VIP
     </span>

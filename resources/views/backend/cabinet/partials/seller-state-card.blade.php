@@ -1,8 +1,7 @@
 @php
     $stateActionUrl = match ($sellerCabinetState->primaryAction) {
         'create_store' => route('account.store.create'),
-        'choose_package' => route('account.packages.index'),
-        'open_products', 'choose_visible_products', 'remove_extra_vip' => route('account.store.products.index'),
+        'open_products' => route('account.store.products.index'),
         'add_product' => route('account.store.products.create'),
         'edit_store' => isset($seller) ? route('account.store.edit', $seller->id) : null,
         'open_store' => isset($seller) ? route('seller', $seller->alias) : null,
@@ -33,45 +32,19 @@
         </div>
 
         <div class="row g-3 mt-2">
-            <div class="col-6 col-lg-3">
-                <small class="text-muted d-block">Тариф</small>
-                <strong>{{ $sellerCabinetState->packageName ?? 'Нет тарифа' }}</strong>
+            <div class="col-6 col-lg-4">
+                <small class="text-muted d-block">Баланс</small>
+                <strong>{{ number_format((float) $sellerCabinetState->balance, 2, ',', ' ') }} руб</strong>
             </div>
-            <div class="col-6 col-lg-3">
-                <small class="text-muted d-block">Видны покупателям</small>
+            <div class="col-6 col-lg-4">
+                <small class="text-muted d-block">В каталоге</small>
                 <strong>{{ $sellerCabinetState->visibleProductsCount }}</strong>
             </div>
-            <div class="col-6 col-lg-3">
-                <small class="text-muted d-block">Активные товары</small>
-                <strong>
-                    {{ $sellerCabinetState->activeProductsCount }}
-                    @if($sellerCabinetState->activeProductsLimit !== null)
-                        / {{ $sellerCabinetState->activeProductsLimit }}
-                    @endif
-                </strong>
-            </div>
-            <div class="col-6 col-lg-3">
+            <div class="col-6 col-lg-4">
                 <small class="text-muted d-block">VIP</small>
-                <strong>
-                    {{ $sellerCabinetState->vipProductsCount }}
-                    @if($sellerCabinetState->vipProductsLimit !== null)
-                        / {{ $sellerCabinetState->vipProductsLimit }}
-                    @endif
-                </strong>
+                <strong>{{ $sellerCabinetState->vipProductsCount }}</strong>
             </div>
         </div>
-
-            @if(! $sellerCabinetState->packageIsLifetime && $sellerCabinetState->packageDaysLeft !== null && $sellerCabinetState->packageDaysLeft <= 7)
-                <div class="seller-cabinet-renewal-note seller-cabinet-renewal-note--{{ $sellerCabinetState->autoRenewEnabled && $sellerCabinetState->autoRenewPossible ? 'success' : 'warning' }} mt-3">
-                    @if($sellerCabinetState->autoRenewEnabled && $sellerCabinetState->autoRenewPossible)
-                        Тариф продлится автоматически. После списания товары останутся видимыми.
-                    @elseif($sellerCabinetState->autoRenewEnabled)
-                        Автопродление включено, но баланса не хватает. При непродлении товары будут скрыты из каталога.
-                    @else
-                        Автопродление отключено. После окончания тарифа товары будут скрыты из каталога.
-                    @endif
-                </div>
-            @endif
 
         @if($sellerCabinetState->blockers !== [])
             <div class="seller-cabinet-state__blockers">

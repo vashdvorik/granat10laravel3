@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -31,7 +29,7 @@ class FavoritesControllerTest extends TestCase
 
     public function test_favorites_page_has_modern_empty_state_with_recommendations(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $product = $this->createVisibleProduct($seller, $category, [
             'name' => 'FavoriteRecommendedProduct_UNIQ',
@@ -58,7 +56,7 @@ class FavoritesControllerTest extends TestCase
 
     public function test_get_products_returns_json_with_html_and_metadata(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $product = $this->createVisibleProduct($seller, $category, [
             'name' => 'FavoriteJsonProduct_UNIQ',
@@ -90,7 +88,7 @@ class FavoritesControllerTest extends TestCase
 
     public function test_get_products_skips_stale_ids_before_visible_products(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $staleProducts = Product::factory()->count(12)->create([
             'seller_id' => $seller->id,
@@ -118,7 +116,7 @@ class FavoritesControllerTest extends TestCase
 
     public function test_load_more_favorites_returns_products_partial(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $products = Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
@@ -137,17 +135,10 @@ class FavoritesControllerTest extends TestCase
         $response->assertSee('FavoriteLoadMoreProduct_UNIQ');
     }
 
-    private function createSellerWithPackage(): Seller
+    private function createSeller(): Seller
     {
         $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

@@ -36,7 +36,16 @@ class ProductForm
                         ->label('Опубликовать после сохранения')
                         ->helperText('Товар станет виден покупателям только после успешной модерации.')
                         ->default(false),
-                    Forms\Components\Toggle::make('is_vip')->label('VIP')->default(false),
+                    Forms\Components\Toggle::make('is_vip')
+                        ->label('VIP')
+                        ->helperText('Продавцы покупают VIP сами за баланс. Здесь VIP можно включить вручную.')
+                        ->live()
+                        ->default(false),
+                    Forms\Components\DateTimePicker::make('vip_until')
+                        ->label('VIP действует до')
+                        ->helperText('Оставьте пустым для VIP без ограничения по времени.')
+                        ->seconds(false)
+                        ->visible(fn (Forms\Get $get): bool => (bool) $get('is_vip')),
                     Forms\Components\Textarea::make('desc')
                         ->label('Описание')->rows(6)->maxLength(500)->columnSpanFull(),
                 ])->columns(2),

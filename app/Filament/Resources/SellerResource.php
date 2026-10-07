@@ -4,12 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SellerResource\Pages;
 use App\Filament\Resources\SellerResource\RelationManagers\ProductsRelationManager;
-use App\Filament\Resources\SellerResource\RelationManagers\SellerPackagesRelationManager;
 use App\Models\Seller;
 use App\Models\Settlement;
 use App\Models\User;
 use App\Services\AdminSellerService;
-use App\Services\SellerSettingsService;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -17,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Gate;
 
 class SellerResource extends Resource
 {
@@ -169,13 +166,6 @@ class SellerResource extends Resource
                     ->label('Активные товары')
                     ->alignCenter()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('activeSellerPackage.package.name')
-                    ->label('Активный тариф')
-                    ->placeholder('Нет тарифа')
-                    ->badge(),
-                Tables\Columns\IconColumn::make('auto_renew')
-                    ->label('Автопродление')
-                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime('d.m.Y H:i')
@@ -205,28 +195,13 @@ class SellerResource extends Resource
                         'record' => $record,
                         'activeRelationManager' => 0,
                     ])),
-                Tables\Actions\Action::make('toggleAutoRenew')
-                    ->label(fn (Seller $record): string => $record->auto_renew
-                        ? 'Выключить автопродление'
-                        : 'Включить автопродление')
-                    ->icon('heroicon-o-arrow-path')
-                    ->requiresConfirmation()
-                    ->action(function (Seller $record, SellerSettingsService $service): void {
-                        Gate::authorize('manageSettings', $record);
-                        $service->updateAutoRenew($record, ! $record->auto_renew);
-
-                        Notification::make()
-                            ->title('Настройка автопродления обновлена')
-                            ->success()
-                            ->send();
-                    }),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\Action::make('deleteSeller')
                     ->label('Удалить магазин')
                     ->icon('heroicon-o-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->modalDescription('Магазин, его товары, изображения и история тарифов будут удалены без возможности восстановления.')
+                    ->modalDescription('Магазин, его товары, изображения будут удалены без возможности восстановления.')
                     ->action(function (Seller $record, AdminSellerService $service): void {
                         $service->delete(auth()->user(), $record);
 
@@ -243,14 +218,13 @@ class SellerResource extends Resource
     {
         return [
             ProductsRelationManager::class,
-            SellerPackagesRelationManager::class,
         ];
     }
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user', 'activeSellerPackage.package'])
+            ->with(['user'])
             ->withCount([
                 'products as active_products_count' => fn (Builder $query): Builder => $query
                     ->where('is_active', true),

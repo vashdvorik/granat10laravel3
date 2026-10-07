@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Services\RegionalContext;
 use App\Services\RegionalUrlService;
@@ -63,14 +61,7 @@ class RegionalLinksAndSitemapTest extends TestCase
         $settlement = Settlement::factory()->create(['slug' => 'sitemap-city']);
         $otherSettlement = Settlement::factory()->create(['slug' => 'empty-city']);
         $seller = Seller::factory()->for($settlement)->create(['alias' => 'sitemap-shop']);
-        $package = Package::factory()->withLimits(50, 10)->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -113,7 +104,7 @@ class RegionalLinksAndSitemapTest extends TestCase
             'slug' => 'seo-city',
             'name' => 'SEO-город',
         ]);
-        $seller = $this->createSellerWithPackage($settlement, 'seo-shop');
+        $seller = $this->createSeller($settlement, 'seo-shop');
         $category = Category::factory()->create([
             'name' => 'Ноутбуки',
             'alias' => 'laptops',
@@ -164,17 +155,10 @@ class RegionalLinksAndSitemapTest extends TestCase
             ->assertSee('Ручное SEO-описание города.');
     }
 
-    private function createSellerWithPackage(Settlement $settlement, string $alias): Seller
+    private function createSeller(Settlement $settlement, string $alias): Seller
     {
         $seller = Seller::factory()->for($settlement)->create(['alias' => $alias]);
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

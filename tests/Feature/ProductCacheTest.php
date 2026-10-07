@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -35,16 +33,9 @@ class ProductCacheTest extends TestCase
 
     private function createVisibleProduct(array $attrs = []): Product
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller  = Seller::factory()->create();
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-            'end_date'   => null,
-        ]);
 
         return Product::factory()->create(array_merge([
             'seller_id'   => $seller->id,
@@ -106,16 +97,9 @@ class ProductCacheTest extends TestCase
 
     public function test_get_category_products_count_returns_correct_count(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller  = Seller::factory()->create();
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-            'end_date'   => null,
-        ]);
 
         Product::factory()->count(3)->create([
             'seller_id'   => $seller->id,

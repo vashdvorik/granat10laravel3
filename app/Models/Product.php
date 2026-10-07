@@ -23,7 +23,7 @@ class Product extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'price', 'lowprice', 'is_vip', 'is_active', 'publication_requested', 'category_id', 'seller_id'])
+            ->logOnly(['name', 'price', 'lowprice', 'is_vip', 'vip_until', 'is_active', 'publication_requested', 'category_id', 'seller_id'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
             ->useLogName('products')
@@ -46,6 +46,7 @@ class Product extends Model
         'features4',
         'alias',
         'is_vip',
+        'vip_until',
         'is_active',
         'publication_requested',
         'can_order',
@@ -64,6 +65,8 @@ class Product extends Model
     protected $casts = [
         'push_at' => 'datetime',
         'sale_started_at' => 'datetime',
+        'vip_until' => 'datetime',
+        'is_vip' => 'boolean',
         'moderation_status' => ProductModerationStatus::class,
         'moderation_version' => 'integer',
         'moderated_version' => 'integer',
@@ -85,8 +88,7 @@ class Product extends Model
     {
         return $this->moderation_status === ProductModerationStatus::Approved
             && $this->moderated_version === $this->moderation_version
-            && $this->is_active
-            && $this->seller?->activePackage() !== null;
+            && $this->is_active;
     }
 
     public function toSearchableArray(): array
@@ -189,9 +191,6 @@ class Product extends Model
             (int) $state->publicationRequested,
             (int) $state->moderationActual,
             (int) $state->hasImages,
-            (int) $state->hasActivePackage,
-            (int) $state->withinActiveLimit,
-            (int) $state->withinVipLimit,
             (int) $state->canBeOrdered,
             (int) $state->visibleToBuyers,
             (string) ($state->hiddenReason ?? ''),
@@ -202,6 +201,8 @@ class Product extends Model
             (string) ($this->moderation_version ?? ''),
             (string) ($this->moderated_version ?? ''),
             (int) $this->is_active,
+            (int) $this->is_vip,
+            (string) ($this->vip_until?->timestamp ?? ''),
             (int) $this->publication_requested,
             (string) ($this->push_at?->timestamp ?? ''),
             (string) ($this->updated_at?->timestamp ?? ''),
@@ -209,23 +210,18 @@ class Product extends Model
     }
 
     /**
-     * Scope: только товары от продавцов с активными пакетами
+     * Scope: публичные товары
+     * (продавец активировал, модерация пройдена и актуальна)
      */
-    public function scopeFromActiveSellerPackage($query)
+    /**
+     * VIP действует сейчас: флаг включён и срок не истёк (null = без срока)
+     */
+    public function isVipActive(): bool
     {
-        return $query->whereHas('seller.sellerPackages', function ($q) {
-            $q->where('is_active', true)
-                ->where(function ($dateQuery) {
-                    $dateQuery->whereNull('end_date')
-                        ->orWhere('end_date', '>=', now()->toDateString()); // DATE vs DATE, не DATETIME
-                });
-        });
+        return (bool) $this->is_vip
+            && ($this->vip_until === null || $this->vip_until->isFuture());
     }
 
-    /**
-     * Scope: публичные товары
-     * (продавец активировал И у продавца есть активный пакет)
-     */
     public function scopeVisible($query)
     {
         return app(ProductVisibilityResolver::class)->applyPublicVisibility($query);

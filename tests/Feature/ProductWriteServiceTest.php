@@ -6,11 +6,9 @@ use App\Enums\ProductModerationStatus;
 use App\Enums\ProductSaveAction;
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use App\Services\ProductActionService;
 use App\Services\ProductModerationIssuePresenter;
@@ -56,7 +54,9 @@ class ProductWriteServiceTest extends TestCase
         $this->assertSame('test-product-1', $product->alias);
         $this->assertFalse((bool) $product->is_active);
         $this->assertSame(ProductModerationStatus::Draft, $product->moderation_status);
-        $this->assertTrue((bool) $product->is_vip);
+        // VIP продавец выставить сам не может — он покупается отдельно за баланс
+        $this->assertFalse((bool) $product->is_vip);
+        $this->assertNull($product->vip_until);
         $this->assertTrue($product->can_order);
         $this->assertTrue($product->delivery_enabled);
         $this->assertNotNull($product->sale_started_at);
@@ -67,7 +67,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
 
         $product = $this->service->create($seller, [
             'name' => 'Товар для проверки',
@@ -129,7 +128,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
 
         try {
             $this->service->create($seller, [
@@ -153,7 +151,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
         $product = Product::factory()->draft()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -282,7 +279,7 @@ class ProductWriteServiceTest extends TestCase
         ]);
 
         $this->assertSame('Updated Product', $updated->name);
-        $this->assertTrue((bool) $updated->is_vip);
+        $this->assertFalse((bool) $updated->is_vip);
         $this->assertFalse($updated->can_order);
         $this->assertFalse($updated->delivery_enabled);
         $this->assertNotNull($updated->sale_started_at);
@@ -335,7 +332,6 @@ class ProductWriteServiceTest extends TestCase
     public function test_unchanged_save_after_switching_main_image_preserves_publication(): void
     {
         $seller = Seller::factory()->create();
-        $this->assignActivePackage($seller);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'is_active' => true,
@@ -373,7 +369,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -414,7 +409,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -468,7 +462,6 @@ class ProductWriteServiceTest extends TestCase
     {
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        $this->assignActivePackage($seller);
         $explicitActor = $seller->user;
         $this->actingAs(User::factory()->create());
 
@@ -487,18 +480,6 @@ class ProductWriteServiceTest extends TestCase
             'product_id' => $product->id,
             'actor_user_id' => $explicitActor->id,
             'action' => 'submitted',
-        ]);
-    }
-
-    private function assignActivePackage(Seller $seller): void
-    {
-        $package = Package::factory()->withLimits(10, 5)->create();
-
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addMonth(),
         ]);
     }
 }

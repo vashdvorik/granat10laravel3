@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -109,31 +107,18 @@ class CabinetControllerTest extends TestCase
         $this->assertStringContainsString('body.seller-cabinet-body .sidebar.collapsed', $css);
     }
 
-    public function test_cabinet_shows_auto_renew_control_in_the_package_state(): void
+    public function test_cabinet_has_no_package_or_auto_renew_blocks(): void
     {
         $user = User::factory()->create(['balance' => 500]);
-        $seller = Seller::factory()->create([
-            'user_id' => $user->id,
-            'auto_renew' => true,
-        ]);
-        $package = Package::factory()->create([
-            'price' => 200,
-            'duration_days' => 30,
-        ]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addDays(3)->toDateString(),
-        ]);
+        Seller::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get(route('account.index'));
 
         $response->assertOk();
-        $response->assertSee('seller-cabinet-renewal', false);
-        $response->assertSee('seller-cabinet-renewal-note', false);
-        $response->assertSee('sellerAutoRenewToggle', false);
-        $response->assertSee(route('account.store.toggle-auto-renew'), false);
+        $response->assertSee('500,00');
+        $response->assertDontSee('sellerAutoRenewToggle', false);
+        $response->assertDontSee('Выбрать тариф');
+        $response->assertDontSee('account/packages', false);
     }
 
     public function test_create_shop_form_returns_200_when_no_shop(): void
@@ -186,15 +171,8 @@ class CabinetControllerTest extends TestCase
     // Создание магазина
     // =========================================================================
 
-    public function test_store_shop_creates_seller_and_assigns_base_package(): void
+    public function test_store_shop_creates_seller(): void
     {
-        // Базовый пакет ID=1 должен существовать
-        $basePackage = Package::factory()->free()->create(['id' => null]); // создаём новый
-        // Для теста storeShop нужен package id=1 — создадим его если не существует
-        if (!Package::find(1)) {
-            Package::factory()->free()->create(['id' => 1]);
-        }
-
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->post(route('account.store.store'), [
@@ -214,10 +192,8 @@ class CabinetControllerTest extends TestCase
             'name'    => 'Мой тестовый магазин Уникальный 99Z',
         ]);
 
-        // После создания магазина должен быть создан SellerPackage
         $seller = Seller::where('user_id', $user->id)->first();
         $this->assertNotNull($seller);
-        $this->assertTrue($seller->sellerPackages()->exists(), 'После создания магазина должен быть назначен базовый пакет');
     }
 
     public function test_store_shop_validates_name_required(): void
@@ -294,10 +270,6 @@ class CabinetControllerTest extends TestCase
 
     public function test_store_shop_generates_unique_alias_from_name(): void
     {
-        if (!Package::find(1)) {
-            Package::factory()->free()->create(['id' => 1]);
-        }
-
         $user = User::factory()->create();
 
         $this->actingAs($user)->post(route('account.store.store'), [
@@ -315,12 +287,6 @@ class CabinetControllerTest extends TestCase
     {
         $user = User::factory()->create(['balance' => 500]);
         $seller = Seller::factory()->create(['user_id' => $user->id]);
-        $package = Package::factory()->withLimits(5, 1)->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'is_active' => true,
@@ -339,7 +305,8 @@ class CabinetControllerTest extends TestCase
         $response->assertViewHas('totalProducts', 1);
         $response->assertViewHas('activeProducts', 1);
         $response->assertViewHas('totalViews', 7);
-        $response->assertViewHas('productLimit', 5);
+        $response->assertViewMissing('productLimit');
+        $response->assertViewMissing('activePackage');
         $response->assertViewHas('balance', '500.00');
     }
 
@@ -421,11 +388,6 @@ class CabinetControllerTest extends TestCase
             'password' => Hash::make('Password123'),
         ]);
         $seller = Seller::factory()->create(['user_id' => $user->id]);
-        $package = Package::factory()->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-        ]);
 
         $response = $this->actingAs($user)->delete(route('account.store.destroy'), [
             'password' => 'Password123',
@@ -434,7 +396,6 @@ class CabinetControllerTest extends TestCase
         $response->assertRedirect(route('account.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('sellers', ['id' => $seller->id]);
-        $this->assertDatabaseMissing('seller_packages', ['seller_id' => $seller->id]);
     }
 
     public function test_destroy_shop_rejects_wrong_password(): void
@@ -465,53 +426,4 @@ class CabinetControllerTest extends TestCase
         $response->assertSessionHasErrors(['password']);
     }
 
-    public function test_toggle_auto_renew_enables_setting(): void
-    {
-        $user = User::factory()->create();
-        $seller = Seller::factory()->create([
-            'user_id' => $user->id,
-            'auto_renew' => false,
-        ]);
-
-        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'), [
-            'auto_renew' => '1',
-        ]);
-
-        $response->assertOk()
-            ->assertJson([
-                'success' => true,
-                'auto_renew' => true,
-            ]);
-        $this->assertTrue($seller->fresh()->auto_renew);
-    }
-
-    public function test_toggle_auto_renew_disables_setting_when_value_missing(): void
-    {
-        $user = User::factory()->create();
-        $seller = Seller::factory()->create([
-            'user_id' => $user->id,
-            'auto_renew' => true,
-        ]);
-
-        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'));
-
-        $response->assertOk()
-            ->assertJson([
-                'success' => true,
-                'auto_renew' => false,
-            ]);
-        $this->assertFalse($seller->fresh()->auto_renew);
-    }
-
-    public function test_toggle_auto_renew_returns_404_without_shop(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->postJson(route('account.store.toggle-auto-renew'), [
-            'auto_renew' => '1',
-        ]);
-
-        $response->assertNotFound()
-            ->assertJsonStructure(['error']);
-    }
 }

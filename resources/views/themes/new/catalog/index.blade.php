@@ -17,8 +17,8 @@
     </aside>
     <section>
         <div class="bimm-catalog__toolbar">
-            <span class="bimm-toolbar-count">{{ $products->total() }} товаров</span>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="bimm-toolbar-count"><strong>{{ $products->total() }}</strong> товаров найдено</span>
+            <div class="bimm-catalog__tools">
                 @include('components.catalog-region-selector')
                 @include('components.catalog-sort-dropdown')
             </div>
@@ -32,7 +32,7 @@
                 @endif
             @endif
         @else
-            <div class="bimm-empty"><i class="fa-regular fa-face-frown" style="font-size:30px;margin-bottom:12px"></i><p>По выбранным условиям товаров пока нет.</p><a class="bimm-button bimm-button--dark" href="{{ $regionalUrl->route('catalog.index') }}">Сбросить фильтры</a></div>
+            <div class="bimm-empty"><i class="fa-regular fa-face-frown" style="font-size:30px;margin-bottom:12px"></i><h2>Товаров не нашлось</h2><p>Попробуйте изменить регион, категорию или сортировку — так будет проще найти нужное.</p><div class="bimm-empty__actions"><a class="bimm-button bimm-button--dark" href="{{ $regionalUrl->route('catalog.index') }}">Сбросить фильтры</a><a class="bimm-button bimm-button--light" href="{{ $regionalUrl->route('home') }}">На главную</a></div></div>
         @endif
     </section>
 </div>
@@ -45,6 +45,7 @@ document.querySelector('[data-bimm-load-more]')?.addEventListener('click', funct
     button.disabled = true;
     fetch(button.dataset.url + '?page=' + page).then(function (response) { return response.text(); }).then(function (html) {
         document.querySelector('.bimm-product-grid').insertAdjacentHTML('beforeend', html);
+        window.dispatchEvent(new Event('bimm:favorites-rendered'));
         button.dataset.currentPage = page;
         button.disabled = page >= Number(button.dataset.lastPage);
         if (button.disabled) button.remove();

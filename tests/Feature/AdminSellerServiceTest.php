@@ -4,12 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use App\Services\AdminSellerService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -50,11 +48,6 @@ class AdminSellerServiceTest extends TestCase
             'path' => 'products/image.webp',
             'is_main' => true,
         ]);
-        $package = Package::factory()->create();
-        $sellerPackage = SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-        ]);
 
         foreach ([
             $seller->photo,
@@ -74,7 +67,6 @@ class AdminSellerServiceTest extends TestCase
         $this->assertDatabaseMissing('sellers', ['id' => $seller->id]);
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
         $this->assertDatabaseMissing('images', ['id' => $image->id]);
-        $this->assertDatabaseMissing('seller_packages', ['id' => $sellerPackage->id]);
         $this->assertDatabaseHas('users', ['id' => $owner->id]);
 
         Storage::disk('public')->assertMissing($seller->photo);

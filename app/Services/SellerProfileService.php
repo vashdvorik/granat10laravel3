@@ -35,12 +35,6 @@ class SellerProfileService
         $data['can_order'] = (bool) ($data['can_order'] ?? false);
         $data['delivery_enabled'] = (bool) ($data['delivery_enabled'] ?? false);
 
-        if ($data['can_order'] && ! ($seller->activePackage()?->package?->has_order_system ?? false)) {
-            throw ValidationException::withMessages([
-                'can_order' => 'Ваш текущий тариф не поддерживает приём заказов.',
-            ]);
-        }
-
         if (! $data['can_order']) {
             $data['delivery_enabled'] = false;
         }

@@ -5,10 +5,8 @@ namespace Tests\Feature;
 use App\Enums\ProductModerationStatus;
 use App\Jobs\ModerateProductJob;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
-use App\Models\SellerPackage;
 use App\Services\ProductModerationRetryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
@@ -109,13 +107,6 @@ class ProductModerationRetryTest extends TestCase
             'request_fingerprint' => hash('sha256', 'retry-'.$product->id),
         ]);
         Image::factory()->create(['product_id' => $product->id]);
-        $package = Package::factory()->withLimits(10, 5)->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $product->seller_id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addMonth(),
-        ]);
 
         return $product;
     }

@@ -9,13 +9,11 @@ use App\Filament\Resources\ProductResource\Pages\ListProducts;
 use App\Filament\Resources\ProductResource\RelationManagers\ImagesRelationManager;
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
 use App\Models\Role;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -197,7 +195,7 @@ class ProductResourceTest extends TestCase
     public function test_active_product_can_be_created_with_image_and_available_limit(): void
     {
         $administrator = $this->createAdministrator();
-        $seller = $this->createSellerWithPackage();
+        $seller = Seller::factory()->create();
         $category = Category::factory()->create();
 
         $this->actingAs($administrator);
@@ -268,7 +266,7 @@ class ProductResourceTest extends TestCase
     public function test_publish_action_rejects_product_without_image_and_publishes_valid_product(): void
     {
         $administrator = $this->createAdministrator();
-        $seller = $this->createSellerWithPackage();
+        $seller = Seller::factory()->create();
         $category = Category::factory()->create();
         $invalidProduct = Product::factory()->inactive()->create([
             'seller_id' => $seller->id,
@@ -295,46 +293,34 @@ class ProductResourceTest extends TestCase
         $this->assertTrue((bool) $validProduct->refresh()->is_active);
     }
 
-    public function test_publish_action_respects_active_and_vip_package_limits(): void
+    public function test_publish_action_has_no_limit_on_active_or_vip_products(): void
     {
         $administrator = $this->createAdministrator();
         $category = Category::factory()->create();
+        $seller = Seller::factory()->create();
 
-        $activeLimitedSeller = $this->createSellerWithPackage(activeLimit: 1, vipLimit: 5);
-        Product::factory()->create([
-            'seller_id' => $activeLimitedSeller->id,
+        Product::factory()->count(12)->create([
+            'seller_id' => $seller->id,
             'category_id' => $category->id,
             'is_active' => true,
         ]);
-        $activeLimitedProduct = Product::factory()->inactive()->create([
-            'seller_id' => $activeLimitedSeller->id,
+        Product::factory()->activeVip()->count(3)->create([
+            'seller_id' => $seller->id,
             'category_id' => $category->id,
         ]);
-        Image::factory()->create(['product_id' => $activeLimitedProduct->id]);
-
-        $vipLimitedSeller = $this->createSellerWithPackage(activeLimit: 5, vipLimit: 1);
-        Product::factory()->activeVip()->create([
-            'seller_id' => $vipLimitedSeller->id,
+        $product = Product::factory()->inactive()->create([
+            'seller_id' => $seller->id,
             'category_id' => $category->id,
         ]);
-        $vipLimitedProduct = Product::factory()->inactive()->vip()->create([
-            'seller_id' => $vipLimitedSeller->id,
-            'category_id' => $category->id,
-        ]);
-        Image::factory()->create(['product_id' => $vipLimitedProduct->id]);
+        Image::factory()->create(['product_id' => $product->id]);
 
         $this->actingAs($administrator);
 
         Livewire::test(ListProducts::class)
-            ->callTableAction('activate', $activeLimitedProduct)
-            ->assertTableActionHalted('activate');
+            ->callTableAction('activate', $product)
+            ->assertNotified();
 
-        Livewire::test(ListProducts::class)
-            ->callTableAction('activate', $vipLimitedProduct)
-            ->assertTableActionHalted('activate');
-
-        $this->assertFalse((bool) $activeLimitedProduct->refresh()->is_active);
-        $this->assertFalse((bool) $vipLimitedProduct->refresh()->is_active);
+        $this->assertTrue((bool) $product->refresh()->is_active);
     }
 
     public function test_moderator_can_approve_request_changes_and_reject_products(): void
@@ -400,7 +386,7 @@ class ProductResourceTest extends TestCase
     public function test_deactivate_push_and_delete_actions_use_action_service(): void
     {
         $administrator = $this->createAdministrator();
-        $seller = $this->createSellerWithPackage();
+        $seller = Seller::factory()->create();
         $category = Category::factory()->create();
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -515,20 +501,4 @@ class ProductResourceTest extends TestCase
         return User::factory()->create(['role_id' => $role->id]);
     }
 
-    private function createSellerWithPackage(
-        int $activeLimit = 10,
-        int $vipLimit = 5
-    ): Seller {
-        $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits($activeLimit, $vipLimit)->create();
-
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addMonth(),
-        ]);
-
-        return $seller;
-    }
 }

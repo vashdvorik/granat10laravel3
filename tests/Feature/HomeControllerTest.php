@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,14 +17,7 @@ class HomeControllerTest extends TestCase
         $category = Category::factory()->create(['name' => 'Категория главной']);
         $emptyCategory = Category::factory()->create(['name' => 'Пустая категория главной']);
         $seller = Seller::factory()->create(['name' => 'Магазин главной']);
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -40,7 +31,7 @@ class HomeControllerTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('Где купить? Смотри на BIMM.')
-            ->assertSee('Все товары из Приднестровья в одном месте')
+            ->assertSee('Маркетплейс Приднестровья')
             ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
             ->assertSee('Товары, которые уже есть на BIMM')
             ->assertSee('Новые товары продавцов')

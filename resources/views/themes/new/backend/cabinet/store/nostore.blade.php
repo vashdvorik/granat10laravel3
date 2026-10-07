@@ -9,9 +9,6 @@
                 <a href="{{ route('account.store.create') }}" class="btn btn-primary btn-squared">
                     Создать магазин
                 </a>
-                <a href="{{ route('account.packages.index') }}" class="btn btn-outline-secondary btn-squared">
-                    Посмотреть тарифы
-                </a>
             </div>
         </div>
 
@@ -34,7 +31,7 @@
                 <img src="{{ asset('cabinet/img/svg/chat.svg') }}" alt="" class="svg">
             </div>
             <h5>Если нужна помощь</h5>
-            <p>Проверьте подсказки в кабинете и разделы с тарифами. Важные ограничения зависят от выбранного пакета.</p>
+            <p>Проверьте подсказки в кабинете: они подскажут, что нужно сделать, чтобы товары стали видны покупателям.</p>
         </div>
 
         <div class="nostore-card">
@@ -42,7 +39,7 @@
                 <img src="{{ asset('cabinet/img/svg/documents.svg') }}" alt="" class="svg">
             </div>
             <h5>Почему это важно</h5>
-            <p>Без магазина покупатели не увидят товары, а также не смогут перейти к контактам, заказам и тарифам.</p>
+            <p>Без магазина покупатели не увидят товары, а также не смогут перейти к контактам и заказам.</p>
         </div>
     </div>
 </div>

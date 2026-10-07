@@ -6,7 +6,6 @@ use App\Enums\OrderStatus;
 use App\Models\OrderStatusHistory;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Spatie\Activitylog\Models\Activity;
@@ -48,16 +47,11 @@ class SellerEventTimelineService
                             ->where('subject_type', Seller::class)
                             ->where('subject_id', $seller->id);
                     })
-                    ->orWhere(function ($packageQuery) use ($seller) {
-                        $packageQuery
-                            ->where('log_name', 'packages')
-                            ->where('properties->seller_id', $seller->id);
-                    })
                     ->orWhere(function ($userQuery) use ($seller) {
                         $userQuery
                             ->where('causer_type', User::class)
                             ->where('causer_id', $seller->user_id)
-                            ->whereIn('log_name', ['sellers', 'products', 'packages']);
+                            ->whereIn('log_name', ['sellers', 'products']);
                     });
 
                 if ($productIds !== []) {
@@ -92,7 +86,7 @@ class SellerEventTimelineService
     private function mapActivity(Activity $activity): array
     {
         $properties = $activity->properties;
-        $reason = $properties->get('reason') ?: $properties->get('package_name');
+        $reason = $properties->get('reason');
 
         return [
             'date' => $activity->created_at,
@@ -106,12 +100,6 @@ class SellerEventTimelineService
 
     private function activityDescription(Activity $activity, ?string $reason): ?string
     {
-        if ($activity->log_name === 'packages') {
-            return $reason
-                ? 'Причина или тариф: '.$reason
-                : 'Изменение тарифа влияет на лимиты товаров, VIP и приём заказов.';
-        }
-
         if ($activity->subject_type === Product::class) {
             return 'Изменение товара может влиять на его публикацию в каталоге.';
         }
@@ -125,12 +113,6 @@ class SellerEventTimelineService
 
     private function activityTone(Activity $activity): string
     {
-        if ($activity->log_name === 'packages') {
-            $action = $activity->properties->get('action');
-
-            return $action === 'deactivate' ? 'warning' : 'success';
-        }
-
         if ($activity->subject_type === Product::class) {
             return 'info';
         }
@@ -140,16 +122,12 @@ class SellerEventTimelineService
 
     private function activityUrl(Activity $activity): ?string
     {
-        if ($activity->log_name === 'packages' || $activity->subject_type === SellerPackage::class) {
-            return route('account.packages.index');
-        }
-
         if ($activity->subject_type === Product::class && $activity->subject_id) {
             return route('account.store.products.show', $activity->subject_id);
         }
 
         if ($activity->subject_type === Seller::class || $activity->log_name === 'sellers') {
-            return route('account.store.index');
+            return route('account.index');
         }
 
         return null;
@@ -157,10 +135,6 @@ class SellerEventTimelineService
 
     private function activityAction(Activity $activity): ?string
     {
-        if ($activity->log_name === 'packages' || $activity->subject_type === SellerPackage::class) {
-            return 'Открыть тарифы';
-        }
-
         if ($activity->subject_type === Product::class) {
             return 'Открыть товар';
         }

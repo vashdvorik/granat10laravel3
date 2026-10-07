@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\DestroyShopRequest;
 use App\Http\Requests\StoreShopRequest;
-use App\Http\Requests\ToggleAutoRenewRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Services\AccountSecurityService;
 use App\Services\CabinetStatsService;
 use App\Services\SellerCabinetStateService;
-use App\Services\SellerSettingsService;
 use App\Services\ShopService;
 
 class CabinetController extends Controller
@@ -160,22 +158,5 @@ class CabinetController extends Controller
             ->log('Удалён магазин "' . $sellerName . '"');
 
         return redirect()->route('account.index')->with('success', 'Магазин успешно удалён');
-    }
-    public function toggleAutoRenew(ToggleAutoRenewRequest $request, SellerSettingsService $sellerSettingsService)
-    {
-        $seller = Auth::user()->seller;
-
-        if (!$seller) {
-            return response()->json(['error' => 'Магазин не найден'], 404);
-        }
-
-        $this->authorize('manageSettings', $seller);
-
-        $seller = $sellerSettingsService->updateAutoRenew($seller, $request->boolean('auto_renew'));
-
-        return response()->json([
-            'success' => true,
-            'auto_renew' => $seller->auto_renew,
-        ]);
     }
 }

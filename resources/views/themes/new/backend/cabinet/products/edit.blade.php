@@ -60,31 +60,10 @@
                                             {{-- ============================================ --}}
                                             <div class="product-form-alerts pt-20">
                                                 {{-- ✅ СООБЩЕНИЕ ОБ УСПЕХЕ --}}
-                                                @if(session('success'))
-                                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                                        <div class="alert-content">
-                                                            <p>{{ session('success') }}</p>
-                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
-                                                                <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endif
 
                                                 {{-- ✅ СООБЩЕНИЕ ОБ ОШИБКЕ --}}
-                                                @if(session('error'))
-                                                    <div class="alert-big alert alert-danger alert-dismissible fade show" role="alert">
-                                                        <div class="alert-content">
-                                                            <h6 class="alert-heading">Ошибка</h6>
-                                                            <p>{{ session('error') }}</p>
-                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
-                                                                <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                @endif
 
-                                                {{-- ✅ ОШИБКИ ВАЛИДАЦИИ (включая лимиты пакета) --}}
+                                                {{-- ✅ ОШИБКИ ВАЛИДАЦИИ  --}}
                                                 @if($errors->any())
                                                     <div class="alert-big alert alert-danger alert-dismissible fade show" role="alert">
                                                         <div class="alert-content">
@@ -203,56 +182,21 @@
                                                     @enderror
                                                 </div>
 
-                                                {{-- ✅ VIP ТОВАР С ИНФОРМАЦИОННЫМ БЛОКОМ --}}
+                                                {{-- VIP: покупается на странице товара --}}
                                                 <div class="form-group mb-20">
-                                                    @php($vipAllowed = $vipAvailability['allowed'] ?? true)
-
-                                                    @if($vipAllowed)
-                                                        <div class="checkbox-theme-default custom-checkbox">
-                                                            <input class="checkbox" 
-                                                                   type="checkbox" 
-                                                                   name="is_vip" 
-                                                                   value="1" 
-                                                                   id="is_vip"
-                                                                   {{ old('is_vip', $product->is_vip) ? 'checked' : '' }}>
-                                                            <label for="is_vip">
-                                                                <span class="checkbox-text">
-                                                                    <i class="uil uil-star text-warning"></i> VIP товар
-                                                                </span>
-                                                            </label>
+                                                    <div class="alert alert-info d-flex align-items-start py-2 px-3 mb-0 product-form-callout product-form-callout--info">
+                                                        <i class="uil uil-star me-2 mt-1 product-form-callout__icon text-warning"></i>
+                                                        <div>
+                                                            <small class="d-block mb-0">
+                                                                @if($product->isVipActive())
+                                                                    <strong>VIP действует{{ $product->vip_until ? ' до '.$product->vip_until->format('d.m.Y H:i') : ' без ограничения по сроку' }}.</strong>
+                                                                @else
+                                                                    <strong>VIP товары показываются первыми</strong> в каталоге и в поиске.
+                                                                @endif
+                                                                Подключить или продлить VIP можно на <a href="{{ route('account.store.products.show', $product) }}">странице товара</a>.
+                                                            </small>
                                                         </div>
-
-                                                        {{-- ℹ️ Информационное сообщение --}}
-                                                        <div class="alert alert-info d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--info">
-                                                            <i class="uil uil-info-circle me-2 mt-1 product-form-callout__icon text-primary"></i>
-                                                            <div>
-                                                                <small class="d-block mb-0">
-                                                                    <strong>VIP товары показываются всегда первыми</strong> в каталоге и в поиске
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                    @else
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--warning">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1 product-form-callout__icon text-warning"></i>
-                                                            <div>
-                                                                <small class="d-block mb-0 text-dark">
-                                                                    <strong>{{ $vipAvailability['message'] }}</strong>
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-
-                                                    {{-- ⚠️ Ошибка лимита VIP товаров --}}
-                                                    @error('is_vip')
-                                                        <div class="alert alert-warning d-flex align-items-start py-2 px-3 mt-2 mb-0 product-form-callout product-form-callout--warning">
-                                                            <i class="uil uil-exclamation-triangle me-2 mt-1 product-form-callout__icon text-warning"></i>
-                                                            <div>
-                                                                <small class="d-block mb-0 text-dark">
-                                                                    <strong>{{ $message }}</strong>
-                                                                </small>
-                                                            </div>
-                                                        </div>
-                                                    @enderror
+                                                    </div>
                                                 </div>
 
                                                 {{-- Описание --}}

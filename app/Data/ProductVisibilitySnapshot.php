@@ -14,9 +14,6 @@ final readonly class ProductVisibilitySnapshot
         public bool $isModerationApproved,
         public bool $isModerationCurrent,
         public bool $hasImages,
-        public bool $hasActivePackage,
-        public bool $withinActiveLimit,
-        public bool $withinVipLimit,
         public array $buyerBlockingReasons,
     ) {}
 }

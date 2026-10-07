@@ -38,13 +38,6 @@ class CabinetStatsService
                 ->limit(5)
                 ->get();
 
-        $activePackage = $seller->activePackage();
-        $daysLeft = null;
-
-        if ($activePackage && $activePackage->end_date) {
-            $daysLeft = (int) now()->diffInDays($activePackage->end_date, false);
-        }
-
         return [
             'seller' => $seller,
             'totalProducts' => $totalProducts,
@@ -54,11 +47,6 @@ class CabinetStatsService
             'saleProducts' => $saleProducts,
             'totalViews' => $totalViews,
             'topProducts' => $topProducts,
-            'activePackage' => $activePackage,
-            'daysLeft' => $daysLeft,
-            'productLimit' => $activePackage ? $activePackage->package->active_products_limit : null,
-            'vipLimit' => $activePackage ? $activePackage->package->vip_products_limit : null,
-            'packageHistory' => $seller->sellerPackages()->with('package')->orderByDesc('id')->get(),
             'balance' => $user->balance,
         ];
     }

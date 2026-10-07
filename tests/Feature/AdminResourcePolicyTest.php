@@ -3,12 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -24,11 +22,6 @@ class AdminResourcePolicyTest extends TestCase
         $user = User::factory()->create();
         $seller = Seller::factory()->create(['user_id' => $user->id]);
         $category = Category::factory()->create();
-        $package = Package::factory()->create();
-        $sellerPackage = SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-        ]);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -49,21 +42,6 @@ class AdminResourcePolicyTest extends TestCase
             'delete',
             'reorder',
         ]);
-        $this->assertPolicyAbilities($administrator, Package::class, $package, [
-            'viewAny',
-            'view',
-            'create',
-            'update',
-            'delete',
-        ]);
-        $this->assertPolicyAbilities($administrator, SellerPackage::class, $sellerPackage, [
-            'viewAny',
-            'view',
-            'create',
-            'update',
-        ]);
-        $this->assertFalse(Gate::forUser($administrator)->allows('delete', $sellerPackage));
-        $this->assertFalse(Gate::forUser($administrator)->allows('deleteAny', SellerPackage::class));
         $this->assertPolicyAbilities($administrator, Product::class, $product, [
             'viewAny',
             'view',
@@ -86,14 +64,10 @@ class AdminResourcePolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $category = Category::factory()->create();
-        $package = Package::factory()->create();
 
         $this->assertFalse(Gate::forUser($user)->allows('viewAny', User::class));
         $this->assertFalse(Gate::forUser($user)->allows('viewAny', Category::class));
         $this->assertFalse(Gate::forUser($user)->allows('update', $category));
-        $this->assertFalse(Gate::forUser($user)->allows('viewAny', Package::class));
-        $this->assertFalse(Gate::forUser($user)->allows('update', $package));
-        $this->assertFalse(Gate::forUser($user)->allows('viewAny', SellerPackage::class));
     }
 
     public function test_dangerous_bulk_deletes_are_disabled(): void
@@ -102,7 +76,6 @@ class AdminResourcePolicyTest extends TestCase
 
         $this->assertFalse(Gate::forUser($administrator)->allows('deleteAny', User::class));
         $this->assertFalse(Gate::forUser($administrator)->allows('deleteAny', Category::class));
-        $this->assertFalse(Gate::forUser($administrator)->allows('deleteAny', Package::class));
     }
 
     public function test_administrator_cannot_delete_own_account(): void

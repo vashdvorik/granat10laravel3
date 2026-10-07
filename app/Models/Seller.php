@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -50,7 +49,6 @@ class Seller extends Model
         'photos',
         'photo',
         'can_order',
-        'auto_renew',
         'delivery_enabled',
         'delivery_terms',
         'telegram_notifications_enabled',
@@ -66,7 +64,6 @@ class Seller extends Model
 
     protected $casts = [
         'can_order' => 'boolean',
-        'auto_renew' => 'boolean',
         'delivery_enabled' => 'boolean',
         'telegram_notifications_enabled' => 'boolean',
         'telegram_verified_at' => 'datetime',
@@ -104,41 +101,6 @@ class Seller extends Model
                 $settlement->id
             )
         );
-    }
-
-    /**
-     * Связь с пакетами через таблицу seller_packages
-     */
-    public function sellerPackages()
-    {
-        return $this->hasMany(SellerPackage::class);
-    }
-
-    public function activeSellerPackage(): HasOne
-    {
-        return $this->hasOne(SellerPackage::class)
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query
-                    ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now()->toDateString());
-            })
-            ->latestOfMany();
-    }
-
-    /**
-     * Получить активный пакет продавца
-     */
-    public function activePackage()
-    {
-        return $this->sellerPackages()
-            ->where('is_active', true)
-            ->where(function ($query) {
-                $query->whereNull('end_date')                         // Бессрочный пакет
-                    ->orWhere('end_date', '>=', now()->toDateString()); // Или срок еще не истек (сравниваем DATE с DATE)
-            })
-            ->with('package')
-            ->first();
     }
 
     // ==========================================

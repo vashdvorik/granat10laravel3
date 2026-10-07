@@ -8,10 +8,8 @@ use App\Data\ProductModerationResult;
 use App\Enums\ProductModerationStatus;
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -58,7 +56,7 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertSee('seller-products-toolbar', false);
         $response->assertSee('seller-product-card__state', false);
         $response->assertSee('Видны покупателям');
-        $response->assertSee('Скрыты из-за тарифа');
+        $response->assertDontSee('Скрыты из-за тарифа');
     }
 
     public function test_products_index_shows_filtered_empty_state(): void
@@ -90,32 +88,21 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertSee('RootCategory_UNIQ');
     }
 
-    public function test_create_form_replaces_vip_checkbox_with_limit_message_when_limit_reached(): void
+    public function test_create_form_has_no_vip_checkbox_and_explains_paid_vip(): void
     {
-        [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller, vipLimit: 1);
-        $category = Category::factory()->create();
-        Product::factory()->activeVip()->create([
-            'seller_id' => $seller->id,
-            'category_id' => $category->id,
-        ]);
+        [$user] = $this->createUserWithSeller();
 
         $this->actingAs($user)
             ->get(route('account.store.products.create'))
             ->assertOk()
-            ->assertSee('Ваш лимит превышен 1/1')
+            ->assertSee('VIP товары показываются первыми')
             ->assertDontSee('id="is_vip"', false);
     }
 
-    public function test_edit_form_replaces_vip_checkbox_with_limit_message_when_limit_reached(): void
+    public function test_edit_form_has_no_vip_checkbox_and_links_to_product_page(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller, vipLimit: 1);
         $category = Category::factory()->create();
-        Product::factory()->activeVip()->create([
-            'seller_id' => $seller->id,
-            'category_id' => $category->id,
-        ]);
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -126,7 +113,7 @@ class BackendProductControllerProductsTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.store.products.edit', $product))
             ->assertOk()
-            ->assertSee('Ваш лимит превышен 1/1')
+            ->assertSee(route('account.store.products.show', $product), false)
             ->assertDontSee('id="is_vip"', false);
     }
 
@@ -256,7 +243,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_store_product_returns_validation_error_before_persisting_blocked_title(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
 
         $response = $this->actingAs($user)
@@ -282,7 +268,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_sync_provider_failure_does_not_break_product_creation_request(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         config()->set('moderation.ai_enabled', true);
         config()->set('moderation.mode', 'auto');
@@ -334,18 +319,18 @@ class BackendProductControllerProductsTest extends TestCase
             'is_vip' => 1,
         ]);
 
+        // VIP продавец сам выставить не может: он покупается отдельно
         $response->assertRedirect(route('account.store.products.index'));
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
             'name' => 'Updated Backend Product',
-            'is_vip' => true,
+            'is_vip' => false,
         ]);
     }
 
     public function test_update_can_save_changes_and_submit_product_for_moderation(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         $product = Product::factory()->draft()->create([
             'seller_id' => $seller->id,
@@ -381,7 +366,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_activate_product_returns_ajax_success(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -402,7 +386,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_activate_product_returns_ajax_error_without_images(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -421,7 +404,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_deactivate_product_returns_ajax_success(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -443,7 +425,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_owner_can_submit_product_for_moderation(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $product = Product::factory()->draft()->create([
             'seller_id' => $seller->id,
         ]);
@@ -471,7 +452,6 @@ class BackendProductControllerProductsTest extends TestCase
     public function test_push_up_returns_ajax_success_and_cooldown_error(): void
     {
         [$user, $seller] = $this->createUserWithSeller();
-        $this->assignActivePackage($seller);
         $category = Category::factory()->create();
         $product = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -614,17 +594,5 @@ class BackendProductControllerProductsTest extends TestCase
         $seller = Seller::factory()->create(['user_id' => $user->id]);
 
         return [$user, $seller];
-    }
-
-    private function assignActivePackage(Seller $seller, int $activeLimit = 50, int $vipLimit = 10): void
-    {
-        $package = Package::factory()->withLimits($activeLimit, $vipLimit)->create();
-
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
     }
 }

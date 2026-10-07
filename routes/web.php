@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Backend\BalanceTopupController;
 use App\Http\Controllers\CabinetController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HealthController;
@@ -184,6 +185,9 @@ Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.
             Route::patch('{product}/deactivate', [App\Http\Controllers\Backend\ProductController::class, 'deactivate'])->name('deactivate');
             Route::post('{product}/submit-moderation', [App\Http\Controllers\Backend\ProductController::class, 'submitForModeration'])->name('submit-moderation');
 
+            // Покупка VIP за баланс
+            Route::post('{product}/vip', [App\Http\Controllers\Backend\ProductController::class, 'purchaseVip'])->name('vip');
+
             // Поднятие товара в списке
             Route::post('{product}/push-up', [App\Http\Controllers\Backend\ProductController::class, 'pushUp'])->name('push-up');
 
@@ -196,8 +200,6 @@ Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.
         Route::get('{seller}/edit', [App\Http\Controllers\Backend\SellerController::class, 'edit'])->name('edit');
         Route::put('{seller}', [App\Http\Controllers\Backend\SellerController::class, 'update'])->name('update');
 
-        Route::post('toggle-auto-renew', [CabinetController::class, 'toggleAutoRenew'])
-            ->name('toggle-auto-renew');
         Route::post('telegram/connect', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'connect'])
             ->name('telegram.connect');
         Route::delete('telegram', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'disconnect'])
@@ -225,54 +227,28 @@ Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.
         // Смена пароля
         Route::get('change-password', [CabinetController::class, 'showChangePasswordForm'])->name('change_password');
         Route::post('change-password', [CabinetController::class, 'updatePassword'])->name('update_password');
+
+        // Пополнение баланса банковской картой (Web-платёж)
+        Route::get('balance/topup', [BalanceTopupController::class, 'create'])
+            ->name('balance.topup');
+        Route::post('balance/topup', [BalanceTopupController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('balance.topup.store');
+
+        // «Поблагодарить разработчика»: перевод с баланса администратору
+        Route::post('balance/tip', [App\Http\Controllers\Backend\DeveloperTipController::class, 'store'])
+            ->middleware('throttle:10,1')
+            ->name('balance.tip');
     });
 
-    // === РАЗДЕЛ ТАРИФОВ ===
-    Route::prefix('packages')->name('packages.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Backend\PackageController::class, 'index'])->name('index');
-        Route::get('{package}/prepare', [App\Http\Controllers\Backend\PackageController::class, 'prepare'])->name('prepare');
-        Route::post('{package}/prepare', [App\Http\Controllers\Backend\PackageController::class, 'applyPreparation'])->name('prepare.apply');
-        Route::post('{package}/purchase', [App\Http\Controllers\Backend\PackageController::class, 'purchase'])->name('purchase');
-    });
 });
 
-// ТЕСТОВЫЙ РОУТ - УДАЛИТЬ ПОСЛЕ ПРОВЕРКИ
-if (app()->environment('local')) {
-    Route::get('/test-package-system', function (\App\Services\SellerPackageStatusService $sellerPackageStatusService) {
-        $total = \App\Models\Product::count();
-        $visible = \App\Models\Product::visible()->count();
-        $hidden = $total - $visible;
+// === WEB-ПЛАТЁЖ: адреса для банка (ResultURL / SuccessURL / FailURL), без CSRF и без параметров в адресе ===
+Route::match(['get', 'post'], 'payments/webpayment/result', [BalanceTopupController::class, 'result'])
+    ->middleware('throttle:60,1')
+    ->name('payments.webpayment.result');
+Route::match(['get', 'post'], 'payments/webpayment/success', [BalanceTopupController::class, 'back'])
+    ->name('payments.webpayment.success');
+Route::match(['get', 'post'], 'payments/webpayment/fail', [BalanceTopupController::class, 'back'])
+    ->name('payments.webpayment.fail');
 
-        $sellers = \App\Models\Seller::with(['sellerPackages', 'user'])->get();
-
-        $output = '<h2>Проверка системы пакетов</h2>';
-        $output .= "<p><strong>Всего товаров:</strong> $total</p>";
-        $output .= "<p><strong>Видимых (с активным пакетом):</strong> $visible</p>";
-        $output .= "<p><strong>Скрытых (без пакета):</strong> $hidden</p>";
-        $output .= '<hr>';
-
-        $output .= '<h3>Продавцы:</h3>';
-        foreach ($sellers as $seller) {
-            $activePackage = $seller->activePackage();
-            $status = $sellerPackageStatusService->getStatus($seller);
-
-            $output .= "<div style='border:1px solid #ccc; padding:10px; margin:10px 0;'>";
-            $output .= "<p><strong>{$seller->name}</strong> (ID: {$seller->id})</p>";
-            $balance = $seller->user?->balance ?? 0;
-            $output .= "<p>Баланс: {$balance} руб | Автопродление: ".($seller->auto_renew ? 'Вкл' : 'Выкл').'</p>';
-            $output .= '<p>Товаров активных: '.$seller->products()->where('is_active', true)->count().'</p>';
-
-            if ($activePackage) {
-                $output .= "<p style='color:green;'>✅ Активный пакет: {$activePackage->package->name}</p>";
-                $output .= '<p>Срок: '.($activePackage->end_date ? $activePackage->end_date->format('d.m.Y') : 'Бессрочный').'</p>';
-            } else {
-                $output .= "<p style='color:red;'>❌ Нет активного пакета</p>";
-            }
-
-            $output .= "<p><em>{$status['message']}</em></p>";
-            $output .= '</div>';
-        }
-
-        return $output;
-    });
-}

@@ -11,6 +11,14 @@ class ProductObserver
     {
     }
 
+    public function saving(Product $product): void
+    {
+        // Срок VIP имеет смысл только при включённом VIP
+        if (! $product->is_vip) {
+            $product->vip_until = null;
+        }
+    }
+
     public function created(Product $product): void
     {
         $this->cache->forgetProductRelated($product);

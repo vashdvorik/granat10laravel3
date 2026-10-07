@@ -6,13 +6,11 @@ use App\Filament\Resources\SellerResource;
 use App\Filament\Resources\SellerResource\Pages\CreateSeller;
 use App\Filament\Resources\SellerResource\Pages\EditSeller;
 use App\Filament\Resources\SellerResource\Pages\ListSellers;
-use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
 use App\Models\Settlement;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,7 +45,7 @@ class SellerResourceTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_seller_list_contains_active_products_and_package(): void
+    public function test_seller_list_contains_active_products(): void
     {
         $administrator = $this->createAdministrator();
         $seller = Seller::factory()->create();
@@ -58,20 +56,12 @@ class SellerResourceTest extends TestCase
         Product::factory()->inactive()->create([
             'seller_id' => $seller->id,
         ]);
-        $package = Package::factory()->create(['name' => 'Профессиональный']);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addMonth(),
-        ]);
 
         $this->actingAs($administrator);
 
         Livewire::test(ListSellers::class)
             ->assertCanSeeTableRecords([$seller])
             ->assertTableColumnStateSet('active_products_count', 1, $seller->id)
-            ->assertTableColumnStateSet('activeSellerPackage.package.name', 'Профессиональный', $seller->id)
             ->assertTableActionHasUrl('publicPage', route('seller', $seller->alias), $seller)
             ->assertTableActionHasUrl('products', SellerResource::getUrl('edit', [
                 'record' => $seller,
@@ -79,14 +69,10 @@ class SellerResourceTest extends TestCase
             ]), $seller);
     }
 
-    public function test_administrator_can_create_seller_with_base_package(): void
+    public function test_administrator_can_create_seller(): void
     {
         $administrator = $this->createAdministrator();
         $owner = User::factory()->create();
-        $basePackage = Package::factory()->create([
-            'id' => 1,
-            'name' => 'Базовый',
-        ]);
 
         $this->actingAs($administrator);
 
@@ -108,11 +94,6 @@ class SellerResourceTest extends TestCase
         $this->assertSame('Новый магазин', $seller->name);
         $this->assertNotEmpty($seller->alias);
         $this->assertSame('https://example.test', $seller->link);
-        $this->assertDatabaseHas('seller_packages', [
-            'seller_id' => $seller->id,
-            'package_id' => $basePackage->id,
-            'is_active' => true,
-        ]);
     }
 
     public function test_edit_keeps_owner_and_product_count_unchanged(): void
@@ -148,21 +129,19 @@ class SellerResourceTest extends TestCase
         $this->assertSame('Обновлённый магазин', $seller->name);
     }
 
-    public function test_auto_renew_action_uses_settings_service(): void
+    public function test_seller_list_has_no_package_or_auto_renew_controls(): void
     {
         $administrator = $this->createAdministrator();
-        $seller = Seller::factory()->create(['auto_renew' => false]);
+        $seller = Seller::factory()->create();
 
         $this->actingAs($administrator);
 
         Livewire::test(ListSellers::class)
-            ->callTableAction('toggleAutoRenew', $seller)
-            ->assertNotified();
-
-        $this->assertTrue($seller->refresh()->auto_renew);
+            ->assertCanSeeTableRecords([$seller])
+            ->assertTableActionDoesNotExist('toggleAutoRenew');
     }
 
-    public function test_edit_page_displays_products_and_package_history_relations(): void
+    public function test_edit_page_displays_products_relation_without_package_history(): void
     {
         $administrator = $this->createAdministrator();
         $seller = Seller::factory()->create();
@@ -171,7 +150,7 @@ class SellerResourceTest extends TestCase
             ->get("/admin/sellers/{$seller->id}/edit")
             ->assertOk()
             ->assertSee('Товары')
-            ->assertSee('История тарифов');
+            ->assertDontSee('История тарифов');
     }
 
     private function createAdministrator(): User

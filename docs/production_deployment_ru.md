@@ -176,6 +176,7 @@ REGIONAL_URLS_ENABLED=true
 REGIONAL_SEO_ENABLED=true
 DESIGN_DEFAULT=legacy
 CABINET_DESIGN_DEFAULT=legacy
+VIP_PRICE_PER_DAY=1
 
 PRODUCT_MODERATION_AI_ENABLED=false
 PRODUCT_MODERATION_AI_PROVIDER=fake
@@ -197,6 +198,10 @@ HEALTH_WORKER_MAX_AGE=180
 ORDER_PERSONAL_DATA_RETENTION_DAYS=365
 ORDER_ANONYMIZATION_BATCH_SIZE=200
 ```
+
+`VIP_PRICE_PER_DAY` — стоимость одного дня VIP в рублях, пока администратор не
+сохранил свою цену в разделе «Система → Настройки VIP». После первого сохранения
+в админке действует цена из админки, а значение из `.env` больше не используется.
 
 Сгенерируйте ключ приложения:
 
@@ -235,11 +240,16 @@ php artisan db:seed
 
 ```bash
 php artisan db:seed --class=CategoriesJsonSeeder --force
-php artisan db:seed --class=PackagesTableSeeder --force
 ```
 
-`PackagesTableSeeder` очищает таблицу тарифов, поэтому на существующей базе его
-не запускайте.
+Тарифов (пакетов) в проекте больше нет, отдельный сидер для них не нужен.
+
+> Миграции `2026_10_04_000001_add_vip_until_to_products_table` и
+> `2026_10_04_000002_drop_package_system` добавляют срок VIP у товаров и
+> **безвозвратно удаляют** таблицы `packages` и `seller_packages` и колонку
+> `sellers.auto_renew`. Денежный баланс продавцов (`users.balance`) не меняется.
+> Перед применением обязательно сделайте резервную копию базы (раздел 1).
+> Порядок обновления существующего сайта с этой версией — в разделе 15.
 
 ## 6. Первый администратор
 
@@ -395,9 +405,21 @@ sudo crontab -u www-data -e
 
 Планировщик выполняет:
 
-- проверку и автопродление истёкших тарифов в `01:00`;
+- снятие VIP с товаров, у которых закончился оплаченный срок, каждые 5 минут (`products:expire-vip`);
 - обезличивание старых завершённых и отменённых заказов в `02:00`;
 - запись heartbeat worker каждую минуту, если очередь не `sync`.
+
+Команды проверки автопродления тарифов (`packages:deactivate-expired`) больше нет:
+тарифы удалены. Если в `crontab` или Supervisor осталась ссылка на неё, удалите её.
+
+Если cron не работает, VIP не будет сниматься после окончания срока.
+
+Проверить расписание и запустить снятие VIP вручную:
+
+```bash
+php artisan schedule:list
+php artisan products:expire-vip
+```
 
 Проверка без изменения заказов:
 
@@ -494,6 +516,7 @@ cd /var/www/granat
 php artisan about
 php artisan route:list --path=admin
 php artisan migrate:status
+php artisan schedule:list
 php artisan config:show queue
 php artisan config:show moderation
 
@@ -510,7 +533,10 @@ curl -f https://example.com/health/ready
 - оформление заказа;
 - отображение заказа в кабинете продавца;
 - подключение Telegram;
-- `/admin/login` и страницу модерации.
+- `/admin/login` и страницу модерации;
+- `/admin/vip-settings` — стоимость одного дня VIP;
+- страницу товара в кабинете продавца: блок «VIP-размещение» (сроки, цены, баланс);
+- в кабинете и в админке нет разделов «Тарифы» и «Пакеты».
 
 `/health/ready` может вернуть HTTP 503, если worker очереди не записал heartbeat.
 В этом случае проверьте:
@@ -549,6 +575,53 @@ npm run build
 
 После обновления снова выполните раздел «Финальная проверка».
 
+### Обновление до версии без тарифов (пакетов)
+
+Эта версия удаляет систему тарифов и добавляет платный VIP за баланс продавца.
+Выполняйте обновление с учётом следующего:
+
+1. **Резервная копия базы обязательна.** Миграция `drop_package_system`
+   безвозвратно удаляет таблицы `packages`, `seller_packages` и колонку
+   `sellers.auto_renew`. Проверьте архив (`gzip -t`) до запуска миграций.
+2. Остановите изменения на время обновления: `php artisan down`.
+3. Выполните обычное обновление (`git pull`, `composer install`, миграции):
+
+   ```bash
+   git pull --ff-only
+   composer install --no-dev --prefer-dist --optimize-autoloader
+   php artisan migrate --force
+   ```
+
+   Миграции в этом релизе:
+
+   - `2026_10_04_000001_add_vip_until_to_products_table` — колонка `products.vip_until`;
+   - `2026_10_04_000002_drop_package_system` — удаление тарифов; старые записи журнала
+     событий о тарифах сохраняются, но отвязываются от удалённых моделей.
+
+4. Обязательно очистите кеш и перезапустите очереди (команды из блока выше:
+   `optimize:clear`, `optimize`, `filament:optimize`, `queue:restart`, перезапуск Supervisor).
+5. Проверьте, что cron вызывает `schedule:run` каждую минуту: от этого зависит
+   автоматическое снятие VIP. Выполните `php artisan schedule:list` — в списке должна
+   быть команда `products:expire-vip` (каждые 5 минут), а команды
+   `packages:deactivate-expired` быть не должно.
+6. Проверьте базу:
+
+   ```bash
+   php artisan tinker --execute="echo Schema::hasTable('packages') ? 'packages ЕСТЬ' : 'packages удалена'; echo PHP_EOL; echo Schema::hasColumn('products', 'vip_until') ? 'vip_until есть' : 'vip_until НЕТ';"
+   ```
+
+7. Откройте `/admin/vip-settings` и при необходимости измените стоимость одного дня VIP
+   (по умолчанию 1 руб; сроки 1, 7, 30 и 365 дней считаются как цена дня × число дней).
+8. Верните сайт в работу: `php artisan up`.
+
+Что изменится для пользователей после обновления:
+
+- ограничений по числу товаров больше нет, сайт и соцсети продавцов показываются всегда;
+- товары продавцов с истёкшим тарифом снова станут видны, если они активны и прошли модерацию;
+- товары, которые уже были VIP, остаются VIP без срока (их ведёт администратор);
+- продавец покупает VIP сам на странице товара за деньги с баланса. Пополнение баланса
+  пока выполняет администратор (корректировка баланса в админке).
+
 ## 16. Откат
 
 Если релиз неработоспособен:
@@ -571,6 +644,24 @@ php artisan up
 Не откатывайте базу автоматически. Восстановление SQL-резервной копии выполняйте
 только после проверки совместимости миграций и остановки записи в приложение.
 
+**Откат релиза «без тарифов».** Предыдущая версия кода работает с таблицами
+`packages` и `seller_packages`, а текущая миграция их удаляет. Откат через
+`git checkout` без восстановления базы приведёт к ошибкам на сайте. Поэтому:
+
+1. остановите сайт (`php artisan down`) и запись в приложение;
+2. верните код предыдущего релиза (`git checkout <PREVIOUS_RELEASE_COMMIT>`,
+   `composer install --no-dev --prefer-dist --optimize-autoloader`);
+3. восстановите базу из резервной копии, сделанной перед обновлением
+   (`gunzip -c database-<ДАТА>.sql.gz | mysql -u granat_user -p granat`).
+   Изменения в базе, сделанные после обновления (заказы, покупки VIP, списания
+   с баланса), будут потеряны — сверьтесь с логами до восстановления;
+4. выполните `php artisan optimize:clear`, `php artisan optimize`,
+   `php artisan queue:restart`, перезапустите Supervisor и `php artisan up`.
+
+Команда `php artisan migrate:rollback --step=2` пересоздаёт только **пустые**
+таблицы тарифов (данные тарифов она не вернёт) и удаляет `products.vip_until`
+вместе со сроками купленных VIP. Для настоящего отката она не подходит.
+
 ## 17. Минимальный чек-лист перед передачей сайта
 
 - [ ] `APP_DEBUG=false`, `.env` недоступен из web;
@@ -581,7 +672,9 @@ php artisan up
 - [ ] права на `storage` и `bootstrap/cache` проверены;
 - [ ] Redis отвечает `PONG`;
 - [ ] два worker-процесса Supervisor работают;
-- [ ] cron вызывает `schedule:run` каждую минуту;
+- [ ] cron вызывает `schedule:run` каждую минуту, в `schedule:list` есть `products:expire-vip`;
+- [ ] в админке задана стоимость одного дня VIP (`/admin/vip-settings`);
+- [ ] в кабинете и в админке нет разделов «Тарифы» и «Пакеты», таблицы `packages` и `seller_packages` удалены;
 - [ ] `/health/live` и `/health/ready` отвечают успешно;
 - [ ] создан администратор и удалён `ADMIN_PASSWORD`;
 - [ ] Telegram webhook зарегистрирован, если он нужен;

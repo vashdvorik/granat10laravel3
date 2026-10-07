@@ -19,7 +19,6 @@ class ListSellerProducts
         'moderation' => 'На проверке',
         'fixes' => 'Нужно исправить',
         'no_images' => 'Без фото',
-        'tariff' => 'Скрыты из-за тарифа',
         'vip' => 'VIP',
     ];
 
@@ -81,7 +80,6 @@ class ListSellerProducts
                 ProductModerationStatus::Rejected->value,
             ]),
             'no_images' => $query->whereDoesntHave('images'),
-            'tariff' => $this->whereHiddenByTariff($query, $seller),
             'vip' => $query->where('is_vip', true),
             default => null,
         };
@@ -93,8 +91,7 @@ class ListSellerProducts
             ->where('is_active', true)
             ->where('moderation_status', ProductModerationStatus::Approved->value)
             ->whereColumn('moderated_version', 'moderation_version')
-            ->whereHas('images')
-            ->whereHas('seller.sellerPackages', fn (Builder $sellerPackageQuery) => $this->activePackageConstraint($sellerPackageQuery));
+            ->whereHas('images');
     }
 
     private function whereHiddenFromBuyers(Builder|HasMany $query): void
@@ -105,48 +102,7 @@ class ListSellerProducts
                 ->orWhere('moderation_status', '!=', ProductModerationStatus::Approved->value)
                 ->orWhereNull('moderated_version')
                 ->orWhereColumn('moderated_version', '!=', 'moderation_version')
-                ->orWhereDoesntHave('images')
-                ->orWhereDoesntHave('seller.sellerPackages', fn (Builder $sellerPackageQuery) => $this->activePackageConstraint($sellerPackageQuery));
-        });
-    }
-
-    private function whereHiddenByTariff(Builder|HasMany $query, Seller $seller): void
-    {
-        $activePackage = $seller->activePackage();
-
-        if ($activePackage === null) {
-            $query->where('is_active', true);
-
-            return;
-        }
-
-        $package = $activePackage->package;
-        $activeProductsLimit = $package?->active_products_limit;
-        $vipProductsLimit = $package?->vip_products_limit;
-        $activeProductsCount = $seller->products()->where('is_active', true)->count();
-        $vipProductsCount = $seller->products()
-            ->where('is_active', true)
-            ->where('is_vip', true)
-            ->count();
-        $activeLimitExceeded = $activeProductsLimit !== null && $activeProductsCount > $activeProductsLimit;
-        $vipLimitExceeded = $vipProductsLimit !== null && $vipProductsCount > $vipProductsLimit;
-
-        if (! $activeLimitExceeded && ! $vipLimitExceeded) {
-            $query->whereRaw('1 = 0');
-
-            return;
-        }
-
-        $query->where(function (Builder $tariffQuery) use ($activeLimitExceeded, $vipLimitExceeded): void {
-            if ($activeLimitExceeded) {
-                $tariffQuery->orWhere('is_active', true);
-            }
-
-            if ($vipLimitExceeded) {
-                $tariffQuery->orWhere(fn (Builder $vipQuery) => $vipQuery
-                    ->where('is_active', true)
-                    ->where('is_vip', true));
-            }
+                ->orWhereDoesntHave('images');
         });
     }
 
@@ -168,17 +124,6 @@ class ListSellerProducts
         $this->applyStatusFilter($query, $seller, $status);
 
         return $query->count();
-    }
-
-    private function activePackageConstraint(Builder $query): void
-    {
-        $query
-            ->where('is_active', true)
-            ->where(function (Builder $dateQuery): void {
-                $dateQuery
-                    ->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now()->toDateString());
-            });
     }
 
     private function categoryTree(array $sellerCategoryIds): Collection

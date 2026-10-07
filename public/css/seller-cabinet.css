@@ -2956,7 +2956,7 @@ body.seller-cabinet-body .product-show-page .product-details__availability li {
 }
 
 body.seller-cabinet-body .product-show-primary-action {
-    margin: 18px 0 0 !important;
+    margin: 18px 0 14px !important;
 }
 
 body.seller-cabinet-body .product-show-actions {
@@ -4788,12 +4788,35 @@ body.seller-cabinet-body .events-empty p {
         right: 58px;
         z-index: 9993;
         display: block;
+        width: auto;
+        height: auto;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        transform: none;
+        visibility: visible;
+        opacity: 1;
     }
 
     body.seller-cabinet-body .mobile-author-actions .navbar-right__menu {
         display: flex;
         align-items: center;
         gap: 6px;
+    }
+
+    body.seller-cabinet-body .mobile-author-actions .navbar-right__menu .nav-notification .dropdown-custom {
+        padding: 0;
+    }
+
+    body.seller-cabinet-body .mobile-author-actions .navbar-right__menu .nav-notification .nav-item-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid var(--seller-cabinet-border, #e7e9f0);
+        border-radius: 12px;
+        background: #fff;
     }
 
     body.seller-cabinet-body .sidebar {
@@ -7325,3 +7348,18 @@ body.seller-cabinet-body .product-edit-page .product-form-section .card-header {
     }
 }
 
+
+/* Обзор магазина: шапка без дублирующего блока статуса */
+body.seller-cabinet-body .store-overview-hero--compact {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, auto);
+}
+
+@media (max-width: 991.98px) {
+    body.seller-cabinet-body .store-overview-hero--compact {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+body.seller-cabinet-body .store-overview-hero__stats--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}

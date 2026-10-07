@@ -5,10 +5,8 @@ namespace Tests\Feature;
 use App\Enums\ProductModerationStatus;
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\ProductVisibilityResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,7 +15,7 @@ class ProductVisibilityResolverTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_visibility_is_true_for_approved_active_product_with_package(): void
+    public function test_public_visibility_is_true_for_approved_active_product(): void
     {
         $product = $this->product([
             'is_active' => true,
@@ -49,7 +47,7 @@ class ProductVisibilityResolverTest extends TestCase
         $this->assertContains('no_images', $snapshot->buyerBlockingReasons);
     }
 
-    public function test_public_visibility_is_blocked_without_active_package(): void
+    public function test_public_visibility_does_not_depend_on_any_package(): void
     {
         $product = Product::factory()->create([
             'seller_id' => Seller::factory()->create()->id,
@@ -62,21 +60,13 @@ class ProductVisibilityResolverTest extends TestCase
 
         $snapshot = app(ProductVisibilityResolver::class)->snapshot($product);
 
-        $this->assertFalse($snapshot->publicVisible);
-        $this->assertFalse($snapshot->buyerVisible);
-        $this->assertContains('no_active_package', $snapshot->buyerBlockingReasons);
+        $this->assertTrue($snapshot->publicVisible);
+        $this->assertNotContains('no_active_package', $snapshot->buyerBlockingReasons);
     }
 
     private function product(array $attributes, bool $withImage): Product
     {
         $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         $product = Product::factory()->create(array_merge([
             'seller_id' => $seller->id,

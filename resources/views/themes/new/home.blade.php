@@ -3,43 +3,49 @@
 @section('title', 'BIMM — локальный маркетплейс')
 
 @section('content')
-<section class="bimm-hero">
+<section class="bimm-hero bimm-hero--compact">
     <div class="bimm-hero__content">
-        <span class="bimm-kicker">Маркетплейс рядом</span>
-        <h1>Находите вещи с характером.</h1>
-        <p>Товары локальных продавцов, реальные магазины и честный выбор в одном красивом пространстве.</p>
-        <form class="bimm-search bimm-search--hero" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">
-            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            <input type="search" name="q" placeholder="Что ищете сегодня?" autocomplete="off">
-            <button type="submit">Найти</button>
-        </form>
+        <span class="bimm-kicker">BIMM</span>
+        <h1>Маркетплейс Приднестровья</h1>
+        <p>Заказывай товары с доставкой, узнавай, где купить и по какой цене, и находи контакты продавцов.</p>
     </div>
+    <form class="bimm-search bimm-search--hero" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input type="search" name="q" placeholder="Что ищете? Например, наушники" autocomplete="off" aria-label="Поиск товаров">
+        <button type="submit">Найти</button>
+    </form>
 </section>
 
+@if($latestProducts->isNotEmpty())
+    <section class="bimm-section bimm-section--latest">
+        <div class="bimm-section__head"><div><span class="bimm-kicker">Свежие находки</span><h2>Новые предложения</h2></div><a class="bimm-section__link" href="{{ $regionalUrl->route('catalog.index') }}">Открыть каталог →</a></div>
+        <div class="bimm-product-grid">@foreach($latestProducts as $product) @include('components.home-product-card', ['product' => $product]) @endforeach</div>
+    </section>
+@endif
+
 @if($featuredCategories->isNotEmpty())
-    <section class="bimm-section">
+    <section class="bimm-section bimm-section--categories">
         <div class="bimm-section__head"><div><span class="bimm-kicker">Навигация</span><h2>Выберите направление</h2></div><a class="bimm-section__link" href="{{ $regionalUrl->route('catalog.index') }}">Весь каталог →</a></div>
         <div class="bimm-category-grid">
             @foreach($featuredCategories->take(10) as $category)
+                @php
+                    $categoryCount = (int) $category->visible_products_count;
+                    $categoryCountLabel = ($categoryCount % 10 === 1 && $categoryCount % 100 !== 11)
+                        ? 'предложение'
+                        : (($categoryCount % 10 >= 2 && $categoryCount % 10 <= 4 && ($categoryCount % 100 < 10 || $categoryCount % 100 >= 20)) ? 'предложения' : 'предложений');
+                @endphp
                 <a class="bimm-category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $category->alias]) }}">
                     <span class="bimm-category__icon">{{ mb_strtoupper(mb_substr($category->name, 0, 1)) }}</span>
-                    <span><strong>{{ $category->name }}</strong><small>{{ $category->visible_products_count }} предложений</small></span>
+                    <span><strong>{{ $category->name }}</strong><small>{{ $categoryCount }} {{ $categoryCountLabel }}</small></span>
                 </a>
             @endforeach
         </div>
     </section>
 @endif
 
-@if($latestProducts->isNotEmpty())
-    <section class="bimm-section">
-        <div class="bimm-section__head"><div><span class="bimm-kicker">Свежие находки</span><h2>Новые предложения</h2></div><a class="bimm-section__link" href="{{ $regionalUrl->route('catalog.index') }}">Открыть каталог →</a></div>
-        <div class="bimm-product-grid">@foreach($latestProducts as $product) @include('components.home-product-card', ['product' => $product]) @endforeach</div>
-    </section>
-@endif
-
 @if($saleProducts->isNotEmpty())
-    <section class="bimm-section">
-        <div class="bimm-section__head"><div><span class="bimm-kicker">Особая цена</span><h2>Выгодные предложения</h2></div><a class="bimm-section__link" href="{{ $regionalUrl->route('catalog.sale') }}">Все скидки →</a></div>
+    <section class="bimm-section bimm-section--sale">
+        <div class="bimm-section__head"><div><span class="bimm-kicker">Особая цена</span><h2>Распродажа дня</h2></div><a class="bimm-section__link" href="{{ $regionalUrl->route('catalog.sale') }}">Все скидки →</a></div>
         <div class="bimm-product-grid">@foreach($saleProducts as $product) @include('components.home-product-card', ['product' => $product]) @endforeach</div>
     </section>
 @endif
@@ -58,12 +64,4 @@
     </section>
 @endif
 
-<section class="bimm-section">
-    <div class="bimm-section__head"><div><span class="bimm-kicker">Как это работает</span><h2>Покупать локальное — просто</h2></div></div>
-    <div class="bimm-how">
-        <article><span>01</span><h3>Найдите нужное</h3><p>Ищите товар или открывайте категории с предложениями продавцов вашего региона.</p></article>
-        <article><span>02</span><h3>Выберите магазин</h3><p>Сравните условия, город, описание и контакты в одной карточке товара.</p></article>
-        <article><span>03</span><h3>Свяжитесь напрямую</h3><p>Уточните наличие, доставку и оформите заказ удобным способом.</p></article>
-    </div>
-</section>
 @endsection

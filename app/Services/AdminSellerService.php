@@ -46,8 +46,6 @@ class AdminSellerService
                 $product->delete();
             }
 
-            $lockedSeller->sellerPackages()->delete();
-
             $sellerName = $lockedSeller->name;
             $lockedSeller->delete();
 

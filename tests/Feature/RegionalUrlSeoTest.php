@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -120,14 +118,7 @@ class RegionalUrlSeoTest extends TestCase
         string $name
     ): Product {
         $seller = Seller::factory()->for($settlement)->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return Product::factory()->create([
             'seller_id' => $seller->id,

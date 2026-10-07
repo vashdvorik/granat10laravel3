@@ -352,8 +352,8 @@
             <div class="sidebar__menu-group">
                <ul class="sidebar_nav">
                   <!--магазин-->
-                  <li class="has-child {{ request()->routeIs('account.store.*') || request()->routeIs('account.packages.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
-                     <a href="{{ route('account.store.index') }}" class="">
+                  <li class="has-child {{ request()->routeIs('account.index', 'account.store.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
+                     <a href="{{ route('account.index') }}" class="">
                         <span class="nav-icon uil uil-bag"></span>
                         <span class="menu-text text-initial">Магазин</span>
                         <span class="toggle-icon"></span>
@@ -366,8 +366,8 @@
                         @endif
                         
                         @if(auth()->check() && auth()->user()->seller)
-                        <li class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}">
-                           <a href="{{ route('account.store.index') }}">Общая информация</a>
+                        <li class="{{ request()->routeIs('account.index') ? 'active' : '' }}">
+                           <a href="{{ route('account.index') }}">Общая информация</a>
                         </li>
                         <li class="{{ request()->routeIs('account.store.products.index') ? 'active' : '' }}">
                            <a href="{{ route('account.store.products.index') }}">Каталог товаров</a>
@@ -381,11 +381,6 @@
                         <li class="{{ request()->routeIs('account.store.events.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.events.index') }}">Журнал событий</a>
                         </li>
-                        @if(auth()->check() && auth()->user()->seller)
-                        <li class="{{ request()->routeIs('account.packages.index') ? 'active' : '' }}">
-                           <a href="{{ route('account.packages.index') }}">Тарифы</a>
-                        </li>
-                        @endif
                         <li class="{{ request()->routeIs('account.store.delete') ? 'active' : '' }}">
                            <a href="{{ route('account.store.delete') }}">Удалить магазин</a>
                         </li>

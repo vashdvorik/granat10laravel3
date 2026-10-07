@@ -13,12 +13,10 @@ use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Observers\CategoryObserver;
 use App\Observers\ImageObserver;
 use App\Observers\ProductObserver;
 use App\Observers\SellerObserver;
-use App\Observers\SellerPackageObserver;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
@@ -66,7 +64,6 @@ class EventServiceProvider extends ServiceProvider
         Image::observe(ImageObserver::class);
         Product::observe(ProductObserver::class);
         Seller::observe(SellerObserver::class);
-        SellerPackage::observe(SellerPackageObserver::class);
     }
 
     /**

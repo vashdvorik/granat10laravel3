@@ -4,9 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -29,18 +27,12 @@ class BackendOrderControllerTest extends TestCase
             ->assertDontSee($foreignOrder->number);
     }
 
-    public function test_order_index_explains_when_tariff_disallows_new_orders_but_keeps_history(): void
+    public function test_order_index_explains_when_seller_disabled_new_orders_but_keeps_history(): void
     {
         $user = User::factory()->create();
         $seller = Seller::factory()->create([
             'user_id' => $user->id,
-            'can_order' => true,
-        ]);
-        $package = Package::factory()->create(['has_order_system' => false]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
+            'can_order' => false,
         ]);
         $order = Order::factory()->create(['seller_id' => $seller->id]);
 
@@ -49,8 +41,23 @@ class BackendOrderControllerTest extends TestCase
             ->assertOk()
             ->assertSee($order->number)
             ->assertSee('order-intake-card--disabled', false)
-            ->assertSee('Тариф не принимает новые заказы')
-            ->assertSee('История заказов сохраняется');
+            ->assertSee('Приём заказов выключен')
+            ->assertSee('Магазин выключил форму заказа в настройках.');
+    }
+
+    public function test_order_index_shows_enabled_intake_without_any_package(): void
+    {
+        $user = User::factory()->create();
+        Seller::factory()->create([
+            'user_id' => $user->id,
+            'can_order' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.store.orders.index'))
+            ->assertOk()
+            ->assertSee('order-intake-card--enabled', false)
+            ->assertSee('Приём заказов включён');
     }
 
     public function test_order_show_keeps_existing_order_available_when_new_orders_are_disabled(): void

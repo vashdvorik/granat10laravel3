@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\SellerPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -51,20 +49,9 @@ class SellerPageServiceTest extends TestCase
 
     public function test_get_seller_products_returns_only_visible_products_for_seller(): void
     {
-        $package = Package::factory()->withLimits(10, 2)->create();
         $seller = Seller::factory()->create();
         $otherSeller = Seller::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
-        SellerPackage::factory()->create([
-            'seller_id' => $otherSeller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
 
         $visibleProduct = Product::factory()->create([
             'seller_id' => $seller->id,

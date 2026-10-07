@@ -81,7 +81,6 @@ class SellerPolicyTest extends TestCase
             'update',
             'delete',
             'manageSettings',
-            'purchasePackage',
         ];
     }
 

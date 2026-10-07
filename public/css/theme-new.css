@@ -1,15 +1,44 @@
 :root {
-    --bimm-ink: #111827;
-    --bimm-ink-soft: #243047;
-    --bimm-paper: #f7f7f3;
+    /* Sketch-inspired design tokens from dizayn.md */
+    --color-obsidian: #212123;
+    --color-bone: #fafafa;
+    --color-graphite: #4a4a4a;
+    --color-carbon: #000000;
+    --color-slate: #5c5c5c;
+    --color-mist: #a7a7a7;
+    --color-ash: #c4c4c4;
+    --color-fog: #e6e6e6;
+    --color-onyx: #151515;
+    --color-steel: #7f7f7f;
+    --color-iris: #555dff;
+    --color-lagoon: #03cbbc;
+    --color-cobalt: #4389e6;
+    --gradient-dusk-wash: linear-gradient(104deg, rgb(252 122 155 / .42) 0%, rgb(180 126 238 / .34) 100%);
+    --gradient-prism-drift: linear-gradient(90deg, rgb(50 173 247 / .22) 20%, rgb(116 75 208 / .18) 40%, rgb(233 127 66 / .16) 50%, rgb(50 173 247 / .18) 75%);
+    --font-reckless: 'Playfair Display', Georgia, serif;
+    --font-intervariable: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --spacing-unit: 8px;
+    --page-max-width: 1200px;
+    --section-gap: 80px;
+    --bimm-ink: var(--color-obsidian);
+    --bimm-ink-soft: var(--color-graphite);
+    --bimm-paper: var(--color-bone);
     --bimm-card: #ffffff;
-    --bimm-line: #e5e7eb;
-    --bimm-muted: #6b7280;
-    --bimm-gold: #b9853f;
-    --bimm-gold-dark: #8d6128;
-    --bimm-mint: #dcefe8;
-    --bimm-shadow: 0 22px 70px rgba(17, 24, 39, .09);
-    --bimm-radius: 22px;
+    --bimm-line: var(--color-fog);
+    --bimm-muted: var(--color-slate);
+    --bimm-gold: var(--color-iris);
+    --bimm-gold-dark: var(--color-onyx);
+    --bimm-mint: #f1f1f1;
+    --bimm-shadow: 0 1px 3px rgb(0 0 0 / .08);
+    --bimm-radius: 20px;
+}
+
+@font-face {
+    font-family: 'Playfair Display';
+    src: url('../sass/components/Vendor/PlayfairDisplay/fonts/PlayfairDisplay-Regular.woff') format('woff');
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -214,3 +243,2096 @@ body.theme-new button, body.theme-new input, body.theme-new select, body.theme-n
     .bimm-order-form > form > div label[style*="grid-column"] { grid-column: auto !important; }
 }
 @media (max-width: 390px) { .bimm-product-grid { gap: 8px; } .bimm-product__image { aspect-ratio: 1 / 1.12; } .bimm-product__open { width: 27px; height: 27px; } }
+
+/* --------------------------------------------------------------------------
+   Design-system pass: quiet editorial marketplace
+   -------------------------------------------------------------------------- */
+body.theme-new {
+    color: var(--color-obsidian);
+    background: var(--color-bone);
+    font-family: var(--font-intervariable);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body.theme-new ::selection {
+    color: #fff;
+    background: var(--color-iris);
+}
+
+body.theme-new h1,
+body.theme-new h2,
+body.theme-new h3 {
+    color: var(--color-obsidian);
+    font-family: var(--font-reckless);
+    font-weight: 500;
+    letter-spacing: -.02em;
+}
+
+.bimm-wrap {
+    width: min(var(--page-max-width), calc(100% - 48px));
+}
+
+.bimm-main {
+    min-height: 65vh;
+    padding: 32px 0 96px;
+}
+
+.bimm-header {
+    border-bottom: 1px solid rgb(230 230 230 / .82);
+    background: rgb(250 250 250 / .86);
+    box-shadow: 0 1px 0 rgb(255 255 255 / .75);
+}
+
+.bimm-header__inner {
+    min-height: 76px;
+    gap: 24px;
+}
+
+.bimm-brand {
+    gap: 12px;
+    color: var(--color-obsidian);
+    font-size: 19px;
+    font-weight: 500;
+    letter-spacing: .12em;
+}
+
+.bimm-brand__mark {
+    display: grid;
+    width: 25px;
+    height: 25px;
+    border-radius: 4px;
+    color: transparent;
+    background: var(--color-obsidian);
+    transform: rotate(45deg);
+}
+
+.bimm-brand__mark::after {
+    content: '';
+    width: 7px;
+    height: 7px;
+    margin: auto;
+    border-radius: 50%;
+    background: var(--color-bone);
+}
+
+.bimm-nav {
+    justify-content: flex-start;
+    gap: 21px;
+    color: var(--color-slate);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.bimm-nav a,
+.bimm-mobile-nav a {
+    transition: color .2s ease;
+}
+
+.bimm-nav a:hover,
+.bimm-nav a:focus,
+.bimm-mobile-nav a:hover,
+.bimm-mobile-nav a:focus {
+    color: var(--color-obsidian);
+}
+
+.bimm-search {
+    max-width: 300px;
+    padding: 8px 11px 8px 14px;
+    border: 1px solid var(--color-fog);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: var(--shadow-subtle-2, inset 0 1px 1px rgb(0 0 0 / .03));
+}
+
+.bimm-search input {
+    color: var(--color-obsidian);
+    font-size: 13px;
+}
+
+.bimm-search input::placeholder {
+    color: var(--color-mist);
+}
+
+.bimm-search button {
+    display: grid;
+    place-items: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--color-onyx);
+}
+
+.bimm-icon-link,
+.bimm-menu-toggle {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--color-fog);
+    border-radius: 16px;
+    color: var(--color-obsidian);
+    background: #fff;
+    transition: border-color .2s ease, transform .2s ease;
+}
+
+.bimm-icon-link:hover,
+.bimm-menu-toggle:hover {
+    border-color: var(--color-ash);
+    transform: translateY(-1px);
+}
+
+.bimm-hero {
+    min-height: 430px;
+    padding: clamp(40px, 7vw, 88px);
+    border: 1px solid rgb(230 230 230 / .7);
+    border-radius: 28px;
+    color: var(--color-obsidian);
+    background: var(--gradient-dusk-wash), var(--color-bone);
+    box-shadow: none;
+}
+
+.bimm-hero::after {
+    right: -80px;
+    bottom: -160px;
+    width: 430px;
+    height: 430px;
+    border-color: rgb(255 255 255 / .6);
+    box-shadow: 0 0 0 30px rgb(255 255 255 / .2), 0 0 0 60px rgb(255 255 255 / .12);
+}
+
+.bimm-hero__content {
+    max-width: 680px;
+}
+
+.bimm-kicker {
+    color: var(--color-iris);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+}
+
+.bimm-kicker::before {
+    width: 22px;
+    background: currentColor;
+}
+
+.bimm-hero h1 {
+    max-width: 700px;
+    color: var(--color-obsidian);
+    font-family: var(--font-reckless);
+    font-size: clamp(48px, 7vw, 76px);
+    font-weight: 500;
+    letter-spacing: -1.75px;
+    line-height: 1;
+}
+
+.bimm-hero p {
+    max-width: 500px;
+    margin: 22px 0 30px;
+    color: var(--color-graphite);
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.bimm-search--hero {
+    max-width: 600px;
+    padding: 7px 8px 7px 18px;
+    border-color: rgb(255 255 255 / .75);
+    border-radius: 20px;
+    box-shadow: 0 2px 7px rgb(33 33 35 / .08);
+}
+
+.bimm-search--hero button {
+    width: auto;
+    height: auto;
+    padding: 12px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 0 0 3px rgb(252 122 155 / .28), 0 0 12px 2px rgb(252 122 155 / .16);
+}
+
+.bimm-section {
+    margin-top: var(--section-gap);
+}
+
+.bimm-section__head {
+    margin-bottom: 24px;
+}
+
+.bimm-section__head h2,
+.bimm-page-head h1 {
+    font-size: clamp(34px, 4vw, 44px);
+    font-weight: 500;
+    letter-spacing: -.88px;
+}
+
+.bimm-section__head p,
+.bimm-page-head p {
+    color: var(--color-graphite);
+}
+
+.bimm-section__link {
+    color: var(--color-obsidian) !important;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--color-ash);
+    text-underline-offset: 4px;
+}
+
+.bimm-category-grid,
+.bimm-product-grid,
+.bimm-seller-grid,
+.bimm-how {
+    gap: 16px;
+}
+
+.bimm-category,
+.bimm-product,
+.bimm-seller,
+.bimm-empty,
+.bimm-order,
+.bimm-detail__below,
+.bimm-sidebar {
+    border-color: var(--color-fog);
+    border-radius: 20px;
+    box-shadow: none;
+}
+
+.bimm-category,
+.bimm-seller,
+.bimm-order,
+.bimm-detail__below,
+.bimm-sidebar {
+    background: #fff;
+}
+
+.bimm-category:hover,
+.bimm-product:hover,
+.bimm-seller:hover {
+    box-shadow: 0 2px 10px rgb(0 0 0 / .06);
+}
+
+.bimm-category__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--color-obsidian);
+    background: var(--color-bone);
+    box-shadow: var(--bimm-shadow);
+}
+
+.bimm-category strong,
+.bimm-seller strong {
+    font-weight: 500;
+}
+
+.bimm-product__image {
+    background: var(--color-bone);
+}
+
+.bimm-product__badge {
+    padding: 5px 10px;
+    color: #fff;
+    background: var(--color-iris);
+    font-weight: 500;
+}
+
+.bimm-product__heart {
+    border: 1px solid rgb(230 230 230 / .8);
+    color: var(--color-obsidian);
+    background: rgb(250 250 250 / .9);
+}
+
+.bimm-product__seller,
+.bimm-seller small,
+.bimm-product__old,
+.bimm-order__top,
+.bimm-order dt {
+    color: var(--color-steel);
+}
+
+.bimm-product h3 {
+    font-family: var(--font-intervariable);
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.bimm-product__price,
+.bimm-order dd {
+    color: var(--color-obsidian);
+    font-weight: 500;
+}
+
+.bimm-product__open,
+.bimm-button--dark,
+.bimm-button--gold {
+    color: #fff !important;
+    background: var(--color-onyx);
+    box-shadow: 0 0 0 3px rgb(252 122 155 / .22), 0 0 12px 2px rgb(252 122 155 / .12);
+}
+
+.bimm-button {
+    min-height: 44px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.bimm-button--light {
+    border-color: var(--color-fog);
+    color: var(--color-obsidian) !important;
+    background: #fff;
+    box-shadow: none;
+}
+
+.bimm-seller__logo,
+.bimm-seller-hero__logo {
+    color: var(--color-obsidian);
+    background: var(--color-bone);
+}
+
+.bimm-seller-hero {
+    border-radius: 20px;
+    color: var(--color-obsidian);
+    background: var(--gradient-dusk-wash), #fff;
+    box-shadow: none;
+}
+
+.bimm-seller-hero h1 {
+    color: var(--color-obsidian);
+    font-family: var(--font-reckless);
+    font-size: 34px;
+    font-weight: 500;
+}
+
+.bimm-seller-hero p,
+.bimm-seller-hero__contact {
+    color: var(--color-graphite);
+}
+
+.bimm-seller-hero__contact a {
+    color: var(--color-obsidian);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bimm-trust div {
+    background: var(--color-bone);
+}
+
+.bimm-how article {
+    border: 1px solid var(--color-fog);
+    border-radius: 20px;
+    color: var(--color-obsidian);
+    background: #fff;
+}
+
+.bimm-how span {
+    color: #fff;
+    background: var(--color-iris);
+}
+
+.bimm-how h3 {
+    font-family: var(--font-intervariable);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.bimm-how p,
+.bimm-description,
+.bimm-features li {
+    color: var(--color-graphite);
+}
+
+.bimm-breadcrumbs {
+    color: var(--color-steel);
+}
+
+.bimm-breadcrumbs a:hover {
+    color: var(--color-obsidian);
+}
+
+.bimm-region-picker,
+.bimm-catalog__toolbar select {
+    border-color: var(--color-fog);
+    border-radius: 16px;
+    color: var(--color-obsidian);
+    background: #fff;
+}
+
+.bimm-pagination a,
+.bimm-pagination span {
+    border-color: var(--color-fog);
+    border-radius: 12px;
+    color: var(--color-obsidian);
+    background: #fff;
+}
+
+.bimm-pagination .active span {
+    color: #fff;
+    background: var(--color-onyx);
+}
+
+.bimm-footer {
+    padding-top: 56px;
+    background: var(--color-onyx);
+}
+
+.bimm-footer .bimm-brand {
+    color: #fff;
+}
+
+.bimm-footer .bimm-brand__mark {
+    background: #fff;
+}
+
+.bimm-footer .bimm-brand__mark::after {
+    background: var(--color-onyx);
+}
+
+.bimm-footer h3 {
+    font-family: var(--font-intervariable);
+    font-weight: 500;
+    letter-spacing: .08em;
+}
+
+.bimm-bottom-nav {
+    border-color: var(--color-fog);
+    background: rgb(250 250 250 / .96);
+    box-shadow: 0 2px 15px rgb(0 0 0 / .12);
+}
+
+.bimm-bottom-nav a {
+    color: var(--color-slate);
+}
+
+.bimm-bottom-nav a:hover {
+    color: var(--color-obsidian);
+}
+
+.bimm-flash {
+    border: 1px solid var(--color-fog);
+    color: var(--color-graphite);
+    background: #fff;
+}
+
+.bimm-auth {
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+}
+
+.bimm-auth__main {
+    width: min(520px, 100%);
+    padding: 32px;
+    border: 1px solid var(--color-fog);
+    border-radius: 20px;
+    background: #fff;
+}
+
+@media (max-width: 780px) {
+    .bimm-wrap { width: min(100% - 28px, 620px); }
+    .bimm-main { padding-top: 24px; padding-bottom: 96px; }
+    .bimm-hero { min-height: 460px; padding: 38px 24px; border-radius: 24px; }
+    .bimm-hero h1 { font-size: clamp(46px, 13vw, 64px); }
+    .bimm-section { margin-top: 64px; }
+    .bimm-section__head h2,
+    .bimm-page-head h1 { font-size: 36px; }
+    .bimm-search--hero { display: flex !important; }
+    .bimm-seller-hero h1 { font-size: 29px; }
+    .bimm-auth__main { padding: 24px 18px; }
+}
+
+/* Spacing pass: a quieter 8px rhythm for the marketplace layout. */
+.bimm-wrap {
+    width: min(var(--page-max-width), calc(100% - 64px));
+}
+
+.bimm-main {
+    padding: 40px 0 112px;
+}
+
+.bimm-header__inner {
+    gap: 32px;
+}
+
+.bimm-hero {
+    min-height: 0;
+    padding: clamp(40px, 5vw, 64px) clamp(32px, 6vw, 88px);
+}
+
+.bimm-section {
+    margin-top: 80px;
+}
+
+.bimm-section__head {
+    margin-bottom: 28px;
+}
+
+.bimm-category-grid,
+.bimm-product-grid,
+.bimm-seller-grid,
+.bimm-how {
+    gap: 20px;
+}
+
+.bimm-category {
+    padding: 20px;
+}
+
+.bimm-product__body {
+    padding: 18px;
+}
+
+.bimm-seller {
+    padding: 18px;
+}
+
+.bimm-catalog {
+    gap: 40px;
+}
+
+.bimm-catalog__toolbar {
+    margin-bottom: 24px;
+}
+
+.bimm-detail {
+    gap: 56px;
+}
+
+.bimm-detail__below {
+    margin-top: 64px;
+    padding: 32px;
+}
+
+.bimm-footer {
+    padding-top: 64px;
+    padding-bottom: 32px;
+}
+
+.bimm-footer__grid {
+    gap: 40px;
+}
+
+@media (max-width: 780px) {
+    .bimm-wrap { width: min(100% - 32px, 620px); }
+    .bimm-main { padding: 32px 0 104px; }
+    .bimm-hero { padding: 40px 24px; }
+    .bimm-category-grid,
+    .bimm-product-grid,
+    .bimm-seller-grid,
+    .bimm-how { gap: 12px; }
+    .bimm-product__body { padding: 12px; }
+    .bimm-detail { gap: 32px; }
+    .bimm-detail__below { margin-top: 40px; padding: 24px; }
+}
+
+/* Temu-inspired commerce pass: dense discovery, warm orange accents, clear deals. */
+:root {
+    --temu-orange: #ff5a1f;
+    --temu-orange-dark: #e94812;
+    --temu-orange-soft: #fff1e9;
+    --temu-red: #e53920;
+    --temu-green: #16834b;
+    --temu-ink: #222222;
+    --temu-muted: #6d6d6d;
+    --temu-line: #e9e9e9;
+    --temu-surface: #f7f7f7;
+    --page-max-width: 1280px;
+    --color-obsidian: var(--temu-ink);
+    --color-bone: #ffffff;
+    --color-graphite: #4f4f4f;
+    --color-slate: #666666;
+    --color-mist: #9b9b9b;
+    --color-ash: #c8c8c8;
+    --color-fog: var(--temu-line);
+    --color-onyx: var(--temu-orange);
+    --color-steel: #858585;
+    --color-iris: var(--temu-orange);
+    --color-lagoon: var(--temu-green);
+    --gradient-dusk-wash: linear-gradient(112deg, #ff4f1f 0%, #ff7b24 58%, #ffad56 100%);
+    --bimm-ink: var(--temu-ink);
+    --bimm-ink-soft: var(--temu-muted);
+    --bimm-paper: #ffffff;
+    --bimm-line: var(--temu-line);
+    --bimm-muted: var(--temu-muted);
+    --bimm-gold: var(--temu-orange);
+    --bimm-gold-dark: var(--temu-orange-dark);
+    --bimm-mint: var(--temu-orange-soft);
+    --bimm-radius: 10px;
+}
+
+body.theme-new {
+    color: var(--temu-ink);
+    background: #fff;
+}
+
+.bimm-wrap {
+    width: min(var(--page-max-width), calc(100% - 32px));
+}
+
+.bimm-deal-bar {
+    color: #fff;
+    background: var(--temu-orange);
+    font-size: 12px;
+}
+
+.bimm-deal-bar__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 32px;
+}
+
+.bimm-deal-bar__inner span,
+.bimm-deal-bar__inner a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.bimm-deal-bar__note {
+    opacity: .82;
+}
+
+.bimm-deal-bar__inner a {
+    margin-left: auto;
+    color: #fff;
+    font-weight: 700;
+}
+
+.bimm-deal-bar__inner a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.bimm-header {
+    border-bottom-color: var(--temu-line);
+    background: rgb(255 255 255 / .96);
+    box-shadow: 0 1px 4px rgb(0 0 0 / .04);
+}
+
+.bimm-header__inner {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    min-height: 70px;
+    gap: 24px;
+}
+
+.bimm-brand {
+    gap: 9px;
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: .1em;
+}
+
+.bimm-brand__mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--temu-orange);
+}
+
+.bimm-brand__mark::after {
+    width: 8px;
+    height: 8px;
+    background: #fff;
+}
+
+.bimm-nav {
+    justify-content: flex-start;
+    gap: 20px;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.bimm-nav a:hover,
+.bimm-nav a:focus,
+.bimm-mobile-nav a:hover,
+.bimm-mobile-nav a:focus {
+    color: var(--temu-orange);
+}
+
+.bimm-actions {
+    min-width: 0;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.bimm-actions .bimm-search {
+    width: min(430px, 32vw);
+    max-width: none;
+}
+
+.bimm-search {
+    padding: 7px 8px 7px 12px;
+    border-color: #d7d7d7;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.bimm-search:focus-within {
+    border-color: var(--temu-orange);
+    box-shadow: 0 0 0 2px rgb(255 90 31 / .13);
+}
+
+.bimm-search input {
+    color: var(--temu-ink);
+    font-size: 13px;
+}
+
+.bimm-search button {
+    width: 31px;
+    height: 31px;
+    border-radius: 5px;
+    color: #fff;
+    background: var(--temu-orange);
+}
+
+.bimm-icon-link,
+.bimm-menu-toggle {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+}
+
+.bimm-icon-link:hover,
+.bimm-menu-toggle:hover {
+    color: var(--temu-orange);
+    background: var(--temu-orange-soft);
+    transform: none;
+}
+
+.bimm-category-strip {
+    display: block;
+    border-top: 1px solid #f4f4f4;
+    border-bottom: 1px solid var(--temu-line);
+    background: #fff;
+}
+
+.bimm-category-strip__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 45px;
+    overflow-x: auto;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.bimm-category-strip__inner a:hover {
+    color: var(--temu-orange);
+}
+
+.bimm-category-strip__all {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: #fff !important;
+    background: var(--temu-orange);
+}
+
+.bimm-category-strip__region {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    color: var(--temu-muted);
+}
+
+.bimm-main {
+    padding: 24px 0 72px;
+    background: #fff;
+}
+
+.bimm-hero {
+    min-height: 380px;
+    padding: clamp(42px, 5vw, 70px) clamp(28px, 7vw, 88px);
+    border: 0;
+    border-radius: 12px;
+    background: var(--gradient-dusk-wash);
+    box-shadow: none;
+}
+
+.bimm-hero::after {
+    right: -90px;
+    bottom: -210px;
+    width: 520px;
+    height: 520px;
+    border-color: rgb(255 255 255 / .28);
+    box-shadow: 0 0 0 35px rgb(255 255 255 / .12), 0 0 0 70px rgb(255 255 255 / .08);
+}
+
+.bimm-hero__content {
+    max-width: 680px;
+}
+
+.bimm-kicker {
+    color: var(--temu-orange);
+    font-family: var(--font-intervariable);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+.bimm-hero .bimm-kicker {
+    color: #fff;
+}
+
+.bimm-hero h1 {
+    max-width: 680px;
+    color: #fff;
+    font-family: var(--font-intervariable);
+    font-size: clamp(40px, 5vw, 64px);
+    font-weight: 900;
+    letter-spacing: -.055em;
+    line-height: 1.02;
+}
+
+.bimm-hero p {
+    max-width: 560px;
+    margin: 20px 0 25px;
+    color: rgb(255 255 255 / .88);
+    font-size: 16px;
+    line-height: 1.55;
+}
+
+.bimm-search--hero {
+    max-width: 560px;
+    padding: 6px 7px 6px 16px;
+    border: 0;
+    border-radius: 7px;
+    box-shadow: 0 4px 13px rgb(166 52 10 / .16);
+}
+
+.bimm-search--hero button {
+    width: auto;
+    height: auto;
+    padding: 11px 24px;
+    border-radius: 5px;
+    color: #fff;
+    background: var(--temu-orange-dark);
+    box-shadow: none;
+    font-weight: 800;
+}
+
+.bimm-hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 18px;
+    color: rgb(255 255 255 / .9);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.bimm-hero__trust span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.bimm-benefits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+    padding: 14px 18px;
+    border: 1px solid var(--temu-line);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.bimm-benefits > div {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 3px 12px;
+    border-right: 1px solid var(--temu-line);
+}
+
+.bimm-benefits > div:last-child {
+    border-right: 0;
+}
+
+.bimm-benefits > div > i {
+    color: var(--temu-orange);
+    font-size: 20px;
+}
+
+.bimm-benefits strong,
+.bimm-benefits small {
+    display: block;
+}
+
+.bimm-benefits strong {
+    color: var(--temu-ink);
+    font-size: 13px;
+}
+
+.bimm-benefits small {
+    margin-top: 3px;
+    color: var(--temu-muted);
+    font-size: 11px;
+}
+
+.bimm-section {
+    margin-top: 48px;
+}
+
+.bimm-section__head {
+    margin-bottom: 18px;
+}
+
+.bimm-section__head h2,
+.bimm-page-head h1 {
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-size: clamp(24px, 3vw, 30px);
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.bimm-section__head p,
+.bimm-page-head p {
+    color: var(--temu-muted);
+}
+
+.bimm-section__link {
+    color: var(--temu-orange) !important;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.bimm-category-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.bimm-category,
+.bimm-seller,
+.bimm-order,
+.bimm-detail__below,
+.bimm-sidebar,
+.bimm-product {
+    border-color: var(--temu-line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: none;
+}
+
+.bimm-category {
+    min-height: 108px;
+    padding: 14px;
+}
+
+.bimm-category:hover,
+.bimm-product:hover,
+.bimm-seller:hover {
+    border-color: rgb(255 90 31 / .55);
+    box-shadow: 0 3px 12px rgb(0 0 0 / .07);
+    transform: translateY(-1px);
+}
+
+.bimm-category__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    color: var(--temu-orange);
+    background: var(--temu-orange-soft);
+    box-shadow: none;
+}
+
+.bimm-category strong,
+.bimm-seller strong {
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-weight: 700;
+}
+
+.bimm-category small,
+.bimm-seller small {
+    color: var(--temu-muted);
+}
+
+.bimm-product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.bimm-product {
+    overflow: hidden;
+}
+
+.bimm-product__image {
+    background: var(--temu-surface);
+}
+
+.bimm-product__badge {
+    top: 8px;
+    left: 8px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    background: var(--temu-red);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.bimm-product__heart {
+    top: 8px;
+    right: 8px;
+    width: 29px;
+    height: 29px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / .92);
+}
+
+.bimm-product__body {
+    padding: 12px;
+}
+
+.bimm-product__seller,
+.bimm-product__old,
+.bimm-order__top,
+.bimm-order dt {
+    color: var(--temu-muted);
+}
+
+.bimm-product h3 {
+    margin: 6px 0 11px;
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0;
+}
+
+.bimm-product__price,
+.bimm-order dd {
+    color: var(--temu-red);
+    font-weight: 800;
+}
+
+.bimm-product__old {
+    font-size: 10px;
+}
+
+.bimm-product__open,
+.bimm-button--dark,
+.bimm-button--gold {
+    color: #fff !important;
+    background: var(--temu-orange);
+    box-shadow: none;
+}
+
+.bimm-product__open {
+    width: 28px;
+    height: 28px;
+    border-radius: 5px;
+}
+
+.bimm-button,
+.bimm-search--hero button {
+    border-radius: 6px;
+}
+
+.bimm-button {
+    min-height: 40px;
+    padding: 0 17px;
+    font-weight: 700;
+}
+
+.bimm-button--light {
+    border-color: #d6d6d6;
+    color: var(--temu-ink) !important;
+    background: #fff;
+}
+
+.bimm-seller-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.bimm-seller {
+    padding: 14px;
+}
+
+.bimm-seller__logo,
+.bimm-seller-hero__logo {
+    color: var(--temu-orange);
+    background: var(--temu-orange-soft);
+}
+
+.bimm-section--sale {
+    padding: 20px;
+    border: 1px solid #ffddc9;
+    border-radius: 10px;
+    background: #fff8f3;
+}
+
+.bimm-section--sale .bimm-section__head {
+    margin-bottom: 16px;
+}
+
+.bimm-section--sale .bimm-kicker {
+    color: var(--temu-red);
+}
+
+.bimm-how {
+    gap: 12px;
+}
+
+.bimm-how article {
+    padding: 20px;
+    border: 1px solid var(--temu-line);
+    border-radius: 8px;
+    color: var(--temu-ink);
+    background: #fff;
+}
+
+.bimm-how span {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 20px;
+    border-radius: 50%;
+    color: #fff;
+    background: var(--temu-orange);
+}
+
+.bimm-how h3 {
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.bimm-how p,
+.bimm-description,
+.bimm-features li {
+    color: var(--temu-muted);
+}
+
+.bimm-catalog {
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 24px;
+}
+
+.bimm-sidebar {
+    padding: 16px;
+}
+
+.bimm-sidebar a:hover,
+.bimm-sidebar a.active {
+    color: var(--temu-orange);
+}
+
+.bimm-catalog__toolbar {
+    margin-bottom: 16px;
+}
+
+.bimm-region-picker,
+.bimm-catalog__toolbar select,
+.bimm-pagination a,
+.bimm-pagination span {
+    border-color: #d9d9d9;
+    border-radius: 6px;
+}
+
+.bimm-pagination .active span {
+    background: var(--temu-orange);
+}
+
+.bimm-detail {
+    gap: 36px;
+}
+
+.bimm-detail__below {
+    padding: 24px;
+}
+
+.bimm-trust div {
+    background: var(--temu-orange-soft);
+}
+
+.bimm-seller-hero {
+    border-radius: 10px;
+    background: var(--gradient-dusk-wash);
+}
+
+.bimm-footer {
+    padding-top: 48px;
+    background: #262626;
+}
+
+.bimm-footer .bimm-brand__mark {
+    background: var(--temu-orange);
+}
+
+.bimm-footer .bimm-brand__mark::after {
+    background: #fff;
+}
+
+@media (max-width: 1100px) {
+    .bimm-category-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .bimm-product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .bimm-seller-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .bimm-actions .bimm-search { width: min(330px, 28vw); }
+}
+
+@media (max-width: 780px) {
+    .bimm-deal-bar__note,
+    .bimm-category-strip__region { display: none; }
+    .bimm-deal-bar__inner { gap: 12px; min-height: 30px; }
+    .bimm-deal-bar__inner a { margin-left: auto; }
+    .bimm-header__inner { gap: 10px; }
+    .bimm-actions .bimm-search { display: none; }
+    .bimm-category-strip__inner { gap: 16px; min-height: 42px; }
+    .bimm-main { padding-top: 16px; }
+    .bimm-hero { min-height: 360px; padding: 36px 24px; }
+    .bimm-hero h1 { font-size: clamp(34px, 10vw, 52px); }
+    .bimm-hero__trust { gap: 10px 16px; }
+    .bimm-benefits { grid-template-columns: 1fr; padding: 10px 14px; }
+    .bimm-benefits > div { padding: 8px 4px; border-right: 0; border-bottom: 1px solid var(--temu-line); }
+    .bimm-benefits > div:last-child { border-bottom: 0; }
+    .bimm-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .bimm-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .bimm-seller-grid { grid-template-columns: 1fr; }
+    .bimm-section--sale { padding: 14px; }
+}
+
+/* Keep the commerce typography above the earlier editorial defaults. */
+body.theme-new .bimm-hero h1,
+body.theme-new .bimm-section__head h2,
+body.theme-new .bimm-page-head h1,
+body.theme-new .bimm-seller-hero h1,
+body.theme-new .bimm-detail h1,
+body.theme-new .bimm-how h3,
+body.theme-new .bimm-product h3,
+body.theme-new .bimm-order h2,
+body.theme-new .bimm-detail__below h2 {
+    font-family: var(--font-intervariable);
+    font-weight: 800;
+}
+
+body.theme-new .bimm-hero h1 {
+    color: #fff;
+    font-weight: 900;
+}
+
+/* Shared polish for secondary marketplace states. */
+body.theme-new .bimm-sidebar h3,
+body.theme-new .bimm-order h2,
+body.theme-new .bimm-detail__below h2,
+body.theme-new .bimm-empty h1,
+body.theme-new .bimm-auth__main form h3 {
+    font-family: var(--font-intervariable);
+    font-weight: 800;
+}
+
+.bimm-page-head {
+    margin-bottom: 28px;
+}
+
+.bimm-breadcrumbs {
+    gap: 9px;
+    margin-bottom: 18px;
+    color: #929292;
+    font-size: 12px;
+}
+
+.bimm-breadcrumbs a:hover {
+    color: var(--temu-orange);
+}
+
+.bimm-toolbar-count {
+    color: var(--temu-muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.bimm-empty {
+    padding: 56px 28px;
+    border: 1px solid var(--temu-line);
+    border-radius: 10px;
+    color: var(--temu-muted);
+    background: #fff;
+    text-align: center;
+}
+
+.bimm-empty .fa-face-frown,
+.bimm-empty .fa-heart,
+.bimm-empty .fa-bag-shopping {
+    color: var(--temu-orange);
+}
+
+.bimm-flash {
+    border-color: #ffd8c7;
+    border-radius: 8px;
+    color: #a84a27;
+    background: var(--temu-orange-soft);
+}
+
+.bimm-gallery__main {
+    border: 1px solid var(--temu-line);
+    border-radius: 10px;
+    background: var(--temu-surface);
+}
+
+.bimm-gallery__thumb {
+    border-color: var(--temu-line);
+    border-radius: 7px;
+}
+
+.bimm-gallery__thumb.is-active {
+    border-color: var(--temu-orange);
+}
+
+.bimm-detail__category {
+    color: var(--temu-orange) !important;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.bimm-detail__price {
+    color: var(--temu-red);
+}
+
+.bimm-detail__meta div {
+    border-bottom-color: var(--temu-line);
+}
+
+.bimm-order-form {
+    border-color: var(--temu-line) !important;
+    border-radius: 10px !important;
+}
+
+.bimm-order-form input,
+.bimm-order-form textarea,
+.bimm-order-form select {
+    border: 1px solid #d7d7d7;
+    border-radius: 6px;
+}
+
+.bimm-order-form input:focus,
+.bimm-order-form textarea:focus,
+.bimm-order-form select:focus {
+    border-color: var(--temu-orange);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgb(255 90 31 / .13);
+}
+
+.bimm-footer__assurance {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 34px;
+    padding: 16px 0;
+    border-top: 1px solid rgb(255 255 255 / .12);
+    border-bottom: 1px solid rgb(255 255 255 / .12);
+    color: rgb(255 255 255 / .78);
+    font-size: 12px;
+}
+
+.bimm-footer__assurance span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bimm-footer__assurance i {
+    color: #ff8a5e;
+}
+
+.bimm-auth .bimm-brand__mark {
+    background: var(--temu-orange);
+}
+
+.bimm-auth .bimm-brand__mark::after {
+    background: #fff;
+}
+
+@media (max-width: 780px) {
+    .bimm-footer__assurance {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 10px;
+    }
+}
+
+/* UX pass: make the next action obvious and keep secondary actions quiet. */
+.bimm-hero__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.bimm-button--hero-secondary {
+    min-height: 38px;
+    border-color: rgba(255, 255, 255, .38);
+    color: #fff !important;
+    background: rgba(255, 255, 255, .12);
+}
+
+.bimm-search--hero button {
+    min-width: 104px;
+    white-space: nowrap;
+}
+
+.bimm-button--hero-secondary:hover,
+.bimm-button--hero-secondary:focus-visible {
+    border-color: #fff;
+    background: rgba(255, 255, 255, .22);
+}
+
+.bimm-hero__text-link {
+    color: rgba(255, 255, 255, .82);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.bimm-hero__text-link:hover,
+.bimm-hero__text-link:focus-visible {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.bimm-product__image-link {
+    position: absolute;
+    inset: 0;
+    display: block;
+    z-index: 1;
+}
+
+.bimm-product__image-link img,
+.bimm-product__image-link .bimm-product__placeholder {
+    display: block;
+}
+
+.bimm-product__badge {
+    z-index: 2;
+    pointer-events: none;
+}
+
+.bimm-product__heart {
+    z-index: 3;
+    transition: color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.bimm-product__heart:hover,
+.bimm-product__heart:focus-visible,
+.bimm-product__heart.is-active {
+    color: var(--temu-orange);
+    background: #fff;
+}
+
+.bimm-product__heart:active {
+    transform: scale(.92);
+}
+
+.bimm-product__open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto;
+    min-width: 84px;
+    padding: 0 9px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.bimm-product__open:hover,
+.bimm-product__open:focus-visible {
+    color: #fff;
+    background: var(--temu-orange-dark);
+}
+
+.bimm-catalog__tools {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bimm-toolbar-count strong {
+    color: var(--temu-ink);
+}
+
+.bimm-empty h2 {
+    margin: 8px 0;
+    color: var(--temu-ink);
+    font-family: var(--font-intervariable);
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.bimm-empty p {
+    max-width: 520px;
+    margin: 0 auto 20px;
+    line-height: 1.6;
+}
+
+.bimm-empty__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bimm-page-head--split {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.bimm-form-optional {
+    color: var(--temu-muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.bimm-order-form legend {
+    margin-bottom: 8px;
+    color: var(--temu-ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.bimm-order-form label {
+    color: var(--temu-ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.bimm-order-form input[type="radio"],
+.bimm-order-form input[type="checkbox"] {
+    accent-color: var(--temu-orange);
+}
+
+.bimm-order-form .bimm-kicker {
+    margin-bottom: 8px;
+    color: var(--temu-orange);
+}
+
+.bimm-order-success {
+    border-style: solid;
+    text-align: left;
+}
+
+.bimm-order-success p {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+@media (max-width: 780px) {
+    .bimm-page-head--split {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .bimm-hero__actions {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 11px;
+    }
+
+    .bimm-catalog__tools {
+        width: 100%;
+    }
+
+    .bimm-catalog__tools > * {
+        flex: 1 1 160px;
+    }
+}
+
+@media (max-width: 390px) {
+    .bimm-product__open {
+        min-width: 30px;
+        width: 30px;
+        padding: 0;
+    }
+
+    .bimm-product__open span {
+        display: none;
+    }
+}
+
+/* Regional product-first direction: the marketplace leads, products carry the color. */
+body.theme-new .bimm-deal-bar {
+    border-bottom: 1px solid var(--temu-line);
+    color: var(--temu-ink);
+    background: #fff;
+}
+
+body.theme-new .bimm-deal-bar__inner a {
+    color: var(--temu-orange);
+}
+
+body.theme-new .bimm-deal-bar__inner i {
+    color: var(--temu-orange);
+}
+
+body.theme-new .bimm-brand {
+    letter-spacing: .08em;
+}
+
+body.theme-new .bimm-brand__label {
+    display: grid;
+    gap: 1px;
+    line-height: 1;
+}
+
+body.theme-new .bimm-brand__label > span {
+    display: block;
+}
+
+body.theme-new .bimm-brand__label small {
+    display: block;
+    color: var(--temu-muted);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .045em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+body.theme-new .bimm-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+    align-items: center;
+    gap: clamp(24px, 5vw, 70px);
+    min-height: 420px;
+    border: 1px solid #f0e1d9;
+    color: var(--temu-ink);
+    background: linear-gradient(110deg, #fffaf7 0%, #fff 68%);
+    box-shadow: 0 8px 28px rgb(55 38 28 / .05);
+}
+
+body.theme-new .bimm-hero::after {
+    display: none;
+}
+
+body.theme-new .bimm-hero__content {
+    max-width: 620px;
+}
+
+body.theme-new .bimm-hero .bimm-kicker {
+    color: var(--temu-orange);
+}
+
+body.theme-new .bimm-hero h1 {
+    color: var(--temu-ink);
+}
+
+body.theme-new .bimm-hero p {
+    color: var(--temu-muted);
+}
+
+body.theme-new .bimm-hero .bimm-search--hero {
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 5px 18px rgb(65 42 28 / .08);
+}
+
+body.theme-new .bimm-hero__actions .bimm-button--hero-secondary {
+    border-color: #ffb89c;
+    color: var(--temu-orange-dark) !important;
+    background: #fff;
+}
+
+body.theme-new .bimm-hero__actions .bimm-button--hero-secondary:hover,
+body.theme-new .bimm-hero__actions .bimm-button--hero-secondary:focus-visible {
+    border-color: var(--temu-orange);
+    color: #fff !important;
+    background: var(--temu-orange);
+}
+
+body.theme-new .bimm-hero__text-link {
+    color: var(--temu-orange-dark);
+}
+
+body.theme-new .bimm-hero__trust {
+    color: var(--temu-muted);
+}
+
+.bimm-hero__visual {
+    min-width: 0;
+    padding: 18px;
+    border: 1px solid var(--temu-line);
+    border-radius: 12px;
+    background: rgb(255 255 255 / .78);
+    box-shadow: 0 8px 26px rgb(55 38 28 / .06);
+}
+
+.bimm-hero__visual-label {
+    display: block;
+    margin-bottom: 12px;
+    color: var(--temu-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.bimm-hero-products {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.bimm-hero-product {
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid var(--temu-line);
+    border-radius: 8px;
+    color: var(--temu-ink);
+    background: #fff;
+    transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.bimm-hero-product:hover,
+.bimm-hero-product:focus-visible {
+    border-color: #ffb89c;
+    color: var(--temu-ink);
+    box-shadow: 0 6px 18px rgb(255 90 31 / .1);
+    transform: translateY(-2px);
+}
+
+.bimm-hero-product__image {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--temu-surface);
+    color: var(--temu-orange);
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.bimm-hero-product__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bimm-hero-product__name {
+    display: -webkit-box;
+    min-height: 30px;
+    margin-top: 8px;
+    overflow: hidden;
+    color: var(--temu-ink);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.bimm-hero-product strong {
+    display: block;
+    margin-top: 7px;
+    color: var(--temu-red);
+    font-size: 14px;
+}
+
+body.theme-new .bimm-seller-hero {
+    border: 1px solid #f0e1d9;
+    background: linear-gradient(110deg, #fffaf7, #fff 70%);
+}
+
+@media (max-width: 900px) {
+    body.theme-new .bimm-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bimm-hero__visual {
+        max-width: 640px;
+    }
+}
+
+@media (max-width: 780px) {
+    body.theme-new .bimm-brand__label small {
+        display: none;
+    }
+
+    body.theme-new .bimm-hero {
+        min-height: 0;
+        padding: 32px 24px;
+    }
+
+    .bimm-hero__visual {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 390px) {
+    .bimm-hero-products {
+        gap: 6px;
+    }
+
+    .bimm-hero-product {
+        padding: 6px;
+    }
+
+    .bimm-hero-product strong {
+        font-size: 12px;
+    }
+}
+
+/* Minimal marketplace pass: one navigation layer, one primary action, products first. */
+body.theme-new .bimm-header {
+    box-shadow: none;
+}
+
+body.theme-new {
+    overflow-x: hidden;
+}
+
+body.theme-new .bimm-nav__seller {
+    color: var(--temu-orange);
+    font-weight: 700;
+}
+
+body.theme-new .bimm-main {
+    padding-top: 20px;
+    padding-bottom: 56px;
+}
+
+body.theme-new .bimm-hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(300px, .75fr);
+    gap: clamp(24px, 4vw, 52px);
+    min-height: 360px;
+    padding: clamp(30px, 4vw, 50px) clamp(24px, 5vw, 64px);
+    border-radius: 10px;
+    box-shadow: 0 5px 18px rgb(55 38 28 / .04);
+}
+
+body.theme-new .bimm-hero h1 {
+    max-width: 560px;
+    font-size: clamp(34px, 4.2vw, 54px);
+}
+
+body.theme-new .bimm-hero p {
+    max-width: 500px;
+    margin: 16px 0 22px;
+    font-size: 15px;
+}
+
+body.theme-new .bimm-hero__visual {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.theme-new .bimm-hero__visual-label {
+    margin-bottom: 9px;
+}
+
+body.theme-new .bimm-hero-products {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+body.theme-new .bimm-hero-product {
+    padding: 7px;
+    border-radius: 7px;
+}
+
+body.theme-new .bimm-hero-product__name {
+    font-size: 10px;
+}
+
+body.theme-new .bimm-section {
+    margin-top: 38px;
+}
+
+body.theme-new .bimm-section__head {
+    margin-bottom: 14px;
+}
+
+body.theme-new .bimm-section__head h2 {
+    font-size: clamp(22px, 2.6vw, 28px);
+}
+
+body.theme-new .bimm-category-grid {
+    gap: 8px;
+}
+
+body.theme-new .bimm-category {
+    min-height: 94px;
+    padding: 12px;
+    border-radius: 7px;
+}
+
+body.theme-new .bimm-category:hover,
+body.theme-new .bimm-product:hover,
+body.theme-new .bimm-seller:hover {
+    transform: none;
+    box-shadow: 0 2px 9px rgb(0 0 0 / .05);
+}
+
+body.theme-new .bimm-product-grid {
+    gap: 18px 14px;
+}
+
+body.theme-new .bimm-product {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+body.theme-new .bimm-product__image {
+    aspect-ratio: 1 / 1;
+    border: 1px solid var(--temu-line);
+    border-radius: 8px;
+}
+
+body.theme-new .bimm-product__body {
+    padding: 9px 2px 0;
+}
+
+body.theme-new .bimm-product h3 {
+    min-height: 36px;
+    margin: 5px 0 8px;
+}
+
+body.theme-new .bimm-product__bottom {
+    justify-content: flex-start;
+}
+
+body.theme-new .bimm-product__price {
+    font-size: 17px;
+}
+
+body.theme-new .bimm-section--sale {
+    padding: 0 0 4px;
+    border: 0;
+    border-top: 1px solid #f1ddd4;
+    border-radius: 0;
+    background: transparent;
+}
+
+body.theme-new .bimm-section--sale .bimm-section__head {
+    padding-top: 24px;
+}
+
+body.theme-new .bimm-seller-grid {
+    gap: 8px;
+}
+
+body.theme-new .bimm-seller {
+    border-radius: 7px;
+}
+
+@media (max-width: 900px) {
+    body.theme-new .bimm-hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.theme-new .bimm-hero__visual {
+        max-width: 480px;
+    }
+}
+
+@media (max-width: 780px) {
+    body.theme-new .bimm-main {
+        padding-top: 14px;
+    }
+
+    body.theme-new .bimm-hero {
+        gap: 24px;
+        padding: 28px 20px;
+    }
+
+    body.theme-new .bimm-section {
+        margin-top: 32px;
+    }
+
+    body.theme-new .bimm-category {
+        min-height: 88px;
+        padding: 10px;
+    }
+}
+
+/* Final compact discovery override. Keep the first screen focused on products. */
+body.theme-new .bimm-hero--compact {
+    display: grid;
+    grid-template-columns: minmax(0, .95fr) minmax(360px, 1.05fr);
+    align-items: center;
+    gap: 32px;
+    min-height: 0;
+    padding: 28px 40px;
+    border: 1px solid var(--temu-line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: none;
+}
+
+body.theme-new .bimm-hero--compact .bimm-hero__content {
+    max-width: 520px;
+}
+
+body.theme-new .bimm-hero--compact .bimm-kicker {
+    margin-bottom: 10px;
+}
+
+body.theme-new .bimm-hero--compact h1 {
+    max-width: 520px;
+    margin: 0;
+    font-size: clamp(28px, 3.5vw, 42px);
+    line-height: 1.05;
+    letter-spacing: -.045em;
+}
+
+body.theme-new .bimm-hero--compact p {
+    max-width: 460px;
+    margin: 10px 0 0;
+    font-size: 14px;
+}
+
+body.theme-new .bimm-hero--compact .bimm-search--hero {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    body.theme-new .bimm-hero--compact {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 18px;
+    }
+}
+
+@media (max-width: 780px) {
+    body.theme-new .bimm-hero--compact {
+        display: block;
+        padding: 24px 20px;
+    }
+
+    body.theme-new .bimm-hero--compact .bimm-search--hero {
+        margin-top: 18px;
+    }
+}

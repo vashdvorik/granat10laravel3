@@ -3,16 +3,13 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\ProductResource\Pages\CreateProduct;
-use App\Filament\Resources\SellerPackageResource\Pages\ListSellerPackages;
 use App\Filament\Resources\SellerResource\Pages\CreateSeller;
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Permission;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Seller;
 use App\Models\Settlement;
-use App\Models\SellerPackage;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,19 +31,10 @@ class AdministrationWorkflowTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_administrator_can_complete_seller_product_and_subscription_workflow(): void
+    public function test_administrator_can_complete_seller_and_product_workflow(): void
     {
         $administrator = $this->createAdministrator();
         $owner = User::factory()->create(['balance' => 500]);
-        $basePackage = Package::factory()->free()->create([
-            'id' => 1,
-            'name' => 'Базовый',
-        ]);
-        $paidPackage = Package::factory()->withLimits(10, 3)->create([
-            'name' => 'Профессиональный',
-            'price' => 100,
-            'duration_days' => 30,
-        ]);
         $category = Category::factory()->create(['name' => 'Тестовая категория']);
 
         $this->actingAs($administrator);
@@ -64,32 +52,9 @@ class AdministrationWorkflowTest extends TestCase
             ->assertNotified();
 
         $seller = Seller::query()->where('user_id', $owner->id)->firstOrFail();
-        $baseSubscription = SellerPackage::query()
-            ->where('seller_id', $seller->id)
-            ->where('package_id', $basePackage->id)
-            ->firstOrFail();
-
         $this->assertNotNull($seller->photo);
         Storage::disk('public')->assertExists($seller->photo);
-        $this->assertTrue($baseSubscription->is_active);
-
-        Livewire::test(ListSellerPackages::class)
-            ->callTableAction('assignPackage', null, [
-                'seller_id' => $seller->id,
-                'package_id' => $paidPackage->id,
-                'charge_balance' => true,
-                'reason' => 'Проверка полного сценария Filament',
-            ])
-            ->assertNotified();
-
-        $activeSubscription = SellerPackage::query()
-            ->where('seller_id', $seller->id)
-            ->where('package_id', $paidPackage->id)
-            ->firstOrFail();
-
-        $this->assertTrue((bool) $activeSubscription->is_active);
-        $this->assertFalse($baseSubscription->fresh()->is_active);
-        $this->assertSame(400.0, (float) $owner->fresh()->balance);
+        $this->assertSame(500.0, (float) $owner->fresh()->balance);
 
         Livewire::test(CreateProduct::class)
             ->fillForm([
@@ -120,21 +85,13 @@ class AdministrationWorkflowTest extends TestCase
         $this->get("/admin/sellers/{$seller->id}/edit")
             ->assertOk()
             ->assertSee('Товары')
-            ->assertSee('История тарифов');
+            ->assertDontSee('История тарифов');
 
         $this->get("/admin/products/{$product->id}/edit")
             ->assertOk()
             ->assertSee('Изображения');
 
-        $this->get('/admin/activity-log')
-            ->assertOk()
-            ->assertSee('Административное назначение тарифа');
-
-        $this->assertDatabaseHas('activity_log', [
-            'log_name' => 'packages',
-            'description' => 'Административное назначение тарифа',
-            'causer_id' => $administrator->id,
-        ]);
+        $this->get('/admin/activity-log')->assertOk();
     }
 
     private function createAdministrator(): User

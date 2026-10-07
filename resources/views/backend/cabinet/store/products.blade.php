@@ -1,24 +1,12 @@
 ﻿{{-- КАТАЛОГ ТОВАРОВ --}}
 
 @extends('backend.cabinet.layout_cabinet')
-@inject('sellerPackageStatusService', 'App\Services\SellerPackageStatusService')
 
 @section('content_cabinet')
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
 <div class="contents">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         @if(!$seller)
             @include('backend.cabinet.store.nostore')
         @else
@@ -49,28 +37,10 @@
                             @include('backend.cabinet.partials.seller-state-card', [
                                 'sellerCabinetState' => $sellerCabinetState,
                                 'seller' => $seller,
-                                'showRenewalDetails' => false,
                                 'showPrimaryAction' => false,
                             ])
                         @endisset
 
-                        {{-- Уведомление если товары скрыты от покупателей --}}
-                        @php
-                            $packageStatus = $sellerPackageStatusService->getStatus($seller);
-                        @endphp
-                        @if(!$packageStatus['has_package'])
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="alert-big alert alert-danger" role="alert">
-                                        <div class="alert-content">
-                                            <h6 class="alert-heading">Ваши товары скрыты от покупателей</h6>
-                                            <p>У вас нет активного пакета. Все товары недоступны для просмотра на сайте. 
-                                            <a href="{{ route('account.packages.index') }}" class="alert-link">Выберите пакет</a>, чтобы ваши товары снова стали видны покупателям.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     <div class="seller-products-layout">
 
                         {{-- ФИЛЬТРЫ СВЕРХУ КАРТОЧЕК --}}
@@ -161,7 +131,6 @@
                                                     $productCabinetState = $product->cabinet_state;
                                                     $nextStepUrl = match ($productCabinetState->primaryAction) {
                                                         'add_images', 'remove_vip' => route('account.store.products.edit', $product->id),
-                                                        'choose_package', 'choose_visible_products' => route('account.packages.index'),
                                                         default => null,
                                                     };
                                                 @endphp
@@ -180,7 +149,7 @@
                                                                 <div class="product-item__image seller-product-card__media">
                                                                     {{-- Статусы: VIP и Активность --}}
                                                                     <div class="position-absolute top-0 start-0 m-2 d-flex gap-2 seller-product-card__badges">
-                                                                        @if($product->is_vip)
+                                                                        @if($product->isVipActive())
                                                                             <span class="seller-product-card__badge seller-product-card__badge--vip">
                                                                                 <i class="uil uil-star"></i> VIP
                                                                             </span>

@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderStatusHistory;
-use App\Models\Package;
+use App\Models\Product;
 use App\Models\Seller;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,24 +15,22 @@ class BackendEventJournalControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_seller_event_journal_shows_package_activity_and_order_history(): void
+    public function test_seller_event_journal_shows_product_activity_and_order_history(): void
     {
         $user = User::factory()->create();
         $seller = Seller::factory()->create(['user_id' => $user->id]);
-        $package = Package::factory()->create(['name' => 'Start']);
         $order = Order::factory()->create([
             'seller_id' => $seller->id,
             'status' => OrderStatus::Accepted,
         ]);
 
-        activity('packages')
+        $product = Product::factory()->create(['seller_id' => $seller->id]);
+
+        activity('products')
             ->causedBy($user)
-            ->performedOn($package)
-            ->withProperties([
-                'seller_id' => $seller->id,
-                'package_name' => 'Start',
-            ])
-            ->log('Package activated for test');
+            ->performedOn($product)
+            ->withProperties(['seller_id' => $seller->id])
+            ->log('Product activity for test');
 
         OrderStatusHistory::factory()->create([
             'order_id' => $order->id,
@@ -46,7 +44,7 @@ class BackendEventJournalControllerTest extends TestCase
             ->assertOk()
             ->assertSee('events-page', false)
             ->assertSee('event-timeline__item', false)
-            ->assertSee('Package activated for test')
+            ->assertSee('Product activity for test')
             ->assertSee($order->number)
             ->assertSee('Customer contacted');
     }
@@ -57,21 +55,21 @@ class BackendEventJournalControllerTest extends TestCase
         $seller = Seller::factory()->create(['user_id' => $user->id]);
         $foreignUser = User::factory()->create();
         $foreignSeller = Seller::factory()->create(['user_id' => $foreignUser->id]);
-        $package = Package::factory()->create();
         $ownOrder = Order::factory()->create(['seller_id' => $seller->id]);
         $foreignOrder = Order::factory()->create(['seller_id' => $foreignSeller->id]);
 
-        activity('packages')
-            ->causedBy($user)
-            ->performedOn($package)
-            ->withProperties(['seller_id' => $seller->id])
-            ->log('Own package event');
+        $ownProduct = Product::factory()->create(['seller_id' => $seller->id]);
+        $foreignProduct = Product::factory()->create(['seller_id' => $foreignSeller->id]);
 
-        activity('packages')
+        activity('products')
+            ->causedBy($user)
+            ->performedOn($ownProduct)
+            ->log('Own product event');
+
+        activity('products')
             ->causedBy($foreignUser)
-            ->performedOn($package)
-            ->withProperties(['seller_id' => $foreignSeller->id])
-            ->log('Foreign package event');
+            ->performedOn($foreignProduct)
+            ->log('Foreign product event');
 
         OrderStatusHistory::factory()->create([
             'order_id' => $ownOrder->id,
@@ -88,9 +86,9 @@ class BackendEventJournalControllerTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.store.events.index'))
             ->assertOk()
-            ->assertSee('Own package event')
+            ->assertSee('Own product event')
             ->assertSee('Own order event')
-            ->assertDontSee('Foreign package event')
+            ->assertDontSee('Foreign product event')
             ->assertDontSee('Foreign order event');
     }
 

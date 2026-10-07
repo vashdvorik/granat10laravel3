@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -34,16 +32,9 @@ class ProductControllerTest extends TestCase
 
     private function createVisibleProduct(array $attrs = []): Product
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-            'end_date'   => null,
-        ]);
 
         return Product::factory()->create(array_merge([
             'seller_id'   => $seller->id,
@@ -101,20 +92,19 @@ class ProductControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_product_detail_returns_404_when_seller_package_expired(): void
+    public function test_product_detail_is_visible_for_seller_without_any_package(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
+        $product = $this->createVisibleProduct();
+
+        $this->get(route('product.show', $product->alias))->assertOk();
+    }
+
+    public function test_product_detail_returns_404_when_moderation_is_not_approved(): void
+    {
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-            'end_date'   => now()->subDay()->toDateString(), // просрочен
-        ]);
-
-        $product = Product::factory()->create([
+        $product = Product::factory()->draft()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category->id,
             'is_active'   => true,
@@ -229,9 +219,6 @@ class ProductControllerTest extends TestCase
     {
         $product = $this->createVisibleProduct(['can_order' => true]);
         $product->seller->update(['can_order' => true]);
-        $product->seller->activePackage()->update([
-            'package_id' => Package::factory()->create(['has_order_system' => true])->id,
-        ]);
 
         $this->get(route('product.show', $product->alias))
             ->assertOk()
@@ -251,9 +238,6 @@ class ProductControllerTest extends TestCase
             'can_order' => true,
             'delivery_enabled' => true,
             'delivery_terms' => "Доставка по городу.\nСтоимость согласовывается с продавцом.",
-        ]);
-        $product->seller->activePackage()->update([
-            'package_id' => Package::factory()->create(['has_order_system' => true])->id,
         ]);
 
         $this->get(route('product.show', $product->alias))

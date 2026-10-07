@@ -58,8 +58,8 @@
 
     @if($product->view_state->primaryAction !== \App\Enums\ProductPrimaryAction::Edit)
         <a href="{{ route('account.store.products.edit', $product->id) }}"
-           class="btn btn-primary btn-default btn-squared border-0 flex-fill">
-            Изменить
+           class="btn btn-light btn-default btn-squared flex-fill">
+           Редактировать
         </a>
     @endif
 </div>

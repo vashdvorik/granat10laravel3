@@ -3,37 +3,19 @@
 @extends('backend.cabinet.layout_cabinet')
 
 @section('content_cabinet')
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
 <div class="contents store-edit-page">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         @if(!$seller)
             @include('backend.cabinet.store.nostore')
         @else
-            @php
-                $activePackage = $seller->activePackage();
-                $hasWebsiteLink = $activePackage && $activePackage->package && $activePackage->package->has_website_link;
-                $hasSocialLinks = $activePackage && $activePackage->package && $activePackage->package->has_social_links;
-                $hasOrderSystem = $activePackage && $activePackage->package && $activePackage->package->has_order_system;
-            @endphp
-
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcrumb-main">
                         <h4 class="breadcrumb-title">Редактирование магазина</h4>
                         <div class="breadcrumb-action justify-content-center flex-wrap">
-                            <a href="{{ route('account.store.index') }}" class="btn btn-sm btn-secondary">
+                            <a href="{{ route('account.index') }}" class="btn btn-sm btn-secondary">
                                 <i class="uil uil-arrow-left"></i> Назад
                             </a>
                         </div>
@@ -132,15 +114,11 @@
                                 <h6 class="fw-500 mb-0">Заказы и доставка</h6>
                             </div>
                             <div class="card-body">
-                                @if(!$hasOrderSystem)
-                                    <div class="alert alert-warning">Текущий тариф не поддерживает заказы через сайт.</div>
-                                @endif
                                 <div class="form-check form-switch mb-3">
                                     <input type="hidden" name="can_order" value="0">
                                     <input class="form-check-input @error('can_order') is-invalid @enderror"
                                            type="checkbox" id="can_order" name="can_order" value="1"
-                                           @checked(old('can_order', $seller->can_order))
-                                           @disabled(!$hasOrderSystem)>
+                                           @checked(old('can_order', $seller->can_order))>
                                     <label class="form-check-label" for="can_order">Принимать заказы через сайт</label>
                                     <small class="text-muted d-block">На карточках разрешённых товаров появится форма заказа.</small>
                                     @error('can_order')<div class="text-danger small">{{ $message }}</div>@enderror
@@ -149,15 +127,13 @@
                                     <input type="hidden" name="delivery_enabled" value="0">
                                     <input class="form-check-input" type="checkbox"
                                            id="delivery_enabled" name="delivery_enabled" value="1"
-                                           @checked(old('delivery_enabled', $seller->delivery_enabled))
-                                           @disabled(!$hasOrderSystem)>
+                                           @checked(old('delivery_enabled', $seller->delivery_enabled))>
                                     <label class="form-check-label" for="delivery_enabled">Предлагать доставку</label>
                                     <small class="text-muted d-block">Доставка появится только у товаров, где она также разрешена.</small>
                                 </div>
                                 <label for="delivery_terms" class="form-label">Условия доставки</label>
                                 <textarea class="form-control @error('delivery_terms') is-invalid @enderror"
-                                          id="delivery_terms" name="delivery_terms" rows="4" maxlength="2000"
-                                          @disabled(!$hasOrderSystem)>{{ old('delivery_terms', $seller->delivery_terms) }}</textarea>
+                                          id="delivery_terms" name="delivery_terms" rows="4" maxlength="2000">{{ old('delivery_terms', $seller->delivery_terms) }}</textarea>
                                 <small class="text-muted">Например: районы доставки, стоимость и сроки.</small>
                                 @error('delivery_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 <hr>
@@ -189,18 +165,10 @@
                                 ])
 
 
-                                <div class="store-edit-visibility-note">
-                                    <i class="uil uil-info-circle"></i>
-                                    <div>
-                                        <strong>Заполнить можно сейчас.</strong>
-                                        <span>Google Maps показывается всегда. Сайт и соцсети сохраняются в профиле, но покупатели увидят их только на тарифе, где эти возможности доступны.</span>
-                                    </div>
-                                </div>
-
                                 <div class="store-edit-contact-group">
                                     <div class="store-edit-contact-group__head">
                                         <h6>Ссылки магазина</h6>
-                                        <p>Адрес на карте помогает покупателю понять, где находится продавец. Сайт показывается по тарифу.</p>
+                                        <p>Адрес на карте помогает покупателю понять, где находится продавец.</p>
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-md-6">
@@ -214,7 +182,7 @@
                                                    value="{{ old('link_map', $seller->link_map) }}"
                                                    maxlength="2000"
                                                    placeholder="https://maps.app.goo.gl/pP9mUgkPdA5BnkF25">
-                                            <small class="text-muted">Показывается покупателям на всех тарифах.</small>
+                                            <small class="text-muted">Показывается покупателям.</small>
                                             @error('link_map')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -231,13 +199,7 @@
                                                    value="{{ old('link', $seller->link) }}"
                                                    maxlength="191"
                                                    placeholder="https://example.com">
-                                            <small class="text-muted">
-                                                @if($hasWebsiteLink)
-                                                    Показывается покупателям на текущем тарифе.
-                                                @else
-                                                    Можно сохранить сейчас; покупатели увидят сайт после смены тарифа.
-                                                @endif
-                                            </small>
+                                            <small class="text-muted">Показывается покупателям.</small>
                                             @error('link')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -248,7 +210,7 @@
                                 <div class="store-edit-contact-group">
                                     <div class="store-edit-contact-group__head">
                                         <h6>Соцсети и мессенджеры</h6>
-                                        <p>Эти поля нужны для связи с магазином. Они не отключаются при заполнении, но публичная видимость зависит от тарифа.</p>
+                                        <p>Эти поля нужны для связи с магазином.</p>
                                     </div>
                                     <div class="row g-3">
                                         <div class="col-md-4">
@@ -299,9 +261,6 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    @unless($hasSocialLinks)
-                                        <div class="store-edit-contact-note">Соцсети сохранятся в кабинете, но будут скрыты от покупателей до смены тарифа.</div>
-                                    @endunless
                                 </div>
                             </div>
                         </div>
@@ -336,55 +295,10 @@
                                 @enderror
                             </div>
                         </div>
-                        @if($activePackage && $activePackage->package)
-                            <div class="card mb-25 store-edit-card store-edit-tariff-card">
-                                <div class="card-header">
-                                    <h6 class="fw-500">Текущий тариф</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center mb-3">
-                                        <h5 class="text-primary">{{ $activePackage->package->name }}</h5>
-                                        @if($activePackage->package->price > 0)
-                                            <div class="text-success fw-bold">{{ number_format($activePackage->package->price, 0) }} руб.</div>
-                                        @else
-                                            <div class="text-muted">Бесплатно</div>
-                                        @endif
-                                    </div>
-
-                                    <div class="list-group list-group-flush">
-                                        <div class="list-group-item px-0 py-2 border-0">
-                                            @if($activePackage->package->has_website_link)
-                                                <i class="uil uil-check-circle text-success"></i>
-                                                <small class="text-success">Ссылка на сайт</small>
-                                            @else
-                                                <i class="uil uil-times-circle text-muted"></i>
-                                                <small class="text-muted">Ссылка на сайт</small>
-                                            @endif
-                                        </div>
-
-                                        <div class="list-group-item px-0 py-2 border-0">
-                                            @if($activePackage->package->has_social_links)
-                                                <i class="uil uil-check-circle text-success"></i>
-                                                <small class="text-success">Соцсети</small>
-                                            @else
-                                                <i class="uil uil-times-circle text-muted"></i>
-                                                <small class="text-muted">Соцсети</small>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    @if(!$hasWebsiteLink || !$hasSocialLinks)
-                                        <a href="{{ route('account.packages.index') }}" class="btn btn-warning btn-sm w-100 mt-3">
-                                            <i class="uil uil-arrow-circle-up"></i> Обновить тариф
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        @endif
                     </div>
                 </div>
                 <div class="store-edit-submit-bar">
-                    <a href="{{ route('account.store.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('account.index') }}" class="btn btn-secondary">
                         <i class="uil uil-times"></i> Отмена
                     </a>
                     <button type="submit" class="btn btn-primary">

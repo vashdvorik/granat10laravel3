@@ -115,7 +115,7 @@
             <i class="uil uil-edit"></i> Исправить товар
         </a>
     @elseif($state->primaryAction === \App\Enums\ProductPrimaryAction::ResolveUnavailable)
-        <a href="{{ route('account.packages.index') }}"
+        <a href="{{ route('account.store.products.edit', $product) }}"
            class="btn btn-sm btn-warning btn-default btn-squared w-100">
             <i class="uil uil-exclamation-triangle"></i> Устранить причину
         </a>

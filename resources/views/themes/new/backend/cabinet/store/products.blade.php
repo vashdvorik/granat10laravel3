@@ -1,21 +1,8 @@
 ﻿{{-- КАТАЛОГ ТОВАРОВ --}}
 
 @extends('backend.cabinet.layout_cabinet')
-@inject('sellerPackageStatusService', 'App\Services\SellerPackageStatusService')
 
 @section('content_cabinet')
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
 
 <div class="contents">
     <div class="container-fluid">
@@ -25,7 +12,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcrumb-main">
-                        <h4 class="breadcrumb-title">Каталог товаров</h4>
+                        <h4 class="breadcrumb-title">Товары магазина</h4>
                         <div class="breadcrumb-action justify-content-center flex-wrap">
                             <a href="{{ route('account.store.products.create') }}" class="btn btn-sm btn-primary">
                                 <i class="uil uil-plus"></i> Добавить товар
@@ -49,36 +36,18 @@
                             @include('backend.cabinet.partials.seller-state-card', [
                                 'sellerCabinetState' => $sellerCabinetState,
                                 'seller' => $seller,
-                                'showRenewalDetails' => false,
                                 'showPrimaryAction' => false,
                             ])
                         @endisset
 
-                        {{-- Уведомление если товары скрыты от покупателей --}}
-                        @php
-                            $packageStatus = $sellerPackageStatusService->getStatus($seller);
-                        @endphp
-                        @if(!$packageStatus['has_package'])
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="alert-big alert alert-danger" role="alert">
-                                        <div class="alert-content">
-                                            <h6 class="alert-heading">Ваши товары скрыты от покупателей</h6>
-                                            <p>У вас нет активного пакета. Все товары недоступны для просмотра на сайте. 
-                                            <a href="{{ route('account.packages.index') }}" class="alert-link">Выберите пакет</a>, чтобы ваши товары снова стали видны покупателям.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     <div class="seller-products-layout">
 
                         {{-- ФИЛЬТРЫ СВЕРХУ КАРТОЧЕК --}}
                         <aside class="seller-products-filters">
                             <div class="orders-toolbar seller-products-toolbar">
                                 <div class="seller-products-toolbar__info">
-                                    <strong>Фильтр по товарам</strong>
-                                    <span>Показываем товары только этого магазина</span>
+                                    <strong>Товары магазина</strong>
+                                    <span>Фильтруйте товары по текущему статусу</span>
                                 </div>
                                 <div class="orders-status-filter seller-products-status-filter">
                                     <a href="{{ route('account.store.products.index') }}"
@@ -161,7 +130,6 @@
                                                     $productCabinetState = $product->cabinet_state;
                                                     $nextStepUrl = match ($productCabinetState->primaryAction) {
                                                         'add_images', 'remove_vip' => route('account.store.products.edit', $product->id),
-                                                        'choose_package', 'choose_visible_products' => route('account.packages.index'),
                                                         default => null,
                                                     };
                                                 @endphp
@@ -180,7 +148,7 @@
                                                                 <div class="product-item__image seller-product-card__media">
                                                                     {{-- Статусы: VIP и Активность --}}
                                                                     <div class="position-absolute top-0 start-0 m-2 d-flex gap-2 seller-product-card__badges">
-                                                                        @if($product->is_vip)
+                                                                        @if($product->isVipActive())
                                                                             <span class="seller-product-card__badge seller-product-card__badge--vip">
                                                                                 <i class="uil uil-star"></i> VIP
                                                                             </span>
@@ -283,8 +251,8 @@
 
                                                                             @if($product->view_state->primaryAction !== \App\Enums\ProductPrimaryAction::Edit)
                                                                             <a href="{{ route('account.store.products.edit', $product->id) }}" 
-                                                                               class="btn btn-primary btn-default btn-squared border-0 flex-fill">
-                                                                                Изменить
+                                                                               class="btn btn-light btn-default btn-squared flex-fill">
+                                                                                Редактировать
                                                                             </a>
                                                                             @endif
                                                                         </div>
@@ -331,8 +299,8 @@
                                                             </div>
                                                         @else
                                                         <i class="uil uil-box fs-40 text-muted mb-3 d-block"></i>
-                                                        <h5 class="text-muted mb-3">У вас пока нет товаров</h5>
-                                                        <p class="text-muted mb-4">Добавьте первый товар, чтобы начать продажи</p>
+                                                        <h5 class="text-muted mb-3">В магазине пока нет товаров</h5>
+                                                        <p class="text-muted mb-4">Добавьте первую позицию, чтобы покупатели могли её найти и заказать.</p>
                                                         <a href="{{ route('account.store.products.create') }}" 
                                                            class="btn btn-primary">
                                                             <i class="uil uil-plus"></i> Добавить первый товар

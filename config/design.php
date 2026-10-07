@@ -14,6 +14,7 @@ return [
     'themes' => [
         'legacy' => 'Старый дизайн',
         'new' => 'Новый дизайн',
+        'joom' => 'Joom-style витрина',
     ],
 
     'default' => env('DESIGN_DEFAULT', 'legacy'),

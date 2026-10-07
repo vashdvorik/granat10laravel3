@@ -20,19 +20,10 @@ class SellerController extends Controller
     /**
      * Показывает магазин (общая информация)
      */
-    public function index(SellerCabinetStateService $sellerCabinetStateService)
+    public function index()
     {
-        $user = Auth::user();
-        $seller = $user->seller;
-        
-        if (!$seller) {
-            return redirect()->route('account.store.create')
-                ->with('info', 'Создайте магазин для начала работы');
-        }
-        
-        $sellerCabinetState = $sellerCabinetStateService->make($seller);
-
-        return view('backend.cabinet.store.index', compact('user', 'seller', 'sellerCabinetState'));
+        // Общая информация о магазине теперь на главной странице кабинета; адрес оставлен для старых ссылок.
+        return redirect()->route('account.index');
     }
 
     /**
@@ -90,7 +81,7 @@ class SellerController extends Controller
             $request->file('logo')
         );
 
-        return redirect()->route('account.store.index')
+        return redirect()->route('account.index')
             ->with('success', 'Магазин обновлён');
     }
     /**

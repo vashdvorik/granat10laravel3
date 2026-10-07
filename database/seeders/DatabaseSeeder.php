@@ -20,12 +20,10 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             //CategoriesTableSeeder::class,
             CategoriesJsonSeeder::class,
-            PackagesTableSeeder::class,
             SellersTableSeeder::class,
             SellerSettlementBackfillSeeder::class,
             ProductsTableSeeder::class,
             ImagesTableSeeder::class,
-            SellerPackagesTableSeeder::class,
         ]);
     }
 }

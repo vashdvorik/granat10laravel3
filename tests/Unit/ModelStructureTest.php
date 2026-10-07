@@ -4,10 +4,8 @@ namespace Tests\Unit;
 
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,8 +14,6 @@ use PHPUnit\Framework\TestCase;
  *
  * @covers \App\Models\Product
  * @covers \App\Models\Seller
- * @covers \App\Models\Package
- * @covers \App\Models\SellerPackage
  * @covers \App\Models\Category
  * @covers \App\Models\Image
  */
@@ -77,61 +73,11 @@ class ModelStructureTest extends TestCase
         $seller = new Seller;
         $casts = $seller->getCasts();
 
-        $this->assertArrayHasKey('auto_renew', $casts);
-        $this->assertSame('boolean', $casts['auto_renew']);
-    }
-
-    // =========================================================================
-    // Package
-    // =========================================================================
-
-    public function test_package_casts_boolean_features(): void
-    {
-        $package = new Package;
-        $casts = $package->getCasts();
-
-        foreach (['has_website_link', 'has_social_links', 'has_order_system', 'is_active'] as $field) {
-            $this->assertArrayHasKey($field, $casts, "Package должен кастить '{$field}'");
+        foreach (['can_order', 'delivery_enabled', 'telegram_notifications_enabled'] as $field) {
+            $this->assertArrayHasKey($field, $casts);
             $this->assertSame('boolean', $casts[$field]);
         }
-
-        $this->assertSame('decimal:2', $casts['price']);
-        $this->assertSame('integer', $casts['duration_days']);
-        $this->assertSame('integer', $casts['active_products_limit']);
-        $this->assertSame('integer', $casts['vip_products_limit']);
-    }
-
-    public function test_package_fillable_contains_limit_fields(): void
-    {
-        $package = new Package;
-        $fillable = $package->getFillable();
-
-        $this->assertContains('active_products_limit', $fillable);
-        $this->assertContains('vip_products_limit', $fillable);
-    }
-
-    // =========================================================================
-    // SellerPackage
-    // =========================================================================
-
-    public function test_seller_package_casts_dates(): void
-    {
-        $sp = new SellerPackage;
-        $casts = $sp->getCasts();
-
-        $this->assertArrayHasKey('start_date', $casts, 'start_date должен быть кастирован');
-        $this->assertArrayHasKey('end_date', $casts, 'end_date должен быть кастирован');
-        $this->assertSame('boolean', $casts['is_active']);
-    }
-
-    public function test_seller_package_fillable(): void
-    {
-        $sp = new SellerPackage;
-        $fillable = $sp->getFillable();
-
-        foreach (['seller_id', 'package_id', 'start_date', 'end_date', 'is_active'] as $field) {
-            $this->assertContains($field, $fillable);
-        }
+        $this->assertArrayNotHasKey('auto_renew', $casts);
     }
 
     // =========================================================================
@@ -180,6 +126,8 @@ class ModelStructureTest extends TestCase
         $this->assertFalse(method_exists(Seller::class, 'canActivateProduct'));
         $this->assertFalse(method_exists(Seller::class, 'checkProductLimits'));
         $this->assertFalse(method_exists(Seller::class, 'getPackageStatus'));
+        $this->assertFalse(method_exists(Seller::class, 'activePackage'));
+        $this->assertFalse(method_exists(Seller::class, 'sellerPackages'));
     }
 
     public function test_seller_has_get_cached_by_alias_method(): void

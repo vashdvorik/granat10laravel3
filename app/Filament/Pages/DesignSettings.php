@@ -53,6 +53,7 @@ class DesignSettings extends Page implements HasForms
                     ->descriptions([
                         'legacy' => 'Текущие Blade-шаблоны и ассеты сайта.',
                         'new' => 'Новые шаблоны с автоматическим возвратом к старому дизайну для ещё не перенесённых страниц.',
+                        'joom' => 'Плотная e-commerce витрина с акцентом на подборки, скидки и быстрый заказ.',
                     ])
                     ->required(),
                 Forms\Components\Repeater::make('catalog_banners')

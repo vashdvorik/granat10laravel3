@@ -12,7 +12,6 @@
         $cabinetProducts = html_entity_decode('&#1058;&#1086;&#1074;&#1072;&#1088;&#1099;');
         $cabinetOrders = html_entity_decode('&#1047;&#1072;&#1082;&#1072;&#1079;&#1099;');
         $cabinetStats = html_entity_decode('&#1040;&#1085;&#1072;&#1083;&#1080;&#1090;&#1080;&#1082;&#1072;');
-        $cabinetPackages = html_entity_decode('&#1058;&#1072;&#1088;&#1080;&#1092;&#1099;');
         $cabinetProfile = html_entity_decode('&#1055;&#1088;&#1086;&#1092;&#1080;&#1083;&#1100;');
         $cabinetSecurity = html_entity_decode('&#1041;&#1077;&#1079;&#1086;&#1087;&#1072;&#1089;&#1085;&#1086;&#1089;&#1090;&#1100;');
         $cabinetMarketplaceBack = html_entity_decode('&#1042;&#1077;&#1088;&#1085;&#1091;&#1090;&#1100;&#1089;&#1103; &#1074; &#1084;&#1072;&#1088;&#1082;&#1077;&#1090;&#1087;&#1083;&#1077;&#1081;&#1089;');
@@ -21,24 +20,78 @@
     <title>{{ trim($__env->yieldContent('title', $cabinetDefaultTitle)) }}</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/theme-cabinet-new.css') }}">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/bootstrap/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/theme-cabinet-shared.css') }}?v={{ filemtime(public_path('css/theme-cabinet-shared.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/theme-cabinet-new.css') }}?v={{ filemtime(public_path('css/theme-cabinet-new.css')) }}">
     @stack('styles')
 </head>
 <body class="cabinet-new">
 <div class="cabinet-shell">
     <header class="cabinet-topbar">
         <a class="cabinet-brand" href="{{ route('account.index') }}">
-            <img class="cabinet-brand__logo" src="{{ asset('img/logo.png') }}" alt="BIMM">
+            <span class="cabinet-brand__mark" aria-hidden="true"></span>
+            <span class="cabinet-brand__copy">
+                <span class="cabinet-brand__title">BIMM</span>
+                <span class="cabinet-brand__subtitle">Seller studio</span>
+            </span>
         </a>
 
         <div class="cabinet-topbar__right">
             <a href="{{ route('home') }}" target="_blank" rel="noopener">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ $cabinetOpenSite }}
+                <i class="fa-solid fa-arrow-up-right-from-square"></i><span class="cabinet-label">{{ $cabinetOpenSite }}</span>
             </a>
+            @auth
+                @php
+                    $cabinetNotifications = auth()->user()->notifications()->latest()->limit(8)->get();
+                    $unreadNotificationsCount = auth()->user()->unreadNotifications()->count();
+                @endphp
+                <div class="dropdown cabinet-bell">
+                    <button type="button" class="cabinet-bell__toggle" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Уведомления">
+                        <i class="fa-regular fa-bell"></i>
+                        @if($unreadNotificationsCount > 0)
+                            <span class="cabinet-bell__badge">{{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}</span>
+                        @endif
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end cabinet-bell__menu">
+                        <div class="cabinet-bell__head">Уведомления</div>
+                        <div class="cabinet-bell__list">
+                            @forelse($cabinetNotifications as $notification)
+                                <a class="cabinet-bell__item {{ $notification->read_at ? '' : 'cabinet-bell__item--unread' }}"
+                                   href="{{ route('account.notifications.read', $notification->id) }}">
+                                    <strong>{{ $notification->data['subject'] ?? $notification->data['product_name'] ?? 'Уведомление' }}</strong>
+                                    <span>{{ $notification->data['title'] ?? $notification->data['status_label'] ?? 'Статус изменён' }}</span>
+                                    @if(!empty($notification->data['status_label']) && !empty($notification->data['title']))
+                                        <span>{{ $notification->data['status_label'] }}</span>
+                                    @endif
+                                    @if(!empty($notification->data['comment']))
+                                        <span>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 80) }}</span>
+                                    @endif
+                                    <small>{{ $notification->created_at->diffForHumans() }}</small>
+                                </a>
+                            @empty
+                                <div class="cabinet-bell__empty">Уведомлений пока нет</div>
+                            @endforelse
+                        </div>
+                        @if($unreadNotificationsCount > 0)
+                            <form method="POST" action="{{ route('account.notifications.read-all') }}" class="cabinet-bell__footer">
+                                @csrf
+                                <button type="submit">Отметить все прочитанными</button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            @endauth
             <span class="cabinet-user">
                 <span class="cabinet-user__avatar"><i class="fa-regular fa-user"></i></span>
-                {{ $user?->name ?: $user?->email ?: $cabinetGuestLabel }}
+                <span class="cabinet-user__name">{{ $user?->name ?: $user?->email ?: $cabinetGuestLabel }}</span>
             </span>
+            @auth
+                <a class="cabinet-logout" href="{{ route('logout') }}" title="Выйти из кабинета">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i><span class="cabinet-label">Выйти</span>
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+            @endauth
         </div>
     </header>
 
@@ -47,12 +100,9 @@
             <p class="cabinet-sidebar__label">{{ $cabinetWorkspace }}</p>
             <nav>
                 <a class="{{ request()->routeIs('account.index') ? 'active' : '' }}" href="{{ route('account.index') }}">
-                    <i class="fa-solid fa-grid-2"></i><span>{{ $cabinetOverview }}</span>
+                    <i class="fa-solid fa-table-cells-large"></i><span>{{ $cabinetOverview }}</span>
                 </a>
                 @if($seller)
-                    <a class="{{ request()->routeIs('account.store.index') ? 'active' : '' }}" href="{{ route('account.store.index') }}">
-                        <i class="fa-solid fa-store"></i><span>{{ $cabinetStore }}</span>
-                    </a>
                     <a class="{{ request()->routeIs('account.store.products*') ? 'active' : '' }}" href="{{ route('account.store.products.index') }}">
                         <i class="fa-solid fa-boxes-stacked"></i><span>{{ $cabinetProducts }}</span>
                     </a>
@@ -62,11 +112,8 @@
                     <a class="{{ request()->routeIs('account.stats') ? 'active' : '' }}" href="{{ route('account.stats') }}">
                         <i class="fa-solid fa-chart-line"></i><span>{{ $cabinetStats }}</span>
                     </a>
-                    <a class="{{ request()->routeIs('account.packages*') ? 'active' : '' }}" href="{{ route('account.packages.index') }}">
-                        <i class="fa-solid fa-gem"></i><span>{{ $cabinetPackages }}</span>
-                    </a>
                 @endif
-                <a class="{{ request()->routeIs('account.user*') ? 'active' : '' }}" href="{{ route('account.user.index') }}">
+                <a class="{{ request()->routeIs('account.user.index', 'account.user.edit', 'account.user.update') ? 'active' : '' }}" href="{{ route('account.user.index') }}">
                     <i class="fa-regular fa-circle-user"></i><span>{{ $cabinetProfile }}</span>
                 </a>
                 <a class="{{ request()->routeIs('account.user.change_password') ? 'active' : '' }}" href="{{ route('account.user.change_password') }}">
@@ -81,10 +128,16 @@
         <main class="cabinet-content">
             <div class="cabinet-content__inner">
                 @if(session('success'))
-                    <div class="alert" style="margin-bottom:18px">{{ session('success') }}</div>
+                    <div class="alert cabinet-flash cabinet-flash--success">{{ session('success') }}</div>
                 @endif
                 @if(session('error'))
-                    <div class="alert" style="margin-bottom:18px;background:#fff0ee;border-color:#f0cdca;color:#8b3d36">{{ session('error') }}</div>
+                    <div class="alert cabinet-flash cabinet-flash--error">{{ session('error') }}</div>
+                @endif
+                @if(session('warning'))
+                    <div class="alert cabinet-flash cabinet-flash--error">{{ session('warning') }}</div>
+                @endif
+                @if(session('info'))
+                    <div class="alert cabinet-flash cabinet-flash--success">{{ session('info') }}</div>
                 @endif
 
                 @yield('content_cabinet')
@@ -93,7 +146,30 @@
     </div>
 </div>
 
-<script src="{{ asset('cabinet/assets/vendor_assets/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ asset('cabinet/assets/vendor_assets/js/jquery/jquery-3.5.1.min.js') }}"></script>
+<script src="{{ asset('cabinet/assets/vendor_assets/js/bootstrap/popper.js') }}"></script>
+<script src="{{ asset('cabinet/assets/vendor_assets/js/bootstrap/bootstrap.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(function () {
+    $('a.cabinet-logout').on('click', function (e) {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Вы уверены?',
+            text: 'Вы действительно хотите выйти из кабинета?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff5a1f',
+            confirmButtonText: 'Выйти',
+            cancelButtonText: 'Отмена'
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                $('#logout-form').submit();
+            }
+        });
+    });
+});
+</script>
 <script>
 (function () {
     function updateCharacterCounter(field, counter, maxLength) {

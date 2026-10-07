@@ -16,8 +16,14 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(Request $request, SellerCabinetStateService $sellerCabinetStateService): View
+    public function index(Request $request, SellerCabinetStateService $sellerCabinetStateService): View|RedirectResponse
     {
+        if ($request->user()->seller === null) {
+            return redirect()
+                ->route('account.store.create')
+                ->with('error', 'Заказы появятся после создания магазина.');
+        }
+
         $this->authorize('viewAny', Order::class);
         $seller = $request->user()->seller;
         $status = $request->string('status')->toString();
@@ -85,34 +91,11 @@ class OrderController extends Controller
 
     private function orderIntakeStatus(Seller $seller): array
     {
-        $activePackage = $seller->activePackage();
-        $package = $activePackage?->package;
-
-        if (! $activePackage) {
-            return [
-                'enabled' => false,
-                'label' => 'Новые заказы недоступны',
-                'description' => 'Нет активного тарифа. Уже созданные заказы остаются в кабинете и доступны для обработки.',
-                'action' => route('account.packages.index'),
-                'action_label' => 'Выбрать тариф',
-            ];
-        }
-
-        if (! ($package?->has_order_system ?? false)) {
-            return [
-                'enabled' => false,
-                'label' => 'Тариф не принимает новые заказы',
-                'description' => 'История заказов сохраняется. Новые заказы через сайт появятся после перехода на тариф с заказами.',
-                'action' => route('account.packages.index'),
-                'action_label' => 'Сменить тариф',
-            ];
-        }
-
         if (! $seller->can_order) {
             return [
                 'enabled' => false,
                 'label' => 'Приём заказов выключен',
-                'description' => 'Тариф поддерживает заказы, но магазин выключил форму заказа в настройках.',
+                'description' => 'Магазин выключил форму заказа в настройках.',
                 'action' => route('account.store.edit', $seller),
                 'action_label' => 'Открыть настройки',
             ];

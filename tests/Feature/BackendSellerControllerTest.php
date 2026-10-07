@@ -2,9 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Package;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,14 +21,22 @@ class BackendSellerControllerTest extends TestCase
         Storage::fake('public');
     }
 
-    public function test_store_index_redirects_to_create_when_user_has_no_shop(): void
+    public function test_old_store_index_url_redirects_to_main_cabinet_page(): void
+    {
+        $user = User::factory()->create();
+        Seller::factory()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)->get(route('account.store.index'))
+            ->assertRedirect(route('account.index'));
+    }
+
+    public function test_main_cabinet_page_offers_to_create_shop_when_user_has_none(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('account.store.index'));
-
-        $response->assertRedirect(route('account.store.create'));
-        $response->assertSessionHas('info');
+        $this->actingAs($user)->get(route('account.index'))
+            ->assertOk()
+            ->assertSee(route('account.store.create'), false);
     }
 
     public function test_store_index_uses_overview_design_system_blocks(): void
@@ -38,7 +44,7 @@ class BackendSellerControllerTest extends TestCase
         $user = User::factory()->create();
         Seller::factory()->create(['user_id' => $user->id]);
 
-        $response = $this->actingAs($user)->get(route('account.store.index'));
+        $response = $this->actingAs($user)->get(route('account.index'));
 
         $response->assertOk();
         $response->assertSee('store-overview-page', false);
@@ -46,74 +52,50 @@ class BackendSellerControllerTest extends TestCase
         $response->assertSee('store-overview-hero__stats', false);
         $response->assertSee('store-info-tile', false);
         $response->assertSee('store-tariff-card', false);
+        $response->assertDontSee('account/packages', false);
     }
 
-    public function test_store_index_shows_auto_renew_control_for_expiring_package(): void
+    public function test_store_index_shows_balance_and_no_package_controls(): void
     {
-        $user = User::factory()->create();
-        $seller = Seller::factory()->create([
-            'user_id' => $user->id,
-            'auto_renew' => true,
-        ]);
-        $package = Package::factory()->monthly()->create();
+        $user = User::factory()->create(['balance' => 150]);
+        Seller::factory()->create(['user_id' => $user->id]);
 
-        SellerPackage::factory()->active()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-        ]);
-
-        $response = $this->actingAs($user)->get(route('account.store.index'));
+        $response = $this->actingAs($user)->get(route('account.index'));
 
         $response->assertOk()
-            ->assertSee('sellerAutoRenewToggle', false)
-            ->assertSee(route('account.store.toggle-auto-renew'), false);
+            ->assertSee('150,00')
+            ->assertDontSee('sellerAutoRenewToggle', false)
+            ->assertDontSee('Текущий тариф')
+            ->assertDontSee('Выбрать тариф');
     }
 
-    public function test_store_index_separates_filled_contacts_from_tariff_visibility(): void
+    public function test_store_index_shows_all_filled_contacts_without_any_package(): void
     {
         $user = User::factory()->create();
-        $seller = Seller::factory()->create([
+        Seller::factory()->create([
             'user_id' => $user->id,
             'link' => 'https://seller.example.com',
             'telegram' => '@seller',
             'can_order' => true,
         ]);
-        $package = Package::factory()->create([
-            'has_website_link' => false,
-            'has_social_links' => false,
-            'has_order_system' => false,
-        ]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
 
-        $response = $this->actingAs($user)->get(route('account.store.index'));
+        $response = $this->actingAs($user)->get(route('account.index'));
 
         $response->assertOk();
-        $response->assertSee('store-feature-grid', false);
-        $response->assertSee('store-feature-card--blocked', false);
-        $response->assertSee('Сохранено, скрыто тарифом');
-        $response->assertSee('Данные можно заполнить, но покупатели увидят их только после смены тарифа');
+        $response->assertSee('https://seller.example.com');
+        $response->assertSee('@seller');
+        $response->assertSee('Не указаны: Google Maps, Instagram, Viber');
+        $response->assertDontSee('Не заполнено');
+        $response->assertDontSee('скрыто тарифом');
     }
 
-    public function test_store_edit_keeps_website_and_social_inputs_editable_when_tariff_hides_them(): void
+    public function test_store_edit_keeps_website_and_social_inputs_editable(): void
     {
         $user = User::factory()->create();
         $seller = Seller::factory()->create([
             'user_id' => $user->id,
             'link' => 'https://seller.example.com',
             'telegram' => '@seller',
-        ]);
-        $package = Package::factory()->create([
-            'has_website_link' => false,
-            'has_social_links' => false,
-        ]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
         ]);
 
         $response = $this->actingAs($user)->get(route('account.store.edit', $seller));
@@ -124,7 +106,6 @@ class BackendSellerControllerTest extends TestCase
         $response->assertSee('store-edit-layout', false);
         $response->assertSee('store-edit-card', false);
         $response->assertSee('store-edit-submit-bar', false);
-        $response->assertSee('store-edit-visibility-note', false);
         $response->assertSee('store-edit-contact-group', false);
         $response->assertSee('store-telegram-connect-form', false);
         $response->assertDontSee('store-edit-actions-card', false);
@@ -156,7 +137,7 @@ class BackendSellerControllerTest extends TestCase
             'viber' => '+123456789',
         ]);
 
-        $response->assertRedirect(route('account.store.index'));
+        $response->assertRedirect(route('account.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseHas('sellers', [
             'id' => $seller->id,
@@ -208,7 +189,7 @@ class BackendSellerControllerTest extends TestCase
             'logo' => UploadedFile::fake()->image('logo.png', 800, 800),
         ]);
 
-        $response->assertRedirect(route('account.store.index'));
+        $response->assertRedirect(route('account.index'));
 
         $seller->refresh();
         $this->assertStringEndsWith('.webp', $seller->photo);
@@ -230,17 +211,10 @@ class BackendSellerControllerTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_owner_can_enable_orders_and_delivery_on_supported_tariff(): void
+    public function test_owner_can_enable_orders_and_delivery(): void
     {
         $user = User::factory()->create();
         $seller = Seller::factory()->create(['user_id' => $user->id, 'can_order' => false]);
-        $package = Package::factory()->create(['has_order_system' => true]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         $this->actingAs($user)->put(route('account.store.update', $seller), [
             'name' => $seller->name,
@@ -248,7 +222,7 @@ class BackendSellerControllerTest extends TestCase
             'can_order' => '1',
             'delivery_enabled' => '1',
             'delivery_terms' => 'По городу ежедневно.',
-        ])->assertRedirect(route('account.store.index'));
+        ])->assertRedirect(route('account.index'));
 
         $seller->refresh();
         $this->assertTrue($seller->can_order);
@@ -256,17 +230,5 @@ class BackendSellerControllerTest extends TestCase
         $this->assertSame('По городу ежедневно.', $seller->delivery_terms);
     }
 
-    public function test_owner_cannot_enable_orders_on_unsupported_tariff(): void
-    {
-        $user = User::factory()->create();
-        $seller = Seller::factory()->create(['user_id' => $user->id, 'can_order' => false]);
 
-        $this->actingAs($user)->put(route('account.store.update', $seller), [
-            'name' => $seller->name,
-            'settlement_id' => $seller->settlement_id,
-            'can_order' => '1',
-        ])->assertSessionHasErrors(['can_order']);
-
-        $this->assertFalse($seller->fresh()->can_order);
-    }
 }

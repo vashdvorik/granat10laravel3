@@ -96,11 +96,4 @@ class CacheInvalidationUnitTest extends TestCase
         );
     }
 
-    public function test_product_scope_from_active_seller_package_exists(): void
-    {
-        $this->assertTrue(
-            method_exists(Product::class, 'scopeFromActiveSellerPackage'),
-            'Product должен иметь scope "fromActiveSellerPackage"'
-        );
-    }
 }

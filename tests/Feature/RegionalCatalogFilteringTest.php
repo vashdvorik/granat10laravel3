@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Services\CatalogCacheService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -38,8 +36,8 @@ class RegionalCatalogFilteringTest extends TestCase
 
         $this->selectedSettlement = Settlement::factory()->create();
         $this->otherSettlement = Settlement::factory()->create();
-        $this->selectedSeller = $this->createSellerWithPackage($this->selectedSettlement, 'selected-shop');
-        $this->otherSeller = $this->createSellerWithPackage($this->otherSettlement, 'other-shop');
+        $this->selectedSeller = $this->createSeller($this->selectedSettlement, 'selected-shop');
+        $this->otherSeller = $this->createSeller($this->otherSettlement, 'other-shop');
         $category = Category::factory()->create(['is_active' => true]);
         $this->selectedProduct = $this->createProduct($this->selectedSeller, $category, 'Selected Regional Product');
         $this->otherProduct = $this->createProduct($this->otherSeller, $category, 'Other Regional Product');
@@ -161,17 +159,10 @@ class RegionalCatalogFilteringTest extends TestCase
         return $this->withSession(['regional_settlement_id' => $this->selectedSettlement->id]);
     }
 
-    private function createSellerWithPackage(Settlement $settlement, string $alias): Seller
+    private function createSeller(Settlement $settlement, string $alias): Seller
     {
         $seller = Seller::factory()->for($settlement)->create(['alias' => $alias]);
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

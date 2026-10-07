@@ -16,7 +16,6 @@ class CatalogDatabaseIndexTest extends TestCase
         $this->assertIndexExists('products', 'products_seller_active_vip_index');
         $this->assertIndexExists('products', 'products_seller_created_index');
         $this->assertIndexExists('categories', 'categories_parent_active_number_index');
-        $this->assertIndexExists('seller_packages', 'seller_packages_active_period_index');
     }
 
     private function assertIndexExists(string $table, string $index): void

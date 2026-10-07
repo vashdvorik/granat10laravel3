@@ -54,7 +54,6 @@ class ActivityLog extends Page implements HasTable
                         'auth' => 'info',
                         'products' => 'success',
                         'sellers' => 'warning',
-                        'packages' => 'danger',
                         'user_balance', 'user_roles', 'users' => 'primary',
                         default => 'gray',
                     })

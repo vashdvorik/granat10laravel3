@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\FavoritesService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -38,7 +36,7 @@ class FavoritesServiceTest extends TestCase
 
     public function test_initial_products_returns_metadata_and_only_first_page(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $products = Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
@@ -56,7 +54,7 @@ class FavoritesServiceTest extends TestCase
 
     public function test_products_page_returns_visible_products_in_requested_order(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $first = $this->createVisibleProduct($seller, $category, ['name' => 'First Favorite']);
         $second = $this->createVisibleProduct($seller, $category, ['name' => 'Second Favorite']);
@@ -73,7 +71,7 @@ class FavoritesServiceTest extends TestCase
 
     public function test_products_page_uses_requested_page_offset(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $products = Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
@@ -87,17 +85,10 @@ class FavoritesServiceTest extends TestCase
         $this->assertSame($products->last()->id, $pageProducts->first()->id);
     }
 
-    private function createSellerWithPackage(): Seller
+    private function createSeller(): Seller
     {
         $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

@@ -3,6 +3,7 @@
 @section('content_cabinet')
 <div class="contents store-edit-page">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         <div class="row">
             <div class="col-12">
                 <div class="breadcrumb-main">
@@ -18,16 +19,13 @@
                         <h6 class="fw-500 mb-0">Перед удалением проверьте последствия</h6>
                     </div>
                     <div class="card-body">
-                        @if(session('error'))
-                            <div class="alert alert-danger">{{ session('error') }}</div>
-                        @endif
 
                         <div class="alert alert-warning product-form-callout product-form-callout--warning mb-4">
                             <div class="d-flex align-items-start gap-2">
                                 <i class="uil uil-exclamation-triangle product-form-callout__icon text-warning mt-1"></i>
                                 <div>
                                     <strong>Внимание.</strong>
-                                    <div>Это действие необратимо. Магазин, товары, тариф и связанные данные будут удалены.</div>
+                                    <div>Это действие необратимо. Магазин, товары и связанные данные будут удалены.</div>
                                 </div>
                             </div>
                         </div>

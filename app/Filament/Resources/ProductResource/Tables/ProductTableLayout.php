@@ -51,6 +51,9 @@ class ProductTableLayout
                 ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\IconColumn::make('is_vip')
                 ->label('VIP')->boolean()->toggleable(isToggledHiddenByDefault: true),
+            Tables\Columns\TextColumn::make('vip_until')
+                ->label('VIP до')->dateTime('d.m.Y H:i')->placeholder('—')->sortable()
+                ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('images_count')
                 ->label('Фото')->alignCenter()->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('push_at')

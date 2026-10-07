@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\CatalogPageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -31,7 +29,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_catalog_page_data_applies_current_price_filter(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $cheapProduct = $this->createVisibleProduct($seller, $category, [
             'name' => 'Cheap_Filter_Product',
@@ -56,8 +54,8 @@ class CatalogPageServiceTest extends TestCase
     public function test_catalog_products_filter_by_seller_alias(): void
     {
         $category = Category::factory()->create();
-        $targetSeller = $this->createSellerWithPackage(['alias' => 'target-seller']);
-        $otherSeller = $this->createSellerWithPackage(['alias' => 'other-seller']);
+        $targetSeller = $this->createSeller(['alias' => 'target-seller']);
+        $otherSeller = $this->createSeller(['alias' => 'other-seller']);
         $targetProduct = $this->createVisibleProduct($targetSeller, $category, ['name' => 'Target_Product']);
         $otherProduct = $this->createVisibleProduct($otherSeller, $category, ['name' => 'Other_Product']);
 
@@ -73,8 +71,8 @@ class CatalogPageServiceTest extends TestCase
     {
         $targetCategory = Category::factory()->create(['is_active' => true]);
         $otherCategory = Category::factory()->create(['is_active' => true]);
-        $targetSeller = $this->createSellerWithPackage(['alias' => 'category-seller']);
-        $otherSeller = $this->createSellerWithPackage(['alias' => 'outside-seller']);
+        $targetSeller = $this->createSeller(['alias' => 'category-seller']);
+        $otherSeller = $this->createSeller(['alias' => 'outside-seller']);
         $targetProduct = $this->createVisibleProduct($targetSeller, $targetCategory, ['name' => 'Category_Product']);
         $otherProduct = $this->createVisibleProduct($otherSeller, $otherCategory, ['name' => 'Outside_Product']);
 
@@ -91,7 +89,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_sale_products_return_only_discounted_visible_products(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $saleProduct = $this->createVisibleProduct($seller, $category, [
             'name' => 'Sale_Product',
@@ -111,7 +109,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_search_products_filter_by_text_and_category(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $targetCategory = Category::factory()->create(['is_active' => true]);
         $otherCategory = Category::factory()->create(['is_active' => true]);
         $targetProduct = $this->createVisibleProduct($seller, $targetCategory, [
@@ -129,7 +127,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_search_requires_every_meaningful_word(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $matchingProduct = $this->createVisibleProduct($seller, $category, [
             'name' => 'Красная зимняя куртка',
@@ -146,7 +144,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_search_orders_exact_name_before_description_match(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $descriptionMatch = $this->createVisibleProduct($seller, $category, [
             'name' => 'Обычный товар',
@@ -166,7 +164,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_search_products_can_be_sorted_by_effective_price(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $expensiveProduct = $this->createVisibleProduct($seller, $category, [
             'name' => 'Search Sort Phone Expensive',
@@ -187,7 +185,7 @@ class CatalogPageServiceTest extends TestCase
 
     public function test_search_treats_sql_wildcards_as_regular_characters(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $category = Category::factory()->create();
         $regularProduct = $this->createVisibleProduct($seller, $category, [
             'name' => 'Обычный товар',
@@ -198,17 +196,10 @@ class CatalogPageServiceTest extends TestCase
         $this->assertFalse($products->contains($regularProduct));
     }
 
-    private function createSellerWithPackage(array $sellerAttributes = []): Seller
+    private function createSeller(array $sellerAttributes = []): Seller
     {
         $seller = Seller::factory()->create($sellerAttributes);
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

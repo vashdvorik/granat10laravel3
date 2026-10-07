@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Enums\ProductModerationStatus;
 use App\Exceptions\ProductModerationException;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
-use App\Models\SellerPackage;
 use App\Models\User;
 use App\Notifications\ProductModerationDecisionNotification;
 use App\Jobs\ModerateProductJob;
@@ -33,7 +31,6 @@ class ProductModerationServiceTest extends TestCase
     public function test_seller_can_submit_draft_product_and_action_is_recorded(): void
     {
         $product = Product::factory()->draft()->create();
-        $this->assignPackage($product);
         Image::factory()->create(['product_id' => $product->id]);
         $actor = $product->seller->user;
 
@@ -55,7 +52,6 @@ class ProductModerationServiceTest extends TestCase
     public function test_submission_requires_publishable_product(): void
     {
         $product = Product::factory()->draft()->create();
-        $this->assignPackage($product);
 
         $this->expectException(ProductModerationException::class);
 
@@ -68,7 +64,6 @@ class ProductModerationServiceTest extends TestCase
             'name' => 'Телефон +373 777 12345',
             'desc' => 'Телефон в хорошем состоянии и полной комплектации.',
         ]);
-        $this->assignPackage($product);
         Image::factory()->create(['product_id' => $product->id]);
 
         $this->expectException(ProductModerationException::class);
@@ -82,7 +77,6 @@ class ProductModerationServiceTest extends TestCase
             'name' => 'Коллекционный предмет',
             'desc' => 'Боеприпасы для частной коллекции в оригинальной упаковке.',
         ]);
-        $this->assignPackage($product);
         Image::factory()->create(['product_id' => $product->id]);
 
         $submitted = $this->service->submit($product, $product->seller->user);
@@ -104,7 +98,6 @@ class ProductModerationServiceTest extends TestCase
         $product = Product::factory()->draft()->create([
             'desc' => 'Подробное описание обычного товара без нарушений.',
         ]);
-        $this->assignPackage($product);
         Image::factory()->create(['product_id' => $product->id]);
 
         $this->service->submit($product, $product->seller->user);
@@ -236,18 +229,6 @@ class ProductModerationServiceTest extends TestCase
             'product_id' => $product->id,
             'manual_decision' => 'block',
             'agrees_with_manual' => false,
-        ]);
-    }
-
-    private function assignPackage(Product $product): void
-    {
-        $package = Package::factory()->withLimits(10, 5)->create();
-
-        SellerPackage::factory()->create([
-            'seller_id' => $product->seller_id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => now()->addMonth(),
         ]);
     }
 }

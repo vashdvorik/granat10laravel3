@@ -25,7 +25,6 @@ abstract class ProductRequest extends FormRequest
             'features2' => ['nullable', 'string', 'max:30'],
             'features3' => ['nullable', 'string', 'max:30'],
             'features4' => ['nullable', 'string', 'max:30'],
-            'is_vip' => ['boolean'],
             'save_action' => ['required', Rule::enum(ProductSaveAction::class)],
             'can_order' => ['boolean'],
             'delivery_enabled' => ['boolean'],

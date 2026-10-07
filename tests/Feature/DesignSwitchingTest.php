@@ -81,6 +81,23 @@ class DesignSwitchingTest extends TestCase
         }
     }
 
+    public function test_joom_design_renders_the_public_marketplace_shell(): void
+    {
+        config()->set('design.default', 'joom');
+        Cache::forget(config('design.cache_key'));
+
+        try {
+            $this->get(route('home'))
+                ->assertOk()
+                ->assertSee('joom-header')
+                ->assertSee('theme-joom.css')
+                ->assertSeeText('Покупки на каждый день');
+        } finally {
+            config()->set('design.default', 'legacy');
+            Cache::forget(config('design.cache_key'));
+        }
+    }
+
     public function test_new_cabinet_design_renders_the_seller_cabinet_shell(): void
     {
         config()->set('cabinet_design.default', 'legacy');

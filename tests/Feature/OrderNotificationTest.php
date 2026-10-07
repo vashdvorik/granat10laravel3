@@ -9,10 +9,8 @@ use App\Events\OrderStatusChanged;
 use App\Listeners\SendNewOrderNotification;
 use App\Listeners\SendOrderStatusChangedNotification;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\User;
 use App\Services\OrderManagementService;
 use App\Services\OrderService;
@@ -103,13 +101,6 @@ class OrderNotificationTest extends TestCase
     private function createOrderableProduct(): Product
     {
         $seller = Seller::factory()->create(['can_order' => true]);
-        $package = Package::factory()->create(['has_order_system' => true]);
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return Product::factory()->create([
             'seller_id' => $seller->id,

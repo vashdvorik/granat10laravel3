@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -33,16 +31,9 @@ class CatalogControllerTest extends TestCase
 
     private function createVisibleProductWithSeller(?Seller $seller = null, ?Category $category = null): Product
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = $seller ?? Seller::factory()->create();
         $category = $category ?? Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-            'end_date'   => null,
-        ]);
 
         return Product::factory()->create([
             'seller_id'   => $seller->id,
@@ -77,10 +68,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_sidebar_does_not_show_top_or_vip_products_block(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create(['name' => 'VIP Sidebar Seller']);
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
 
         Product::factory()->create([
             'seller_id' => $seller->id,
@@ -104,13 +93,13 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_shows_only_visible_products(): void
     {
-        $seller   = Seller::factory()->create(); // без пакета — товар не виден
+        $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
 
         Product::factory()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category->id,
-            'is_active'   => true,
+            'is_active'   => false, // снят с публикации — товар не виден
             'name'        => 'SecretProduct_NotVisible_XYZ',
         ]);
 
@@ -125,10 +114,8 @@ class CatalogControllerTest extends TestCase
             category: Category::factory()->create()
         );
         // Создаём виден товар с уникальным именем
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category->id,
@@ -163,10 +150,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_paginates_products(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         Product::factory()->count(15)->create([
             'seller_id'   => $seller->id,
@@ -220,12 +205,10 @@ class CatalogControllerTest extends TestCase
 
     public function test_category_catalog_shows_only_products_in_category(): void
     {
-        $package   = Package::factory()->withLimits(50, 10)->create();
         $seller    = Seller::factory()->create();
         $category1 = Category::factory()->create(['is_active' => true]);
         $category2 = Category::factory()->create(['is_active' => true]);
 
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         Product::factory()->create([
             'seller_id'   => $seller->id,
@@ -255,10 +238,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_price_filter_works(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         $cheapProduct     = Product::factory()->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => true, 'price' => 100, 'name' => 'Cheap_100_Unique']);
         $expensiveProduct = Product::factory()->create(['seller_id' => $seller->id, 'category_id' => $category->id, 'is_active' => true, 'price' => 9999, 'name' => 'Expensive_9999_Unique']);
@@ -270,10 +251,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_sort_by_lowest_price_first(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         Product::factory()->create([
             'seller_id' => $seller->id,
@@ -301,10 +280,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_catalog_sort_by_sale_first(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         Product::factory()->create([
             'seller_id' => $seller->id,
@@ -334,10 +311,8 @@ class CatalogControllerTest extends TestCase
     public function test_load_more_catalog_returns_products_partial(): void
     {
         $this->createVisibleProductWithSeller();
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category->id,
@@ -354,11 +329,9 @@ class CatalogControllerTest extends TestCase
 
     public function test_load_more_category_returns_products_partial(): void
     {
-        $package   = Package::factory()->withLimits(50, 10)->create();
         $seller    = Seller::factory()->create();
         $category1 = Category::factory()->create(['is_active' => true]);
         $category2 = Category::factory()->create(['is_active' => true]);
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category1->id,
@@ -382,10 +355,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_load_more_sale_returns_products_partial(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id'       => $seller->id,
             'category_id'     => $category->id,
@@ -404,10 +375,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_sale_page_uses_modern_product_cards(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -437,10 +406,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_sale_page_uses_market_load_more_button(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -458,10 +425,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_load_more_search_returns_products_partial(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->create([
             'seller_id'   => $seller->id,
             'category_id' => $category->id,
@@ -477,10 +442,8 @@ class CatalogControllerTest extends TestCase
 
     public function test_search_page_uses_market_load_more_button(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create();
         $category = Category::factory()->create();
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true, 'end_date' => null]);
         Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,

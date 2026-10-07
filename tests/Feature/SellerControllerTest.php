@@ -3,11 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Region;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -153,21 +151,10 @@ class SellerControllerTest extends TestCase
 
     public function test_seller_page_shows_only_visible_products_of_that_seller(): void
     {
-        $package   = Package::factory()->withLimits(50, 10)->create();
         $seller1   = Seller::factory()->create(['alias' => 'seller-one-unique-test']);
         $seller2   = Seller::factory()->create();
         $category  = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller1->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-        ]);
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller2->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-        ]);
 
         Product::factory()->create([
             'seller_id'   => $seller1->id,
@@ -239,11 +226,9 @@ class SellerControllerTest extends TestCase
 
     public function test_inactive_product_not_shown_on_seller_page(): void
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create(['alias' => 'test-inactive-product-seller']);
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create(['seller_id' => $seller->id, 'package_id' => $package->id, 'is_active' => true]);
 
         Product::factory()->create([
             'seller_id'   => $seller->id,
@@ -272,15 +257,9 @@ class SellerControllerTest extends TestCase
 
     public function test_load_more_seller_products_returns_products_partial(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create(['alias' => 'load-more-seller-products']);
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
         Product::factory()->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,
@@ -297,15 +276,9 @@ class SellerControllerTest extends TestCase
 
     public function test_seller_page_keeps_desktop_pagination_and_mobile_load_more(): void
     {
-        $package = Package::factory()->withLimits(50, 10)->create();
         $seller = Seller::factory()->create(['alias' => 'seller-products-pagination']);
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
         Product::factory()->count(13)->create([
             'seller_id' => $seller->id,
             'category_id' => $category->id,

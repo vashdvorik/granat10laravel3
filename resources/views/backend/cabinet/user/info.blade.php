@@ -5,6 +5,7 @@
 @section('content_cabinet')
 <div class="contents">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         <div class="row">
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
@@ -13,19 +14,7 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
 
         <div class="row g-4">
             <div class="col-xxl-4 col-lg-5">
@@ -98,13 +87,15 @@
                                 </div>
 
                                 <div class="d-grid gap-2">
-                                    <a href="#" class="btn btn-success btn-squared">
+                                    <a href="{{ route('account.user.balance.topup') }}" class="btn btn-success btn-squared">
                                         <i class="uil uil-plus-circle"></i> Пополнить баланс
                                     </a>
-                                    <a href="#" class="btn btn-outline-secondary btn-squared">
+                                    <a href="{{ route('account.user.balance.topup') }}#history" class="btn btn-outline-secondary btn-squared">
                                         <i class="uil uil-history-alt"></i> История операций
                                     </a>
                                 </div>
+
+                                @include('backend.cabinet.user.partials.developer-tip')
                             </div>
                         </div>
                     </div>

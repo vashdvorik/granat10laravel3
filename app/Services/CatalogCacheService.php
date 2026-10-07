@@ -6,7 +6,6 @@ use App\Jobs\WarmCategoriesCache;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use Closure;
 use Illuminate\Support\Facades\Cache;
@@ -162,14 +161,6 @@ class CatalogCacheService
         if ($seller) {
             $this->forgetSellerCategoryCounts($seller);
         }
-    }
-
-    public function forgetSellerPackageRelated(SellerPackage $sellerPackage): void
-    {
-        $seller = $sellerPackage->seller;
-
-        $this->forgetSellerRelated($seller, visibilityChanged: true);
-        $this->forgetCategoryRelated();
     }
 
     public function forgetCategoryRelated(bool $warm = true): void

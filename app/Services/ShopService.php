@@ -2,20 +2,16 @@
 
 namespace App\Services;
 
-use App\Models\Package;
 use App\Models\Seller;
 use App\Models\Settlement;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
-use RuntimeException;
 
 class ShopService
 {
-    public const BASE_PACKAGE_ID = 1;
     private const MAX_ALIAS_LENGTH = 191;
     private const ALIAS_SUFFIX_RESERVE = 12;
 
@@ -24,27 +20,10 @@ class ShopService
         unset($data['logo']);
         $data['town'] = Settlement::query()->findOrFail($data['settlement_id'])->name;
 
-        $seller = DB::transaction(function () use ($user, $data) {
-            $basePackage = Package::find(self::BASE_PACKAGE_ID);
-
-            if (!$basePackage) {
-                throw new RuntimeException('Базовый тариф не найден');
-            }
-
-            $seller = Seller::create(array_merge($data, [
-                'user_id' => $user->id,
-                'alias' => $this->generateUniqueAlias($data['name']),
-            ]));
-
-            $seller->sellerPackages()->create([
-                'package_id' => $basePackage->id,
-                'start_date' => now(),
-                'end_date' => null,
-                'is_active' => true,
-            ]);
-
-            return $seller;
-        });
+        $seller = Seller::create(array_merge($data, [
+            'user_id' => $user->id,
+            'alias' => $this->generateUniqueAlias($data['name']),
+        ]));
 
         if ($logoFile) {
             $seller->update(['photo' => $this->storeLogo($seller, $logoFile)]);

@@ -7,9 +7,9 @@
             <div>
                 <span class="events-hero__eyebrow">Журнал кабинета</span>
                 <h4>Важные события магазина</h4>
-                <p>Здесь собраны изменения тарифов, товаров и заказов. Журнал помогает понять, почему товар пропал из публикации, тариф изменил лимиты или заказ сменил статус.</p>
+                <p>Здесь собраны изменения товаров, магазина и заказов. Журнал помогает понять, почему товар пропал из публикации или заказ сменил статус.</p>
             </div>
-            <a href="{{ route('account.store.index') }}" class="btn btn-sm btn-outline-primary">К магазину</a>
+            <a href="{{ route('account.index') }}" class="btn btn-sm btn-outline-primary">К магазину</a>
         </div>
 
         <div class="events-summary">
@@ -50,8 +50,8 @@
             <div class="events-empty">
                 <span class="uil uil-history"></span>
                 <h5>Событий пока нет</h5>
-                <p>Когда вы измените тариф, товар, настройки магазина или статус заказа, важные действия появятся здесь.</p>
-                <a href="{{ route('account.store.index') }}" class="btn btn-primary">Открыть магазин</a>
+                <p>Когда вы измените товар, настройки магазина или статус заказа, важные действия появятся здесь.</p>
+                <a href="{{ route('account.index') }}" class="btn btn-primary">Открыть магазин</a>
             </div>
         @endif
     </div>

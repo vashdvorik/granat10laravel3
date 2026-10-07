@@ -3,10 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -65,18 +63,12 @@ class CacheObserverTest extends TestCase
         $this->assertFalse(Cache::has('seller_by_alias:new-alias'));
     }
 
-    public function test_seller_package_update_clears_visibility_dependent_caches(): void
+    public function test_product_deactivation_clears_visibility_dependent_caches(): void
     {
         $category = Category::factory()->create();
         $seller = Seller::factory()->create();
-        $package = Package::factory()->create();
-        $sellerPackage = SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-        ]);
 
-        Product::factory()->create([
+        $product = Product::factory()->create([
             'category_id' => $category->id,
             'seller_id' => $seller->id,
             'is_active' => true,
@@ -87,7 +79,7 @@ class CacheObserverTest extends TestCase
         Cache::put('menu_categories', 'stale-menu');
         Cache::put('sellers_list', collect([$seller]));
 
-        $sellerPackage->update(['is_active' => false]);
+        $product->update(['is_active' => false]);
 
         $this->assertFalse(Cache::has('category_products_count:'.$category->id));
         $this->assertFalse(Cache::has('product_price_range'));

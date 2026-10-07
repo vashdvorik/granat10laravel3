@@ -52,11 +52,12 @@
 
 <div class="contents orders-page order-show-page">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         <div class="order-show-hero">
             <div>
                 <span class="orders-hero__eyebrow">Заказ магазина</span>
                 <h4>{{ $order->number }}</h4>
-                <p>Этот заказ остаётся доступным независимо от текущего тарифа магазина.</p>
+                <p>Этот заказ остаётся доступным в кабинете, даже если приём новых заказов выключен.</p>
             </div>
             <div class="order-show-hero__actions">
                 <span class="order-status-badge order-status-badge--{{ $statusTone }}">{{ $order->status->label() }}</span>
@@ -64,9 +65,6 @@
             </div>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
         @if($errors->any())
             <div class="alert alert-danger">{{ $errors->first() }}</div>
         @endif

@@ -4,19 +4,15 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Region;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Models\User;
 use App\Policies\CategoryPolicy;
 use App\Policies\OrderPolicy;
-use App\Policies\PackagePolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\RegionPolicy;
-use App\Policies\SellerPackagePolicy;
 use App\Policies\SellerPolicy;
 use App\Policies\SettlementPolicy;
 use App\Policies\UserPolicy;
@@ -33,11 +29,9 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Category::class => CategoryPolicy::class,
         Order::class => OrderPolicy::class,
-        Package::class => PackagePolicy::class,
         Product::class => ProductPolicy::class,
         Region::class => RegionPolicy::class,
         Seller::class => SellerPolicy::class,
-        SellerPackage::class => SellerPackagePolicy::class,
         Settlement::class => SettlementPolicy::class,
         User::class => UserPolicy::class,
     ];

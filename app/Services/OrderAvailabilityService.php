@@ -30,12 +30,6 @@ class OrderAvailabilityService
             return new OrderAvailability(false, false, 'Магазин временно не принимает заказы.');
         }
 
-        $sellerPackage = $seller->activePackage();
-
-        if ($sellerPackage === null || ! $sellerPackage->package->has_order_system) {
-            return new OrderAvailability(false, false, 'Тариф магазина не поддерживает заказы.');
-        }
-
         $selectedSettlement = app(RegionalContext::class)->settlement();
 
         if (

@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
@@ -34,15 +32,9 @@ class ImageModelTest extends TestCase
 
     private function createProductWithSeller(): array
     {
-        $package  = Package::factory()->withLimits(50, 10)->create();
         $seller   = Seller::factory()->create();
         $category = Category::factory()->create();
 
-        SellerPackage::factory()->create([
-            'seller_id'  => $seller->id,
-            'package_id' => $package->id,
-            'is_active'  => true,
-        ]);
 
         $product = Product::factory()->create([
             'seller_id'   => $seller->id,

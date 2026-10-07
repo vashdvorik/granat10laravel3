@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\CustomerOrderListService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Session;
@@ -184,20 +182,11 @@ class PublicOrderFlowTest extends TestCase
 
     private function createOrderableProduct(bool $deliveryEnabled = false): Product
     {
-        $package = Package::factory()->withLimits(50, 10)->create([
-            'has_order_system' => true,
-        ]);
         $seller = Seller::factory()->create([
             'can_order' => true,
             'delivery_enabled' => $deliveryEnabled,
         ]);
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return Product::factory()->create([
             'seller_id' => $seller->id,

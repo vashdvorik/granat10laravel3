@@ -13,11 +13,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Проверка и автопродление пакетов каждый день в 01:00
-        $schedule->command('packages:deactivate-expired --auto-renew')
-            ->dailyAt('01:00')
+        // Снятие VIP с товаров, у которых истёк оплаченный срок
+        $schedule->command('products:expire-vip')
+            ->everyFiveMinutes()
             ->withoutOverlapping()
-            ->appendOutputTo(storage_path('logs/packages-check.log'));
+            ->appendOutputTo(storage_path('logs/vip-expiration.log'));
+
+        // Сверка ожидающих пополнений баланса с банком (если ResultURL не дошёл)
+        $schedule->command('balance:reconcile-topups')
+            ->everyFiveMinutes()
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/balance-topups.log'));
 
         $schedule->command('orders:anonymize-expired')
             ->dailyAt('02:00')

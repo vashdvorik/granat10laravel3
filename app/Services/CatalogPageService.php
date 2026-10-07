@@ -226,13 +226,6 @@ class CatalogPageService
     private function getSellersForCategory(array $categoryIds): Collection
     {
         return Seller::forRegionalContext()
-            ->whereHas('sellerPackages', function (Builder $query) {
-                $query->where('is_active', true)
-                    ->where(function (Builder $dateQuery) {
-                        $dateQuery->whereNull('end_date')
-                            ->orWhere('end_date', '>=', now()->toDateString());
-                    });
-            })
             ->whereHas('products', function (Builder $query) use ($categoryIds) {
                 $query->where('is_active', true)
                     ->whereIn('category_id', $categoryIds);

@@ -6,10 +6,8 @@ use App\Application\Products\Queries\ListSellerProducts;
 use App\Enums\ProductModerationStatus;
 use App\Models\Category;
 use App\Models\Image;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -52,7 +50,7 @@ class ListSellerProductsQueryTest extends TestCase
 
     public function test_query_filters_visible_products(): void
     {
-        $seller = $this->sellerWithPackage();
+        $seller = Seller::factory()->create();
         $visibleProduct = Product::factory()->create([
             'seller_id' => $seller->id,
             'name' => 'VisibleProduct_UNIQ',
@@ -84,7 +82,7 @@ class ListSellerProductsQueryTest extends TestCase
 
     public function test_query_filters_moderation_fixes_no_images_and_vip(): void
     {
-        $seller = $this->sellerWithPackage();
+        $seller = Seller::factory()->create();
         $pendingProduct = Product::factory()->pendingModeration()->create(['seller_id' => $seller->id]);
         $fixProduct = Product::factory()->create([
             'seller_id' => $seller->id,
@@ -108,14 +106,10 @@ class ListSellerProductsQueryTest extends TestCase
         $this->assertSame([$vipProduct->id], $vip['products']->pluck('id')->all());
     }
 
-    public function test_query_filters_products_hidden_by_tariff(): void
+    public function test_tariff_filter_no_longer_exists(): void
     {
         $seller = Seller::factory()->create();
-        $activeProduct = Product::factory()->create([
-            'seller_id' => $seller->id,
-            'is_active' => true,
-        ]);
-        Product::factory()->inactive()->create(['seller_id' => $seller->id]);
+        Product::factory()->create(['seller_id' => $seller->id, 'is_active' => true]);
 
         $result = app(ListSellerProducts::class)->execute(
             $seller,
@@ -123,12 +117,13 @@ class ListSellerProductsQueryTest extends TestCase
             ['product_status' => 'tariff']
         );
 
-        $this->assertSame([$activeProduct->id], $result['products']->pluck('id')->all());
+        $this->assertNotContains('tariff', array_column($result['productStatusFilters'], 'key'));
+        $this->assertSame('all', $result['currentProductStatus']);
     }
 
     public function test_status_filter_links_are_available_in_result(): void
     {
-        $seller = $this->sellerWithPackage();
+        $seller = Seller::factory()->create();
         Product::factory()->draft()->create(['seller_id' => $seller->id]);
 
         $result = app(ListSellerProducts::class)->execute($seller);
@@ -139,17 +134,4 @@ class ListSellerProductsQueryTest extends TestCase
         $this->assertSame('all', $result['currentProductStatus']);
     }
 
-    private function sellerWithPackage(): Seller
-    {
-        $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(10, 2)->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
-
-        return $seller;
-    }
 }

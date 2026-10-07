@@ -42,11 +42,6 @@ class SellerPolicy
         return $this->ownsSeller($user, $seller);
     }
 
-    public function purchasePackage(User $user, Seller $seller): bool
-    {
-        return $this->ownsSeller($user, $seller);
-    }
-
     public function deleteAny(User $user): bool
     {
         return false;

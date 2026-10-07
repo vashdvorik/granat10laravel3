@@ -6,10 +6,8 @@ use App\Data\OrderCreationData;
 use App\Exceptions\OrderUnavailableException;
 use App\Models\Category;
 use App\Models\Order;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Models\Settlement;
 use App\Services\OrderAvailabilityService;
 use App\Services\OrderService;
@@ -56,25 +54,12 @@ class OrderServiceTest extends TestCase
         $this->assertSame(1, Order::query()->count());
     }
 
-    public function test_order_is_blocked_when_store_or_tariff_disallows_orders(): void
+    public function test_order_is_blocked_when_store_disallows_orders(): void
     {
         [$product, $seller] = $this->orderableProduct();
         $seller->forceFill(['can_order' => false])->save();
 
         $this->expectException(OrderUnavailableException::class);
-
-        app(OrderService::class)->create($product, $this->data());
-    }
-
-    public function test_order_is_blocked_when_tariff_has_expired(): void
-    {
-        [$product, $seller] = $this->orderableProduct();
-        $seller->sellerPackages()->update([
-            'end_date' => now()->subDay()->toDateString(),
-        ]);
-
-        $this->expectException(OrderUnavailableException::class);
-        $this->expectExceptionMessage('Тариф магазина не поддерживает заказы.');
 
         app(OrderService::class)->create($product, $this->data());
     }
@@ -166,14 +151,7 @@ class OrderServiceTest extends TestCase
     private function orderableProduct(array $productAttributes = []): array
     {
         $seller = Seller::factory()->create(['can_order' => true]);
-        $package = Package::factory()->create(['has_order_system' => true]);
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         $product = Product::factory()->create(array_merge([
             'seller_id' => $seller->id,

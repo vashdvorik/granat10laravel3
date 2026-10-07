@@ -45,9 +45,7 @@ class ProductWriteService
 
         $this->validateLimits(
             $this->productLimitService->validateForStore(
-                $seller,
                 $submitForModeration,
-                $data['is_vip'],
                 ! empty($images)
             ),
             $category
@@ -121,9 +119,7 @@ class ProductWriteService
 
         $this->validateLimits(
             $this->productLimitService->validateForUpdate(
-                $product,
                 $submitForModeration,
-                $data['is_vip'],
                 $product->images()->exists() || ! empty($images)
             ),
             $category
@@ -228,7 +224,8 @@ class ProductWriteService
      */
     private function normalizeFlags(array $data): array
     {
-        $data['is_vip'] = (bool) ($data['is_vip'] ?? false);
+        // VIP продавец не выставляет сам: он покупается отдельно за баланс
+        unset($data['is_vip'], $data['vip_until']);
         $data['can_order'] = (bool) ($data['can_order'] ?? false);
         $data['delivery_enabled'] = $data['can_order']
             && (bool) ($data['delivery_enabled'] ?? false);

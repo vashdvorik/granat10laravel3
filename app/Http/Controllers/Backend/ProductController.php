@@ -16,12 +16,15 @@ use App\Models\Image as ProductImage;
 use App\Models\Product;
 use App\Services\BackendProductService;
 use App\Services\ProductActionService;
-use App\Services\ProductLimitService;
+use App\Services\ProductVipService;
 use App\Services\ProductModerationIssuePresenter;
 use App\Services\ProductModerationService;
 use App\Services\SellerCabinetStateService;
+use App\Services\VipPricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use RuntimeException;
 
 class ProductController extends Controller
 {
@@ -62,10 +65,7 @@ class ProductController extends Controller
     /**
      * Форма создания товара
      */
-    public function create(
-        BackendProductService $backendProductService,
-        ProductLimitService $productLimitService
-    )
+    public function create(BackendProductService $backendProductService)
     {
         $user = Auth::user();
         $seller = $user->seller;
@@ -77,9 +77,8 @@ class ProductController extends Controller
 
         // Только корневые категории для первого уровня (из кеша)
         $categories = $backendProductService->getRootCategories();
-        $vipAvailability = $productLimitService->canActivateVipProduct($seller);
 
-        return view('backend.cabinet.products.create', compact('categories', 'seller', 'vipAvailability'));
+        return view('backend.cabinet.products.create', compact('categories', 'seller'));
     }
 
     /**
@@ -119,7 +118,11 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $product, ProductModerationIssuePresenter $issuePresenter)
+    public function show(
+        Product $product,
+        ProductModerationIssuePresenter $issuePresenter,
+        VipPricing $vipPricing
+    )
     {
         $this->authorize('view', $product);
 
@@ -130,7 +133,17 @@ class ProductController extends Controller
 
         $moderationIssues = $issuePresenter->forProduct($product);
 
-        return view('backend.cabinet.products.show', compact('product', 'moderationIssues'));
+        $vipOptions = $vipPricing->options();
+        $vipPricePerDay = $vipPricing->pricePerDay();
+        $userBalance = Auth::user()->balance;
+
+        return view('backend.cabinet.products.show', compact(
+            'product',
+            'moderationIssues',
+            'vipOptions',
+            'vipPricePerDay',
+            'userBalance'
+        ));
     }
 
     /**
@@ -139,8 +152,7 @@ class ProductController extends Controller
     public function edit(
         Product $product,
         BackendProductService $backendProductService,
-        ProductModerationIssuePresenter $issuePresenter,
-        ProductLimitService $productLimitService
+        ProductModerationIssuePresenter $issuePresenter
     ) {
         $this->authorize('update', $product);
 
@@ -150,14 +162,12 @@ class ProductController extends Controller
         // Получаем цепочку категорий товара (для предзаполнения)
         $selectedPath = $backendProductService->getSelectedPath($product->category_id);
         $moderationIssues = $issuePresenter->forProduct($product);
-        $vipAvailability = $productLimitService->canActivateVipProduct($product->seller, $product->id);
 
         return view('backend.cabinet.products.edit', compact(
             'product',
             'categories',
             'selectedPath',
-            'moderationIssues',
-            'vipAvailability'
+            'moderationIssues'
         ));
     }
 
@@ -308,6 +318,37 @@ class ProductController extends Controller
         }
 
         return redirect()->back()->with('success', 'Главное изображение обновлено');
+    }
+
+    /**
+     * Покупка VIP для товара за деньги с баланса
+     */
+    public function purchaseVip(
+        Request $request,
+        Product $product,
+        ProductVipService $vipService,
+        VipPricing $vipPricing
+    ) {
+        $this->authorize('view', $product);
+
+        $validated = $request->validate([
+            'days' => ['required', 'integer', Rule::in(array_keys($vipPricing->durations()))],
+        ], [
+            'days.required' => 'Выберите срок VIP.',
+            'days.in' => 'Выбран недоступный срок VIP.',
+            'days.integer' => 'Выбран недоступный срок VIP.',
+        ]);
+
+        try {
+            $updated = $vipService->purchase($request->user(), $product, (int) $validated['days']);
+        } catch (RuntimeException $exception) {
+            return redirect()->back()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->back()->with(
+            'success',
+            'VIP для товара "'.$updated->name.'" действует до '.$updated->vip_until->format('d.m.Y H:i')
+        );
     }
 
     /**

@@ -15,6 +15,7 @@
 
 <div class="contents orders-page">
     <div class="container-fluid">
+        @include('backend.cabinet.partials.flash')
         <div class="order-intake-card order-intake-card--{{ $orderIntakeStatus['enabled'] ? 'enabled' : 'disabled' }}">
             <div>
                 <span>{{ $orderIntakeStatus['enabled'] ? 'Приём включён' : 'Приём ограничен' }}</span>
@@ -26,9 +27,6 @@
             </a>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
 
         <div class="orders-toolbar">
             <div>

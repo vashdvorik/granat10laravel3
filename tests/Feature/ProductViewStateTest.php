@@ -6,10 +6,8 @@ use App\Enums\ProductDisplayState;
 use App\Enums\ProductModerationStatus;
 use App\Enums\ProductPrimaryAction;
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\ProductStateTransitionService;
 use App\Services\ProductViewStateFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -156,13 +154,6 @@ class ProductViewStateTest extends TestCase
     private function product(array $attributes): Product
     {
         $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return Product::factory()->create(array_merge([
             'seller_id' => $seller->id,

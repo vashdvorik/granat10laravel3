@@ -4,10 +4,8 @@ namespace Tests\Feature;
 
 use App\Application\Products\Queries\ListSellerProducts;
 use App\Models\Category;
-use App\Models\Package;
 use App\Models\Product;
 use App\Models\Seller;
-use App\Models\SellerPackage;
 use App\Services\BackendProductService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -48,7 +46,7 @@ class BackendProductServiceTest extends TestCase
 
     public function test_get_index_data_filters_products_by_category(): void
     {
-        $seller = $this->createSellerWithPackage();
+        $seller = $this->createSeller();
         $targetCategory = Category::factory()->create();
         $otherCategory = Category::factory()->create();
         $targetProduct = Product::factory()->create([
@@ -87,17 +85,10 @@ class BackendProductServiceTest extends TestCase
         $this->assertTrue((bool) $categories->first()->has_children);
     }
 
-    private function createSellerWithPackage(): Seller
+    private function createSeller(): Seller
     {
         $seller = Seller::factory()->create();
-        $package = Package::factory()->withLimits(50, 10)->create();
 
-        SellerPackage::factory()->create([
-            'seller_id' => $seller->id,
-            'package_id' => $package->id,
-            'is_active' => true,
-            'end_date' => null,
-        ]);
 
         return $seller;
     }

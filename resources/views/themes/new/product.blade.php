@@ -33,11 +33,11 @@
             @if($product->seller->address)<div><dt>Адрес</dt><dd>{{ $product->seller->address }}</dd></div>@endif
         </dl>
         <div class="bimm-detail__actions">
-            @if($product->seller->phone)<a class="bimm-button bimm-button--dark" href="tel:{{ $phoneHref }}"><i class="fa-solid fa-phone"></i> Позвонить продавцу</a>@endif
-            @if($orderAvailability->allowed)<a class="bimm-button bimm-button--gold" href="#order-form">Оформить заказ</a>@endif
+            @if($orderAvailability->allowed)<a class="bimm-button bimm-button--gold" href="#order-form">Оформить заказ <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>@endif
+            @if($product->seller->phone)<a class="bimm-button {{ $orderAvailability->allowed ? 'bimm-button--light' : 'bimm-button--dark' }}" href="tel:{{ $phoneHref }}"><i class="fa-solid fa-phone"></i> {{ $orderAvailability->allowed ? 'Задать вопрос продавцу' : 'Позвонить продавцу' }}</a>@endif
         </div>
-        @if(!$orderAvailability->allowed && ($product->seller->can_order || $product->can_order))<div class="bimm-flash" style="margin-top:16px">Заказ через сайт временно недоступен. Свяжитесь с продавцом по телефону.</div>@endif
-        <div class="bimm-trust"><div><strong><i class="fa-solid fa-shield-halved"></i> Напрямую</strong>Вы общаетесь с продавцом без посредников.</div><div><strong><i class="fa-solid fa-location-dot"></i> Локально</strong>Условия получения согласуются с магазином.</div></div>
+        @if(!$orderAvailability->allowed && ($product->seller->can_order || $product->can_order))<div class="bimm-flash" style="margin-top:16px">Заказ на сайте сейчас недоступен. Позвоните продавцу — он подскажет наличие и условия получения.</div>@endif
+        <div class="bimm-trust"><div><strong><i class="fa-solid fa-comments"></i> Связь напрямую</strong>Задайте вопрос продавцу до покупки.</div><div><strong><i class="fa-solid fa-location-dot"></i> Удобное получение</strong>Способ и время согласуете с магазином.</div></div>
     </div>
 </section>
 
