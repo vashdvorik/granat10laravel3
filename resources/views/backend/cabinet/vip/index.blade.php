@@ -59,7 +59,7 @@
                         <h6 class="mb-2"><i class="uil uil-star text-warning"></i> Что даёт VIP</h6>
                         <ul class="mb-0 ps-3 text-muted fs-14">
                             <li>Товар показывается выше остальных в каталоге, поиске и на главной.</li>
-                            <li>На карточке появляется значок «VIP», покупатели замечают её первой.</li>
+                            <li>Покупатели не видят пометки «VIP»: для них это обычная карточка, которая просто стоит выше остальных.</li>
                             <li>Оплата с баланса за нужное число дней, без подписок и автосписаний.</li>
                         </ul>
                     </div>
@@ -163,7 +163,7 @@
                                                   class="mt-1">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-link btn-sm text-danger p-0">
+                                                <button type="submit" class="vip-link-danger">
                                                     Отключить{{ $state->refundCents > 0 ? ' (вернём '.Money::rubles($state->refundCents).')' : '' }}
                                                 </button>
                                             </form>

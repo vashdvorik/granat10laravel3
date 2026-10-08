@@ -465,7 +465,7 @@ class ModerateProductJobTest extends TestCase
         $this->assertSame(ProductModerationStatus::ChangesRequired, $product->moderation_status);
         $this->assertStringContainsString('ненормативная лексика', $product->moderation_summary);
         $this->assertStringContainsString('Исправьте карточку товара', $product->moderation_summary);
-        $this->assertStringContainsString('отправьте её на модерацию повторно', $product->moderation_summary);
+        $this->assertStringContainsString('отправьте её на проверку повторно', $product->moderation_summary);
     }
 
     public function test_out_of_scope_ai_requirements_do_not_block_auto_approval(): void

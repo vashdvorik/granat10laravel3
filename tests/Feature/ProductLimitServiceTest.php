@@ -33,7 +33,7 @@ class ProductLimitServiceTest extends TestCase
         $errors = $this->service->validateForStore(true, false);
 
         $this->assertArrayHasKey('is_active', $errors);
-        $this->assertStringContainsString('Нельзя опубликовать товар без изображений', $errors['is_active']);
+        $this->assertStringContainsString('без фото товар нельзя отправить на проверку', $errors['is_active']);
         $this->assertStringContainsString('Сохранить черновик', $errors['is_active']);
     }
 
@@ -64,7 +64,7 @@ class ProductLimitServiceTest extends TestCase
         $error = $this->service->activationError($product);
 
         $this->assertNotNull($error);
-        $this->assertStringContainsString('Нельзя опубликовать товар без изображений', $error);
+        $this->assertStringContainsString('без фото товар нельзя отправить на проверку', $error);
         $this->assertStringContainsString('Сохранить черновик', $error);
     }
 }

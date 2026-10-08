@@ -83,7 +83,7 @@ class SellerCabinetStateService
         if ($this->productsInModerationCount($seller) > 0) {
             $blockers[] = $this->blocker(
                 'products_need_moderation',
-                'Некоторые товары находяться на модерации.',
+                'Некоторые товары ждут проверки: результат придёт в уведомления.',
                 'open_products'
             );
         }

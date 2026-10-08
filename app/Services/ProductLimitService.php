@@ -12,7 +12,7 @@ use App\Models\Product;
  */
 class ProductLimitService
 {
-    private const PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Нельзя опубликовать товар без изображений. Загрузите хотя бы одно фото или нажмите "Сохранить черновик".';
+    private const PRODUCT_WITHOUT_IMAGES_MESSAGE = 'Добавьте хотя бы одно фото: без фото товар нельзя отправить на проверку и опубликовать. Пока фото нет, нажмите «Сохранить черновик».';
 
     public function validateForStore(bool $isActive, bool $hasImages): array
     {

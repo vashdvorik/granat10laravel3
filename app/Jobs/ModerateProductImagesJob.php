@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Contracts\ProductImageModerationClient;
 use App\Enums\ProductModerationStatus;
+use App\Events\ProductModerationDecided;
 use App\Exceptions\AiModerationProviderException;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
@@ -223,6 +224,12 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
                 'moderated_at' => now(),
                 'moderated_by_user_id' => null,
             ])->save();
+
+            // Итог проверки фото: продавец узнаёт, что товар опубликован или что нужно исправить.
+            // «Передан администратору» не уведомляем: это видно по статусу.
+            if (in_array($status, [ProductModerationStatus::Approved, ProductModerationStatus::ChangesRequired], true)) {
+                ProductModerationDecided::dispatch($freshProduct->id);
+            }
         }
 
         $run->update([

@@ -8,14 +8,38 @@ use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\Product;
 use App\Services\CustomerOrderListService;
+use App\Services\OrderAvailabilityService;
 use App\Services\OrderService;
 use App\Services\OrderTokenService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class OrderController extends Controller
 {
+    /**
+     * Страница оформления заказа: покупатель нажал «Оформить заказ» на странице товара.
+     * Если заказ на сайте для товара недоступен, возвращаем на страницу товара: там объяснена причина и есть телефон.
+     */
+    public function create(string $alias, OrderAvailabilityService $availability): View|RedirectResponse
+    {
+        $product = Product::visible()
+            ->forRegionalContext()
+            ->with(['images', 'seller', 'category'])
+            ->where('alias', $alias)
+            ->firstOrFail();
+
+        $orderAvailability = $availability->check($product);
+
+        if (! $orderAvailability->allowed) {
+            return redirect()->route('product.show', ['alias' => $product->alias]);
+        }
+
+        $orderIdempotencyKey = (string) Str::uuid();
+
+        return view('orders.create', compact('product', 'orderAvailability', 'orderIdempotencyKey'));
+    }
     public function store(
         StoreOrderRequest $request,
         Product $product,

@@ -215,19 +215,19 @@ class ProductControllerTest extends TestCase
             ->assertSee('.product-meta dd{display:flex;align-items:center;gap:8px;', false);
     }
 
-    public function test_product_order_form_uses_full_width_section(): void
+    public function test_product_page_links_to_separate_checkout_instead_of_embedding_the_form(): void
     {
-        $product = $this->createVisibleProduct(['can_order' => true]);
+        $product = $this->createVisibleProduct(['can_order' => true, 'desc' => 'Подробное описание товара']);
         $product->seller->update(['can_order' => true]);
 
         $this->get(route('product.show', $product->alias))
             ->assertOk()
-            ->assertSee('class="product-order-section"', false)
-            ->assertSee('class="order-form" id="order-form"', false)
-            ->assertSee('.product-order-section{width:100%;margin:50px 0 0}', false)
-            ->assertDontSee('.product-order-section{max-width:820px;margin:50px auto 0}', false);
+            ->assertSee('href="'.route('orders.create', ['alias' => $product->alias]).'"', false)
+            ->assertSee('Оформить заказ')
+            ->assertDontSee('id="order-form"', false)
+            ->assertDontSee('product-order-section', false)
+            ->assertDontSee('data-order-form', false);
     }
-
     public function test_product_order_form_shows_seller_delivery_terms(): void
     {
         $product = $this->createVisibleProduct([
@@ -240,7 +240,7 @@ class ProductControllerTest extends TestCase
             'delivery_terms' => "Доставка по городу.\nСтоимость согласовывается с продавцом.",
         ]);
 
-        $this->get(route('product.show', $product->alias))
+        $this->get(route('orders.create', ['alias' => $product->alias]))
             ->assertOk()
             ->assertSee('Условия доставки')
             ->assertSee('Доставка по городу.')

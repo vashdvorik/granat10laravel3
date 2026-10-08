@@ -88,7 +88,7 @@
                                           <p>{{ $notification->data['status_label'] }}</p>
                                        @endif
                                        @if(!empty($notification->data['comment']))
-                                          <p>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 80) }}</p>
+                                          <p>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 140) }}</p>
                                        @endif
                                        <p><span class="time-posted">{{ $notification->created_at->diffForHumans() }}</span></p>
                                     </div>
@@ -380,7 +380,7 @@
                      </ul>
                   </li>
                   <!--аккаунт-->
-                  <li class="has-child {{ request()->routeIs('account.user.*') ? 'open active' : '' }}">
+                  <li class="has-child {{ request()->routeIs('account.user.*', 'account.balance.*') ? 'open active' : '' }}">
                      <a href="{{ route('account.user.index') }}" class="">
                         <span class="nav-icon uil uil-users-alt"></span>
                         <span class="menu-text">Аккаунт</span>

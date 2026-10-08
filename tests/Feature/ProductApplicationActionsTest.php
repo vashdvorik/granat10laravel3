@@ -36,7 +36,8 @@ class ProductApplicationActionsTest extends TestCase
 
         $this->assertSame($seller->id, $product->seller_id);
         $this->assertSame(ProductModerationStatus::Draft, $product->moderation_status);
-        $this->assertSame('Товар сохранён как черновик.', $result->userMessage);
+        $this->assertStringContainsString('Черновик сохранён', $result->userMessage);
+        $this->assertStringContainsString('Покупатели его не видят', $result->userMessage);
     }
 
     public function test_update_action_updates_existing_product(): void
@@ -62,6 +63,8 @@ class ProductApplicationActionsTest extends TestCase
         );
 
         $this->assertSame('Новое название', $result->product->name);
-        $this->assertSame('Изменения сохранены в черновике.', $result->userMessage);
+        // опубликованный товар, у которого поменяли название: честно говорим, что он скрыт до новой проверки
+        $this->assertStringContainsString('скрыт из каталога', $result->userMessage);
+        $this->assertStringContainsString('отправьте его на проверку', $result->userMessage);
     }
 }

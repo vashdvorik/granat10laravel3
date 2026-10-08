@@ -93,7 +93,7 @@ class SellerControllerTest extends TestCase
         $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
-    public function test_regional_shops_page_has_city_switcher_for_mobile_and_desktop(): void
+    public function test_regional_shops_page_has_city_switcher_in_page_and_mobile_menu(): void
     {
         $region = Region::factory()->create(['name' => 'Приднестровье']);
         $currentSettlement = Settlement::factory()->for($region)->create([
@@ -107,9 +107,9 @@ class SellerControllerTest extends TestCase
 
         $this->get(route('regional.shops', ['location' => $currentSettlement->slug]))
             ->assertOk()
-            ->assertSee('class="header-mobile-region hidden-md hidden-lg"', false)
+            ->assertDontSee('class="topbar"', false)
             ->assertSee('class="shops-hero__region"', false)
-            ->assertSee('regional-selector--mobile-header', false)
+            ->assertSee('regional-selector--push-menu', false)
             ->assertSee('regional-selector--hero', false)
             ->assertSee('Слободзея')
             ->assertSee('Тирасполь')

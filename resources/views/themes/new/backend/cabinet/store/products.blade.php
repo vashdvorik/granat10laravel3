@@ -122,6 +122,23 @@
                                 <div class="tab-pane fade show active" id="ap-overview" role="tabpanel" aria-labelledby="ap-overview-tab">
                                     
 
+                                    {{-- Как проходит проверка: коротко и без терминов --}}
+                                    <details class="moderation-help">
+                                        <summary><i class="uil uil-question-circle"></i> Как проходит проверка товара</summary>
+                                        <div class="moderation-help__body">
+                                            <ol>
+                                                <li><strong>Черновик.</strong> Вы заполняете карточку. Покупатели её не видят.</li>
+                                                <li><strong>Отправка на проверку.</strong> Нажмите «Отправить на проверку». Товар встанет в очередь, покупатели его по-прежнему не видят.</li>
+                                                <li><strong>Результат.</strong> Товар либо публикуется сам, либо вы получаете замечания: что именно исправить. Уведомление придёт в колокольчик вверху.</li>
+                                                <li><strong>Исправления.</strong> Поправьте карточку и отправьте её снова.</li>
+                                            </ol>
+                                            <p class="mb-0">
+                                                Цену, скидку и условия заказа можно менять в любой момент, это применяется сразу.
+                                                Если изменить название, описание, характеристики, категорию или фото, товар скроется
+                                                и пройдёт проверку заново.
+                                            </p>
+                                        </div>
+                                    </details>
                                     @if($products->count() > 0)
                                         {{-- КАРТОЧКИ ТОВАРОВ --}}
                                         <div class="product-page-list">
@@ -197,17 +214,6 @@
                                                                             </small>
                                                                         @endif
 
-                                                                        <small class="text-muted d-block mb-2 seller-product-card__legacy-state">
-                                                                            <i class="uil uil-shield-check"></i>
-                                                                            <strong>Модерация:</strong>
-                                                                            {{ $product->view_state->moderationLabel }}
-                                                                            <br>
-                                                                            <strong>Покупателям:</strong>
-                                                                            {{ $productCabinetState->label }}
-                                                                        </small>
-                                                                        <small class="text-muted d-block mb-2 seller-product-card__legacy-state">
-                                                                            {{ \Illuminate\Support\Str::limit($productCabinetState->description, 100) }}
-                                                                        </small>
                                                                         <div class="seller-product-card__state seller-product-card__state--{{ $productCabinetState->color }}">
                                                                             <div class="seller-product-card__state-title">
                                                                                 <i class="uil uil-shield-check"></i>
@@ -219,7 +225,7 @@
                                                                         </div>
 
                                                                         {{-- Дата последнего поднятия --}}
-                                                                        @if($product->push_at)
+                                                                        @if($product->push_at && $product->view_state->isPublic)
                                                                             <small class="text-muted d-block mb-2">
                                                                                 <i class="uil uil-clock"></i> Поднятие: {{ $product->push_at->format('d.m.Y в H:i') }}
                                                                             </small>
@@ -489,20 +495,20 @@ $(document).ready(function() {
         let title, text, icon, confirmText;
 
         if (action === 'activate') {
-            title = 'Включить товар?';
-            text = `Товар "${productName}" снова станет доступен покупателям в каталоге и поиске.`;
-            icon = 'question';
-            confirmText = '<i class="uil uil-play me-1"></i> Да, включить';
-        } else if (action === 'submit') {
             title = 'Опубликовать товар?';
-            text = `Товар "${productName}" будет отправлен на проверку администратору.`;
+            text = `Товар "${productName}" появится в каталоге и поиске, покупатели смогут его найти и заказать.`;
+            icon = 'question';
+            confirmText = '<i class="uil uil-check me-1"></i> Да, опубликовать';
+        } else if (action === 'submit') {
+            title = 'Отправить товар на проверку?';
+            text = `Товар "${productName}" уйдёт на проверку. Пока она идёт, покупатели его не видят. После одобрения он опубликуется сам, а результат придёт в уведомления (колокольчик вверху).`;
             icon = 'question';
             confirmText = '<i class="uil uil-shield-check me-1"></i> Да, отправить';
         } else {
-            title = 'Скрыть товар?';
-            text = `Товар "${productName}" будет скрыт из каталога и поиска.`;
+            title = 'Снять товар с публикации?';
+            text = `Товар "${productName}" исчезнет из каталога и поиска. Опубликовать его снова можно в любой момент.`;
             icon = 'warning';
-            confirmText = '<i class="uil uil-pause me-1"></i> Да, скрыть';
+            confirmText = '<i class="uil uil-pause me-1"></i> Да, снять с публикации';
         }
 
         Swal.fire({
@@ -549,6 +555,10 @@ $(document).ready(function() {
                             errorMessage = xhr.responseJSON.message;
                         } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                             errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        }
+
+                        if (xhr.status === 403) {
+                            errorMessage = 'Это действие сейчас недоступно: статус товара уже изменился (возможно, в другой вкладке). Обновите страницу.';
                         }
 
                         Swal.fire({

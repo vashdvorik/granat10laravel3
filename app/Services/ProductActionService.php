@@ -22,7 +22,7 @@ class ProductActionService
     {
         if (! $this->transitions->canPublish($product)) {
             throw new ProductActivationException(
-                'Товар нельзя опубликовать до завершения модерации актуальной версии.'
+                'Опубликовать можно только товар, который прошёл проверку. Если вы недавно меняли карточку, дождитесь результата новой проверки.'
             );
         }
 
@@ -62,8 +62,8 @@ class ProductActionService
 
         if ($product->is_active && $product->images()->count() === 1) {
             throw new ProductImageDeletionException(
-                'Нельзя удалить последнее изображение активного товара. '
-                    .'Сначала деактивируйте товар или загрузите новое фото.'
+                'Это единственное фото опубликованного товара, без него товар нельзя показывать покупателям. '
+                    .'Сначала добавьте новое фото, а потом удалите это — или снимите товар с публикации.'
             );
         }
 
@@ -84,7 +84,7 @@ class ProductActionService
     {
         if (! $this->transitions->canPushUp($product)) {
             throw new ProductPushTooSoonException(
-                'Поднять можно только опубликованный товар.',
+                'Поднять можно только опубликованный товар: тот, который сейчас виден покупателям.',
                 now()
             );
         }

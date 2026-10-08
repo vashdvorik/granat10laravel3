@@ -23,6 +23,10 @@ class PublicOrderFlowTest extends TestCase
         $this->get(route('product.show', $product->alias))
             ->assertOk()
             ->assertSee('Оформить заказ')
+            ->assertSee(route('orders.create', ['alias' => $product->alias]), false);
+
+        $this->get(route('orders.create', ['alias' => $product->alias]))
+            ->assertOk()
             ->assertSee(route('orders.store', $product), false);
 
         $product->seller->update(['can_order' => false]);

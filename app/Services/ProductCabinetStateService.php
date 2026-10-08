@@ -10,7 +10,8 @@ class ProductCabinetStateService
 {
     public function __construct(
         private readonly ProductStateTransitionService $transitions,
-        private readonly ProductVisibilityResolver $visibilityResolver
+        private readonly ProductVisibilityResolver $visibilityResolver,
+        private readonly ProductStatusStoryFactory $storyFactory,
     ) {}
 
     public function make(Product $product): ProductCabinetState
@@ -56,52 +57,29 @@ class ProductCabinetStateService
         bool $hasImages,
         bool $visibleToBuyers,
     ): array {
-        if ($product->moderation_status === ProductModerationStatus::Draft) {
-            return ['draft', 'Черновик', 'Товар ещё не отправлен на проверку.', 'gray', null, 'submit'];
-        }
+        // Тексты берутся из единого источника, чтобы карточка, страница товара и уведомления говорили одно и то же
+        $story = $this->storyFactory->make($product);
+        $explanation = $story->explanation;
+        $tone = $story->tone;
+        $label = $story->headline;
 
-        if ($product->moderation_status === ProductModerationStatus::Pending) {
-            return ['queued', 'На проверке', 'Товар ожидает проверки.', 'warning', null, null];
-        }
-
-        if ($product->moderation_status === ProductModerationStatus::Processing) {
-            return ['checking', 'Проверяется', 'Сейчас выполняется автоматическая проверка.', 'warning', null, null];
-        }
-
-        if (in_array($product->moderation_status, [
-            ProductModerationStatus::NeedsReview,
-            ProductModerationStatus::Failed,
-        ], true)) {
-            return ['manual_review', 'На ручной проверке', 'Товар проверяет администратор.', 'info', null, null];
-        }
-
-        if ($product->moderation_status === ProductModerationStatus::ChangesRequired) {
-            return ['changes_required', 'Нужно исправить', $product->moderation_summary ?: 'Исправьте замечания и отправьте товар повторно.', 'info', 'moderation_not_approved', 'edit'];
-        }
-
-        if ($product->moderation_status === ProductModerationStatus::Rejected) {
-            return ['rejected', 'Отклонён', $product->moderation_summary ?: 'Товар отклонён. Измените карточку перед повторной отправкой.', 'danger', 'moderation_not_approved', 'edit'];
-        }
-
-        if (! $moderationActual) {
-            return ['hidden_moderation_outdated', 'Скрыт: нужна повторная проверка', 'Товар изменён после модерации.', 'warning', 'moderation_outdated', 'submit'];
-        }
-
-        if (! $product->is_active) {
-            return ['approved_hidden', 'Одобрен, но не опубликован', 'Товар прошёл проверку, но снят с публикации.', 'gray', 'not_enabled_by_seller', 'publish'];
-        }
-
-        if (! $hasImages) {
-            return ['hidden_no_images', 'Скрыт: нет фото', 'Добавьте фото, чтобы товар можно было показывать покупателям.', 'warning', 'no_images', 'add_images'];
-        }
-
-        if ($visibleToBuyers || $this->transitions->isPublic($product)) {
-            return ['visible', 'Виден покупателям', 'Товар показывается в каталоге и поиске.', 'success', null, 'push_up'];
-        }
-
-        return ['hidden_not_enabled', 'Снят с публикации', 'Товар сейчас не показывается покупателям.', 'gray', 'not_enabled_by_seller', 'publish'];
+        return match (true) {
+            $product->moderation_status === ProductModerationStatus::Draft => ['draft', $label, $story->remark !== null ? 'Замечания прошлой проверки: '.$story->remark : $explanation, $tone, null, 'submit'],
+            $product->moderation_status === ProductModerationStatus::Pending => ['queued', $label, $explanation, $tone, null, null],
+            $product->moderation_status === ProductModerationStatus::Processing => ['checking', $label, $explanation, $tone, null, null],
+            in_array($product->moderation_status, [ProductModerationStatus::NeedsReview, ProductModerationStatus::Failed], true)
+                => ['manual_review', $label, $explanation, $tone, null, null],
+            $product->moderation_status === ProductModerationStatus::ChangesRequired
+                => ['changes_required', $label, $story->remark ?: $explanation, $tone, 'moderation_not_approved', 'edit'],
+            $product->moderation_status === ProductModerationStatus::Rejected
+                => ['rejected', $label, $story->remark ?: $explanation, $tone, 'moderation_not_approved', 'edit'],
+            ! $moderationActual => ['hidden_moderation_outdated', $label, $explanation, $tone, 'moderation_outdated', 'submit'],
+            ! $product->is_active => ['approved_hidden', $label, $explanation, $tone, 'not_enabled_by_seller', 'publish'],
+            ! $hasImages => ['hidden_no_images', $label, $explanation, $tone, 'no_images', 'add_images'],
+            $visibleToBuyers || $this->transitions->isPublic($product) => ['visible', $label, $explanation, $tone, null, 'push_up'],
+            default => ['hidden_not_enabled', 'Снят с публикации', 'Товар сейчас не показывается покупателям.', 'gray', 'not_enabled_by_seller', 'publish'],
+        };
     }
-
     private function canBeOrdered(Product $product): bool
     {
         return (bool) $product->can_order

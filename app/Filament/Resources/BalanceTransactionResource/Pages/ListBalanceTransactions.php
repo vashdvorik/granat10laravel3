@@ -8,4 +8,6 @@ use Filament\Resources\Pages\ListRecords;
 class ListBalanceTransactions extends ListRecords
 {
     protected static string $resource = BalanceTransactionResource::class;
+
+    protected static ?string $title = 'Журнал баланса';
 }

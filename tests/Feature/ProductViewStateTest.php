@@ -55,10 +55,12 @@ class ProductViewStateTest extends TestCase
         $state = app(ProductViewStateFactory::class)->make($product);
 
         $this->assertSame('На ручной проверке', $state->moderationLabel);
-        $this->assertSame(
-            'Товар передан администратору на дополнительную проверку.',
-            $state->description
-        );
+        $this->assertSame('manual_review', $state->story->key);
+        $this->assertSame('Проверяет администратор', $state->story->headline);
+        $this->assertStringContainsString('Это не отказ', $state->description);
+        // служебный текст сбоя продавцу не показывается
+        $this->assertStringNotContainsString('Gemini', $state->description);
+        $this->assertNull($state->story->remark);
     }
 
     public function test_approved_inactive_product_can_only_be_published(): void

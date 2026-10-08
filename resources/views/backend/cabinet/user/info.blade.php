@@ -35,7 +35,7 @@
                                 <i class="uil uil-edit"></i> Редактировать данные
                             </a>
                             <a href="{{ route('account.user.change_password') }}" class="btn btn-outline-secondary btn-squared">
-                                <i class="uil uil-lock"></i> Сменить пароль
+                                <i class="uil uil-lock"></i> {{ $user->hasPassword() ? 'Сменить пароль' : 'Задать пароль' }}
                             </a>
                         </div>
                     </div>

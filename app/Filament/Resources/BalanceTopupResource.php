@@ -17,7 +17,9 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /** Платежи картой через банк: от создания счёта до зачисления денег. Только просмотр и сверка с банком. */
@@ -87,8 +89,10 @@ class BalanceTopupResource extends Resource
                     ->sortable()
                     ->summarize(
                         Sum::make()
-                            ->label('Оплачено')
-                            ->query(fn (QueryBuilder $query): QueryBuilder => $query->where('status', BalanceTopup::STATUS_PAID))
+                            ->label('Оплачено, без тестовых')
+                            ->query(fn (QueryBuilder $query): QueryBuilder => $query
+                                ->where('status', BalanceTopup::STATUS_PAID)
+                                ->where('is_test', false))
                             ->formatStateUsing(fn (mixed $state): string => Money::rup((int) $state)),
                     ),
                 Tables\Columns\TextColumn::make('status')
@@ -321,6 +325,11 @@ class BalanceTopupResource extends Resource
         };
 
         return $topup;
+    }
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record === null ? null : 'Платёж № '.$record->getKey();
     }
 
     public static function getEloquentQuery(): Builder

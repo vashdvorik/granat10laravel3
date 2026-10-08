@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Application\Products\CreateProduct;
+use App\Application\Products\ProductSaveMessage;
 use App\Application\Products\Queries\ListSellerProducts;
 use App\Application\Products\UpdateProduct;
 use App\Exceptions\ProductActivationException;
@@ -269,6 +270,10 @@ class ProductController extends Controller
 
         $this->authorize('manageImages', $product);
 
+        // состояние до удаления: удаление фото может вернуть товар в черновик, продавцу нужно об этом сказать
+        $statusBefore = $product->moderation_status;
+        $wasPublic = $product->view_state->isPublic;
+
         try {
             $updatedProduct = $productActionService->deleteImage($image);
         } catch (ProductImageDeletionException $exception) {
@@ -281,15 +286,23 @@ class ProductController extends Controller
             return redirect()->back()->with('error', $exception->getMessage());
         }
 
+        $message = ProductSaveMessage::forImageDeleted($statusBefore, $wasPublic, $updatedProduct);
+
         if (request()->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Изображение удалено',
+                'message' => $message,
                 'current_version' => $updatedProduct->moderation_version,
+                // свежий блок статуса, чтобы страница не показывала «Опубликован» у товара, который уже черновик
+                'status_html' => view('components.product-moderation-status', [
+                    'product' => $updatedProduct,
+                    'hasIssues' => false,
+                ])->render(),
+                'state_changed' => $statusBefore !== $updatedProduct->moderation_status,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Изображение удалено');
+        return redirect()->back()->with('success', $message);
     }
 
     /**
@@ -420,7 +433,7 @@ class ProductController extends Controller
         $this->authorize('submitForModeration', $product);
 
         try {
-            $productModerationService->submit($product, Auth::user());
+            $submitted = $productModerationService->submit($product, Auth::user());
         } catch (ProductModerationException $exception) {
             if (request()->ajax()) {
                 return response()->json([
@@ -431,17 +444,19 @@ class ProductController extends Controller
             return redirect()->back()->with('error', $exception->getMessage());
         }
 
+        $message = ProductSaveMessage::afterSubmit($submitted);
+
         if (request()->ajax()) {
             $product->refresh();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Товар отправлен на модерацию',
+                'message' => $message,
                 'fragments' => $this->renderProductCardFragments($product),
             ]);
         }
 
-        return redirect()->back()->with('success', 'Товар отправлен на модерацию');
+        return redirect()->back()->with('success', $message);
     }
 
     private function renderProductCardFragments(Product $product): array

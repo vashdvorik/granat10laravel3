@@ -65,7 +65,7 @@
                                         <span>{{ $notification->data['status_label'] }}</span>
                                     @endif
                                     @if(!empty($notification->data['comment']))
-                                        <span>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 80) }}</span>
+                                        <span>{{ \Illuminate\Support\Str::limit($notification->data['comment'], 140) }}</span>
                                     @endif
                                     <small>{{ $notification->created_at->diffForHumans() }}</small>
                                 </a>

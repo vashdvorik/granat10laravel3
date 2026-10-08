@@ -329,12 +329,19 @@ sudo certbot renew --dry-run
 После заполнения `.env`:
 
 ```bash
+rm -rf bootstrap/cache/filament
 php artisan optimize:clear
 php artisan optimize
 php artisan filament:optimize
 ```
 
 После каждого изменения `.env` повторяйте эти команды.
+
+**Первой строкой всегда удаляйте `bootstrap/cache/filament`.** Это кеш списка ресурсов админки. Если в
+релизе ресурс удалён (например, тарифы) или добавлен (например, раздел «Финансы»), а старый кеш остался,
+весь сайт отвечает ошибкой 500 вида `Class "App\Filament\Resources\...Resource" not found`. Если сайт уже
+упал по этой причине, достаточно выполнить `rm -rf bootstrap/cache/filament` и `php artisan optimize:clear`,
+а если консоли нет, удалить папку `bootstrap/cache/filament` через файловый менеджер.
 
 ## 9. Workers очереди
 
@@ -623,6 +630,7 @@ php artisan down --render="errors::503"
 git pull --ff-only
 composer install --no-dev --prefer-dist --optimize-autoloader
 php artisan migrate --force
+rm -rf bootstrap/cache/filament
 php artisan optimize:clear
 php artisan optimize
 php artisan filament:optimize

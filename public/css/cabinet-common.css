@@ -7651,3 +7651,106 @@ body.seller-cabinet-body .product-edit-page .product-form-section,
         flex-direction: column;
     }
 }
+
+/* ===== Статус товара: что это значит и что делать дальше ===== */
+.product-status-box {
+    display: block;
+    margin: 0 0 18px;
+    padding: 14px 16px;
+    border: 1px solid var(--seller-cabinet-border, #e3e6ef);
+    border-radius: 14px;
+    background: var(--seller-cabinet-soft, #f8f9fb);
+    overflow-wrap: anywhere;
+}
+.product-status-box__head { display: flex; align-items: flex-start; gap: 12px; }
+.product-status-box__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: #fff;
+    color: #6b7280;
+    font-size: 21px;
+}
+.product-status-box__titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.product-status-box__title { color: var(--seller-cabinet-text, #1f2937); font-size: 16px; line-height: 1.3; }
+.product-status-box__text { color: var(--seller-cabinet-muted, #6b7280); font-size: 14px; line-height: 1.45; }
+.product-status-box__remark {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--seller-cabinet-text, #1f2937);
+    font-size: 14px;
+    line-height: 1.5;
+}
+.product-status-box__next {
+    margin-top: 10px;
+    color: var(--seller-cabinet-text, #1f2937);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.45;
+}
+.product-status-box--success { border-color: rgba(40, 180, 133, .3); background: rgba(40, 180, 133, .08); }
+.product-status-box--success .product-status-box__icon { color: #058c66; }
+.product-status-box--warning { border-color: rgba(255, 160, 67, .35); background: rgba(255, 160, 67, .1); }
+.product-status-box--warning .product-status-box__icon { color: #d9730d; }
+.product-status-box--danger { border-color: rgba(255, 90, 103, .3); background: rgba(255, 90, 103, .08); }
+.product-status-box--danger .product-status-box__icon { color: #d6293a; }
+.product-status-box--info { border-color: rgba(75, 207, 227, .35); background: rgba(75, 207, 227, .1); }
+.product-status-box--info .product-status-box__icon { color: #0c8ea3; }
+
+/* Подсказка о том, что запускает повторную проверку, и справка «как проходит проверка» */
+.product-recheck-hint {
+    margin: 0 0 18px;
+    padding: 12px 14px;
+    border: 1px dashed var(--seller-cabinet-border, #d9dce6);
+    border-radius: 12px;
+    color: var(--seller-cabinet-muted, #6b7280);
+    font-size: 14px;
+    line-height: 1.5;
+}
+.product-recheck-hint strong { color: var(--seller-cabinet-text, #1f2937); }
+.product-form-actions__hint {
+    margin: 0 0 12px;
+    color: var(--seller-cabinet-muted, #6b7280);
+    font-size: 13px;
+    line-height: 1.45;
+    text-align: right;
+}
+.moderation-help {
+    margin: 0 0 20px;
+    border: 1px solid var(--seller-cabinet-border, #e3e6ef);
+    border-radius: 14px;
+    background: #fff;
+}
+.moderation-help > summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+}
+.moderation-help > summary::-webkit-details-marker { display: none; }
+.moderation-help__body { padding: 0 16px 14px; color: var(--seller-cabinet-muted, #6b7280); font-size: 14px; line-height: 1.55; }
+.moderation-help__body ol { margin: 0 0 10px; padding-left: 20px; }
+.moderation-help__body li { margin-bottom: 6px; }
+.moderation-help__body strong { color: var(--seller-cabinet-text, #1f2937); }
+
+/* Текстовая кнопка «Отключить»: .btn-link в темах кабинета получает цветной фон, поэтому свой класс */
+.vip-link-danger {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: transparent !important;
+    color: #d6293a !important;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+}
+.vip-link-danger:hover,
+.vip-link-danger:focus { text-decoration: underline; }

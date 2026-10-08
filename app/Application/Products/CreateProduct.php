@@ -32,9 +32,7 @@ class CreateProduct
             product: $product,
             action: $action,
             moderationDispatched: $action->requestsModeration(),
-            userMessage: $action === ProductSaveAction::Draft
-                ? 'Товар сохранён как черновик.'
-                : 'Товар сохранён и отправлен на проверку.',
+            userMessage: ProductSaveMessage::forCreate($product, $action->requestsModeration()),
         );
     }
 }

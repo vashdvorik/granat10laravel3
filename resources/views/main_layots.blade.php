@@ -93,11 +93,6 @@
             padding-right: 1px !important;
         }
     
-    /* СКРЫВАЕМ TOPBAR */
-        .topbar {
-            display: none !important;
-        }
-        
         /* СКРЫВАЕМ ПЕРЕКЛЮЧАТЕЛЬ ВИДА (GRID/LIST) */
         .view-mode {
             display: none !important;
@@ -664,53 +659,6 @@
         </div>-->
 
 
-    <!--ПОЛОСКА СЕРОГО ЦВЕТА  -->
-    <div class="topbar">
-        <div class="container container-240">
-            <div class="row flex">
-                <div class="col-md-6 col-sm-6 col-xs-4 flex-left">
-                    <div class="topbar-left">
-                        <div class="element element-store">
-                            @if(config('regionality.enabled'))
-                                @include('components.regional-selector', ['variant' => 'topbar'])
-                            @else
-                                <span>
-                                    <img src="{{ asset('img/icon-map.png') }}" alt="">
-                                    Все регионы
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-sm-6 col-xs-8 flex-right">
-                    <div class="topbar-right">
-                        <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('seller.help') }}">Помощь продавцам</a>
-                        </div>
-                        <div class="element hidden-xs hidden-sm">
-                            <a href="{{ route('account.index') }}"><i class="fa fa-user" style="margin-right:5px;"></i><span>Войти продавцу</span></a>
-                        </div>
-                <!--    <div class="element element-currency">
-                            <a id="label3" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            
-                            <span>RUP</span>
-                            <span class="ion-ios-arrow-down f-10 e-arrow"></span>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="label3">
-                                <li><a href="#">USD</a></li>
-                                <li><a href="#">RUP</a></li>
-                                <li><a href="#">MDL</a></li>
-                            </ul>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
-            <div class="header-mobile-region hidden-md hidden-lg">
-                @include('components.regional-selector', ['variant' => 'mobile-header'])
-            </div>
-        </div>
-    </div>
-
     <!-- ПЕРВАЯ ЧАСТЬ ШАПКИ САЙТА (ЛОГОТИП, ПОИСК, ИКОНКИ КОРЗИНЫ)-->
     <div class="header-center">
         <div class="container container-240">
@@ -723,7 +671,7 @@
                 <div class="col-lg-7 col-md-7 v-center header-search hidden-xs hidden-sm">
                     <form method="get" class="searchform ajax-search" action="{{ $regionalUrl->route('search') }}" role="search">
                         <input type="hidden" name="type" value="product">
-                        <input type="text" onblur="if (this.value=='') this.value = this.defaultValue" onfocus="if (this.value==this.defaultValue) this.value = ''" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}">
+                        <input type="text" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}" aria-label="Поиск товаров и магазинов" autocomplete="off">
                         <input type="hidden" name="category" id="search-category-input" value="{{ request('category') }}">
                         <div class="search-panel">
                             <a class="dropdown-toggle" data-toggle="dropdown" href='#' id="search-category-label">
@@ -754,7 +702,19 @@
                         </div>
                 <!-- Иконки -->
                         <div class="header-sub-element row">
-                            <a class="hidden-xs hidden-sm" href="{{ route('account.index') }}" title="Войти продавцу" aria-label="Войти продавцу"><img src="{{ asset('img/icon-user.png') }}" alt=""></a>
+                            {{-- Десктоп: вход и регистрация продавца. На мобильных ниже остаются иконки избранного и заказов. --}}
+                            <div class="header-auth hidden-xs hidden-sm">
+                                @auth
+                                    <a class="header-auth__btn header-auth__btn--primary" href="{{ route('account.index') }}">
+                                        <i class="fa-regular fa-user" aria-hidden="true"></i> Мой кабинет
+                                    </a>
+                                @else
+                                    <a class="header-auth__btn header-auth__btn--light" href="{{ route('login') }}">Войти</a>
+                                    <a class="header-auth__btn header-auth__btn--primary" href="{{ route('register') }}">
+                                        <span class="header-auth__full">Стать продавцом</span><span class="header-auth__short">Регистрация</span>
+                                    </a>
+                                @endauth
+                            </div>
                             <a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart.png') }}" alt=""></a>
                             <a href="{{ route('orders.index') }}" class="header-orders-link" title="Мои заказы" aria-label="Мои заказы">
                                 <i class="fa-regular fa-clipboard" aria-hidden="true"></i>
@@ -788,6 +748,7 @@
                                     <li class="level1"><a href="{{ $regionalUrl->route('shops') }}"><img src="{{ asset('img/icon-ship.png') }}" alt="">Магазины</a></li>
                                     <li class="level1"><a href="{{ $regionalUrl->route('favorites') }}"><img src="{{ asset('img/icon-heart3.png') }}" alt="">Понравившиеся</a></li>
                                     <li class="level1"><a href="{{ $regionalUrl->route('catalog.sale') }}"><img src="{{ asset('img/skidka-logo.png') }}" alt="">Распродажи сейчас<span class="h-ribbon h-pos e-red">sale</span></a></li>
+                                    <li class="level1"><a href="{{ route('orders.index') }}"><img src="{{ asset('img/icon-orders.svg') }}" alt="">Мои заказы@if(($customerOrdersCount ?? 0) > 0)<span class="main-menu__count">{{ $customerOrdersCount }}</span>@endif</a></li>
                                 </ul>
                             </div>
                         </nav>

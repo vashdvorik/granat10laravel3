@@ -26,17 +26,13 @@ class UpdateProduct
         array $images = []
     ): ProductWriteResult {
         $action = ProductSaveAction::from($data['save_action']);
-        $updatedProduct = $this->productWriteService->update($product, $data, $images, $actor);
+        $outcome = $this->productWriteService->updateWithOutcome($product, $data, $images, $actor);
 
         return new ProductWriteResult(
-            product: $updatedProduct,
+            product: $outcome->product,
             action: $action,
-            moderationDispatched: $action->requestsModeration(),
-            userMessage: match ($action) {
-                ProductSaveAction::Draft => 'Изменения сохранены в черновике.',
-                ProductSaveAction::Submit => 'Изменения сохранены и отправлены на проверку.',
-                ProductSaveAction::Save => 'Изменения сохранены.',
-            },
+            moderationDispatched: $outcome->submitted,
+            userMessage: ProductSaveMessage::forUpdate($outcome),
         );
     }
 }

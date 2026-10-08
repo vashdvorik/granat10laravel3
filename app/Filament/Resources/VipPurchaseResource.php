@@ -16,7 +16,9 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /** Покупки VIP-размещения: кто, за какой товар, на какой срок и сколько заплатил. Только просмотр. */
 class VipPurchaseResource extends Resource
@@ -217,6 +219,11 @@ class VipPurchaseResource extends Resource
                         ->columns(['default' => 1, 'md' => 3]),
                 ]),
         ]);
+    }
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record === null ? null : 'Покупка VIP № '.$record->getKey();
     }
 
     public static function getEloquentQuery(): Builder

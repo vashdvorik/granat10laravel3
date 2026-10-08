@@ -45,8 +45,16 @@ class ProductVipService
         $blockers = [];
 
         if (! $snapshot->publicVisible) {
+            $reasons = $snapshot->buyerBlockingReasons;
+            $moderationBlocks = in_array('moderation_not_approved', $reasons, true) || in_array('moderation_outdated', $reasons, true);
+
             foreach (self::BLOCKERS as $code => $message) {
-                if (in_array($code, $snapshot->buyerBlockingReasons, true)) {
+                // Пока товар не прошёл проверку, «снят с публикации» продавцу ничего не говорит: он его не снимал
+                if ($code === 'not_enabled_by_seller' && $moderationBlocks) {
+                    continue;
+                }
+
+                if (in_array($code, $reasons, true)) {
                     $blockers[] = ['code' => $code, 'message' => $message];
                 }
             }

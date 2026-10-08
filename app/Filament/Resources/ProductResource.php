@@ -9,6 +9,7 @@ use App\Filament\Resources\ProductResource\RelationManagers\ModerationActionsRel
 use App\Filament\Resources\ProductResource\RelationManagers\ModerationRunsRelationManager;
 use App\Filament\Resources\ProductResource\Tables\ProductTableActions;
 use App\Filament\Resources\ProductResource\Tables\ProductTableLayout;
+use App\Enums\ProductModerationStatus;
 use App\Models\Product;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -43,6 +44,30 @@ class ProductResource extends Resource
             ->filters(ProductTableLayout::filters())
             ->actions(ProductTableActions::make())
             ->bulkActions([]);
+    }
+
+    /** Товары, по которым ждут решения администратора: чем дольше очередь, тем дольше продавцы видят «Ждёт проверки». */
+    public static function getNavigationBadge(): ?string
+    {
+        $waiting = Product::query()
+            ->whereIn('moderation_status', [
+                ProductModerationStatus::Pending->value,
+                ProductModerationStatus::NeedsReview->value,
+                ProductModerationStatus::Failed->value,
+            ])
+            ->count();
+
+        return $waiting > 0 ? (string) $waiting : null;
+    }
+
+    public static function getNavigationBadgeColor(): string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Товары, которые ждут решения администратора (на проверке или переданы на ручную проверку).';
     }
 
     public static function getRelations(): array

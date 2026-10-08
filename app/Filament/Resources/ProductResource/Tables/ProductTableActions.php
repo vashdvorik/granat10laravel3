@@ -86,7 +86,7 @@ class ProductTableActions
             ->form([
                 Forms\Components\Textarea::make('comment')
                     ->label('Что написать продавцу')
-                    ->default('Замените проблемное фото товара и отправьте карточку на модерацию повторно.')
+                    ->default('Замените проблемное фото товара и отправьте карточку на проверку повторно.')
                     ->required()
                     ->maxLength(2000),
             ])

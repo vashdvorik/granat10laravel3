@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Contracts\AiModerationClient;
 use App\Enums\ProductModerationStatus;
+use App\Events\ProductModerationDecided;
 use App\Exceptions\AiModerationProviderException;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
@@ -244,6 +245,8 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
                 'moderated_at' => now(),
                 'moderated_by_user_id' => null,
             ])->save();
+
+            $this->notifySellerAboutOutcome($freshProduct->id, $status);
         }
 
         $run->update([
@@ -289,6 +292,18 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
                 $this->mode ?? (string) config('moderation.mode'),
                 $this->configurationHash($imageProvider, $imageModel, 'image'),
             )->afterCommit();
+        }
+    }
+
+    /**
+     * Продавец узнаёт о результате автоматической проверки так же, как о решении администратора:
+     * товар опубликован или нужно что-то исправить. «Передан администратору» и «ждёт» не уведомляем:
+     * это видно по статусу, а итог придёт отдельным уведомлением.
+     */
+    private function notifySellerAboutOutcome(int $productId, ProductModerationStatus $status): void
+    {
+        if (in_array($status, [ProductModerationStatus::Approved, ProductModerationStatus::ChangesRequired], true)) {
+            ProductModerationDecided::dispatch($productId);
         }
     }
 

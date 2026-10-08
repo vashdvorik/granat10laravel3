@@ -10,17 +10,6 @@
     </small>
 @endif
 
-<small class="text-muted d-block mb-2 seller-product-card__legacy-state">
-    <i class="uil uil-shield-check"></i>
-    <strong>Модерация:</strong>
-    {{ $product->view_state->moderationLabel }}
-    <br>
-    <strong>Покупателям:</strong>
-    {{ $productCabinetState->label }}
-</small>
-<small class="text-muted d-block mb-2 seller-product-card__legacy-state">
-    {{ \Illuminate\Support\Str::limit($productCabinetState->description, 100) }}
-</small>
 <div class="seller-product-card__state seller-product-card__state--{{ $productCabinetState->color }}">
     <div class="seller-product-card__state-title">
         <i class="uil uil-shield-check"></i>
@@ -31,7 +20,7 @@
     </div>
 </div>
 
-@if($product->push_at)
+@if($product->push_at && $product->view_state->isPublic)
     <small class="text-muted d-block mb-2">
         <i class="uil uil-clock"></i> Поднятие: {{ $product->push_at->format('d.m.Y в H:i') }}
     </small>

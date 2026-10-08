@@ -219,11 +219,11 @@
     .header-v1 .header-sub {
         display: flex;
         float: none;
-        flex: 0 0 172px;
+        flex: 0 0 auto;
         align-items: center;
         justify-content: flex-end;
         width: auto;
-        max-width: 172px;
+        max-width: none;
         min-width: 0;
         padding-left: 0;
     }
@@ -1262,10 +1262,6 @@ body.pushmenu-push-toleft {
     padding-bottom: 56px;
 }
 
-.sale-page__heading {
-    margin-bottom: 24px;
-}
-
 .sale-page .sale-products-grid {
     margin-bottom: 34px;
 }
@@ -1773,7 +1769,108 @@ body.pushmenu-push-toleft {
     }
 }
 
-.home-product__vip{position:absolute;left:12px;top:12px;padding:5px 10px;border-radius:20px;background:#f5a623;color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;z-index:2}
-.home-product__discount + .home-product__vip{top:46px}
 
-.vip-inline-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:3px 10px;border-radius:999px;background:#f5a623;color:#fff;font-size:.45em;font-weight:800;letter-spacing:.04em;vertical-align:middle;white-space:nowrap}
+
+/* ===== Вход и регистрация продавца в шапке (десктоп) ===== */
+.header-auth {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.header-auth__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 0 22px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.header-auth__btn:hover,
+.header-auth__btn:focus {
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.header-auth__btn--light {
+    border-color: #d9d4df;
+    background: #fff;
+    color: #222228;
+}
+
+.header-auth__btn--light:hover,
+.header-auth__btn--light:focus {
+    border-color: #b965ed;
+    color: #7b3fc2;
+    box-shadow: 0 6px 16px rgba(135, 80, 180, .14);
+}
+
+.header-auth__btn--primary {
+    background: #25252b;
+    color: #fff !important;
+}
+
+.header-auth__btn--primary:hover,
+.header-auth__btn--primary:focus {
+    background: #3a3a44;
+    box-shadow: 0 6px 16px rgba(37, 37, 43, .22);
+}
+
+.header-auth__short { display: none; }
+
+@media (max-width: 1199px) {
+    .header-auth { gap: 8px; }
+    .header-auth__btn { min-height: 40px; padding: 0 15px; font-size: 14px; }
+    .header-auth__full { display: none; }
+    .header-auth__short { display: inline; }
+}
+
+/* На десктопе избранное и заказы живут в основном меню, иконки остаются только на мобильных */
+@media (min-width: 992px) {
+    .header-sub .header-sub-element.row > a:not(.header-auth__btn) { display: none; }
+}
+
+/* Счётчик заказов в пункте меню «Мои заказы» */
+.main-menu__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--market-accent, #8750b4);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: middle;
+}
+
+/* Строка поиска в шапке: при фокусе подсвечивается вся «пилюля» (поле и панель категорий), а не только каретка */
+@media (min-width: 992px) {
+    .header-v1 .header-search form:focus-within input[name="q"] {
+        border-color: #b965ed;
+    }
+
+    .header-v1 .header-search form:focus-within .search-panel {
+        border-top-color: #b965ed;
+        border-right-color: #b965ed;
+        border-bottom-color: #b965ed;
+    }
+
+    .header-v1 .header-search form:focus-within {
+        filter: drop-shadow(0 6px 14px rgba(135, 80, 180, .14));
+    }
+}

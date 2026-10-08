@@ -38,7 +38,7 @@
                                         <div class="product-form-guide__main">
                                             <span class="product-form-guide__eyebrow">Новый товар</span>
                                             <h5>Заполните карточку так, чтобы покупатель сразу понял, где и что он покупает.</h5>
-                                            <p>Минимум для публикации: название, категория, цена и фото. После отправки товар попадёт на проверку.</p>
+                                            <p>Нужны название, категория, цена и хотя бы одно фото. Покупатели увидят товар только после проверки; пока он не готов, сохраните его как черновик.</p>
                                         </div>
                                         <div class="product-form-guide__steps" aria-label="Этапы публикации товара">
                                             <div class="product-form-guide__step">
@@ -54,7 +54,7 @@
                                             <div class="product-form-guide__step">
                                                 <span>3</span>
                                                 <strong>Проверка</strong>
-                                                <small>Отправка на модерацию</small>
+                                                <small>Затем публикация автоматически</small>
                                             </div>
                                         </div>
                                     </div>
@@ -326,6 +326,10 @@
                                     </div>
 
                                     {{-- Кнопки --}}
+                                    <p class="product-form-actions__hint">
+                                        «Отправить на проверку» — товар проверят и после одобрения опубликуют сами.
+                                        «Сохранить черновик» — товар останется только у вас, покупатели его не увидят.
+                                    </p>
                                     <div class="button-group add-product-btn product-form-actions d-flex justify-content-end gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
                                            class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
@@ -341,7 +345,7 @@
                                                 name="save_action"
                                                 value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-shield-check"></i> Опубликовать
+                                            <i class="uil uil-shield-check"></i> Отправить на проверку
                                         </button>
                                     </div>
                                 </form>

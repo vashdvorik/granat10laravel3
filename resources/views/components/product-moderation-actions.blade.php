@@ -51,7 +51,7 @@
                       data-product-name="{{ $product->name }}">
                     @csrf
                     <button type="button" class="dropdown-item status-change-btn">
-                        <i class="uil uil-shield-check me-2"></i> Опубликовать
+                        <i class="uil uil-shield-check me-2"></i> Отправить на проверку
                     </button>
                 </form>
             @endif
@@ -106,7 +106,7 @@
             @csrf
             <button type="button"
                     class="btn btn-sm btn-primary btn-default btn-squared btn-transparent-primary status-change-btn w-100">
-                <i class="uil uil-shield-check"></i> Опубликовать
+                <i class="uil uil-shield-check"></i> Отправить на проверку
             </button>
         </form>
     @elseif($state->primaryAction === \App\Enums\ProductPrimaryAction::Edit)
@@ -117,7 +117,7 @@
     @elseif($state->primaryAction === \App\Enums\ProductPrimaryAction::ResolveUnavailable)
         <a href="{{ route('account.store.products.edit', $product) }}"
            class="btn btn-sm btn-warning btn-default btn-squared w-100">
-            <i class="uil uil-exclamation-triangle"></i> Устранить причину
+            <i class="uil uil-exclamation-triangle"></i> {{ $state->story?->key === 'outdated' ? 'Открыть и исправить' : 'Добавить фото' }}
         </a>
     @endif
 </div>

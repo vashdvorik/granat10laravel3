@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ProductStatusStory;
 use App\Data\ProductViewState;
 use App\Enums\ProductDisplayState;
 use App\Enums\ProductModerationStatus;
@@ -12,7 +13,8 @@ class ProductViewStateFactory
 {
     public function __construct(
         private readonly ProductStateTransitionService $transitions,
-        private readonly ProductDisplayStateResolver $displayStateResolver
+        private readonly ProductDisplayStateResolver $displayStateResolver,
+        private readonly ProductStatusStoryFactory $storyFactory,
     ) {}
 
     public function make(Product $product): ProductViewState
@@ -21,6 +23,7 @@ class ProductViewStateFactory
         $canPublish = $this->transitions->canPublish($product);
         $canSubmit = $this->transitions->canSubmit($product);
         $displayState = $this->displayStateResolver->resolve($product);
+        $story = $this->storyFactory->make($product);
 
         return new ProductViewState(
             displayState: $displayState,
@@ -28,7 +31,7 @@ class ProductViewStateFactory
                 ? 'На ручной проверке'
                 : $product->moderation_status->label(),
             publicationLabel: $isPublic ? 'Опубликован' : 'Не опубликован',
-            description: $this->description($product),
+            description: $this->description($product, $story),
             color: $product->moderation_status === ProductModerationStatus::Failed
                 ? 'warning'
                 : $product->moderation_status->color(),
@@ -50,25 +53,18 @@ class ProductViewStateFactory
             disabledReason: $displayState === ProductDisplayState::Unavailable
                 ? $this->transitions->publicationBlockedReason($product)
                 : null,
+            story: $story,
         );
     }
 
-    private function description(Product $product): string
+    private function description(Product $product, ProductStatusStory $story): string
     {
+        // Замечание проверяющего показываем только там, где продавец может его исправить;
+        // во всех остальных состояниях — спокойное объяснение без служебных формулировок.
         return match ($product->moderation_status) {
-            ProductModerationStatus::Draft => 'Товар сохранён как черновик и ещё не отправлен на модерацию.',
-            ProductModerationStatus::Pending => 'Товар ожидает автоматической проверки.',
-            ProductModerationStatus::Processing => 'Сейчас выполняется автоматическая проверка товара.',
-            ProductModerationStatus::NeedsReview => $product->moderation_summary
-                ?: 'Товар передан администратору на проверку. Дождитесь решения.',
-            ProductModerationStatus::ChangesRequired => $product->moderation_summary
-                ?: 'Исправьте указанные замечания и повторно отправьте товар на проверку.',
-            ProductModerationStatus::Rejected => $product->moderation_summary
-                ?: 'Товар отклонён. Измените карточку перед повторной отправкой.',
-            ProductModerationStatus::Failed => 'Товар передан администратору на дополнительную проверку.',
-            ProductModerationStatus::Approved => $this->transitions->isPublic($product)
-                ? 'Товар прошёл модерацию и виден покупателям.'
-                : 'Товар одобрен. Его можно опубликовать.',
+            ProductModerationStatus::ChangesRequired,
+            ProductModerationStatus::Rejected => $story->remark ?: $story->explanation,
+            default => $story->explanation,
         };
     }
 }

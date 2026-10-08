@@ -38,13 +38,13 @@ class ProductModerationFeedbackService
     {
         if (
             str_contains(mb_strtolower($message), 'исправ')
-            && str_contains(mb_strtolower($message), 'модерац')
+            && (str_contains(mb_strtolower($message), 'модерац') || str_contains(mb_strtolower($message), 'проверк'))
         ) {
             return $message;
         }
 
         return rtrim($message, ". \t\n\r\0\x0B")
-            .'. Исправьте карточку товара и отправьте её на модерацию повторно.';
+            .'. Исправьте карточку товара и отправьте её на проверку повторно.';
     }
 
     private function violationMessage(array $violation): ?string

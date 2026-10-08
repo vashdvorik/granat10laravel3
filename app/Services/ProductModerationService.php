@@ -28,7 +28,10 @@ class ProductModerationService
                 ProductModerationStatus::Draft,
                 ProductModerationStatus::ChangesRequired,
             ], true)) {
-                throw new ProductModerationException('Товар уже отправлен или прошёл модерацию.');
+                throw new ProductModerationException(
+                    'Этот товар уже на проверке или одобрен — отправлять его ещё раз не нужно. '
+                    .'Если вы изменили карточку, откройте «Изменить» и сохраните изменения.'
+                );
             }
 
             $error = $this->productLimitService->activationError($product);
@@ -155,15 +158,26 @@ class ProductModerationService
         );
     }
 
-    public function invalidate(Product $product): Product
+    /**
+     * Содержимое изменилось: прежняя проверка недействительна, товар возвращается в черновик.
+     *
+     * @param  bool  $keepRemark  оставить замечания прошлой проверки (если продавец правит карточку по ним,
+     *                            они не должны пропадать после первого сохранения черновика)
+     */
+    public function invalidate(Product $product, bool $keepRemark = false): Product
     {
+        $keepRemark = $keepRemark && in_array($product->moderation_status, [
+            ProductModerationStatus::ChangesRequired,
+            ProductModerationStatus::Rejected,
+        ], true);
+
         $product->forceFill([
             'is_active' => false,
             'moderation_status' => ProductModerationStatus::Draft,
             'moderation_version' => $product->moderation_version + 1,
             'moderated_version' => null,
             'moderation_source' => null,
-            'moderation_summary' => null,
+            'moderation_summary' => $keepRemark ? $product->moderation_summary : null,
             'moderation_risk_score' => null,
             'moderation_submitted_at' => null,
             'moderated_at' => null,

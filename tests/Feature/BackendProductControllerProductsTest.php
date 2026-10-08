@@ -55,7 +55,7 @@ class BackendProductControllerProductsTest extends TestCase
         $response->assertSee('seller-products-main', false);
         $response->assertSee('seller-products-toolbar', false);
         $response->assertSee('seller-product-card__state', false);
-        $response->assertSee('Видны покупателям');
+        $response->assertSee('Опубликованы');
         $response->assertDontSee('Скрыты из-за тарифа');
     }
 
@@ -379,7 +379,7 @@ class BackendProductControllerProductsTest extends TestCase
             ->patch(route('account.store.products.activate', $product));
 
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertStringContainsString('Виден покупателям', (string) $response->json('fragments.card_html'));
+        $this->assertStringContainsString('Опубликован', (string) $response->json('fragments.card_html'));
         $this->assertTrue((bool) $product->fresh()->is_active);
     }
 

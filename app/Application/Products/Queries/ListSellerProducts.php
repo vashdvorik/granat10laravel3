@@ -13,8 +13,8 @@ class ListSellerProducts
 {
     private const STATUS_FILTERS = [
         'all' => 'Все',
-        'visible' => 'Видны покупателям',
-        'hidden' => 'Скрыты',
+        'visible' => 'Опубликованы',
+        'hidden' => 'Не опубликованы',
         'draft' => 'Черновики',
         'moderation' => 'На проверке',
         'fixes' => 'Нужно исправить',

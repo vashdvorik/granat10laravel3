@@ -57,6 +57,7 @@ Route::get('/favorites/load-more', [App\Http\Controllers\FavoritesController::cl
 
 // роутs для карточки товара
 Route::get('product/{alias}', [ProductController::class, 'show'])->name('product.show');
+Route::get('product/{alias}/order', [OrderController::class, 'create'])->name('orders.create');
 Route::post('product/{product}/order', [OrderController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('orders.store');

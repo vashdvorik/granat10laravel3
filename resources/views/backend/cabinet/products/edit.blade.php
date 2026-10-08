@@ -3,6 +3,31 @@
 @extends('backend.cabinet.layout_cabinet')
 
 @section('content_cabinet')
+@php
+    // Режим формы определяет, что произойдёт при сохранении и что показать продавцу заранее
+    $moderationStatus = $product->moderation_status;
+    $editMode = match (true) {
+        $moderationStatus === \App\Enums\ProductModerationStatus::Approved => 'live',
+        in_array($moderationStatus, [
+            \App\Enums\ProductModerationStatus::Pending,
+            \App\Enums\ProductModerationStatus::Processing,
+            \App\Enums\ProductModerationStatus::NeedsReview,
+            \App\Enums\ProductModerationStatus::Failed,
+        ], true) => 'review',
+        default => 'draft', // черновик, «нужно исправить», «отклонён»
+    };
+    $submitLabel = $editMode === 'draft' ? 'Отправить на проверку' : 'Сохранить изменения';
+    $recheckFields = \App\Services\ProductStatusStoryFactory::RECHECK_FIELDS;
+    $originalContent = [
+        'name' => $product->name,
+        'desc' => $product->desc,
+        'features1' => $product->features1,
+        'features2' => $product->features2,
+        'features3' => $product->features3,
+        'features4' => $product->features4,
+        'category_id' => $product->category_id,
+    ];
+@endphp
 @include('backend.cabinet.partials.flash')
 
 <div class="contents product-form-page product-edit-page">
@@ -20,7 +45,7 @@
                                 name="save_action"
                                 value="save_and_submit"
                                 class="btn btn-sm btn-primary">
-                            <i class="uil uil-shield-check"></i> Опубликовать
+                            <i class="uil uil-shield-check"></i> {{ $submitLabel }}
                         </button>
                     </div>
                 </div>
@@ -40,6 +65,8 @@
                                       enctype="multipart/form-data"
                                       id="product-edit-form"
                                       class="product-edit-form"
+                                      data-recheck-mode="{{ $editMode }}"
+                                      data-original="{{ json_encode($originalContent, JSON_UNESCAPED_UNICODE) }}"
                                       novalidate>
                                     @csrf
                                     @method('PUT')
@@ -48,6 +75,19 @@
                                            value="{{ $product->moderation_version }}">
                                     <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
                                     <x-product-moderation-issues :issues="$moderationIssues" />
+
+                                    @if($editMode === 'live')
+                                        <div class="product-recheck-hint">
+                                            <strong>Что можно менять без проверки.</strong>
+                                            Цену, скидку и условия заказа: они применяются сразу.
+                                            Если изменить {{ $recheckFields }}, товар скроется из каталога и пройдёт проверку заново.
+                                        </div>
+                                    @elseif($editMode === 'review')
+                                        <div class="product-recheck-hint">
+                                            <strong>Что можно менять свободно.</strong>
+                                            Цену, скидку и условия заказа: проверка от этого не собьётся и изменения применятся сразу.
+                                        </div>
+                                    @endif
 
                                     {{-- Основная информация --}}
                                     <div class="card add-product product-form-section mb-24">
@@ -384,22 +424,30 @@
                                     </div>
 
                                     {{-- Кнопки --}}
+                                    @if($editMode === 'draft')
+                                        <p class="product-form-actions__hint">
+                                            После отправки товар проверят. Пока проверка не пройдена, покупатели его не видят,
+                                            а после одобрения он опубликуется сам. «Сохранить черновик» ничего никуда не отправляет.
+                                        </p>
+                                    @endif
                                     <div class="button-group add-product-btn product-form-actions d-flex justify-content-end gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
                                            class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
                                             Отмена
                                         </a>
-                                        <button type="submit"
-                                                name="save_action"
-                                                value="save_draft"
-                                                class="btn btn-light btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-save"></i> Сохранить черновик
-                                        </button>
+                                        @if($editMode === 'draft')
+                                            <button type="submit"
+                                                    name="save_action"
+                                                    value="save_draft"
+                                                    class="btn btn-light btn-default btn-squared text-capitalize">
+                                                <i class="uil uil-save"></i> Сохранить черновик
+                                            </button>
+                                        @endif
                                         <button type="submit"
                                                 name="save_action"
                                                 value="save_and_submit"
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
-                                            <i class="uil uil-shield-check"></i> Опубликовать
+                                            <i class="uil uil-shield-check"></i> {{ $submitLabel }}
                                         </button>
                                     </div>
                                 </form>
@@ -564,6 +612,74 @@ async function restoreCategorySelection(categoryId) {
 
 // === КОНЕЦ БЛОКА КАТЕГОРИЙ ===
 
+// Подтверждение перед правкой, из-за которой опубликованный товар вернётся на проверку
+(function () {
+    const form = document.getElementById('product-edit-form');
+    if (!form) return;
+
+    const mode = form.dataset.recheckMode;
+    if (mode !== 'live' && mode !== 'review') return;
+
+    let original = {};
+    try { original = JSON.parse(form.dataset.original || '{}'); } catch (e) { return; }
+
+    const labels = {
+        name: 'название', desc: 'описание', features1: 'характеристики', features2: 'характеристики',
+        features3: 'характеристики', features4: 'характеристики', category_id: 'категория'
+    };
+    const normalize = (value) => String(value ?? '').replace(/\r\n/g, '\n').trim();
+    let confirmed = false;
+
+    form.addEventListener('submit', function (event) {
+        if (confirmed) return;
+
+        const changed = [];
+        Object.keys(labels).forEach(function (field) {
+            const element = form.elements[field];
+            if (element && normalize(element.value) !== normalize(original[field]) && changed.indexOf(labels[field]) === -1) {
+                changed.push(labels[field]);
+            }
+        });
+
+        const fileInput = form.querySelector('input[type="file"][name="images[]"]');
+        if (fileInput && fileInput.files && fileInput.files.length) changed.push('фото');
+
+        if (!changed.length) return;
+
+        event.preventDefault();
+        const submitter = event.submitter || null;
+
+        Swal.fire({
+            title: mode === 'live' ? 'Товар пропадёт из каталога' : 'Проверка начнётся заново',
+            html: '<p>Вы изменили: <strong>' + changed.join(', ') + '</strong>.</p>' +
+                (mode === 'live'
+                    ? '<p class="mb-0">Такие правки проверяются заново, поэтому товар скроется от покупателей, пока проверка не закончится. После одобрения он опубликуется сам.</p>'
+                    : '<p class="mb-0">Текущая проверка будет отменена, товар снова встанет в очередь.</p>'),
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#5F63F2',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Да, сохранить и отправить на проверку',
+            cancelButtonText: 'Вернуться к редактированию',
+            reverseButtons: true
+        }).then(function (result) {
+            if (!result.isConfirmed) return;
+            confirmed = true;
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit(submitter);
+            } else {
+                if (submitter && submitter.name) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = submitter.name;
+                    hidden.value = submitter.value;
+                    form.appendChild(hidden);
+                }
+                form.submit();
+            }
+        });
+    });
+})();
 $(document).ready(function() {
     let existingImagesCount = {{ $product->images->count() }}; // ✅ let вместо const
     const maxFiles = 5;
@@ -578,7 +694,10 @@ $(document).ready(function() {
         
         Swal.fire({
             title: 'Удалить изображение?',
-            text: 'Это действие нельзя отменить',
+            text: ({
+                live: 'Это действие нельзя отменить. Товар вернётся в черновики и пропадёт из каталога до новой проверки.',
+                review: 'Это действие нельзя отменить. Текущая проверка отменится, товар вернётся в черновики.'
+            })[$('#product-edit-form').data('recheck-mode')] || 'Это действие нельзя отменить',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
@@ -604,12 +723,21 @@ $(document).ready(function() {
                             $('input[name="expected_moderation_version"]').val(response.current_version);
                         }
                         
+                        // Удаление фото могло вернуть товар в черновик: обновляем блок статуса и убираем устаревшие замечания
+                        if (response.status_html) {
+                            $('#product-status-box').replaceWith(response.status_html);
+                        }
+                        if (response.state_changed) {
+                            $('.product-moderation-issues, .product-moderation-field-issue').remove();
+                            $('#product-edit-form').attr('data-recheck-mode', 'draft');
+                        }
+
                         Swal.fire({
                             icon: 'success',
                             title: 'Удалено',
                             text: response.message,
-                            timer: 1500,
-                            showConfirmButton: false
+                            timer: response.state_changed ? 6000 : 1500,
+                            showConfirmButton: !!response.state_changed
                         });
                     },
                     error: function(xhr) {

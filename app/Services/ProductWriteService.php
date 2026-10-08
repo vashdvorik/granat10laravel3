@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ProductWriteOutcome;
 use App\Enums\ProductModerationStatus;
 use App\Enums\ProductSaveAction;
 use App\Models\Category;
@@ -18,7 +19,8 @@ class ProductWriteService
         private readonly ProductImageService $productImageService,
         private readonly BackendProductService $backendProductService,
         private readonly ProductModerationService $productModerationService,
-        private readonly ProductLocalModerationAnalyzer $localModerationAnalyzer
+        private readonly ProductLocalModerationAnalyzer $localModerationAnalyzer,
+        private readonly ProductStateTransitionService $transitions
     ) {}
 
     /**
@@ -93,6 +95,22 @@ class ProductWriteService
         array $images = [],
         ?User $actor = null
     ): Product {
+        return $this->updateWithOutcome($product, $data, $images, $actor)->product;
+    }
+
+    /**
+     * Сохраняет товар и сообщает, что реально произошло: ушёл ли он на проверку, менялось ли то,
+     * что проверяется модерацией. По этому строится сообщение продавцу.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<int, UploadedFile>  $images
+     */
+    public function updateWithOutcome(
+        Product $product,
+        array $data,
+        array $images = [],
+        ?User $actor = null
+    ): ProductWriteOutcome {
         $expectedModerationVersion = isset($data['expected_moderation_version'])
             ? (int) $data['expected_moderation_version']
             : null;
@@ -105,9 +123,13 @@ class ProductWriteService
             && $product->moderation_version !== $expectedModerationVersion
         ) {
             throw ValidationException::withMessages([
-                'product' => 'Товар изменился в другой вкладке. Обновите страницу и проверьте изменения.',
+                'product' => 'Товар изменился в другой вкладке или после автоматической проверки. '
+                    .'Обновите страницу и проверьте изменения, чтобы ничего не потерять.',
             ]);
         }
+
+        $statusBefore = $product->moderation_status;
+        $wasPublic = $this->transitions->isPublic($product);
 
         $category = $this->validateCategory($data['category_id']);
         unset($data['images']);
@@ -144,8 +166,19 @@ class ProductWriteService
 
         if ($saveAction === ProductSaveAction::Save && $moderatedContentChanged) {
             $this->fail([
-                'save_action' => 'Эти изменения требуют повторной проверки. '
-                    .'Выберите сохранение черновика или отправку на проверку.',
+                'save_action' => 'Вы изменили '.ProductStatusStoryFactory::RECHECK_FIELDS.': такие правки проверяются заново. '
+                    .'Нажмите «Отправить на проверку» или «Сохранить черновик».',
+            ], $category);
+        }
+
+        // Отправить на проверку можно товар из черновика или «на доработке», либо любой товар,
+        // который из-за правок содержимого вернётся в черновик. Остальное — не отправка.
+        $canBeSubmitted = $moderatedContentChanged || $this->transitions->canSubmit($product);
+
+        if ($submitForModeration && ! $canBeSubmitted && $product->moderation_status === ProductModerationStatus::Rejected) {
+            $this->fail([
+                'save_action' => 'Товар отклонён. Чтобы отправить его на проверку снова, сначала исправьте карточку '
+                    .'по причине отказа (она показана вверху страницы).',
             ], $category);
         }
 
@@ -166,20 +199,29 @@ class ProductWriteService
         }
 
         if ($moderatedContentChanged) {
-            $product = $this->productModerationService->invalidate($product);
-
-            if ($submitForModeration) {
-                if ($actor === null) {
-                    throw new \LogicException('Для отправки товара на модерацию требуется пользователь.');
-                }
-
-                $product = $this->productModerationService->submit($product, $actor);
-            }
+            // Замечания прошлой проверки остаются в черновике, пока продавец не отправит товар снова
+            $product = $this->productModerationService->invalidate($product, keepRemark: true);
         }
 
-        return $product->refresh();
-    }
+        $submitted = false;
 
+        if ($submitForModeration && $this->transitions->canSubmit($product->refresh())) {
+            if ($actor === null) {
+                throw new \LogicException('Для отправки товара на модерацию требуется пользователь.');
+            }
+
+            $product = $this->productModerationService->submit($product, $actor);
+            $submitted = true;
+        }
+
+        return new ProductWriteOutcome(
+            product: $product->refresh(),
+            submitted: $submitted,
+            contentChanged: $moderatedContentChanged,
+            statusBefore: $statusBefore,
+            wasPublic: $wasPublic,
+        );
+    }
     /**
      * @param  array<string, mixed>  $data
      */

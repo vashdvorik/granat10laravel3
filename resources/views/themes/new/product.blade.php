@@ -25,7 +25,7 @@
     </div>
     <div class="bimm-detail__summary">
         @if($product->category)<a class="bimm-detail__category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">{{ $product->category->name }}</a>@endif
-        <h1>{{ $product->name }}@if($product->isVipActive()) <span class="vip-inline-tag"><i class="fa-solid fa-star"></i> VIP</span>@endif</h1>
+        <h1>{{ $product->name }}</h1>
         <div class="bimm-detail__price"><span>{{ number_format((float) $currentPrice, 0, '.', ' ') }} ₽</span>@if($hasDiscount)<del>{{ number_format((float) $product->price, 0, '.', ' ') }} ₽</del>@endif</div>
         <dl class="bimm-detail__meta">
             <div><dt>Продавец</dt><dd><a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">{{ trim($product->seller->name, '" ') }}</a></dd></div>
@@ -33,7 +33,8 @@
             @if($product->seller->address)<div><dt>Адрес</dt><dd>{{ $product->seller->address }}</dd></div>@endif
         </dl>
         <div class="bimm-detail__actions">
-            @if($orderAvailability->allowed)<a class="bimm-button bimm-button--gold" href="#order-form">Оформить заказ <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>@endif
+            {{-- Заказ оформляется на отдельной странице --}}
+            @if($orderAvailability->allowed)<a class="bimm-button bimm-button--gold" href="{{ route('orders.create', ['alias' => $product->alias]) }}">Оформить заказ <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>@endif
             @if($product->seller->phone)<a class="bimm-button {{ $orderAvailability->allowed ? 'bimm-button--light' : 'bimm-button--dark' }}" href="tel:{{ $phoneHref }}"><i class="fa-solid fa-phone"></i> {{ $orderAvailability->allowed ? 'Задать вопрос продавцу' : 'Позвонить продавцу' }}</a>@endif
         </div>
         @if(!$orderAvailability->allowed && ($product->seller->can_order || $product->can_order))<div class="bimm-flash" style="margin-top:16px">Заказ на сайте сейчас недоступен. Позвоните продавцу — он подскажет наличие и условия получения.</div>@endif
@@ -45,10 +46,6 @@
     <div><h2>О товаре</h2><div class="bimm-description">{{ $product->desc ?: 'Продавец пока не добавил подробное описание.' }}</div></div>
     @if($features->isNotEmpty())<div><h2>Характеристики</h2><ul class="bimm-features">@foreach($features as $feature)<li>{{ $feature }}</li>@endforeach</ul></div>@endif
 </section>
-
-@if($orderAvailability->allowed)
-    <div style="margin-top:30px">@include('orders._form')</div>
-@endif
 
 @if($relatedProducts->isNotEmpty())
     <section class="bimm-section"><div class="bimm-section__head"><div><span class="bimm-kicker">Рекомендуем</span><h2>{{ $relatedTitle }}</h2></div></div><div class="bimm-product-grid">@foreach($relatedProducts as $relatedProduct) @include('components.home-product-card', ['product' => $relatedProduct]) @endforeach</div></section>

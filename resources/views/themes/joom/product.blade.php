@@ -27,14 +27,16 @@
     </div>
     <div class="joom-product-detail__summary">
         @if($product->category)<a class="joom-detail__category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">{{ $product->category->name }}</a>@endif
-        <h1>{{ $product->name }}@if($product->isVipActive()) <span class="vip-inline-tag"><i class="fa-solid fa-star"></i> VIP</span>@endif</h1>
+        <h1>{{ $product->name }}</h1>
         <div class="joom-detail__meta"><span><i class="fa-solid fa-location-dot"></i> {{ $product->seller->town ?? 'ПМР' }}</span><span>Местный продавец</span></div>
         <div class="joom-detail__price"><strong>{{ number_format((float) $currentPrice, 0, '.', ' ') }} ₽</strong>@if($hasDiscount)<del>{{ number_format((float) $product->price, 0, '.', ' ') }} ₽</del><span>−{{ $discount }}%</span>@endif</div>
         <div class="joom-detail__seller"><span class="joom-detail__seller-logo">{{ mb_strtoupper(mb_substr(trim($product->seller->name, '" '), 0, 1)) }}</span><span><small>Продавец</small><a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">{{ trim($product->seller->name, '" ') }}</a></span></div>
         <div class="joom-detail__actions">
-            @if($orderAvailability->allowed)<a class="joom-button joom-button--primary" href="#order-form">Оформить заказ <i class="fa-solid fa-arrow-right"></i></a>@endif
-            @if($product->seller->phone)<a class="joom-button joom-button--quiet" href="tel:{{ $phoneHref }}"><i class="fa-solid fa-phone"></i> Связаться</a>@endif
+            {{-- Заказ оформляется на отдельной странице --}}
+            @if($orderAvailability->allowed)<a class="joom-button joom-button--primary" href="{{ route('orders.create', ['alias' => $product->alias]) }}">Оформить заказ <i class="fa-solid fa-arrow-right"></i></a>@endif
+            @if($product->seller->phone)<a class="joom-button {{ $orderAvailability->allowed ? 'joom-button--quiet' : 'joom-button--primary' }}" href="tel:{{ $phoneHref }}"><i class="fa-solid fa-phone"></i> {{ $orderAvailability->allowed ? 'Связаться' : 'Позвонить продавцу' }}</a>@endif
         </div>
+        @if(!$orderAvailability->allowed && ($product->seller->can_order || $product->can_order))<div class="joom-flash">Заказ на сайте сейчас недоступен. Позвоните продавцу — он подскажет наличие и условия получения.</div>@endif
         <div class="joom-detail__benefits"><div><i class="fa-solid fa-truck-fast"></i><span><strong>{{ $product->delivery_enabled ? 'Доставка доступна' : 'Получение у продавца' }}</strong>Уточните способ и стоимость напрямую.</span></div><div><i class="fa-solid fa-comments"></i><span><strong>Связь напрямую</strong>Задайте вопрос до покупки.</span></div></div>
     </div>
 </section>
@@ -43,8 +45,6 @@
     <div><h2>О товаре</h2><p>{{ $product->desc ?: 'Продавец пока не добавил подробное описание.' }}</p></div>
     @if($features->isNotEmpty())<div><h2>Характеристики</h2><ul>@foreach($features as $feature)<li>{{ $feature }}</li>@endforeach</ul></div>@endif
 </section>
-
-@if($orderAvailability->allowed)<div class="joom-order-wrap">@include('orders._form')</div>@endif
 
 @if($relatedProducts->isNotEmpty())
     <section class="joom-section"><div class="joom-section__head"><div><span class="joom-eyebrow">ЕЩЁ ПОСМОТРИ</span><h2>{{ $relatedTitle }}</h2></div></div><div class="joom-product-row">@foreach($relatedProducts as $relatedProduct) @include('components.home-product-card', ['product' => $relatedProduct]) @endforeach</div></section>

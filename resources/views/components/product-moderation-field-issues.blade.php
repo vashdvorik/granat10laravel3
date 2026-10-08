@@ -3,7 +3,7 @@
 @php($fieldIssues = collect($issues)->where('field', $field))
 
 @if($fieldIssues->isNotEmpty())
-    <div class="alert alert-warning py-2 px-3 mt-2 mb-0" role="alert">
+    <div class="alert alert-warning py-2 px-3 mt-2 mb-0 product-moderation-field-issue" role="alert">
         @foreach($fieldIssues as $issue)
             <div @class(['mb-2' => ! $loop->last])>
                 <strong>Замечание:</strong> {{ $issue['message'] }}

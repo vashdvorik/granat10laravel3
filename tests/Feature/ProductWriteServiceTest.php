@@ -142,7 +142,7 @@ class ProductWriteServiceTest extends TestCase
             $this->fail('ValidationException was not thrown.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('is_active', $exception->errors());
-            $this->assertStringContainsString('Нельзя опубликовать товар без изображений', $exception->errors()['is_active'][0]);
+            $this->assertStringContainsString('без фото товар нельзя отправить на проверку', $exception->errors()['is_active'][0]);
             $this->assertStringContainsString('Сохранить черновик', $exception->errors()['is_active'][0]);
         }
     }

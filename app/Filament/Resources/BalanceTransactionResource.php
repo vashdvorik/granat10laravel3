@@ -18,7 +18,9 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /** Единый журнал баланса всех пользователей: каждая операция, которая меняла деньги на балансе. */
@@ -223,6 +225,11 @@ class BalanceTransactionResource extends Resource
             'days' => 'Дней VIP',
             default => $key,
         };
+    }
+
+    public static function getRecordTitle(?Model $record): string|Htmlable|null
+    {
+        return $record === null ? null : 'Операция № '.$record->getKey();
     }
 
     public static function getEloquentQuery(): Builder

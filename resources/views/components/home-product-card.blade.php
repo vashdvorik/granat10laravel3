@@ -26,10 +26,6 @@
         <span class="home-product__discount">−{{ $discount }}%</span>
     @endif
 
-    @if($product->isVipActive())
-        <span class="home-product__vip" title="VIP-размещение">★ VIP</span>
-    @endif
-
     <button type="button" class="home-product__favorite wishlist-btn"
         data-product-id="{{ $product->id }}" aria-label="Добавить товар в избранное">
         <span class="icon-bg icon-wishlist" aria-hidden="true"></span>

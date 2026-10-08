@@ -21,5 +21,6 @@ final readonly class ProductViewState
         public bool $canOpenPublicPage,
         public ProductPrimaryAction $primaryAction,
         public ?string $disabledReason = null,
+        public ?ProductStatusStory $story = null,
     ) {}
 }

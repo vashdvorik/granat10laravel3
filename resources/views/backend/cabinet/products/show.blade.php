@@ -109,15 +109,6 @@
                                                     <i class="uil uil-star"></i> VIP{{ $product->vip_until ? ' до '.$product->vip_until->format('d.m.Y') : '' }}
                                                 </span>
                                             @endif
-                                            @if($product->view_state->isPublic)
-                                                <span class="badge badge-round badge-success badge-lg">
-                                                    <i class="uil uil-check"></i> Опубликован
-                                                </span>
-                                            @else
-                                                <span class="badge badge-round badge-light badge-lg badge-outlined">
-                                                    <i class="uil uil-pause"></i> Не опубликован
-                                                </span>
-                                            @endif
                                         </div>
                                         <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
                                         <x-product-moderation-issues :issues="$moderationIssues" />
@@ -314,12 +305,17 @@ $(document).ready(function() {
         
         if (action === 'activate') {
             title = 'Опубликовать товар?';
-            text = `Товар "${productName}" будет опубликован и станет доступен для покупателей`;
+            text = `Товар "${productName}" появится в каталоге и поиске, покупатели смогут его найти и заказать.`;
             icon = 'question';
             confirmText = '<i class="uil uil-check me-1"></i> Да, опубликовать';
+        } else if (action === 'submit') {
+            title = 'Отправить товар на проверку?';
+            text = `Товар "${productName}" уйдёт на проверку. Пока она идёт, покупатели его не видят. После одобрения он опубликуется сам, а результат придёт в уведомления (колокольчик вверху).`;
+            icon = 'question';
+            confirmText = '<i class="uil uil-shield-check me-1"></i> Да, отправить';
         } else {
-            title = 'Снять с публикации товар?';
-            text = `Товар "${productName}" будет снят с публикации и скрыт от покупателей`;
+            title = 'Снять товар с публикации?';
+            text = `Товар "${productName}" исчезнет из каталога и поиска. Опубликовать его снова можно в любой момент.`;
             icon = 'warning';
             confirmText = '<i class="uil uil-pause me-1"></i> Да, снять с публикации';
         }
@@ -359,6 +355,8 @@ $(document).ready(function() {
                         let errorMessage = 'Произошла ошибка';
                         if (xhr.responseJSON && xhr.responseJSON.error) {
                             errorMessage = xhr.responseJSON.error;
+                        } else if (xhr.status === 403) {
+                            errorMessage = 'Это действие сейчас недоступно: статус товара уже изменился (возможно, в другой вкладке). Обновите страницу.';
                         }
                         Swal.fire({
                             icon: 'error',
