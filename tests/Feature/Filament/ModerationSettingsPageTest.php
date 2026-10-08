@@ -98,13 +98,12 @@ class ModerationSettingsPageTest extends TestCase
         Livewire::test(ModerationSettings::class)
             ->fillForm([
                 'queue_connection' => 'database',
-                'ai_enabled' => true,
-                'mode' => 'auto',
+                'strategy' => 'auto',
                 'queue' => 'moderation',
                 'timeout' => 90,
                 'max_attempts' => 4,
-                'max_risk' => 5,
-                'excluded_categories' => 'weapons,medicine',
+                'strictness' => 'strict',
+                'excluded_categories' => ['weapons', 'medicine'],
                 'gemini_api_key' => '',
                 'gemini_model' => 'gemini-3.5-flash',
                 'gemini_base_url' => 'https://generativelanguage.googleapis.com',

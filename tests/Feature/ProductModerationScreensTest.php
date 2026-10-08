@@ -112,9 +112,11 @@ class ProductModerationScreensTest extends TestCase
         $this->actingAs($this->user)->get(route('account.store.products.show', $product))
             ->assertOk()
             ->assertSee('Нужно исправить')
-            ->assertSee('Что нужно исправить')
+            ->assertSee('Пока замечания не исправлены, товар не опубликован.')
             ->assertSee('Уберите телефон из названия.')
-            ->assertSee('Исправьте замечания и нажмите');
+            ->assertSee('отправьте товар на проверку снова')
+            // заголовок-эхо «Что нужно исправить» убран: блок один, повторов нет
+            ->assertDontSee('Что нужно исправить');
     }
 
     public function test_page_of_published_product_says_it_is_visible(): void

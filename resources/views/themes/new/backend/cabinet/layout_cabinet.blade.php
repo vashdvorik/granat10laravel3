@@ -115,6 +115,9 @@
                     <a class="{{ request()->routeIs('account.stats') ? 'active' : '' }}" href="{{ route('account.stats') }}">
                         <i class="fa-solid fa-chart-line"></i><span>{{ $cabinetStats }}</span>
                     </a>
+                    <a class="{{ request()->routeIs('account.store.qr*') ? 'active' : '' }}" href="{{ route('account.store.qr') }}">
+                        <i class="fa-solid fa-qrcode"></i><span>QR-код магазина</span>
+                    </a>
                 @endif
                 <a class="{{ request()->routeIs('account.balance.*', 'account.user.balance.*') ? 'active' : '' }}" href="{{ route('account.balance.index') }}">
                     <i class="fa-solid fa-wallet"></i><span>Баланс</span>

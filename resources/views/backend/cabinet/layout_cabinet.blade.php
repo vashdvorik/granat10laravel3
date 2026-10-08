@@ -368,6 +368,9 @@
                         <li class="{{ request()->routeIs('account.store.orders.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.orders.index') }}">Заказы</a>
                         </li>
+                        <li class="{{ request()->routeIs('account.store.qr*') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.qr') }}">QR-код магазина</a>
+                        </li>
                         <li class="{{ request()->routeIs('account.store.events.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.events.index') }}">Журнал событий</a>
                         </li>

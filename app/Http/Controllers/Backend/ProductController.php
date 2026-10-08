@@ -264,7 +264,11 @@ class ProductController extends Controller
     /**
      * Удаление изображения товара
      */
-    public function destroyImage(ProductImage $image, ProductActionService $productActionService)
+    public function destroyImage(
+        ProductImage $image,
+        ProductActionService $productActionService,
+        ProductModerationIssuePresenter $issuePresenter
+    )
     {
         $product = $image->product;
 
@@ -294,9 +298,10 @@ class ProductController extends Controller
                 'message' => $message,
                 'current_version' => $updatedProduct->moderation_version,
                 // свежий блок статуса, чтобы страница не показывала «Опубликован» у товара, который уже черновик
+                // замечания берутся для текущей версии товара: после правки содержимого их уже нет
                 'status_html' => view('components.product-moderation-status', [
                     'product' => $updatedProduct,
-                    'hasIssues' => false,
+                    'issues' => $issuePresenter->forProduct($updatedProduct),
                 ])->render(),
                 'state_changed' => $statusBefore !== $updatedProduct->moderation_status,
             ]);

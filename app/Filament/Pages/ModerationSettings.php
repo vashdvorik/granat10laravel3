@@ -3,12 +3,13 @@
 namespace App\Filament\Pages;
 
 use App\Data\ModerationSettingsSnapshot;
-use App\Services\AiModerationRequestBudget;
+use App\Models\Category;
 use App\Services\AiProviderUrlValidator;
 use App\Services\ModerationConnectionTester;
-use App\Services\ModerationOperationsStatus;
+use App\Services\ModerationSettingsFormMapper;
 use App\Services\ModerationSettingsSnapshotFactory;
 use App\Services\ModerationSettingsWriter;
+use App\Services\ModerationStatusSummary;
 use Filament\Forms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -16,10 +17,23 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
+use Illuminate\Validation\ValidationException;
 
 class ModerationSettings extends Page implements HasForms
 {
     use Forms\Concerns\InteractsWithForms;
+
+    private const ADVANCED_SECTION_ID = 'moderation-advanced';
+
+    /** Поля блока «Дополнительные настройки»: при ошибке в них блок раскрывается сам. */
+    private const ADVANCED_FIELDS = [
+        'queue_connection', 'queue', 'timeout', 'max_attempts',
+        'base_url', 'chat_completions_path',
+        'max_output_tokens', 'retry_times', 'retry_sleep_ms',
+        'requests_per_minute', 'rate_limit_safety_seconds', 'hourly_request_limit', 'daily_request_limit',
+        'image_model', 'image_base_url', 'image_endpoint_path', 'image_auth_header', 'image_auth_prefix',
+        'image_queue', 'image_timeout', 'image_max_attempts',
+    ];
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
@@ -37,9 +51,18 @@ class ModerationSettings extends Page implements HasForms
 
     public bool $apiKeyConfigured = false;
 
+    public bool $textApiKeyConfigured = false;
+
+    public bool $imageApiKeyConfigured = false;
+
     public array $budgetUsage = [];
 
     public array $operationsStatus = [];
+
+    public array $statusSummary = [];
+
+    /** Filament вызывает validate() дважды за одно сохранение: сообщаем об ошибке один раз за запрос. */
+    private bool $validationErrorReported = false;
 
     public static function canAccess(): bool
     {
@@ -55,221 +78,410 @@ class ModerationSettings extends Page implements HasForms
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Краткая инструкция')
-                    ->description('Коротко о том, как пользоваться параметрами ниже.')
-                    ->schema([
-                        Forms\Components\Placeholder::make('moderation_help')
-                            ->content(new HtmlString('<div style="display:grid;gap:.5rem;font-size:.92rem;line-height:1.55;color:#4b5563"><div><strong>Включить ИИ-модерацию</strong> — общий выключатель. Если он выключен, новые товары идут на ручную проверку администратора.</div><div><strong>Режим работы</strong> — <strong>shadow</strong> только пишет решение ИИ, <strong>auto</strong> автоматически публикует безопасные товары.</div><div><strong>Максимальный риск для автопубликации</strong> — порог от 0 до 100. Чем ниже число, тем строже фильтр.</div><div><strong>Категории без автопубликации</strong> — укажите алиасы через запятую. Для этих категорий автопубликация не включается.</div><div><strong>Формат API</strong> — схема подключения для модерации изображений. После смены провайдера проверьте модель, URL и заголовок авторизации.</div><div><strong>Префикс ключа</strong> — обычно <strong>Bearer</strong>. Для заголовка <strong>x-goog-api-key</strong> поле нужно оставить пустым.</div><div><strong>Очередь, таймаут, попытки</strong> — параметры работы воркера. Если очередь не запущена, проверки будут зависать или не выполняться.</div></div>'))
-                    ])
-                    ->compact(),
-
-                Forms\Components\Section::make('Основной режим')
-                    ->schema([
-                        Forms\Components\Toggle::make('ai_enabled')
-                            ->label('Включить ИИ-модерацию'),
-                        Forms\Components\Select::make('mode')
-                            ->label('Режим работы')
-                            ->options([
-                                'shadow' => 'Теневой — ИИ только записывает решение',
-                                'auto' => 'Автоматический — безопасные товары публикуются',
-                            ])
-                            ->required(),
-                        Forms\Components\TextInput::make('max_risk')
-                            ->label('Максимальный риск для автопубликации, %')
-                            ->numeric()->minValue(0)->maxValue(100)->required(),
-                        Forms\Components\TextInput::make('excluded_categories')
-                            ->label('Категории без автопубликации')
-                            ->helperText('Алиасы через запятую. Пустое поле разрешает автопубликацию во всех категориях при успешной проверке.'),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Очередь')
-                    ->description('На рабочем сервере queue worker должен работать постоянно.')
-                    ->schema([
-                        Forms\Components\Select::make('queue_connection')
-                            ->label('Подключение очереди')
-                            ->options([
-                                'database' => 'Database — рекомендуется',
-                                'sync' => 'Sync — только для локальной отладки',
-                            ])->required(),
-                        Forms\Components\TextInput::make('queue')
-                            ->label('Название очереди')->required(),
-                        Forms\Components\TextInput::make('timeout')
-                            ->label('Таймаут, секунд')->numeric()->minValue(5)->maxValue(300)->required(),
-                        Forms\Components\TextInput::make('max_attempts')
-                            ->label('Количество попыток')->numeric()->minValue(1)->maxValue(10)->required(),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Подключение нейросети')
-                    ->description($this->apiKeyConfigured
-                        ? 'API-ключ настроен. Оставьте поле ключа пустым, чтобы сохранить текущее значение.'
-                        : 'Укажите параметры API выбранного сервиса.')
-                    ->schema([
-                        Forms\Components\Select::make('provider')
-                            ->label('Протокол API')
-                            ->options([
-                                'google' => 'Google Gemini / Gemma',
-                                'deepseek' => 'DeepSeek',
-                                'openai_compatible' => 'OpenAI-compatible API',
-                            ])
-                            ->live()
-                            ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
-                                if ($state === 'deepseek') {
-                                    $set('model', 'deepseek-chat');
-                                    $set('base_url', 'https://api.deepseek.com');
-                                    $set('chat_completions_path', '/chat/completions');
-                                }
-
-                                if ($state === 'google') {
-                                    $set('model', 'gemini-3.5-flash');
-                                    $set('base_url', 'https://generativelanguage.googleapis.com/v1beta');
-                                    $set('chat_completions_path', '/chat/completions');
-                                }
-                            })
-                            ->required()
-                            ->helperText('Выбирается формат запросов API, а не конкретная компания.'),
-                        Forms\Components\TextInput::make('api_key')
-                            ->label('Новый API-ключ')
-                            ->password()->revealable()->autocomplete(false)
-                            ->helperText('Для локального API без авторизации поле можно оставить пустым.'),
-                        Forms\Components\TextInput::make('model')
-                            ->label('Идентификатор модели')
-                            ->required()
-                            ->helperText('Например: gemini-2.5-flash, gpt-4.1-mini или имя модели вашего сервиса.'),
-                        Forms\Components\TextInput::make('base_url')
-                            ->label('Базовый URL API')
-                            ->url()->required()
-                            ->rule(function (AiProviderUrlValidator $validator): \Closure {
-                                return function (string $attribute, mixed $value, \Closure $fail) use ($validator): void {
-                                    try {
-                                        $validator->validate((string) $value);
-                                    } catch (\InvalidArgumentException $exception) {
-                                        $fail($exception->getMessage());
-                                    }
-                                };
-                            })
-                            ->helperText('Google: https://generativelanguage.googleapis.com/v1beta. OpenAI-compatible: адрес, заканчивающийся обычно на /v1.'),
-                        Forms\Components\TextInput::make('chat_completions_path')
-                            ->label('Путь Chat Completions')
-                            ->visible(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
-                            ->required(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
-                            ->helperText('Обычно /chat/completions. Изменяйте только если документация провайдера требует другой путь.'),
-                        Forms\Components\TextInput::make('max_output_tokens')
-                            ->label('Максимум токенов ответа')
-                            ->numeric()->minValue(256)->maxValue(32768)->required(),
-                        Forms\Components\TextInput::make('retry_times')
-                            ->label('Повторы HTTP-запроса')
-                            ->numeric()->minValue(0)->maxValue(5)->required(),
-                        Forms\Components\TextInput::make('retry_sleep_ms')
-                            ->label('Пауза между повторами, мс')
-                            ->numeric()->minValue(0)->maxValue(10000)->required(),
-                        Forms\Components\TextInput::make('requests_per_minute')
-                            ->label('Лимит запросов в минуту')
-                            ->numeric()->minValue(1)->maxValue(10000)->required(),
-                        Forms\Components\TextInput::make('rate_limit_safety_seconds')
-                            ->label('Запас между запросами, секунд')
-                            ->numeric()->minValue(0)->maxValue(30)->required(),
-                        Forms\Components\TextInput::make('hourly_request_limit')
-                            ->label('Максимум запросов в час')
-                            ->helperText('После достижения лимита новые товары переходят на ручную проверку без обращения к API.')
-                            ->numeric()->minValue(1)->maxValue(100000)->required(),
-                        Forms\Components\TextInput::make('daily_request_limit')
-                            ->label('Максимум запросов в сутки')
-                            ->helperText('Защищает от неожиданного расхода квоты или средств.')
-                            ->numeric()->minValue(1)->maxValue(1000000)->required(),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('Модерация изображений')
-                    ->description('Одна универсальная схема подходит для Gemini, OpenAI-compatible и native moderation endpoint.')
-                    ->schema([
-                        Forms\Components\Select::make('image_provider')
-                            ->label('Формат API')
-                            ->options([
-                                'gemini' => 'Gemini API',
-                                'openai_compatible' => 'OpenAI-compatible API',
-                                'openai_moderation' => 'Native moderation endpoint',
-                            ])
-                            ->live()
-                            ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
-                                if ($state === 'gemini') {
-                                    $set('image_model', 'gemini-3.1-flash-lite');
-                                    $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
-                                    $set('image_endpoint_path', '/models/{model}:generateContent');
-                                    $set('image_auth_header', 'x-goog-api-key');
-                                    $set('image_auth_prefix', '');
-                                }
-
-                                if ($state === 'openai_compatible') {
-                                    $set('image_model', 'gpt-4o-mini');
-                                    $set('image_base_url', 'https://api.openai.com/v1');
-                                    $set('image_endpoint_path', '/chat/completions');
-                                    $set('image_auth_header', 'Authorization');
-                                    $set('image_auth_prefix', 'Bearer');
-                                }
-
-                                if ($state === 'openai_moderation') {
-                                    $set('image_model', 'omni-moderation-latest');
-                                    $set('image_base_url', 'https://api.openai.com/v1');
-                                    $set('image_endpoint_path', '/moderations');
-                                    $set('image_auth_header', 'Authorization');
-                                    $set('image_auth_prefix', 'Bearer');
-                                }
-                            })
-                            ->required(),
-                        Forms\Components\Toggle::make('image_moderation_enabled')
-                            ->label('Включить проверку фото')
-                            ->helperText('Если включено, товар не будет публиковаться, пока фото не пройдут проверку.'),
-                        Forms\Components\TextInput::make('image_api_key')
-                            ->label('API-ключ')
-                            ->password()->revealable()->autocomplete(false)
-                            ->helperText('Можно оставить пустым, если ключ уже сохранён в настройках.'),
-                        Forms\Components\TextInput::make('image_model')
-                            ->label('Модель')
-                            ->required()
-                            ->helperText('Например: gemini-3.1-flash-lite, qwen/qwen3.6-flash, gpt-4o-mini.'),
-                        Forms\Components\TextInput::make('image_base_url')
-                            ->label('Базовый URL API')
-                            ->url()->required()
-                            ->rule(function (AiProviderUrlValidator $validator): \Closure {
-                                return function (string $attribute, mixed $value, \Closure $fail) use ($validator): void {
-                                    try {
-                                        $validator->validate((string) $value);
-                                    } catch (\InvalidArgumentException $exception) {
-                                        $fail($exception->getMessage());
-                                    }
-                                };
-                            })
-                            ->helperText('Например: https://api.openai.com/v1 или https://generativelanguage.googleapis.com/v1beta.'),
-                        Forms\Components\TextInput::make('image_endpoint_path')
-                            ->label('Путь endpoint')
-                            ->required()
-                            ->helperText('Можно использовать {model}. Пример: /chat/completions, /moderations или /models/{model}:generateContent.'),
-                        Forms\Components\TextInput::make('image_auth_header')
-                            ->label('Заголовок авторизации')
-                            ->required()
-                            ->helperText('Например: Authorization или x-goog-api-key.'),
-                        Forms\Components\TextInput::make('image_auth_prefix')
-                            ->label('Префикс ключа')
-                            ->placeholder('Bearer')
-                            ->helperText('Например: Bearer. Для x-goog-api-key оставьте пустым.'),
-                        Forms\Components\TextInput::make('image_queue')
-                            ->label('Очередь проверки фото')
-                            ->required()
-                            ->helperText('Обычно moderation.'),
-                        Forms\Components\TextInput::make('image_timeout')
-                            ->label('Таймаут фото, секунд')
-                            ->numeric()->minValue(5)->maxValue(300)->required(),
-                        Forms\Components\TextInput::make('image_max_attempts')
-                            ->label('Попытки проверки фото')
-                            ->numeric()->minValue(1)->maxValue(10)->required(),
-                    ])->columns(2),
+                $this->strategySection(),
+                $this->textConnectionSection(),
+                $this->imageSection(),
+                $this->advancedSection(),
             ])
             ->statePath('data');
     }
 
-    public function save(ModerationSettingsWriter $writer, ModerationSettingsSnapshotFactory $factory): void
+    // ------------------------------------------------------------------ главное решение
+
+    private function strategySection(): Forms\Components\Section
     {
-        $data = $this->form->getState();
-        $writer->save($data);
+        return Forms\Components\Section::make('Как проверять новые товары')
+            ->description('Главная настройка. Всё остальное на странице можно не трогать: значения уже подобраны.')
+            ->schema([
+                Forms\Components\Radio::make('strategy')
+                    ->hiddenLabel()
+                    ->required()
+                    ->live()
+                    ->options([
+                        ModerationSettingsFormMapper::STRATEGY_MANUAL => 'Только вручную',
+                        ModerationSettingsFormMapper::STRATEGY_ASSIST => 'ИИ подсказывает, решает человек',
+                        ModerationSettingsFormMapper::STRATEGY_AUTO => 'ИИ публикует безопасные товары сам',
+                    ])
+                    ->descriptions([
+                        ModerationSettingsFormMapper::STRATEGY_MANUAL => 'ИИ не используется. Каждый новый товар проверяет модератор.',
+                        ModerationSettingsFormMapper::STRATEGY_ASSIST => 'ИИ проверяет товар и оставляет свой вывод: модератор видит его в карточке товара. Публикует или возвращает продавцу всегда человек. Хороший вариант, чтобы присмотреться к работе ИИ.',
+                        ModerationSettingsFormMapper::STRATEGY_AUTO => 'Если риск низкий, товар выходит на сайт без человека. Если ИИ нашёл, что исправить, продавец получает подсказку; всё сомнительное уходит модератору.',
+                    ]),
+
+                Forms\Components\Placeholder::make('auto_notice')
+                    ->hiddenLabel()
+                    ->visible(fn (Forms\Get $get): bool => $get('strategy') === ModerationSettingsFormMapper::STRATEGY_AUTO)
+                    ->content(new HtmlString('<div style="padding:.75rem 1rem;border-radius:.5rem;border:1px solid rgba(217,119,6,.5);background:rgba(217,119,6,.08);font-size:.9rem;line-height:1.5">Товары будут выходить на сайт без проверки человеком. Включайте этот вариант, когда в режиме «ИИ подсказывает» вы убедились, что ИИ почти не ошибается.</div>')),
+
+                Forms\Components\Fieldset::make('Когда ИИ может публиковать сам')
+                    ->visible(fn (Forms\Get $get): bool => $get('strategy') === ModerationSettingsFormMapper::STRATEGY_AUTO)
+                    ->dehydratedWhenHidden()
+                    ->columns(1)
+                    ->schema([
+                        Forms\Components\ToggleButtons::make('strictness')
+                            ->label('Насколько строго')
+                            ->inline()
+                            ->live()
+                            ->dehydratedWhenHidden()
+                            ->options([
+                                'strict' => 'Строго',
+                                'normal' => 'Обычно',
+                                'soft' => 'Мягко',
+                                ModerationSettingsFormMapper::STRICTNESS_CUSTOM => 'Своё значение',
+                            ])
+                            ->helperText('Чем строже, тем больше товаров ИИ передаёт модератору. «Обычно» — разумный выбор для начала: ИИ публикует товар сам, только если оценил риск не выше 10%.'),
+                        Forms\Components\TextInput::make('max_risk')
+                            ->label('Максимальный риск для автопубликации, %')
+                            ->numeric()->minValue(0)->maxValue(100)
+                            ->visible(fn (Forms\Get $get): bool => $get('strictness') === ModerationSettingsFormMapper::STRICTNESS_CUSTOM)
+                            ->required(fn (Forms\Get $get): bool => $get('strictness') === ModerationSettingsFormMapper::STRICTNESS_CUSTOM)
+                            ->dehydratedWhenHidden()
+                            ->helperText('От 0 до 100. Чем меньше число, тем строже: 5 — строго, 10 — обычно, 25 — мягко.'),
+                        Forms\Components\Select::make('excluded_categories')
+                            ->label('Категории, где ИИ не публикует сам')
+                            ->multiple()
+                            ->searchable()
+                            ->options(fn (): array => $this->categoryOptions())
+                            ->dehydratedWhenHidden()
+                            ->helperText('Товары из этих категорий всегда идут на проверку модератору. Подкатегории выбирайте отдельно. Если ничего не выбрано, ограничений нет.'),
+                    ]),
+            ]);
+    }
+
+    // ------------------------------------------------------------------ подключение к ИИ (текст)
+
+    private function textConnectionSection(): Forms\Components\Section
+    {
+        return Forms\Components\Section::make('Подключение к ИИ')
+            ->description('Через какой сервис ИИ читает названия, описания и характеристики товаров.')
+            ->schema([
+                Forms\Components\Select::make('provider')
+                    ->label('Сервис')
+                    ->options([
+                        'google' => 'Google Gemini',
+                        'deepseek' => 'DeepSeek',
+                        'openai_compatible' => 'Другой сервис (совместимый с OpenAI)',
+                    ])
+                    ->live()
+                    ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
+                        if ($state === 'deepseek') {
+                            $set('model', 'deepseek-chat');
+                            $set('base_url', 'https://api.deepseek.com');
+                            $set('chat_completions_path', '/chat/completions');
+                        }
+
+                        if ($state === 'google') {
+                            $set('model', 'gemini-3.5-flash');
+                            $set('base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                            $set('chat_completions_path', '/chat/completions');
+                        }
+                    })
+                    ->required()
+                    ->helperText(fn (Forms\Get $get): string => $get('provider') === 'openai_compatible'
+                        ? 'Для другого сервиса укажите его адрес в блоке «Дополнительные настройки» ниже (поле «Адрес сервиса»).'
+                        : 'Модель и адрес сервиса подставляются сами.'),
+                Forms\Components\TextInput::make('api_key')
+                    ->label('Ключ доступа (API-ключ)')
+                    ->password()->revealable()->autocomplete(false)
+                    ->placeholder(fn (): string => $this->keyPlaceholder('text'))
+                    ->helperText('Хранится в зашифрованном виде и не показывается. Оставьте поле пустым, чтобы не менять сохранённый ключ.'),
+                Forms\Components\TextInput::make('model')
+                    ->label('Модель')
+                    ->required()
+                    ->helperText('Например: gemini-3.5-flash, deepseek-chat. Менять нужно, только если сервис сменил название модели.'),
+                Forms\Components\Actions::make([
+                    Forms\Components\Actions\Action::make('testTextConnection')
+                        ->label('Проверить подключение')
+                        ->icon('heroicon-m-signal')
+                        ->color('gray')
+                        ->action(fn () => $this->testTextConnection(app(ModerationConnectionTester::class))),
+                ])->columnSpanFull(),
+                Forms\Components\Placeholder::make('text_test_hint')
+                    ->hiddenLabel()
+                    ->columnSpanFull()
+                    ->content(new HtmlString('<span style="font-size:.85rem;opacity:.75">Проверка использует сохранённые настройки: если вы что-то поменяли, сначала нажмите «Сохранить».</span>')),
+            ])
+            ->columns(2);
+    }
+
+    // ------------------------------------------------------------------ фото
+
+    private function imageSection(): Forms\Components\Section
+    {
+        return Forms\Components\Section::make('Фото товаров')
+            ->description('Отдельная проверка фотографий. Работает независимо от проверки текста.')
+            ->schema([
+                Forms\Components\Toggle::make('image_moderation_enabled')
+                    ->label('Проверять фотографии с помощью ИИ')
+                    ->helperText('Если включено, товар не опубликуется, пока фото не пройдут проверку.')
+                    ->live()
+                    ->columnSpanFull(),
+                // Пока проверка фото выключена, настройки сервиса скрыты, но их значения сохраняются
+                Forms\Components\Group::make([
+                    Forms\Components\Select::make('image_provider')
+                        ->label('Сервис проверки фото')
+                        ->options([
+                            'gemini' => 'Google Gemini',
+                            'openai_compatible' => 'Другой сервис (совместимый с OpenAI)',
+                            'openai_moderation' => 'OpenAI Moderation (только проверка изображений)',
+                        ])
+                        ->live()
+                        ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
+                            if ($state === 'gemini') {
+                                $set('image_model', 'gemini-3.1-flash-lite');
+                                $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
+                                $set('image_endpoint_path', '/models/{model}:generateContent');
+                                $set('image_auth_header', 'x-goog-api-key');
+                                $set('image_auth_prefix', '');
+                            }
+
+                            if ($state === 'openai_compatible') {
+                                $set('image_model', 'gpt-4o-mini');
+                                $set('image_base_url', 'https://api.openai.com/v1');
+                                $set('image_endpoint_path', '/chat/completions');
+                                $set('image_auth_header', 'Authorization');
+                                $set('image_auth_prefix', 'Bearer');
+                            }
+
+                            if ($state === 'openai_moderation') {
+                                $set('image_model', 'omni-moderation-latest');
+                                $set('image_base_url', 'https://api.openai.com/v1');
+                                $set('image_endpoint_path', '/moderations');
+                                $set('image_auth_header', 'Authorization');
+                                $set('image_auth_prefix', 'Bearer');
+                            }
+                        })
+                        ->required()
+                        ->helperText('Модель, адрес и способ авторизации подставляются сами.'),
+                    Forms\Components\TextInput::make('image_api_key')
+                        ->label('Ключ доступа (API-ключ)')
+                        ->password()->revealable()->autocomplete(false)
+                        ->placeholder(fn (): string => $this->keyPlaceholder('image'))
+                        ->helperText('Хранится в зашифрованном виде и не показывается. Оставьте пустым, чтобы не менять сохранённый ключ.'),
+                    Forms\Components\Actions::make([
+                        Forms\Components\Actions\Action::make('testImageConnection')
+                            ->label('Проверить подключение')
+                            ->icon('heroicon-m-signal')
+                            ->color('gray')
+                            ->action(fn () => $this->testImageConnection(app(ModerationConnectionTester::class))),
+                    ])->columnSpanFull(),
+                    Forms\Components\Placeholder::make('image_test_hint')
+                        ->hiddenLabel()
+                        ->columnSpanFull()
+                        ->content(new HtmlString('<span style="font-size:.85rem;opacity:.75">Проверка использует сохранённые настройки: если вы что-то поменяли, сначала нажмите «Сохранить».</span>')),
+                ])
+                    ->columns(2)
+                    ->columnSpanFull()
+                    ->visible(fn (Forms\Get $get): bool => (bool) $get('image_moderation_enabled'))
+                    ->dehydratedWhenHidden(),
+            ])
+            ->columns(2);
+    }
+
+    // ------------------------------------------------------------------ для специалиста
+
+    private function advancedSection(): Forms\Components\Section
+    {
+        return Forms\Components\Section::make('Дополнительные настройки')
+            ->id(self::ADVANCED_SECTION_ID)
+            ->description('Для специалиста по серверу. Значения подобраны заранее и работают без правок: менять их нужно редко.')
+            ->collapsible()
+            ->collapsed()
+            ->schema([
+                Forms\Components\Fieldset::make('Очередь проверок')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\Select::make('queue_connection')
+                            ->label('Где выполняются проверки')
+                            ->options(fn (): array => $this->queueConnectionOptions())
+                            ->required()
+                            ->helperText('На рабочем сервере нужен вариант Database и запущенный обработчик очереди.'),
+                        Forms\Components\TextInput::make('queue')
+                            ->label('Название очереди')->required(),
+                        Forms\Components\TextInput::make('timeout')
+                            ->label('Сколько ждать ответ ИИ, секунд')
+                            ->numeric()->minValue(5)->maxValue(300)->required(),
+                        Forms\Components\TextInput::make('max_attempts')
+                            ->label('Сколько раз пробовать')
+                            ->numeric()->minValue(1)->maxValue(10)->required(),
+                    ]),
+
+                Forms\Components\Fieldset::make('Адрес сервиса ИИ')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('base_url')
+                            ->label('Адрес сервиса')
+                            ->url()->required()
+                            ->rule(self::urlRule())
+                            ->helperText('Google: https://generativelanguage.googleapis.com/v1beta. Другой сервис: адрес, который обычно заканчивается на /v1.'),
+                        Forms\Components\TextInput::make('chat_completions_path')
+                            ->label('Путь запроса')
+                            ->visible(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
+                            ->required(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
+                            ->helperText('Обычно /chat/completions. Меняйте, только если так написано в документации сервиса.'),
+                    ]),
+
+                Forms\Components\Fieldset::make('Лимиты запросов к ИИ')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('hourly_request_limit')
+                            ->label('Максимум запросов в час')
+                            ->helperText('Когда лимит исчерпан, новые товары идут на ручную проверку без обращения к ИИ.')
+                            ->numeric()->minValue(1)->maxValue(100000)->required(),
+                        Forms\Components\TextInput::make('daily_request_limit')
+                            ->label('Максимум запросов в сутки')
+                            ->helperText('Защищает от неожиданного расхода квоты и денег.')
+                            ->numeric()->minValue(1)->maxValue(1000000)->required(),
+                        Forms\Components\TextInput::make('requests_per_minute')
+                            ->label('Максимум запросов в минуту')
+                            ->numeric()->minValue(1)->maxValue(10000)->required(),
+                        Forms\Components\TextInput::make('rate_limit_safety_seconds')
+                            ->label('Запас между запросами, секунд')
+                            ->numeric()->minValue(0)->maxValue(30)->required(),
+                    ]),
+
+                Forms\Components\Fieldset::make('Повторы и размер ответа')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('max_output_tokens')
+                            ->label('Максимальная длина ответа ИИ (токенов)')
+                            ->numeric()->minValue(256)->maxValue(32768)->required(),
+                        Forms\Components\TextInput::make('retry_times')
+                            ->label('Повторов при сбое связи')
+                            ->numeric()->minValue(0)->maxValue(5)->required(),
+                        Forms\Components\TextInput::make('retry_sleep_ms')
+                            ->label('Пауза между повторами, миллисекунд')
+                            ->numeric()->minValue(0)->maxValue(10000)->required(),
+                    ]),
+
+                Forms\Components\Fieldset::make('Проверка фото: технические параметры')
+                    ->columns(2)
+                    ->schema([
+                        Forms\Components\TextInput::make('image_model')
+                            ->label('Модель')
+                            ->required()
+                            ->helperText('Например: gemini-3.1-flash-lite, gpt-4o-mini.'),
+                        Forms\Components\TextInput::make('image_base_url')
+                            ->label('Адрес сервиса')
+                            ->url()->required()
+                            ->rule(self::urlRule())
+                            ->helperText('Например: https://generativelanguage.googleapis.com/v1beta или https://api.openai.com/v1.'),
+                        Forms\Components\TextInput::make('image_endpoint_path')
+                            ->label('Путь запроса')
+                            ->required()
+                            ->helperText('Можно использовать {model}. Примеры: /chat/completions, /moderations, /models/{model}:generateContent.'),
+                        Forms\Components\TextInput::make('image_auth_header')
+                            ->label('Заголовок для ключа')
+                            ->required()
+                            ->helperText('Например: Authorization или x-goog-api-key.'),
+                        Forms\Components\TextInput::make('image_auth_prefix')
+                            ->label('Слово перед ключом')
+                            ->placeholder('Bearer')
+                            ->helperText('Обычно Bearer. Для x-goog-api-key оставьте пустым.'),
+                        Forms\Components\TextInput::make('image_queue')
+                            ->label('Название очереди для фото')
+                            ->required()
+                            ->helperText('Обычно moderation.'),
+                        Forms\Components\TextInput::make('image_timeout')
+                            ->label('Сколько ждать ответ по фото, секунд')
+                            ->numeric()->minValue(5)->maxValue(300)->required(),
+                        Forms\Components\TextInput::make('image_max_attempts')
+                            ->label('Сколько раз пробовать проверить фото')
+                            ->numeric()->minValue(1)->maxValue(10)->required(),
+                    ]),
+            ]);
+    }
+
+    private static function urlRule(): \Closure
+    {
+        return function (AiProviderUrlValidator $validator): \Closure {
+            return function (string $attribute, mixed $value, \Closure $fail) use ($validator): void {
+                try {
+                    $validator->validate((string) $value);
+                } catch (\InvalidArgumentException $exception) {
+                    $fail($exception->getMessage());
+                }
+            };
+        };
+    }
+
+    // ------------------------------------------------------------------ данные для полей
+
+    private function keyPlaceholder(string $channel): string
+    {
+        $saved = $channel === 'image' ? $this->imageApiKeyConfigured : $this->textApiKeyConfigured;
+
+        return $saved ? 'Ключ сохранён — вводить заново не нужно' : 'Ключ ещё не задан';
+    }
+
+    /** @return array<string, string> */
+    private function queueConnectionOptions(): array
+    {
+        $options = ['database' => 'Database — рекомендуется'];
+        $current = (string) ($this->data['queue_connection'] ?? 'database');
+
+        if ($current !== '' && $current !== 'database') {
+            $options[$current] = $current === 'sync'
+                ? 'Sync — только для отладки на своём компьютере'
+                : $current;
+        }
+
+        return $options;
+    }
+
+    /**
+     * Все категории с родителем в названии («Электроника → Телефоны»), ключ — алиас. Сохранённые алиасы,
+     * которых в базе уже нет, остаются в списке, чтобы их можно было увидеть и снять.
+     *
+     * @return array<string, string>
+     */
+    private function categoryOptions(): array
+    {
+        $categories = Category::query()->get(['id', 'name', 'alias', 'parent_id'])->keyBy('id');
+
+        $options = $categories
+            ->filter(fn (Category $category): bool => filled($category->alias))
+            ->mapWithKeys(function (Category $category) use ($categories): array {
+                $path = [$category->name];
+                $parent = $categories->get($category->parent_id);
+                $guard = 0;
+
+                while ($parent !== null && $guard++ < 10) {
+                    array_unshift($path, $parent->name);
+                    $parent = $categories->get($parent->parent_id);
+                }
+
+                return [$category->alias => implode(' → ', $path)];
+            })
+            ->sort()
+            ->all();
+
+        foreach ((array) ($this->data['excluded_categories'] ?? []) as $alias) {
+            $options[$alias] ??= (string) $alias;
+        }
+
+        return $options;
+    }
+
+    // ------------------------------------------------------------------ сохранение
+
+    public function save(
+        ModerationSettingsWriter $writer,
+        ModerationSettingsSnapshotFactory $factory,
+        ModerationSettingsFormMapper $mapper,
+    ): void {
+        $state = $this->form->getState();
+        $current = $factory->make()->data;
+        $data = $mapper->toStorage($state, $current);
+
+        try {
+            $writer->save($data);
+        } catch (ValidationException $exception) {
+            $this->onValidationError($exception);
+
+            throw $exception;
+        }
+
         $this->applySnapshot($factory->make());
 
         Notification::make()
@@ -290,14 +502,44 @@ class ModerationSettings extends Page implements HasForms
             ->log('Изменены настройки AI-модерации');
     }
 
+    protected function onValidationError(ValidationException $exception): void
+    {
+        if ($this->validationErrorReported) {
+            return;
+        }
+
+        $this->validationErrorReported = true;
+
+        $fields = collect(array_keys($exception->errors()))
+            ->map(fn (string $key): string => preg_replace('/^data\./', '', $key));
+
+        if ($fields->intersect(self::ADVANCED_FIELDS)->isNotEmpty()) {
+            $this->dispatch('open-section', id: self::ADVANCED_SECTION_ID);
+        }
+
+        Notification::make()
+            ->title('Настройки не сохранены')
+            ->body('Исправьте отмеченные поля'.($fields->intersect(self::ADVANCED_FIELDS)->isNotEmpty() ? ' (часть из них — в блоке «Дополнительные настройки»)' : '').'.')
+            ->danger()
+            ->send();
+    }
+
+    // ------------------------------------------------------------------ состояние страницы
+
     private function applySnapshot(ModerationSettingsSnapshot $snapshot): void
     {
-        $this->data = $snapshot->data;
         $this->apiKeyConfigured = $snapshot->apiKeyConfigured;
+        $this->textApiKeyConfigured = $snapshot->textApiKeyConfigured;
+        $this->imageApiKeyConfigured = $snapshot->imageApiKeyConfigured;
         $this->budgetUsage = $snapshot->budgetUsage;
         $this->operationsStatus = $snapshot->operationsStatus;
+        $this->statusSummary = app(ModerationStatusSummary::class)->make($snapshot, app()->isProduction());
 
-        $this->form->fill($snapshot->data);
+        $this->data = app(ModerationSettingsFormMapper::class)->toForm($snapshot->data);
+        // Сохранённые ключи в форму не попадают: поле пустое, пока администратор не введёт новый ключ.
+        $this->data['image_api_key'] = null;
+
+        $this->form->fill($this->data);
     }
 
     public function testTextConnection(ModerationConnectionTester $tester): void

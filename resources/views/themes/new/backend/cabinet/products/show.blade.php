@@ -109,8 +109,7 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
-                                        <x-product-moderation-issues :issues="$moderationIssues" />
+                                        <x-product-moderation-status :product="$product" :issues="$moderationIssues" :field-link-base="route('account.store.products.edit', $product)" />
 
                                         <!-- End: Product Status Badges -->
                                         

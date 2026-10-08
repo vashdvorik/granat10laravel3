@@ -27,9 +27,9 @@ class ProductStatusStoryFactory
             ProductModerationStatus::Pending => new ProductStatusStory(
                 key: 'queued',
                 headline: 'Ждёт проверки',
-                explanation: 'Товар отправлен на проверку и стоит в очереди. Покупатели его пока не видят.',
-                nextStep: 'Ничего делать не нужно: результат придёт в уведомления (колокольчик вверху) и появится здесь. '
-                    .'Не меняйте '.self::RECHECK_FIELDS.' — проверка начнётся заново.',
+                explanation: 'Товар стоит в очереди на проверку. Покупатели его пока не видят.',
+                nextStep: 'Ничего делать не нужно: результат придёт в уведомления (колокольчик вверху). '
+                    .'Если изменить '.self::RECHECK_FIELDS.', проверка начнётся заново.',
                 tone: 'warning',
                 icon: 'clock',
             ),
@@ -37,7 +37,7 @@ class ProductStatusStoryFactory
                 key: 'checking',
                 headline: 'Идёт проверка',
                 explanation: 'Товар сейчас проверяется. Покупатели его пока не видят.',
-                nextStep: 'Ничего делать не нужно: результат придёт в уведомления (колокольчик вверху) и появится здесь.',
+                nextStep: 'Ничего делать не нужно: результат придёт в уведомления (колокольчик вверху).',
                 tone: 'warning',
                 icon: 'search',
             ),
@@ -48,25 +48,24 @@ class ProductStatusStoryFactory
                 explanation: 'Товар проверяет сотрудник сайта. Это не отказ: после проверки товар опубликуется '
                     .'или вы получите понятные замечания.',
                 nextStep: 'Ничего делать не нужно: мы пришлём уведомление. '
-                    .'Не меняйте '.self::RECHECK_FIELDS.' — проверка начнётся заново.',
+                    .'Если изменить '.self::RECHECK_FIELDS.', проверка начнётся заново.',
                 tone: 'info',
                 icon: 'user-check',
             ),
             ProductModerationStatus::ChangesRequired => new ProductStatusStory(
                 key: 'changes_required',
                 headline: 'Нужно исправить',
-                explanation: 'Проверка нашла, что в карточке нужно поправить. Пока вы не исправите, товар не опубликован.',
-                nextStep: 'Исправьте замечания и нажмите «Отправить на проверку».',
+                explanation: 'Пока замечания не исправлены, товар не опубликован.',
+                nextStep: 'Исправьте их и отправьте товар на проверку снова.',
                 tone: 'warning',
                 icon: 'edit',
                 remark: $this->remark($product),
-                remarkTitle: 'Что нужно исправить',
             ),
             ProductModerationStatus::Rejected => new ProductStatusStory(
                 key: 'rejected',
                 headline: 'Отклонён',
                 explanation: 'Товар не прошёл проверку и в таком виде опубликован не будет.',
-                nextStep: 'Прочитайте причину. Если можно исправить, измените карточку и отправьте её на проверку снова. '
+                nextStep: 'Если причину можно исправить, измените карточку и отправьте её на проверку снова. '
                     .'Если считаете отказ ошибкой, свяжитесь с администрацией сайта.',
                 tone: 'danger',
                 icon: 'times-circle',
@@ -86,8 +85,8 @@ class ProductStatusStoryFactory
             return new ProductStatusStory(
                 key: 'draft',
                 headline: 'Черновик',
-                explanation: 'Покупатели этот товар не видят. Ниже замечания прошлой проверки.',
-                nextStep: 'Исправьте замечания и нажмите «Отправить на проверку».',
+                explanation: 'Покупатели этот товар не видят.',
+                nextStep: 'Исправьте замечания и отправьте товар на проверку.',
                 tone: 'warning',
                 icon: 'file-edit-alt',
                 remark: $remark,
@@ -114,7 +113,7 @@ class ProductStatusStoryFactory
                 key: 'outdated',
                 headline: 'Нужна новая проверка',
                 explanation: 'Вы изменили товар после проверки, поэтому покупатели его не видят.',
-                nextStep: 'Отправьте товар на проверку ещё раз.',
+                nextStep: 'Отправьте его на проверку ещё раз.',
                 tone: 'warning',
                 icon: 'redo',
             );

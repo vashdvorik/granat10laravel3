@@ -224,6 +224,12 @@ Route::middleware(['auth', 'verified', 'cabinet.design'])->prefix('account')->na
         Route::delete('telegram', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'disconnect'])
             ->name('telegram.disconnect');
 
+        // QR-код магазина для печати (ведёт на публичную страницу магазина)
+        Route::get('qr', [App\Http\Controllers\Backend\StoreQrController::class, 'index'])->name('qr');
+        Route::get('qr/download/{layout}', [App\Http\Controllers\Backend\StoreQrController::class, 'download'])
+            ->whereIn('layout', App\Services\ShopQrPoster::LAYOUTS)
+            ->name('qr.download');
+
         Route::get('events', App\Http\Controllers\Backend\EventJournalController::class)
             ->name('events.index');
         Route::get('orders', [App\Http\Controllers\Backend\OrderController::class, 'index'])

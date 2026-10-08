@@ -91,7 +91,7 @@ class ProductImageModerationFlowTest extends TestCase
         $this->actingAs($sellerUser)
             ->get(route('account.store.products.show', $product))
             ->assertOk()
-            ->assertSee('Фото №1')
+            ->assertSee('фото №1')
             ->assertSee('Фото не относится к товару.')
             ->assertSee('Замените фото товара.');
 

@@ -73,8 +73,7 @@
                                     <input type="hidden"
                                            name="expected_moderation_version"
                                            value="{{ $product->moderation_version }}">
-                                    <x-product-moderation-status :product="$product" :has-issues="count($moderationIssues) > 0" />
-                                    <x-product-moderation-issues :issues="$moderationIssues" />
+                                    <x-product-moderation-status :product="$product" :issues="$moderationIssues" />
 
                                     @if($editMode === 'live')
                                         <div class="product-recheck-hint">
@@ -143,10 +142,6 @@
                                                     @error('name')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
-                                                    <x-product-moderation-field-issues
-                                                        :issues="$moderationIssues"
-                                                        field="name"
-                                                    />
 
                                                     <div class="form-check form-switch mt-3">
                                                         <input type="hidden" name="can_order" value="0">
@@ -175,10 +170,6 @@
                                                     @error('category_id')
                                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                                     @enderror
-                                                    <x-product-moderation-field-issues
-                                                        :issues="$moderationIssues"
-                                                        field="category"
-                                                    />
                                                 </div>
 
                                                 {{-- Цена --}}
@@ -252,10 +243,6 @@
                                                     @error('desc')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
-                                                    <x-product-moderation-field-issues
-                                                        :issues="$moderationIssues"
-                                                        field="description"
-                                                    />
                                                 </div>
 
                                                 {{-- Характеристики --}}
@@ -313,10 +300,6 @@
                                                     @error('features4')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
-                                                    <x-product-moderation-field-issues
-                                                        :issues="$moderationIssues"
-                                                        field="features"
-                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -332,10 +315,6 @@
                                             </div>
                                             
                                             <div class="add-product__body-img px-sm-40 px-20">
-                                                <x-product-moderation-field-issues
-                                                    :issues="$moderationIssues"
-                                                    field="images"
-                                                />
                                                 {{-- Существующие изображения --}}
                                                 @if($product->images->count() > 0)
                                                     <div class="existing-images mb-25">
@@ -728,7 +707,6 @@ $(document).ready(function() {
                             $('#product-status-box').replaceWith(response.status_html);
                         }
                         if (response.state_changed) {
-                            $('.product-moderation-issues, .product-moderation-field-issue').remove();
                             $('#product-edit-form').attr('data-recheck-mode', 'draft');
                         }
 
