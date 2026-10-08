@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\BalanceAdjustmentService;
@@ -236,6 +237,15 @@ class UserResource extends Resource
     {
         return parent::getEloquentQuery()
             ->with(['role', 'roles', 'seller']);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            RelationManagers\BalanceTransactionsRelationManager::class,
+            RelationManagers\BalanceTopupsRelationManager::class,
+            RelationManagers\VipPurchasesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

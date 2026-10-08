@@ -48,7 +48,7 @@ class ProductController extends Controller
             ->with(['images', 'seller'])
             ->where('category_id', $product->category_id)
             ->whereKeyNot($product->getKey())
-            ->orderByDesc('is_vip')
+            ->orderByVipFirst()
             ->orderByDesc('push_at')
             ->limit(8)
             ->get();
@@ -61,7 +61,7 @@ class ProductController extends Controller
                 ->with(['images', 'seller'])
                 ->where('seller_id', $product->seller_id)
                 ->whereKeyNot($product->getKey())
-                ->orderByDesc('is_vip')
+                ->orderByVipFirst()
                 ->orderByDesc('push_at')
                 ->limit(8)
                 ->get();

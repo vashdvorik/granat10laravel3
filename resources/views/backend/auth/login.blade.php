@@ -77,17 +77,7 @@
             </div>
         </div>
         <a class="text-right text-xs block text-[#8083A3] mb-[20px]" href="{{ route('password.request') }}">Забыли пароль?</a>
-        {{--
-        <div class="flex items-center gap-x-2 justify-between mb-[20px]">
-            <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
-                <img src="{{ asset('auth/assets/images/icons/icon-google.svg') }}" alt="google icon">
-                <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Google аккаунт</span>
-            </a>
-            <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
-                <img src="{{ asset('auth/assets/images/icons/icon-facebook.svg') }}" alt="facebook icon">
-                <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Facebook аккаунт</span>
-            </a>
-        </div> --}}
+        @include('backend.auth.partials.social-login')
         <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">Нет аккаунта продавца?<a class="text-color-brands" href="{{ route('register') }}">&nbsp;Стать продавцом</a></p>
     </form>
 </div>

@@ -51,6 +51,7 @@
             </div>
         </div>
     </div>
+    @include('backend.auth.partials.form-protection')
     <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">
         Сбросить пароль
     </button>

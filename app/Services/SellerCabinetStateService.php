@@ -37,7 +37,7 @@ class SellerCabinetStateService
             ->count();
         $vipProductsCount = $seller->products()
             ->where('is_active', true)
-            ->where('is_vip', true)
+            ->vipActive()
             ->count();
         $canAcceptOrders = (bool) $seller->can_order;
 

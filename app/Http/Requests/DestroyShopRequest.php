@@ -13,8 +13,17 @@ class DestroyShopRequest extends FormRequest
 
     public function rules(): array
     {
+        // Без собственного пароля (вход через Google) подтверждаем удаление названием магазина
+        return $this->user()?->hasPassword()
+            ? ['password' => ['required']]
+            : ['confirmation' => ['required', 'string']];
+    }
+
+    public function messages(): array
+    {
         return [
-            'password' => ['required'],
+            'password.required' => 'Введите пароль для подтверждения.',
+            'confirmation.required' => 'Введите название магазина для подтверждения.',
         ];
     }
 }

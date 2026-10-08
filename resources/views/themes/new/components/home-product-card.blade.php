@@ -11,7 +11,8 @@
         @else
             <span class="bimm-product__placeholder">{{ mb_strtoupper(mb_substr($product->name, 0, 1)) }}</span>
         @endif
-        @if($discount)<span class="bimm-product__badge">−{{ $discount }}%</span>@elseif($product->is_vip)<span class="bimm-product__badge">Выбор BIMM</span>@endif
+        @if($discount)<span class="bimm-product__badge">−{{ $discount }}%</span>@endif
+        @if($product->isVipActive())<span class="bimm-product__vip" title="VIP-размещение"><i class="fa-solid fa-star"></i> VIP</span>@endif
         </a>
         <button class="bimm-product__heart" type="button" data-bimm-favorite="{{ $product->id }}" aria-pressed="false" aria-label="Добавить в избранное"><i class="fa-regular fa-heart"></i></button>
     </div>

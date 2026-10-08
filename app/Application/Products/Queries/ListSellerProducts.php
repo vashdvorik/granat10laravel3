@@ -80,7 +80,7 @@ class ListSellerProducts
                 ProductModerationStatus::Rejected->value,
             ]),
             'no_images' => $query->whereDoesntHave('images'),
-            'vip' => $query->where('is_vip', true),
+            'vip' => $query->vipActive(),
             default => null,
         };
     }

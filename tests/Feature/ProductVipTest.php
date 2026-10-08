@@ -347,13 +347,13 @@ class ProductVipTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.store.products.show', $product))
             ->assertOk()
-            ->assertSee('Купить VIP')
+            ->assertSee('Включить VIP')
             ->assertSee('1 день')
             ->assertSee('7 дней')
             ->assertSee('Месяц (30 дней)')
             ->assertSee('Год (365 дней)')
-            ->assertSee('365.00 руб')
-            ->assertSee('120,00 руб');
+            ->assertSee('365,00 ₽')
+            ->assertSee('120,00 ₽');
     }
 
     public function test_product_page_shows_active_vip_with_end_date_and_offers_extension(): void

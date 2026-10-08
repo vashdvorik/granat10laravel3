@@ -93,6 +93,7 @@ class CabinetController extends Controller
     public function updatePassword(UpdatePasswordRequest $request, AccountSecurityService $accountSecurityService)
     {
         $user = Auth::user();
+        $hadPassword = $user->hasPassword();
 
         try {
             $accountSecurityService->updatePassword(
@@ -101,10 +102,15 @@ class CabinetController extends Controller
                 $request->input('password')
             );
         } catch (\RuntimeException $e) {
-            return redirect()->route('account.index')->with('error', $e->getMessage());
+            return redirect()->route('account.user.change_password')->with('error', $e->getMessage());
         }
 
-        return redirect()->route('account.index')->with('success', 'Пароль успешно изменён!');
+        return redirect()->route('account.user.index')->with(
+            'success',
+            $hadPassword
+                ? 'Пароль успешно изменён!'
+                : 'Пароль задан. Теперь вы можете входить и по почте с паролем, и через Google.'
+        );
     }
     public function userIndex()
     {
@@ -147,7 +153,11 @@ class CabinetController extends Controller
         $this->authorize('delete', $user->seller);
 
         try {
-            $sellerName = $accountSecurityService->deleteShop($user, $request->input('password'));
+            $sellerName = $accountSecurityService->deleteShop(
+                $user,
+                $request->input('password'),
+                $request->input('confirmation')
+            );
         } catch (\RuntimeException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\BalanceTopup;
+use App\Models\BalanceTransaction;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -9,7 +11,9 @@ use App\Models\Region;
 use App\Models\Seller;
 use App\Models\Settlement;
 use App\Models\User;
+use App\Models\VipPurchase;
 use App\Policies\CategoryPolicy;
+use App\Policies\FinanceRecordPolicy;
 use App\Policies\OrderPolicy;
 use App\Policies\ProductPolicy;
 use App\Policies\RegionPolicy;
@@ -27,6 +31,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
+        BalanceTopup::class => FinanceRecordPolicy::class,
+        BalanceTransaction::class => FinanceRecordPolicy::class,
         Category::class => CategoryPolicy::class,
         Order::class => OrderPolicy::class,
         Product::class => ProductPolicy::class,
@@ -34,6 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         Seller::class => SellerPolicy::class,
         Settlement::class => SettlementPolicy::class,
         User::class => UserPolicy::class,
+        VipPurchase::class => FinanceRecordPolicy::class,
     ];
 
     /**

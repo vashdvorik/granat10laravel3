@@ -15,7 +15,7 @@
     </ul>
     <div class="error-page bd-7 text-center">
         <div class="error-img">
-            <img src="img/404.png" alt="">
+            <img src="{{ asset('img/404.png') }}" alt="">
         </div>
         <h3 class="error-title">Этой страницы не существует.</h3>
         <form method="get" class="searchform full" action="/search" role="search">

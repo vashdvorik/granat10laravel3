@@ -17,7 +17,7 @@ class CabinetStatsService
         $inactiveProducts = $totalProducts - $activeProducts;
         $vipProducts = $seller->products()
             ->where('is_active', true)
-            ->where('is_vip', true)
+            ->vipActive()
             ->count();
         $saleProducts = $seller->products()
             ->whereNotNull('lowprice')

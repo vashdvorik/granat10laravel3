@@ -33,34 +33,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::create('packages', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->decimal('price', 10, 2);
-            $table->integer('duration_days')->nullable();
-            $table->integer('active_products_limit')->nullable();
-            $table->integer('vip_products_limit')->nullable();
-            $table->boolean('has_website_link')->default(false);
-            $table->boolean('has_social_links')->default(false);
-            $table->boolean('has_order_system')->default(false);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
-        Schema::create('seller_packages', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('seller_id')->constrained()->onDelete('cascade');
-            $table->foreignId('package_id')->constrained();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->boolean('is_active')->nullable()->default(true);
-            $table->index(['seller_id', 'is_active']);
-            $table->index(['seller_id', 'is_active', 'end_date'], 'seller_packages_active_period_index');
-            $table->timestamps();
-        });
-
-        Schema::table('sellers', function (Blueprint $table): void {
-            $table->boolean('auto_renew')->default(true);
-        });
+        // Удаление тарифов необратимо: данные таблиц packages и seller_packages не сохраняются.
+        // Пустые таблицы всё равно ничего не вернут, а частичный откат оставляет базу в
+        // неконсистентном состоянии (так уже случалось на сервере), поэтому откат запрещён.
+        // Для возврата к тарифам восстанавливайте базу из резервной копии.
+        throw new RuntimeException('Миграция drop_package_system необратима: восстановите базу из резервной копии.');
     }
 };

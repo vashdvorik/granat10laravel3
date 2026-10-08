@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class BalanceTopup extends Model
 {
@@ -16,7 +17,9 @@ class BalanceTopup extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'amount_cents' => 'integer',        'is_test' => 'boolean',
+        'amount_cents' => 'integer',
+        'bank_state' => 'integer',
+        'is_test' => 'boolean',
         'expires_at' => 'datetime',
         'paid_at' => 'datetime',
     ];
@@ -24,6 +27,42 @@ class BalanceTopup extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Строка журнала баланса, созданная при зачислении этого платежа (есть только у оплаченных). */
+    public function ledgerEntry(): HasOne
+    {
+        return $this->hasOne(BalanceTransaction::class, 'reference_id')
+            ->where('reference_type', $this->getMorphClass());
+    }
+
+    /** Платёж ждёт оплаты дольше срока жизни счёта: банк так и не ответил, нужна ручная сверка. */
+    public function isOverdue(): bool
+    {
+        return $this->isPending() && $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    public function statusColor(): string
+    {
+        return match ($this->status) {
+            self::STATUS_PAID => 'success',
+            self::STATUS_FAILED => 'danger',
+            self::STATUS_CANCELLED, self::STATUS_EXPIRED => 'gray',
+            default => 'warning',
+        };
+    }
+
+    /** Что означает код состояния, который вернул банк (GetState). */
+    public function bankStateLabel(): string
+    {
+        return match ($this->bank_state) {
+            null => 'Банк ещё не отвечал',
+            1 => 'Оплачен',
+            2 => 'Отменён покупателем',
+            3 => 'Отказ банка',
+            4 => 'Время счёта истекло',
+            default => 'Код '.$this->bank_state,
+        };
     }
 
     /** Идентификатор счёта для банка (nivid/InvoiceId, до 20 символов). */

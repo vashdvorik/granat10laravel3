@@ -62,6 +62,12 @@
                                     <small class="text-muted d-block mb-1">Личный номер телефона</small>
                                     <strong class="d-block">{{ $user->phone ?? 'Не указан' }}</strong>
                                 </div>
+                                @unless($user->hasPassword())
+                                    <div class="alert alert-info mt-4 mb-0">
+                                        Вы входите через Google. Задайте пароль, чтобы можно было входить и по почте.
+                                        <a href="{{ route('account.user.change_password') }}" class="fw-bold d-block mt-1">Задать пароль</a>
+                                    </div>
+                                @endunless
                             </div>
                         </div>
                     </div>
@@ -90,7 +96,7 @@
                                     <a href="{{ route('account.user.balance.topup') }}" class="btn btn-success btn-squared">
                                         <i class="uil uil-plus-circle"></i> Пополнить баланс
                                     </a>
-                                    <a href="{{ route('account.user.balance.topup') }}#history" class="btn btn-outline-secondary btn-squared">
+                                    <a href="{{ route('account.balance.index') }}" class="btn btn-outline-secondary btn-squared">
                                         <i class="uil uil-history-alt"></i> История операций
                                     </a>
                                 </div>

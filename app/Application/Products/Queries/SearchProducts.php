@@ -182,7 +182,7 @@ class SearchProducts
                 ->orderByDesc('created_at')
                 ->orderByDesc('id'),
             default => $query
-                ->orderByDesc('is_vip')
+                ->orderByVipFirst()
                 ->orderByDesc('push_at')
                 ->orderByDesc('created_at')
                 ->orderByDesc('id'),

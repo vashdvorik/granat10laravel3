@@ -177,7 +177,7 @@
                 @endif
 
                 <div class="product-summary__heading">
-                    <h1 class="product-title">{{ $product->name }}</h1>
+                    <h1 class="product-title">{{ $product->name }}@if($product->isVipActive()) <span class="vip-inline-tag">★ VIP</span>@endif</h1>
                     <button type="button" class="product-favorite wishlist-btn"
                         data-product-id="{{ $product->id }}" aria-label="Добавить товар в избранное">
                         <span class="icon-bg icon-wishlist" aria-hidden="true"></span>

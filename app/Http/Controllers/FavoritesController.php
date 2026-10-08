@@ -16,7 +16,7 @@ class FavoritesController extends Controller
         $recommendedProducts = Product::visible()
             ->forRegionalContext()
             ->with(['images', 'seller'])
-            ->orderByDesc('is_vip')
+            ->orderByVipFirst()
             ->orderByDesc('push_at')
             ->orderByDesc('created_at')
             ->limit(8)

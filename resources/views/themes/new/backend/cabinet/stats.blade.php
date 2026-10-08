@@ -59,7 +59,7 @@
                   <div class="ap-po-details-content d-flex flex-wrap justify-content-between">
                      <div class="ap-po-details__titlebar">
                         <h1>{{ $vipProducts }}</h1>
-                        <p>VIP товаров активно</p>
+                        <p><a href="{{ route('account.vip.index') }}">VIP товаров активно</a></p>
                      </div>
                      <div class="ap-po-details__icon-area">
                         <div class="svg-icon order-bg-opacity-warning color-warning">

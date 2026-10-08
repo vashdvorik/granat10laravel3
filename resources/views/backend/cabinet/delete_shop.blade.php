@@ -49,19 +49,44 @@
                             @csrf
                             @method('DELETE')
 
-                            <div class="form-group mb-20">
-                                <label for="password" class="form-label">Введите пароль для подтверждения</label>
-                                <input
-                                    type="password"
-                                    class="form-control @error('password') is-invalid @enderror"
-                                    id="password"
-                                    name="password"
-                                    required
-                                >
-                                @error('password')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if($user->hasPassword())
+                                <div class="form-group mb-20">
+                                    <label for="password" class="form-label">Введите пароль для подтверждения</label>
+                                    <input
+                                        type="password"
+                                        class="form-control @error('password') is-invalid @enderror"
+                                        id="password"
+                                        name="password"
+                                        required
+                                    >
+                                    @error('password')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @else
+                                {{-- Вход через Google: пароля нет, подтверждаем названием магазина --}}
+                                <div class="form-group mb-20">
+                                    <label for="confirmation" class="form-label">
+                                        Для подтверждения введите название магазина: <strong>{{ $user->seller->name }}</strong>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        class="form-control @error('confirmation') is-invalid @enderror"
+                                        id="confirmation"
+                                        name="confirmation"
+                                        autocomplete="off"
+                                        placeholder="{{ $user->seller->name }}"
+                                        required
+                                    >
+                                    @error('confirmation')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    <small class="text-muted d-block mt-2">
+                                        Пароля у вас нет (вход через Google), поэтому подтверждаем названием.
+                                        Хотите подтверждать паролем? <a href="{{ route('account.user.change_password') }}">Задайте пароль</a>.
+                                    </small>
+                                </div>
+                            @endif
 
                             <div class="store-edit-submit-bar">
                                 <a href="{{ route('account.index') }}" class="btn btn-light btn-default btn-squared">

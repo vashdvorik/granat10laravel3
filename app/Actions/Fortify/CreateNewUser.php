@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Rules\NotDisposableEmail;
 use App\Rules\SafeEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -27,18 +28,23 @@ class CreateNewUser implements CreatesNewUsers
                 'string',
                 'email',
                 new SafeEmail,
+                new NotDisposableEmail,
                 'max:255',
                 Rule::unique(User::class),
             ],
-            'phone' => ['required', 'digits:8'],
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        // Те же данные, что даёт вход через Google (имя и почта); телефон продавец укажет в профиле
+        // или при создании магазина.
+        $user = new User([
             'name' => $input['name'],
             'email' => $input['email'],
-            'phone' => $input['phone'] ?? null,
             'password' => Hash::make($input['password']),
         ]);
+        $user->password_set_at = now();
+        $user->save();
+
+        return $user;
     }
 }

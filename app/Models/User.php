@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordCustom;
+use App\Notifications\VerifyEmailCustom;
+use Throwable;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use InvalidArgumentException;
@@ -16,7 +19,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -57,14 +60,63 @@ class User extends Authenticatable implements FilamentUser
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'password_set_at' => 'datetime',
         'settings' => 'collection',
     ];
 
     public $additional_attributes = ['locale'];
 
+    /**
+     * Задавал ли пользователь пароль сам. У пришедших через Google он случайный и неизвестный:
+     * такому пользователю не нужно вводить «текущий пароль» и можно предложить задать пароль.
+     */
+    public function hasPassword(): bool
+    {
+        return $this->password_set_at !== null;
+    }
+
+    public function balanceTransactions(): HasMany
+    {
+        return $this->hasMany(BalanceTransaction::class);
+    }
+
+    public function balanceTopups(): HasMany
+    {
+        return $this->hasMany(BalanceTopup::class);
+    }
+
+    public function vipPurchases(): HasMany
+    {
+        return $this->hasMany(VipPurchase::class);
+    }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    /**
+     * Письмо отправляется сразу, во время запроса. Если почтовый сервер недоступен (или исчерпан
+     * дневной лимит SMTP), пользователь не должен увидеть ошибку 500: сбой пишется в лог, а страница
+     * «Подтвердите почту» предлагает повторить отправку.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        try {
+            $this->notify(new VerifyEmailCustom);
+        } catch (Throwable $e) {
+            report($e);
+            session()->flash('verification_mail_failed', true);
+        }
+    }
+
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new ResetPasswordCustom($token));
+        try {
+            $this->notify(new ResetPasswordCustom($token));
+        } catch (Throwable $e) {
+            report($e); // пользователь увидит стандартное «если адрес существует, письмо отправлено»
+        }
     }
 
     public function routeNotificationForMail(): string

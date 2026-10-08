@@ -12,7 +12,8 @@
                 <span class="joom-product__placeholder"><i class="fa-regular fa-image" aria-hidden="true"></i><small>Нет фото</small></span>
             @endif
         </a>
-        @if($discount)<span class="joom-product__badge">−{{ $discount }}%</span>@elseif($product->is_vip)<span class="joom-product__badge">Выбор BIMM</span>@endif
+        @if($discount)<span class="joom-product__badge">−{{ $discount }}%</span>@endif
+        @if($product->isVipActive())<span class="joom-product__vip" title="VIP-размещение"><i class="fa-solid fa-star"></i> VIP</span>@endif
         <button class="joom-product__favorite" type="button" data-joom-favorite="{{ $product->id }}" aria-pressed="false" aria-label="Добавить в избранное"><i class="fa-regular fa-heart"></i></button>
         @if($product->delivery_enabled)<span class="joom-product__delivery"><i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Доставка</span>@endif
     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BalanceTransactionType;
 use App\Models\User;
 use App\Notifications\AccountNotification;
 use Illuminate\Support\Facades\DB;
@@ -92,6 +93,24 @@ class DeveloperTipService
 
             $sender->forceFill(['balance' => $this->fromCents($senderOld - $cents)])->save();
             $receiver->forceFill(['balance' => $this->fromCents($receiverOld + $cents)])->save();
+
+            $ledger = app(BalanceLedger::class);
+            $ledger->record(
+                $sender,
+                BalanceTransactionType::TipSent,
+                -$cents,
+                $senderOld - $cents,
+                'Благодарность разработчику',
+                meta: ['to_user_id' => $receiver->getKey()],
+            );
+            $ledger->record(
+                $receiver,
+                BalanceTransactionType::TipReceived,
+                $cents,
+                $receiverOld + $cents,
+                'Благодарность от '.($sender->name ?: $sender->email),
+                meta: ['from_user_id' => $sender->getKey()],
+            );
 
             activity('user_balance')
                 ->causedBy($sender)

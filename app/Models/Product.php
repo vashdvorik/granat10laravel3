@@ -110,7 +110,7 @@ class Product extends Model
             'seller_id' => $this->seller_id,
             'seller_name' => $this->seller?->name,
             'settlement_id' => $this->seller?->settlement_id,
-            'is_vip' => (int) $this->is_vip,
+            'is_vip' => (int) $this->isVipActive(),
             'push_at' => $this->push_at?->getTimestamp() ?? 0,
         ];
     }
@@ -220,6 +220,22 @@ class Product extends Model
     {
         return (bool) $this->is_vip
             && ($this->vip_until === null || $this->vip_until->isFuture());
+    }
+
+    /** Товары, у которых VIP действует сейчас (флаг включён и срок не истёк; null = без срока). */
+    public function scopeVipActive(Builder $query): Builder
+    {
+        return $query->where('products.is_vip', true)
+            ->where(fn (Builder $q) => $q->whereNull('products.vip_until')->orWhere('products.vip_until', '>', now()));
+    }
+
+    /** Сначала товары с действующим VIP. Не зависит от того, успел ли планировщик снять просроченный флаг. */
+    public function scopeOrderByVipFirst(Builder $query): Builder
+    {
+        return $query->orderByRaw(
+            'CASE WHEN products.is_vip = 1 AND (products.vip_until IS NULL OR products.vip_until > ?) THEN 1 ELSE 0 END DESC',
+            [now()->toDateTimeString()],
+        );
     }
 
     public function scopeVisible($query)

@@ -27,7 +27,7 @@
     </div>
     <div class="joom-product-detail__summary">
         @if($product->category)<a class="joom-detail__category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">{{ $product->category->name }}</a>@endif
-        <h1>{{ $product->name }}</h1>
+        <h1>{{ $product->name }}@if($product->isVipActive()) <span class="vip-inline-tag"><i class="fa-solid fa-star"></i> VIP</span>@endif</h1>
         <div class="joom-detail__meta"><span><i class="fa-solid fa-location-dot"></i> {{ $product->seller->town ?? 'ПМР' }}</span><span>Местный продавец</span></div>
         <div class="joom-detail__price"><strong>{{ number_format((float) $currentPrice, 0, '.', ' ') }} ₽</strong>@if($hasDiscount)<del>{{ number_format((float) $product->price, 0, '.', ' ') }} ₽</del><span>−{{ $discount }}%</span>@endif</div>
         <div class="joom-detail__seller"><span class="joom-detail__seller-logo">{{ mb_strtoupper(mb_substr(trim($product->seller->name, '" '), 0, 1)) }}</span><span><small>Продавец</small><a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">{{ trim($product->seller->name, '" ') }}</a></span></div>

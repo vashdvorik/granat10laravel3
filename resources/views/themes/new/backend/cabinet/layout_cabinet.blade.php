@@ -106,6 +106,9 @@
                     <a class="{{ request()->routeIs('account.store.products*') ? 'active' : '' }}" href="{{ route('account.store.products.index') }}">
                         <i class="fa-solid fa-boxes-stacked"></i><span>{{ $cabinetProducts }}</span>
                     </a>
+                    <a class="{{ request()->routeIs('account.vip.*') ? 'active' : '' }}" href="{{ route('account.vip.index') }}">
+                        <i class="fa-solid fa-star"></i><span>VIP-размещение</span>
+                    </a>
                     <a class="{{ request()->routeIs('account.store.orders*') ? 'active' : '' }}" href="{{ route('account.store.orders.index') }}">
                         <i class="fa-solid fa-bag-shopping"></i><span>{{ $cabinetOrders }}</span>
                     </a>
@@ -113,6 +116,9 @@
                         <i class="fa-solid fa-chart-line"></i><span>{{ $cabinetStats }}</span>
                     </a>
                 @endif
+                <a class="{{ request()->routeIs('account.balance.*', 'account.user.balance.*') ? 'active' : '' }}" href="{{ route('account.balance.index') }}">
+                    <i class="fa-solid fa-wallet"></i><span>Баланс</span>
+                </a>
                 <a class="{{ request()->routeIs('account.user.index', 'account.user.edit', 'account.user.update') ? 'active' : '' }}" href="{{ route('account.user.index') }}">
                     <i class="fa-regular fa-circle-user"></i><span>{{ $cabinetProfile }}</span>
                 </a>

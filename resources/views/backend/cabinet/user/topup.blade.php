@@ -34,7 +34,7 @@
                                 <div class="mb-3">
                                     <label for="topup-amount" class="form-label">Сумма пополнения, ₽</label>
                                     <input type="text" inputmode="decimal" id="topup-amount" name="amount"
-                                           value="{{ old('amount') }}" autocomplete="off"
+                                           value="{{ old('amount', $prefillAmount ?? '') }}" autocomplete="off"
                                            class="form-control @error('amount') is-invalid @enderror"
                                            placeholder="Например, 500">
                                     @error('amount')

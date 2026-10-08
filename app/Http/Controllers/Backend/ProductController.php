@@ -20,11 +20,8 @@ use App\Services\ProductVipService;
 use App\Services\ProductModerationIssuePresenter;
 use App\Services\ProductModerationService;
 use App\Services\SellerCabinetStateService;
-use App\Services\VipPricing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
-use RuntimeException;
 
 class ProductController extends Controller
 {
@@ -121,7 +118,7 @@ class ProductController extends Controller
     public function show(
         Product $product,
         ProductModerationIssuePresenter $issuePresenter,
-        VipPricing $vipPricing
+        ProductVipService $vipService
     )
     {
         $this->authorize('view', $product);
@@ -133,16 +130,12 @@ class ProductController extends Controller
 
         $moderationIssues = $issuePresenter->forProduct($product);
 
-        $vipOptions = $vipPricing->options();
-        $vipPricePerDay = $vipPricing->pricePerDay();
-        $userBalance = Auth::user()->balance;
+        $vipState = $vipService->state($product, Auth::user());
 
         return view('backend.cabinet.products.show', compact(
             'product',
             'moderationIssues',
-            'vipOptions',
-            'vipPricePerDay',
-            'userBalance'
+            'vipState'
         ));
     }
 
@@ -318,37 +311,6 @@ class ProductController extends Controller
         }
 
         return redirect()->back()->with('success', 'Главное изображение обновлено');
-    }
-
-    /**
-     * Покупка VIP для товара за деньги с баланса
-     */
-    public function purchaseVip(
-        Request $request,
-        Product $product,
-        ProductVipService $vipService,
-        VipPricing $vipPricing
-    ) {
-        $this->authorize('view', $product);
-
-        $validated = $request->validate([
-            'days' => ['required', 'integer', Rule::in(array_keys($vipPricing->durations()))],
-        ], [
-            'days.required' => 'Выберите срок VIP.',
-            'days.in' => 'Выбран недоступный срок VIP.',
-            'days.integer' => 'Выбран недоступный срок VIP.',
-        ]);
-
-        try {
-            $updated = $vipService->purchase($request->user(), $product, (int) $validated['days']);
-        } catch (RuntimeException $exception) {
-            return redirect()->back()->with('error', $exception->getMessage());
-        }
-
-        return redirect()->back()->with(
-            'success',
-            'VIP для товара "'.$updated->name.'" действует до '.$updated->vip_until->format('d.m.Y H:i')
-        );
     }
 
     /**

@@ -8,7 +8,7 @@
 
  <!--ЧАСТЫЕ ВОПРОСЫ 1 КОЛОНКА-->   
 <!--<div class="pd-banner v2">
-   <a href="#" class="image-bd effect_img2"><img src="img/o-banner.jpg" alt="" class="img-reponsive"></a> 
+   <a href="#" class="image-bd effect_img2"><img src="{{ asset('img/o-banner.jpg') }}" alt="" class="img-reponsive"></a> 
 </div>-->
 <ul class="breadcrumb">
     <li><a href="/">Главная</a></li>

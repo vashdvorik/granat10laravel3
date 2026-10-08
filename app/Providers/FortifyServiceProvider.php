@@ -6,6 +6,12 @@ use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
 use App\Actions\Fortify\UpdateUserProfileInformation;
+use App\Http\Responses\RegisteredUserResponse;
+use App\Http\Responses\VerifiedEmailResponse;
+use App\Http\Responses\VerificationLinkSentResponse;
+use Laravel\Fortify\Contracts\EmailVerificationNotificationSentResponse;
+use Laravel\Fortify\Contracts\RegisterResponse;
+use Laravel\Fortify\Contracts\VerifyEmailResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,7 +26,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(VerifyEmailResponse::class, VerifiedEmailResponse::class);
+        $this->app->singleton(RegisterResponse::class, RegisteredUserResponse::class);
+        $this->app->singleton(EmailVerificationNotificationSentResponse::class, VerificationLinkSentResponse::class);
     }
 
     /**
@@ -49,6 +57,11 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(function () {
         return view('backend.auth.register');
+        });
+
+        // Страница «Проверьте почту» для пользователей с неподтверждённым адресом
+        Fortify::verifyEmailView(function () {
+            return view('backend.auth.verify-email');
         });
 
         Fortify::requestPasswordResetLinkView(function () {

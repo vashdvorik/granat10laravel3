@@ -339,7 +339,7 @@
             <div class="sidebar__menu-group">
                <ul class="sidebar_nav">
                   <!--магазин-->
-                  <li class="has-child {{ request()->routeIs('account.index', 'account.store.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
+                  <li class="has-child {{ request()->routeIs('account.index', 'account.store.*', 'account.vip.*') || request()->routeIs('cabinet.create_shop') ? 'open active' : '' }}">
                      <a href="{{ route('account.index') }}" class="">
                         <span class="nav-icon uil uil-bag"></span>
                         <span class="menu-text text-initial">Магазин</span>
@@ -361,6 +361,9 @@
                         </li>
                         <li class="{{ request()->routeIs('account.store.products.create') ? 'active' : '' }}">
                            <a href="{{ route('account.store.products.create') }}">Добавить товар</a>
+                        </li>
+                        <li class="{{ request()->routeIs('account.vip.*') ? 'active' : '' }}">
+                           <a href="{{ route('account.vip.index') }}">VIP-размещение</a>
                         </li>
                         <li class="{{ request()->routeIs('account.store.orders.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.orders.index') }}">Заказы</a>
@@ -388,8 +391,11 @@
                               <a href="{{ route('account.user.index') }}">Профиль</a>
                         </li>
                         
+                        <li class="{{ request()->routeIs('account.balance.*', 'account.user.balance.*') ? 'active' : '' }}">
+                           <a href="{{ route('account.balance.index') }}">Баланс и операции</a>
+                        </li>
                         <li class="{{ request()->routeIs('account.user.change_password') ? 'active' : '' }}">
-                           <a href="{{ route('account.user.change_password') }}">Сменить пароль</a>
+                           <a href="{{ route('account.user.change_password') }}">{{ auth()->user()->hasPassword() ? 'Сменить пароль' : 'Задать пароль' }}</a>
                         </li>
 
                      </ul>

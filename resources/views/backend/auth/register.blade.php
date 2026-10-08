@@ -65,19 +65,6 @@
                 </div>
             </div>
 
-            <label for="phone">
-                <p class="text-left text-sm mb-2 text-gray-1100 dark:text-gray-dark-1100">Личный телефон</p>
-            </label>
-            <div class="form-control mb-[20px]">
-                <div class="input-group border rounded-lg border-[#E8EDF2] dark:border-[#313442]">
-                    <input class="input flex-1 bg-transparent text-gray-900 focus:outline-none dark:text-gray-dark-300"
-                           type="text" placeholder="777*****" name="phone" id="phone" value="{{ old('phone') }}">
-                    <button type="button" class="btn-square flex items-center justify-center bg-transparent" tabindex="-1">
-                        <img src="{{ asset('auth/assets/images/icons/icon-input-phone.svg') }}" alt="phone icon">
-                    </button>
-                </div>
-            </div>
-
             <label for="password">
                 <p class="text-left text-sm mb-2 text-gray-1100 dark:text-gray-dark-1100">Пароль</p>
             </label>
@@ -105,18 +92,9 @@
             </div>
         </div>
         
+        @include('backend.auth.partials.form-protection')
         <button type="submit" class="btn normal-case h-fit min-h-fit transition-all duration-300 border-4 w-full border-neutral-bg mb-[20px] py-[14px] dark:border-dark-neutral-bg">Создать кабинет продавца</button>
-    {{--    <a class="text-center text-xs block text-[#8083A3] mb-[20px]" href="#">Или зарегистрируйтесь через соцсети</a>
-        <div class="flex items-center gap-x-2 justify-between mb-[20px]">
-            <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
-                <img src="{{ asset('auth/assets/images/icons/icon-google.svg') }}" alt="google icon">
-                <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Google аккаунт</span>
-            </a>
-            <a class="flex items-center justify-center border rounded-lg gap-x-[10px] border-[#E8EDF2] p-[3px] py-[14px] sm:min-w-[170px]" href="#">
-                <img src="{{ asset('auth/assets/images/icons/icon-facebook.svg') }}" alt="facebook icon">
-                <span class="text-gray-1100 text-xs dark:text-gray-dark-1100">Facebook аккаунт</span>
-            </a>
-        </div> --}}
+        @include('backend.auth.partials.social-login')
         <p class="text-sm text-gray-1100 dark:text-gray-dark-1100">
             Уже есть кабинет продавца?
             <a class="text-color-brands" href="{{ route('login') }}">Войти продавцу</a>

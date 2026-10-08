@@ -326,7 +326,7 @@ class CabinetControllerTest extends TestCase
             'password_confirmation' => 'NewPassword456',
         ]);
 
-        $response->assertRedirect(route('account.index'));
+        $response->assertRedirect(route('account.user.index'));
         $response->assertSessionHas('success');
 
         // Убеждаемся, что пароль действительно сменён
@@ -345,7 +345,7 @@ class CabinetControllerTest extends TestCase
             'password_confirmation' => 'NewPassword456',
         ]);
 
-        $response->assertRedirect(route('account.index'));
+        $response->assertRedirect(route('account.user.change_password'));
         $response->assertSessionHas('error');
 
         // Пароль не должен был измениться

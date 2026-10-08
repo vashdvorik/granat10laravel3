@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BalanceTransactionType;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -48,6 +49,15 @@ class BalanceAdjustmentService
             $adjustment = $this->fromCents($adjustmentInCents);
 
             $lockedUser->forceFill(['balance' => $newBalance])->save();
+
+            app(BalanceLedger::class)->record(
+                $lockedUser,
+                BalanceTransactionType::AdminAdjustment,
+                $adjustmentInCents,
+                $newBalanceInCents,
+                'Корректировка администратором: '.$reason,
+                meta: ['actor_id' => $actor->getKey(), 'reason' => $reason],
+            );
 
             activity('user_balance')
                 ->causedBy($actor)

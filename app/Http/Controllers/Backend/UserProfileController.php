@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Rules\SafeEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,7 +38,23 @@ class UserProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
         ]);
 
-        $user->update($data);
+        $emailChanged = mb_strtolower(trim($data['email'])) !== mb_strtolower((string) $user->email);
+
+        $user->fill($data);
+
+        if ($emailChanged) {
+            // Новый адрес нужно подтвердить заново, иначе им можно подменить подтверждённую почту
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+
+            return redirect()->route('verification.notice')
+                ->with('status', 'verification-link-sent');
+        }
 
         return redirect()->route('account.user.index')
             ->with('success', 'Профиль обновлён');

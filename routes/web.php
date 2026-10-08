@@ -138,14 +138,31 @@ Route::middleware('auth')->prefix('cabinet')->group(function () {
 });
 */
 
+// === ВХОД И РЕГИСТРАЦИЯ ЧЕРЕЗ ВНЕШНИЙ АККАУНТ (Google) ===
+Route::middleware(['guest', 'throttle:30,1'])
+    ->prefix('auth')
+    ->name('social.')
+    ->whereIn('provider', array_keys(\App\Services\SocialLoginService::PROVIDERS))
+    ->group(function () {
+        Route::get('{provider}/redirect', [\App\Http\Controllers\Auth\SocialAuthController::class, 'redirect'])->name('redirect');
+        Route::get('{provider}/callback', [\App\Http\Controllers\Auth\SocialAuthController::class, 'callback'])->name('callback');
+    });
+
 // === ЛИЧНЫЙ КАБИНЕТ (BACKEND) ===
-Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.')->group(function () {
+// 'verified': кабинет доступен только после подтверждения почты (письмо со ссылкой отправляется при регистрации)
+Route::middleware(['auth', 'verified', 'cabinet.design'])->prefix('account')->name('account.')->group(function () {
 
     // Главная страница кабинета
     Route::get('/', [CabinetController::class, 'cabinet'])->name('index');
 
     // Статистика магазина
     Route::get('stats', [CabinetController::class, 'stats'])->name('stats');
+
+    // VIP-размещение: все товары, их VIP, покупка и история
+    Route::get('vip', [App\Http\Controllers\Backend\VipController::class, 'index'])->name('vip.index');
+
+    // Журнал баланса (все операции: пополнения, VIP, благодарности, корректировки)
+    Route::get('balance', [App\Http\Controllers\Backend\BalanceJournalController::class, 'index'])->name('balance.index');
     Route::get('notifications/{notification}', [App\Http\Controllers\Backend\NotificationController::class, 'read'])
         ->name('notifications.read');
     Route::post('notifications/read-all', [App\Http\Controllers\Backend\NotificationController::class, 'readAll'])
@@ -185,8 +202,9 @@ Route::middleware(['auth', 'cabinet.design'])->prefix('account')->name('account.
             Route::patch('{product}/deactivate', [App\Http\Controllers\Backend\ProductController::class, 'deactivate'])->name('deactivate');
             Route::post('{product}/submit-moderation', [App\Http\Controllers\Backend\ProductController::class, 'submitForModeration'])->name('submit-moderation');
 
-            // Покупка VIP за баланс
-            Route::post('{product}/vip', [App\Http\Controllers\Backend\ProductController::class, 'purchaseVip'])->name('vip');
+            // VIP: покупка/продление за баланс и досрочное отключение с возвратом
+            Route::post('{product}/vip', [App\Http\Controllers\Backend\VipController::class, 'purchase'])->name('vip');
+            Route::delete('{product}/vip', [App\Http\Controllers\Backend\VipController::class, 'cancel'])->name('vip.cancel');
 
             // Поднятие товара в списке
             Route::post('{product}/push-up', [App\Http\Controllers\Backend\ProductController::class, 'pushUp'])->name('push-up');

@@ -1772,3 +1772,8 @@ body.pushmenu-push-toleft {
         right: 12px;
     }
 }
+
+.home-product__vip{position:absolute;left:12px;top:12px;padding:5px 10px;border-radius:20px;background:#f5a623;color:#fff;font-size:12px;font-weight:800;letter-spacing:.04em;z-index:2}
+.home-product__discount + .home-product__vip{top:46px}
+
+.vip-inline-tag{display:inline-flex;align-items:center;gap:5px;margin-left:8px;padding:3px 10px;border-radius:999px;background:#f5a623;color:#fff;font-size:.45em;font-weight:800;letter-spacing:.04em;vertical-align:middle;white-space:nowrap}

@@ -174,60 +174,8 @@
                                         <div class="mb-3 product-show-primary-action">
                                             <x-product-moderation-actions :product="$product" />
                                         </div>
-                                        {{-- VIP: покупка за баланс --}}
-                                        <div class="card mb-3 product-vip-panel">
-                                            <div class="card-body">
-                                                <h6 class="mb-2"><i class="uil uil-star text-warning"></i> VIP-размещение</h6>
-                                                <p class="text-muted mb-2 fs-14">VIP товары показываются первыми в каталоге и в поиске.</p>
-
-                                                @if($product->isVipActive())
-                                                    <div class="alert alert-success py-2 px-3 mb-3">
-                                                        @if($product->vip_until)
-                                                            VIP действует до <strong>{{ $product->vip_until->format('d.m.Y H:i') }}</strong>.
-                                                        @else
-                                                            VIP действует без ограничения по сроку.
-                                                        @endif
-                                                    </div>
-                                                @endif
-
-                                                @if($product->isVipActive() && ! $product->vip_until)
-                                                    {{-- бессрочный VIP: продлевать нечего --}}
-                                                @elseif(! $product->view_state->isPublic)
-                                                    <div class="alert alert-info py-2 px-3 mb-0">
-                                                        VIP можно подключить после того, как товар пройдёт проверку и будет опубликован.
-                                                    </div>
-                                                @else
-                                                    <form action="{{ route('account.store.products.vip', $product) }}" method="POST" class="product-vip-form">
-                                                        @csrf
-                                                        <div class="mb-3">
-                                                            @foreach($vipOptions as $option)
-                                                                <div class="form-check mb-1">
-                                                                    <input class="form-check-input"
-                                                                           type="radio"
-                                                                           name="days"
-                                                                           id="vip-days-{{ $option['days'] }}"
-                                                                           value="{{ $option['days'] }}"
-                                                                           {{ (int) old('days', $vipOptions[0]['days'] ?? 0) === $option['days'] ? 'checked' : '' }}>
-                                                                    <label class="form-check-label" for="vip-days-{{ $option['days'] }}">
-                                                                        {{ $option['label'] }} — <strong>{{ $option['price'] }} руб</strong>
-                                                                    </label>
-                                                                </div>
-                                                            @endforeach
-                                                            @error('days')
-                                                                <div class="text-danger fs-13">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="d-flex flex-wrap align-items-center gap-3">
-                                                            <button type="submit" class="btn btn-warning btn-default btn-squared">
-                                                                {{ $product->isVipActive() ? 'Продлить VIP' : 'Купить VIP' }}
-                                                            </button>
-                                                            <small class="text-muted">Ваш баланс: {{ number_format((float) $userBalance, 2, ',', ' ') }} руб</small>
-<a href="{{ route('account.user.balance.topup') }}" class="fs-13">Пополнить</a>
-                                                        </div>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </div>
+                                        {{-- VIP: включить, продлить, отключить, оплатить --}}
+                                        @include('backend.cabinet.products.partials.vip-panel')
                                         {{-- КНОПКИ УДАЛИТЬ И ИЗМЕНИТЬ --}}
                                         <div class="d-flex mt-20 flex-wrap gap-2 product-show-actions">
                                             @if($product->view_state->canUnpublish)

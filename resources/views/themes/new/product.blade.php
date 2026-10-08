@@ -25,7 +25,7 @@
     </div>
     <div class="bimm-detail__summary">
         @if($product->category)<a class="bimm-detail__category" href="{{ $regionalUrl->route('catalog.show', ['alias' => $product->category->alias]) }}">{{ $product->category->name }}</a>@endif
-        <h1>{{ $product->name }}</h1>
+        <h1>{{ $product->name }}@if($product->isVipActive()) <span class="vip-inline-tag"><i class="fa-solid fa-star"></i> VIP</span>@endif</h1>
         <div class="bimm-detail__price"><span>{{ number_format((float) $currentPrice, 0, '.', ' ') }} ₽</span>@if($hasDiscount)<del>{{ number_format((float) $product->price, 0, '.', ' ') }} ₽</del>@endif</div>
         <dl class="bimm-detail__meta">
             <div><dt>Продавец</dt><dd><a href="{{ $regionalUrl->route('seller', ['alias' => $product->seller->alias]) }}">{{ trim($product->seller->name, '" ') }}</a></dd></div>

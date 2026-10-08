@@ -18,8 +18,13 @@ class BalanceTopupController extends Controller
     {
         $user = Auth::user();
 
+        // ?amount=150 — подставляем сумму (например, «не хватает на VIP»); только число в допустимых пределах
+        $requested = (string) request()->query('amount', '');
+        $prefill = preg_match('/^\d{1,6}([.,]\d{1,2})?$/', $requested) ? str_replace(',', '.', $requested) : '';
+
         return view('backend.cabinet.user.topup', [
             'user' => $user,
+            'prefillAmount' => $prefill,
             'available' => $this->topups->isAvailable(),
             'minAmount' => $this->topups->minAmount(),
             'maxAmount' => $this->topups->maxAmount(),

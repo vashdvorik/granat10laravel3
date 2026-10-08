@@ -660,7 +660,7 @@
 <header id="header" class="header-v1">
     <!--Баннер вверху страницы  -->
     <!--   <div class="header-top-banner>
-        <a href="#"><img src="img/banner-top2.jpg" alt="" class="img-responsive"></a>
+        <a href="#"><img src="{{ asset('img/banner-top2.jpg') }}" alt="" class="img-responsive"></a>
         </div>-->
 
 

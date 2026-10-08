@@ -2,7 +2,9 @@
 
 namespace App\Services\WebPayment;
 
+use App\Enums\BalanceTransactionType;
 use App\Models\BalanceTopup;
+use App\Services\BalanceLedger;
 use App\Models\User;
 use App\Notifications\AccountNotification;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +42,13 @@ class BalanceTopupService
             throw new RuntimeException('Пополнение баланса временно недоступно.');
         }
 
-        $cents = $this->parseAmount($amount);        $lifetime = max(1, (int) config('services.webpayment.lifetime_minutes'));
+        $cents = $this->parseAmount($amount);
+        $lifetime = max(1, (int) config('services.webpayment.lifetime_minutes'));
 
         $topup = BalanceTopup::query()->create([
             'user_id' => $user->getKey(),
-            'amount_cents' => $cents,            'currency' => (string) config('services.webpayment.currency'),
+            'amount_cents' => $cents,
+            'currency' => (string) config('services.webpayment.currency'),
             'status' => BalanceTopup::STATUS_PENDING,
             'is_test' => (bool) config('services.webpayment.is_test'),
             'expires_at' => now()->addMinutes($lifetime),
@@ -190,11 +194,30 @@ class BalanceTopupService
             return;
         }
 
-        $user = User::query()->lockForUpdate()->findOrFail($topup->user_id);
+        // Внешнего ключа на users может не быть (см. миграцию), поэтому пользователя могли удалить.
+        $user = User::query()->lockForUpdate()->find($topup->user_id);
+
+        if ($user === null) {
+            Log::error('WebPayment: оплаченный счёт без пользователя, зачисление невозможно', ['topup_id' => $topup->getKey()]);
+            $topup->status = BalanceTopup::STATUS_FAILED;
+
+            return;
+        }
+
         $oldCents = $this->toCents((string) ($user->getRawOriginal('balance') ?? '0'));
         $newCents = $oldCents + $topup->amount_cents;
 
         $user->forceFill(['balance' => $this->fromCents($newCents)])->save();
+
+        app(BalanceLedger::class)->record(
+            $user,
+            BalanceTransactionType::Topup,
+            $topup->amount_cents,
+            $newCents,
+            'Пополнение банковской картой, счёт №'.$topup->invoiceId(),
+            $topup,
+            array_filter(['rrn' => $state['rrn'], 'card_last_digits' => $state['lastdgt'], 'is_test' => $topup->is_test ?: null]),
+        );
 
         $topup->status = BalanceTopup::STATUS_PAID;
         $topup->paid_at = now();
@@ -218,7 +241,8 @@ class BalanceTopupService
                 'rrn' => $state['rrn'],
                 'old_balance' => $this->fromCents($oldCents),
                 'new_balance' => $this->fromCents($newCents),
-                'adjustment' => $topup->amountFormatted(),                'is_test' => $topup->is_test,
+                'adjustment' => $topup->amountFormatted(),
+                'is_test' => $topup->is_test,
             ])
             ->log('Пополнение баланса банковской картой');
     }
