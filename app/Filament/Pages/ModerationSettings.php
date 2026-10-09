@@ -4,7 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Data\ModerationSettingsSnapshot;
 use App\Models\Category;
-use App\Services\AiProviderUrlValidator;
 use App\Services\ModerationConnectionTester;
 use App\Services\ModerationSettingsFormMapper;
 use App\Services\ModerationSettingsSnapshotFactory;
@@ -28,12 +27,15 @@ class ModerationSettings extends Page implements HasForms
     /** Поля блока «Дополнительные настройки»: при ошибке в них блок раскрывается сам. */
     private const ADVANCED_FIELDS = [
         'queue_connection', 'queue', 'timeout', 'max_attempts',
-        'base_url', 'chat_completions_path',
         'max_output_tokens', 'retry_times', 'retry_sleep_ms',
         'requests_per_minute', 'rate_limit_safety_seconds', 'hourly_request_limit', 'daily_request_limit',
-        'image_model', 'image_base_url', 'image_endpoint_path', 'image_auth_header', 'image_auth_prefix',
         'image_queue', 'image_timeout', 'image_max_attempts',
     ];
+
+    /** Модель OpenRouter: «автор/название», например openai/gpt-4o-mini или meta-llama/llama-3.1-8b-instruct:free. */
+    private const MODEL_PATTERN = '/^[A-Za-z0-9_.\-]+\/[A-Za-z0-9_.\-:+]+$/';
+
+    private const MODEL_MESSAGE = 'Укажите модель в виде «автор/название», например openai/gpt-4o-mini.';
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
@@ -50,10 +52,6 @@ class ModerationSettings extends Page implements HasForms
     public ?array $data = [];
 
     public bool $apiKeyConfigured = false;
-
-    public bool $textApiKeyConfigured = false;
-
-    public bool $imageApiKeyConfigured = false;
 
     public array $budgetUsage = [];
 
@@ -79,7 +77,7 @@ class ModerationSettings extends Page implements HasForms
         return $form
             ->schema([
                 $this->strategySection(),
-                $this->textConnectionSection(),
+                $this->connectionSection(),
                 $this->imageSection(),
                 $this->advancedSection(),
             ])
@@ -148,47 +146,25 @@ class ModerationSettings extends Page implements HasForms
             ]);
     }
 
-    // ------------------------------------------------------------------ подключение к ИИ (текст)
+    // ------------------------------------------------------------------ подключение к OpenRouter
 
-    private function textConnectionSection(): Forms\Components\Section
+    private function connectionSection(): Forms\Components\Section
     {
-        return Forms\Components\Section::make('Подключение к ИИ')
-            ->description('Через какой сервис ИИ читает названия, описания и характеристики товаров.')
+        return Forms\Components\Section::make('Подключение к OpenRouter')
+            ->description('Через OpenRouter работают и проверка текста, и проверка фото: один ключ на всё.')
             ->schema([
-                Forms\Components\Select::make('provider')
-                    ->label('Сервис')
-                    ->options([
-                        'google' => 'Google Gemini',
-                        'deepseek' => 'DeepSeek',
-                        'openai_compatible' => 'Другой сервис (совместимый с OpenAI)',
-                    ])
-                    ->live()
-                    ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
-                        if ($state === 'deepseek') {
-                            $set('model', 'deepseek-chat');
-                            $set('base_url', 'https://api.deepseek.com');
-                            $set('chat_completions_path', '/chat/completions');
-                        }
-
-                        if ($state === 'google') {
-                            $set('model', 'gemini-3.5-flash');
-                            $set('base_url', 'https://generativelanguage.googleapis.com/v1beta');
-                            $set('chat_completions_path', '/chat/completions');
-                        }
-                    })
-                    ->required()
-                    ->helperText(fn (Forms\Get $get): string => $get('provider') === 'openai_compatible'
-                        ? 'Для другого сервиса укажите его адрес в блоке «Дополнительные настройки» ниже (поле «Адрес сервиса»).'
-                        : 'Модель и адрес сервиса подставляются сами.'),
                 Forms\Components\TextInput::make('api_key')
                     ->label('Ключ доступа (API-ключ)')
                     ->password()->revealable()->autocomplete(false)
-                    ->placeholder(fn (): string => $this->keyPlaceholder('text'))
-                    ->helperText('Хранится в зашифрованном виде и не показывается. Оставьте поле пустым, чтобы не менять сохранённый ключ.'),
-                Forms\Components\TextInput::make('model')
-                    ->label('Модель')
+                    ->placeholder(fn (): string => $this->apiKeyConfigured ? 'Ключ сохранён — вводить заново не нужно' : 'Ключ ещё не задан')
+                    ->helperText('Создаётся на openrouter.ai/keys. Хранится в зашифрованном виде и не показывается. Оставьте поле пустым, чтобы не менять сохранённый ключ.'),
+                Forms\Components\TextInput::make('text_model')
+                    ->label('Модель для текста')
                     ->required()
-                    ->helperText('Например: gemini-3.5-flash, deepseek-chat. Менять нужно, только если сервис сменил название модели.'),
+                    ->regex(self::MODEL_PATTERN)
+                    ->validationMessages(['regex' => self::MODEL_MESSAGE])
+                    ->datalist(['openai/gpt-4o-mini', 'google/gemini-2.5-flash', 'google/gemini-2.0-flash-001', 'deepseek/deepseek-chat', 'anthropic/claude-3.5-haiku'])
+                    ->helperText('Название модели с openrouter.ai/models в виде «автор/название», например openai/gpt-4o-mini. Подойдёт недорогая быстрая модель.'),
                 Forms\Components\Actions::make([
                     Forms\Components\Actions\Action::make('testTextConnection')
                         ->label('Проверить подключение')
@@ -209,73 +185,37 @@ class ModerationSettings extends Page implements HasForms
     private function imageSection(): Forms\Components\Section
     {
         return Forms\Components\Section::make('Фото товаров')
-            ->description('Отдельная проверка фотографий. Работает независимо от проверки текста.')
+            ->description('Отдельная проверка фотографий. Работает независимо от проверки текста и использует тот же ключ.')
             ->schema([
                 Forms\Components\Toggle::make('image_moderation_enabled')
                     ->label('Проверять фотографии с помощью ИИ')
-                    ->helperText('Если включено, товар не опубликуется, пока фото не пройдут проверку.')
+                    ->helperText('Если включено, товар не опубликуется, пока фото не пройдут проверку. Без проверки фото ИИ не сможет публиковать товары с фотографиями сам: они уйдут модератору.')
                     ->live()
                     ->columnSpanFull(),
-                // Пока проверка фото выключена, настройки сервиса скрыты, но их значения сохраняются
+                // Пока проверка фото выключена, поле модели скрыто, но его значение сохраняется
                 Forms\Components\Group::make([
-                    Forms\Components\Select::make('image_provider')
-                        ->label('Сервис проверки фото')
-                        ->options([
-                            'gemini' => 'Google Gemini',
-                            'openai_compatible' => 'Другой сервис (совместимый с OpenAI)',
-                            'openai_moderation' => 'OpenAI Moderation (только проверка изображений)',
-                        ])
-                        ->live()
-                        ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
-                            if ($state === 'gemini') {
-                                $set('image_model', 'gemini-3.1-flash-lite');
-                                $set('image_base_url', 'https://generativelanguage.googleapis.com/v1beta');
-                                $set('image_endpoint_path', '/models/{model}:generateContent');
-                                $set('image_auth_header', 'x-goog-api-key');
-                                $set('image_auth_prefix', '');
-                            }
-
-                            if ($state === 'openai_compatible') {
-                                $set('image_model', 'gpt-4o-mini');
-                                $set('image_base_url', 'https://api.openai.com/v1');
-                                $set('image_endpoint_path', '/chat/completions');
-                                $set('image_auth_header', 'Authorization');
-                                $set('image_auth_prefix', 'Bearer');
-                            }
-
-                            if ($state === 'openai_moderation') {
-                                $set('image_model', 'omni-moderation-latest');
-                                $set('image_base_url', 'https://api.openai.com/v1');
-                                $set('image_endpoint_path', '/moderations');
-                                $set('image_auth_header', 'Authorization');
-                                $set('image_auth_prefix', 'Bearer');
-                            }
-                        })
+                    Forms\Components\TextInput::make('image_model')
+                        ->label('Модель для фото')
                         ->required()
-                        ->helperText('Модель, адрес и способ авторизации подставляются сами.'),
-                    Forms\Components\TextInput::make('image_api_key')
-                        ->label('Ключ доступа (API-ключ)')
-                        ->password()->revealable()->autocomplete(false)
-                        ->placeholder(fn (): string => $this->keyPlaceholder('image'))
-                        ->helperText('Хранится в зашифрованном виде и не показывается. Оставьте пустым, чтобы не менять сохранённый ключ.'),
+                        ->regex(self::MODEL_PATTERN)
+                        ->validationMessages(['regex' => self::MODEL_MESSAGE])
+                        ->datalist(['openai/gpt-4o-mini', 'google/gemini-2.5-flash', 'google/gemini-2.0-flash-001', 'qwen/qwen2.5-vl-72b-instruct'])
+                        ->helperText('Нужна модель, которая умеет читать изображения. Проверьте кнопкой ниже.'),
                     Forms\Components\Actions::make([
                         Forms\Components\Actions\Action::make('testImageConnection')
                             ->label('Проверить подключение')
                             ->icon('heroicon-m-signal')
                             ->color('gray')
                             ->action(fn () => $this->testImageConnection(app(ModerationConnectionTester::class))),
-                    ])->columnSpanFull(),
+                    ]),
                     Forms\Components\Placeholder::make('image_test_hint')
                         ->hiddenLabel()
-                        ->columnSpanFull()
                         ->content(new HtmlString('<span style="font-size:.85rem;opacity:.75">Проверка использует сохранённые настройки: если вы что-то поменяли, сначала нажмите «Сохранить».</span>')),
                 ])
-                    ->columns(2)
                     ->columnSpanFull()
                     ->visible(fn (Forms\Get $get): bool => (bool) $get('image_moderation_enabled'))
                     ->dehydratedWhenHidden(),
-            ])
-            ->columns(2);
+            ]);
     }
 
     // ------------------------------------------------------------------ для специалиста
@@ -306,21 +246,6 @@ class ModerationSettings extends Page implements HasForms
                             ->numeric()->minValue(1)->maxValue(10)->required(),
                     ]),
 
-                Forms\Components\Fieldset::make('Адрес сервиса ИИ')
-                    ->columns(2)
-                    ->schema([
-                        Forms\Components\TextInput::make('base_url')
-                            ->label('Адрес сервиса')
-                            ->url()->required()
-                            ->rule(self::urlRule())
-                            ->helperText('Google: https://generativelanguage.googleapis.com/v1beta. Другой сервис: адрес, который обычно заканчивается на /v1.'),
-                        Forms\Components\TextInput::make('chat_completions_path')
-                            ->label('Путь запроса')
-                            ->visible(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
-                            ->required(fn (Forms\Get $get): bool => $get('provider') === 'openai_compatible')
-                            ->helperText('Обычно /chat/completions. Меняйте, только если так написано в документации сервиса.'),
-                    ]),
-
                 Forms\Components\Fieldset::make('Лимиты запросов к ИИ')
                     ->columns(2)
                     ->schema([
@@ -330,7 +255,7 @@ class ModerationSettings extends Page implements HasForms
                             ->numeric()->minValue(1)->maxValue(100000)->required(),
                         Forms\Components\TextInput::make('daily_request_limit')
                             ->label('Максимум запросов в сутки')
-                            ->helperText('Защищает от неожиданного расхода квоты и денег.')
+                            ->helperText('Защищает от неожиданного расхода денег на OpenRouter.')
                             ->numeric()->minValue(1)->maxValue(1000000)->required(),
                         Forms\Components\TextInput::make('requests_per_minute')
                             ->label('Максимум запросов в минуту')
@@ -345,6 +270,7 @@ class ModerationSettings extends Page implements HasForms
                     ->schema([
                         Forms\Components\TextInput::make('max_output_tokens')
                             ->label('Максимальная длина ответа ИИ (токенов)')
+                            ->helperText('Модели с «рассуждениями» тратят часть этого лимита на размышления: если ответы обрываются, увеличьте число.')
                             ->numeric()->minValue(256)->maxValue(32768)->required(),
                         Forms\Components\TextInput::make('retry_times')
                             ->label('Повторов при сбое связи')
@@ -354,30 +280,9 @@ class ModerationSettings extends Page implements HasForms
                             ->numeric()->minValue(0)->maxValue(10000)->required(),
                     ]),
 
-                Forms\Components\Fieldset::make('Проверка фото: технические параметры')
+                Forms\Components\Fieldset::make('Проверка фото: очередь')
                     ->columns(2)
                     ->schema([
-                        Forms\Components\TextInput::make('image_model')
-                            ->label('Модель')
-                            ->required()
-                            ->helperText('Например: gemini-3.1-flash-lite, gpt-4o-mini.'),
-                        Forms\Components\TextInput::make('image_base_url')
-                            ->label('Адрес сервиса')
-                            ->url()->required()
-                            ->rule(self::urlRule())
-                            ->helperText('Например: https://generativelanguage.googleapis.com/v1beta или https://api.openai.com/v1.'),
-                        Forms\Components\TextInput::make('image_endpoint_path')
-                            ->label('Путь запроса')
-                            ->required()
-                            ->helperText('Можно использовать {model}. Примеры: /chat/completions, /moderations, /models/{model}:generateContent.'),
-                        Forms\Components\TextInput::make('image_auth_header')
-                            ->label('Заголовок для ключа')
-                            ->required()
-                            ->helperText('Например: Authorization или x-goog-api-key.'),
-                        Forms\Components\TextInput::make('image_auth_prefix')
-                            ->label('Слово перед ключом')
-                            ->placeholder('Bearer')
-                            ->helperText('Обычно Bearer. Для x-goog-api-key оставьте пустым.'),
                         Forms\Components\TextInput::make('image_queue')
                             ->label('Название очереди для фото')
                             ->required()
@@ -391,28 +296,7 @@ class ModerationSettings extends Page implements HasForms
                     ]),
             ]);
     }
-
-    private static function urlRule(): \Closure
-    {
-        return function (AiProviderUrlValidator $validator): \Closure {
-            return function (string $attribute, mixed $value, \Closure $fail) use ($validator): void {
-                try {
-                    $validator->validate((string) $value);
-                } catch (\InvalidArgumentException $exception) {
-                    $fail($exception->getMessage());
-                }
-            };
-        };
-    }
-
     // ------------------------------------------------------------------ данные для полей
-
-    private function keyPlaceholder(string $channel): string
-    {
-        $saved = $channel === 'image' ? $this->imageApiKeyConfigured : $this->textApiKeyConfigured;
-
-        return $saved ? 'Ключ сохранён — вводить заново не нужно' : 'Ключ ещё не задан';
-    }
 
     /** @return array<string, string> */
     private function queueConnectionOptions(): array
@@ -493,8 +377,8 @@ class ModerationSettings extends Page implements HasForms
         activity('moderation_settings')
             ->causedBy(auth()->user())
             ->withProperties([
-                'text_provider' => $data['provider'],
-                'image_provider' => $data['image_provider'],
+                'text_model' => $data['text_model'],
+                'image_model' => $data['image_model'],
                 'mode' => $data['mode'],
                 'ai_enabled' => (bool) $data['ai_enabled'],
                 'image_enabled' => (bool) $data['image_moderation_enabled'],
@@ -529,15 +413,13 @@ class ModerationSettings extends Page implements HasForms
     private function applySnapshot(ModerationSettingsSnapshot $snapshot): void
     {
         $this->apiKeyConfigured = $snapshot->apiKeyConfigured;
-        $this->textApiKeyConfigured = $snapshot->textApiKeyConfigured;
-        $this->imageApiKeyConfigured = $snapshot->imageApiKeyConfigured;
         $this->budgetUsage = $snapshot->budgetUsage;
         $this->operationsStatus = $snapshot->operationsStatus;
         $this->statusSummary = app(ModerationStatusSummary::class)->make($snapshot, app()->isProduction());
 
         $this->data = app(ModerationSettingsFormMapper::class)->toForm($snapshot->data);
-        // Сохранённые ключи в форму не попадают: поле пустое, пока администратор не введёт новый ключ.
-        $this->data['image_api_key'] = null;
+        // Сохранённый ключ в форму не попадает: поле пустое, пока администратор не введёт новый ключ.
+        $this->data['api_key'] = null;
 
         $this->form->fill($this->data);
     }

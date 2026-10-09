@@ -70,8 +70,8 @@
                 </div>
             </div>
             <div>
-                <div class="text-sm text-gray-500">Сервис проверки фото</div>
-                <div class="font-semibold">{{ $operationsStatus['image_provider'] ?? '—' }}</div>
+                <div class="text-sm text-gray-500">Модель для текста</div>
+                <div class="font-semibold">{{ $operationsStatus['text_model'] ?? '—' }}</div>
             </div>
             <div>
                 <div class="text-sm text-gray-500">Модель для фото</div>

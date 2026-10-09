@@ -48,34 +48,26 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
         $values = array_merge([
             'QUEUE_CONNECTION' => 'database',
             'PRODUCT_MODERATION_AI_ENABLED' => 'false',
-            'PRODUCT_MODERATION_AI_PROVIDER' => 'google',
             'PRODUCT_MODERATION_AI_MODE' => 'shadow',
             'PRODUCT_MODERATION_QUEUE' => 'moderation',
             'PRODUCT_MODERATION_TIMEOUT' => '60',
             'PRODUCT_MODERATION_MAX_ATTEMPTS' => '3',
             'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK' => '0.10',
             'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES' => '',
-            'GEMINI_API_KEY' => 'existing-secret',
-            'GEMINI_MODEL' => 'gemini-3.5-flash',
-            'GEMINI_BASE_URL' => 'https://generativelanguage.googleapis.com/v1beta',
-            'GEMINI_MAX_OUTPUT_TOKENS' => '2048',
-            'GEMINI_RETRY_TIMES' => '2',
-            'GEMINI_RETRY_SLEEP_MS' => '500',
-            'GEMINI_REQUESTS_PER_MINUTE' => '5',
-            'GEMINI_RATE_LIMIT_SAFETY_SECONDS' => '1',
+            'OPENROUTER_API_KEY' => 'existing-secret',
+            'OPENROUTER_TEXT_MODEL' => 'openai/gpt-4o-mini',
+            'OPENROUTER_IMAGE_MODEL' => 'openai/gpt-4o-mini',
+            'AI_MODERATION_MAX_OUTPUT_TOKENS' => '2048',
+            'AI_MODERATION_RETRY_TIMES' => '2',
+            'AI_MODERATION_RETRY_SLEEP_MS' => '500',
+            'AI_MODERATION_REQUESTS_PER_MINUTE' => '5',
+            'AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS' => '1',
             'AI_MODERATION_HOURLY_REQUEST_LIMIT' => '60',
             'AI_MODERATION_DAILY_REQUEST_LIMIT' => '500',
             'AI_IMAGE_MODERATION_ENABLED' => 'false',
-            'AI_IMAGE_MODERATION_PROVIDER' => 'gemini',
             'AI_IMAGE_MODERATION_QUEUE' => 'moderation',
             'AI_IMAGE_MODERATION_TIMEOUT' => '60',
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS' => '3',
-            'AI_IMAGE_MODERATION_API_KEY' => 'existing-image-secret',
-            'AI_IMAGE_MODERATION_MODEL' => 'gemini-3.1-flash-lite',
-            'AI_IMAGE_MODERATION_BASE_URL' => 'https://generativelanguage.googleapis.com/v1beta',
-            'AI_IMAGE_MODERATION_ENDPOINT_PATH' => '/models/{model}:generateContent',
-            'AI_IMAGE_MODERATION_AUTH_HEADER' => 'x-goog-api-key',
-            'AI_IMAGE_MODERATION_AUTH_PREFIX' => '',
         ], $overrides);
 
         file_put_contents($this->environmentPath, implode(PHP_EOL, array_map(
@@ -110,7 +102,7 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
             ->assertSee('Только вручную')
             ->assertSee('ИИ подсказывает, решает человек')
             ->assertSee('ИИ публикует безопасные товары сам')
-            ->assertSee('Подключение к ИИ')
+            ->assertSee('Подключение к OpenRouter')
             ->assertSee('Фото товаров')
             ->assertSee('Дополнительные настройки')
             ->assertSee('Для специалиста по серверу')
@@ -132,7 +124,7 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
         $section = strpos($html, 'id="moderation-advanced"');
         $this->assertNotFalse($section, 'Блок «Дополнительные настройки» должен быть на странице');
 
-        foreach (['Название очереди', 'Максимум запросов в сутки', 'Заголовок для ключа', 'Пауза между повторами'] as $label) {
+        foreach (['Название очереди', 'Максимум запросов в сутки', 'Название очереди для фото', 'Пауза между повторами'] as $label) {
             $position = strpos($html, $label);
             $this->assertNotFalse($position, "Поле «{$label}» должно оставаться доступным");
             $this->assertGreaterThan($section, $position, "Поле «{$label}» должно быть внутри блока «Дополнительные настройки»");
@@ -155,11 +147,10 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
         $this->actingAs($this->createAdministrator())
             ->get('/admin/moderation-settings')
             ->assertOk()
-            ->assertDontSee('existing-secret')
-            ->assertDontSee('existing-image-secret');
+            ->assertDontSee('existing-secret');
 
         Livewire::test(ModerationSettings::class)
-            ->assertSet('data.image_api_key', null);
+            ->assertSet('data.api_key', null);
     }
 
     // ------------------------------------------------------------------ загрузка настроек в форму
@@ -331,7 +322,7 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
 
     public function test_enabling_ai_without_a_key_explains_what_to_do(): void
     {
-        $this->writeEnvironment(['GEMINI_API_KEY' => '']);
+        $this->writeEnvironment(['OPENROUTER_API_KEY' => '']);
         $this->actingAs($this->createAdministrator());
 
         Livewire::test(ModerationSettings::class)
@@ -372,9 +363,9 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
         $this->actingAs($this->createAdministrator());
 
         Livewire::test(ModerationSettings::class)
-            ->fillForm(['model' => ''])
+            ->fillForm(['text_model' => ''])
             ->call('save')
-            ->assertHasFormErrors(['model'])
+            ->assertHasFormErrors(['text_model'])
             ->assertNotDispatched('open-section');
     }
 
@@ -392,13 +383,13 @@ class ModerationSettingsSimplifiedPageTest extends TestCase
 
     public function test_status_line_reports_a_missing_key_as_an_error(): void
     {
-        $this->writeEnvironment(['PRODUCT_MODERATION_AI_ENABLED' => 'true', 'GEMINI_API_KEY' => '']);
+        $this->writeEnvironment(['PRODUCT_MODERATION_AI_ENABLED' => 'true', 'OPENROUTER_API_KEY' => '']);
 
         $this->actingAs($this->createAdministrator())
             ->get('/admin/moderation-settings')
             ->assertOk()
             ->assertSee('data-moderation-status="error"', false)
-            ->assertSee('Не задан ключ ИИ для проверки текста');
+            ->assertSee('Не задан ключ OpenRouter');
     }
 
     public function test_status_line_confirms_a_working_setup(): void

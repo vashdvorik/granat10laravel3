@@ -5,7 +5,8 @@ namespace App\Services;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Cache;
 
-class GeminiRequestThrottle
+/** Ограничивает частоту запросов к ИИ (в минуту) и расходует часовой/суточный бюджет. */
+class AiRequestThrottle
 {
     private ?string $scope = null;
 
@@ -26,20 +27,14 @@ class GeminiRequestThrottle
         $this->scope = null;
         ($this->requestBudget ?? app(AiModerationRequestBudget::class))->consume($scope);
 
-        $requestsPerMinute = (int) (
-            config('moderation.google.requests_per_minute')
-            ?? config('moderation.http.requests_per_minute', 5)
-        );
+        $requestsPerMinute = (int) config('moderation.http.requests_per_minute', 5);
 
         if ($requestsPerMinute < 1) {
             return;
         }
 
         $intervalSeconds = (60 / $requestsPerMinute)
-            + (int) (
-                config('moderation.google.rate_limit_safety_seconds')
-                ?? config('moderation.http.rate_limit_safety_seconds', 1)
-            );
+            + (int) config('moderation.http.rate_limit_safety_seconds', 1);
         $lockScope = str_replace([':', '/'], '-', $scope ?? 'shared');
         $lock = Cache::lock("moderation:{$lockScope}:rate-limit-lock", 120);
 

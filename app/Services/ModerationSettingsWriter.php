@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Validation\ValidationException;
 
+/** Записывает настройки ИИ-модерации в .env, а ключ OpenRouter — в базу в зашифрованном виде. */
 class ModerationSettingsWriter
 {
     public function __construct(
@@ -17,76 +18,29 @@ class ModerationSettingsWriter
      */
     public function save(array $data): void
     {
-        $provider = (string) ($data['provider'] ?? 'google');
-        $imageProvider = $this->normalizeImageProvider((string) ($data['image_provider'] ?? 'gemini'));
-        $imageModel = (string) ($data['image_model'] ?? $this->defaultImageModel($imageProvider));
-        $imageBaseUrl = (string) ($data['image_base_url'] ?? $this->defaultImageBaseUrl($imageProvider));
-        $imageEndpointPath = (string) ($data['image_endpoint_path'] ?? $this->defaultImageEndpointPath($imageProvider));
-        $imageAuthHeader = (string) ($data['image_auth_header'] ?? $this->defaultImageAuthHeader($imageProvider));
-        $imageAuthPrefix = filled($data['image_auth_prefix'] ?? null)
-            ? (string) $data['image_auth_prefix']
-            : $this->defaultImageAuthPrefix($imageProvider);
+        $newKey = trim((string) ($data['api_key'] ?? ''));
 
-        if ($provider === 'google' && (str_starts_with((string) ($data['model'] ?? ''), 'deepseek-') || str_contains((string) ($data['base_url'] ?? ''), 'deepseek.com'))) {
+        $keyAvailable = $newKey !== ''
+            || $this->secrets->has()
+            || $this->settings->hasValue('OPENROUTER_API_KEY');
+
+        if (! $keyAvailable && ($data['ai_enabled'] || $data['image_moderation_enabled'])) {
             throw ValidationException::withMessages([
-                'data.provider' => 'Для моделей DeepSeek выберите провайдера DeepSeek.',
-            ]);
-        }
-
-        if ($provider === 'deepseek') {
-            $data['base_url'] = 'https://api.deepseek.com';
-            $data['chat_completions_path'] = '/chat/completions';
-        }
-
-        $textPrefix = $this->textEnvironmentPrefix($provider);
-        $textKeyChanged = filled($data['api_key'] ?? null);
-        $imageKeyChanged = filled($data['image_api_key'] ?? null);
-        $textKeyAvailable = filled($data['api_key'] ?? null)
-            || $this->secrets->has($this->textSecretName($provider))
-            || $this->settings->hasValue($textPrefix.'_API_KEY')
-            || $this->settings->hasValue('AI_MODERATION_API_KEY')
-            || ($provider === 'google' && $this->settings->hasValue('GEMINI_API_KEY'));
-        $imageKeyAvailable = filled($data['image_api_key'] ?? null)
-            || $this->secrets->has($this->imageSecretName($imageProvider))
-            || $this->settings->hasValue('AI_IMAGE_MODERATION_API_KEY')
-            || ($imageProvider === 'gemini' && (
-                $this->settings->hasValue('AI_IMAGE_GEMINI_API_KEY')
-                || $this->settings->hasValue('AI_IMAGE_GOOGLE_API_KEY')
-            ))
-            || ($imageProvider === 'openai_compatible' && (
-                $this->settings->hasValue('AI_IMAGE_OPENAI_COMPATIBLE_API_KEY')
-                || $this->settings->hasValue('AI_IMAGE_OPENAI_API_KEY')
-            ))
-            || ($imageProvider === 'openai_moderation' && (
-                $this->settings->hasValue('AI_IMAGE_OPENAI_MODERATION_API_KEY')
-                || $this->settings->hasValue('AI_IMAGE_OPENAI_API_KEY')
-            ));
-
-        if ($data['ai_enabled'] && ! $textKeyAvailable) {
-            throw ValidationException::withMessages([
-                'data.api_key' => 'Для включения текстовой ИИ-модерации укажите ключ выбранного провайдера.',
-            ]);
-        }
-
-        if ($data['image_moderation_enabled'] && ! $imageKeyAvailable) {
-            throw ValidationException::withMessages([
-                'data.image_api_key' => 'Для включения проверки изображений укажите ключ выбранного провайдера.',
+                'data.api_key' => 'Чтобы включить проверку ИИ, укажите ключ OpenRouter.',
             ]);
         }
 
         $values = [
             'QUEUE_CONNECTION' => $data['queue_connection'],
             'PRODUCT_MODERATION_AI_ENABLED' => (bool) $data['ai_enabled'],
-            'PRODUCT_MODERATION_AI_PROVIDER' => $provider,
             'PRODUCT_MODERATION_AI_MODE' => $data['mode'] ?? 'shadow',
             'PRODUCT_MODERATION_QUEUE' => $data['queue'] ?? 'moderation',
             'PRODUCT_MODERATION_TIMEOUT' => $data['timeout'] ?? 60,
             'PRODUCT_MODERATION_MAX_ATTEMPTS' => $data['max_attempts'] ?? 3,
             'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK' => round((float) ($data['max_risk'] ?? 10) / 100, 4),
             'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES' => $data['excluded_categories'] ?? '',
-            'AI_MODERATION_MODEL' => $data['model'] ?? '',
-            'AI_MODERATION_BASE_URL' => $data['base_url'] ?? '',
-            'AI_MODERATION_CHAT_COMPLETIONS_PATH' => $data['chat_completions_path'] ?? '/chat/completions',
+            'OPENROUTER_TEXT_MODEL' => trim((string) ($data['text_model'] ?? '')),
+            'OPENROUTER_IMAGE_MODEL' => trim((string) ($data['image_model'] ?? '')),
             'AI_MODERATION_MAX_OUTPUT_TOKENS' => $data['max_output_tokens'] ?? 1200,
             'AI_MODERATION_RETRY_TIMES' => $data['retry_times'] ?? 0,
             'AI_MODERATION_RETRY_SLEEP_MS' => $data['retry_sleep_ms'] ?? 500,
@@ -95,114 +49,18 @@ class ModerationSettingsWriter
             'AI_MODERATION_HOURLY_REQUEST_LIMIT' => $data['hourly_request_limit'] ?? 60,
             'AI_MODERATION_DAILY_REQUEST_LIMIT' => $data['daily_request_limit'] ?? 500,
             'AI_IMAGE_MODERATION_ENABLED' => (bool) $data['image_moderation_enabled'],
-            'AI_IMAGE_MODERATION_PROVIDER' => $imageProvider,
-            'AI_IMAGE_MODERATION_MODEL' => $imageModel,
-            'AI_IMAGE_MODERATION_BASE_URL' => $imageBaseUrl,
-            'AI_IMAGE_MODERATION_ENDPOINT_PATH' => $imageEndpointPath,
-            'AI_IMAGE_MODERATION_AUTH_HEADER' => $imageAuthHeader,
-            'AI_IMAGE_MODERATION_AUTH_PREFIX' => $imageAuthPrefix,
             'AI_IMAGE_MODERATION_QUEUE' => $data['image_queue'] ?? 'moderation',
             'AI_IMAGE_MODERATION_TIMEOUT' => $data['image_timeout'] ?? 60,
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS' => $data['image_max_attempts'] ?? 3,
-            $textPrefix.'_MODEL' => $data['model'] ?? '',
-            $textPrefix.'_BASE_URL' => $data['base_url'] ?? '',
-            'AI_TEXT_OPENAI_COMPATIBLE_CHAT_COMPLETIONS_PATH' => $data['chat_completions_path'] ?? '/chat/completions',
         ];
 
-        if ($provider !== 'google') {
-            $values[$textPrefix.'_CHAT_COMPLETIONS_PATH'] = $data['chat_completions_path'] ?? '/chat/completions';
-        }
-
-        if ($textKeyChanged) {
-            $this->secrets->put($this->textSecretName($provider), (string) $data['api_key']);
-        }
-
-        if ($imageKeyChanged) {
-            $this->secrets->put($this->imageSecretName($imageProvider), (string) $data['image_api_key']);
+        if ($newKey !== '') {
+            $this->secrets->put($newKey);
         }
 
         $this->settings->update($values);
         Artisan::call('config:clear');
         Artisan::call('queue:restart');
         $this->secrets->applyToConfig();
-    }
-
-    private function textSecretName(string $provider): string
-    {
-        return 'text.'.match ($provider) {
-            'google' => 'google',
-            'deepseek' => 'deepseek',
-            default => 'openai_compatible',
-        };
-    }
-
-    private function textEnvironmentPrefix(string $provider): string
-    {
-        return match ($provider) {
-            'google' => 'AI_TEXT_GOOGLE',
-            'deepseek' => 'AI_TEXT_DEEPSEEK',
-            default => 'AI_TEXT_OPENAI_COMPATIBLE',
-        };
-    }
-
-    private function imageSecretName(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => 'image.gemini',
-            'openai_compatible' => 'image.openai_compatible',
-            'openai_moderation' => 'image.openai_moderation',
-            default => 'image.openai_compatible',
-        };
-    }
-
-    private function normalizeImageProvider(string $provider): string
-    {
-        return match ($provider) {
-            'google' => 'gemini',
-            'openai' => 'openai_compatible',
-            default => $provider,
-        };
-    }
-
-    private function defaultImageModel(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => 'gemini-3.1-flash-lite',
-            'openai_moderation' => 'omni-moderation-latest',
-            default => 'gpt-4o-mini',
-        };
-    }
-
-    private function defaultImageBaseUrl(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => 'https://generativelanguage.googleapis.com/v1beta',
-            default => 'https://api.openai.com/v1',
-        };
-    }
-
-    private function defaultImageEndpointPath(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => '/models/{model}:generateContent',
-            'openai_moderation' => '/moderations',
-            default => '/chat/completions',
-        };
-    }
-
-    private function defaultImageAuthHeader(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => 'x-goog-api-key',
-            default => 'Authorization',
-        };
-    }
-
-    private function defaultImageAuthPrefix(string $provider): string
-    {
-        return match ($provider) {
-            'gemini' => '',
-            default => 'Bearer',
-        };
     }
 }

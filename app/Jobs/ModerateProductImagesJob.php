@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Contracts\ProductImageModerationClient;
+use App\Data\ModerationProvider;
 use App\Enums\ProductModerationStatus;
 use App\Events\ProductModerationDecided;
 use App\Exceptions\AiModerationProviderException;
@@ -10,7 +11,6 @@ use App\Models\Product;
 use App\Models\ProductModerationRun;
 use App\Services\AiModerationOutcomeStatusResolver;
 use App\Services\LocalImageContentScanner;
-use App\Services\ModerationClientResolver;
 use App\Services\ProductAutoApprovalPolicy;
 use App\Services\ProductModerationFeedbackService;
 use App\Services\ProductModerationPayloadFactory;
@@ -36,9 +36,7 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
     public function __construct(
         public readonly int $productId,
         public readonly int $contentVersion,
-        public readonly ?string $provider = null,
         public readonly ?string $model = null,
-        public readonly ?string $baseUrl = null,
         public readonly ?string $mode = null,
         public readonly ?string $configurationVersion = null,
         public readonly bool $forceRetry = false,
@@ -51,10 +49,7 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         $configuration = $this->configurationVersion ?? hash('sha256', implode('|', [
-            $this->provider ?? (string) config('moderation.images.provider'),
-            $this->model ?? '',
-            $this->baseUrl ?? '',
-            (string) config('moderation.images.endpoint_path'),
+            $this->model ?? (string) config('moderation.openrouter.image_model'),
             $this->mode ?? (string) config('moderation.mode'),
         ]));
 
@@ -77,7 +72,6 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
         ProductAutoApprovalPolicy $autoApprovalPolicy,
         ?ProductModerationFeedbackService $feedbackService = null,
         ?AiModerationOutcomeStatusResolver $statusResolver = null,
-        ?ModerationClientResolver $clientResolver = null,
         ?LocalImageContentScanner $localScanner = null,
     ): void {
         $feedbackService ??= app(ProductModerationFeedbackService::class);
@@ -97,22 +91,15 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $imageProvider = $this->provider ?? (string) config('moderation.images.provider', 'gemini');
-        $imageModel = $this->model ?? (string) config('moderation.images.model');
-        config()->set('moderation.images.provider', $imageProvider);
-        config()->set('moderation.images.model', $imageModel);
-        if ($this->baseUrl !== null) {
-            config()->set('moderation.images.base_url', $this->baseUrl);
-        }
-        if ($this->provider !== null) {
-            $client = ($clientResolver ?? app(ModerationClientResolver::class))->images($imageProvider);
-        }
+        // Модель закрепляется при постановке задачи: смена настроек не влияет на то, что уже в очереди
+        $imageModel = $this->model ?? (string) config('moderation.openrouter.image_model');
+        config()->set('moderation.openrouter.image_model', $imageModel);
         $payload = $payloadFactory->make($product);
         $runIdentity = [
             'product_id' => $product->id,
             'content_version' => $this->contentVersion,
             'request_fingerprint' => $this->imageRequestFingerprint($payload->fingerprint.':images'),
-            'provider' => 'image_'.$imageProvider,
+            'provider' => ModerationProvider::IMAGE,
         ];
 
         if (! $this->forceRetry && ProductModerationRun::query()
@@ -130,7 +117,7 @@ class ModerateProductImagesJob implements ShouldBeUnique, ShouldQueue
             $run = ProductModerationRun::query()->create($runIdentity + [
                 'retry_of_id' => $previousRun?->id,
                 'attempt_number' => $attemptNumber,
-                'configuration_version' => $this->configurationVersion ?? hash('sha256', "image|{$imageProvider}|{$imageModel}"),
+                'configuration_version' => $this->configurationVersion ?? hash('sha256', 'image|'.ModerationProvider::IMAGE.'|'.$imageModel),
                 'trigger' => 'image_queue',
                 'model' => $imageModel,
                 'prompt_version' => (string) config('moderation.images.audit.prompt_version'),

@@ -98,21 +98,21 @@ class ProductImageModerationFlowTest extends TestCase
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
             'content_version' => 7,
-            'provider' => 'openai_compatible',
+            'provider' => 'openrouter',
             'decision' => 'allow',
             'status' => 'completed',
         ]);
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
             'content_version' => 7,
-            'provider' => 'image_gemini',
+            'provider' => 'image_openrouter',
             'decision' => 'review',
             'status' => 'completed',
         ]);
 
         $run = ProductModerationRun::query()
             ->where('product_id', $product->id)
-            ->where('provider', 'image_gemini')
+            ->where('provider', 'image_openrouter')
             ->latest('id')
             ->first();
 
@@ -152,8 +152,7 @@ class ProductImageModerationFlowTest extends TestCase
 
     private function handleTextModeration(Product $product, ProductModerationResult $result): void
     {
-        config()->set('moderation.provider', 'openai_compatible');
-        config()->set('moderation.openai_compatible.model', 'test-text-model');
+        config()->set('moderation.openrouter.text_model', 'test/text-model');
 
         (new ModerateProductJob($product->id, $product->moderation_version))->handle(
             new class($result) implements AiModerationClient

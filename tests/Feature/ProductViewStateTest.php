@@ -48,7 +48,7 @@ class ProductViewStateTest extends TestCase
     {
         $product = $this->product([
             'moderation_status' => ProductModerationStatus::Failed,
-            'moderation_summary' => 'Gemini API connection failed.',
+            'moderation_summary' => 'OpenRouter API connection failed.',
             'is_active' => false,
         ]);
 
@@ -59,7 +59,7 @@ class ProductViewStateTest extends TestCase
         $this->assertSame('Проверяет администратор', $state->story->headline);
         $this->assertStringContainsString('Это не отказ', $state->description);
         // служебный текст сбоя продавцу не показывается
-        $this->assertStringNotContainsString('Gemini', $state->description);
+        $this->assertStringNotContainsString('OpenRouter', $state->description);
         $this->assertNull($state->story->remark);
     }
 

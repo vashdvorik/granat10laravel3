@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Contracts\AiModerationClient;
+use App\Data\ModerationProvider;
 use App\Enums\ProductModerationStatus;
 use App\Events\ProductModerationDecided;
 use App\Exceptions\AiModerationProviderException;
 use App\Models\Product;
 use App\Models\ProductModerationRun;
 use App\Services\AiModerationOutcomeStatusResolver;
-use App\Services\ModerationClientResolver;
 use App\Services\ModerationProviderMetadataResolver;
 use App\Services\ProductAutoApprovalPolicy;
 use App\Services\ProductModerationFeedbackService;
@@ -37,10 +37,7 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
     public function __construct(
         public readonly int $productId,
         public readonly int $contentVersion,
-        public readonly ?string $provider = null,
         public readonly ?string $model = null,
-        public readonly ?string $baseUrl = null,
-        public readonly ?string $endpointPath = null,
         public readonly ?string $mode = null,
         public readonly ?string $configurationVersion = null,
         public readonly bool $forceRetry = false,
@@ -53,10 +50,7 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         $configuration = $this->configurationVersion ?? hash('sha256', implode('|', [
-            $this->provider ?? (string) config('moderation.provider'),
-            $this->model ?? '',
-            $this->baseUrl ?? '',
-            $this->endpointPath ?? '',
+            $this->model ?? (string) config('moderation.openrouter.text_model'),
             $this->mode ?? (string) config('moderation.mode'),
         ]));
 
@@ -76,7 +70,6 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
         ?ModerationProviderMetadataResolver $metadataResolver = null,
         ?AiModerationOutcomeStatusResolver $statusResolver = null,
         ?ProductModerationScopeFilter $scopeFilter = null,
-        ?ModerationClientResolver $clientResolver = null,
     ): void {
         $feedbackService ??= app(ProductModerationFeedbackService::class);
         $metadataResolver ??= app(ModerationProviderMetadataResolver::class);
@@ -96,25 +89,9 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $provider = $this->provider ?? (string) config('moderation.provider');
-        $model = $this->model ?? match ($provider) {
-            'google' => (string) config('moderation.google.model'),
-            'openai_compatible' => (string) config('moderation.openai_compatible.model'),
-            'deepseek' => (string) config('moderation.deepseek.model'),
-            default => 'fake',
-        };
-        config()->set('moderation.provider', $provider);
-        if ($provider !== 'fake') {
-            config()->set("moderation.{$provider}.model", $model);
-            if ($this->baseUrl !== null) {
-                config()->set("moderation.{$provider}.base_url", $this->baseUrl);
-            }
-            if (in_array($provider, ['openai_compatible', 'deepseek'], true) && $this->endpointPath !== null) {
-                config()->set("moderation.{$provider}.chat_completions_path", $this->endpointPath);
-            }
-        }
-        if ($this->provider !== null) {
-            $client = ($clientResolver ?? app(ModerationClientResolver::class))->text($provider);
+        // Модель закрепляется при постановке задачи: смена настроек не влияет на то, что уже в очереди
+        if ($this->model !== null) {
+            config()->set('moderation.openrouter.text_model', $this->model);
         }
         $payload = $payloadFactory->make($product);
         $metadata = $metadataResolver->resolve();
@@ -140,7 +117,7 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
             $run = ProductModerationRun::query()->create($runIdentity + [
                 'retry_of_id' => $previousRun?->id,
                 'attempt_number' => $attemptNumber,
-                'configuration_version' => $this->configurationVersion ?? $this->configurationHash($provider, $model),
+                'configuration_version' => $this->configurationVersion ?? $this->configurationHash(ModerationProvider::TEXT, $metadata->model),
                 'trigger' => 'queue',
                 'model' => $metadata->model,
                 'prompt_version' => $metadata->promptVersion,
@@ -170,7 +147,7 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
             Log::channel('moderation')->warning('AI moderation request failed.', [
                 'product_id' => $this->productId,
                 'content_version' => $this->contentVersion,
-                'provider' => (string) config('moderation.provider'),
+                'provider' => ModerationProvider::TEXT,
                 'attempt' => $this->attempts(),
                 'exception' => $exception::class,
                 'retryable' => ! $exception instanceof AiModerationProviderException
@@ -274,23 +251,20 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
         Log::channel('moderation')->info('AI moderation completed.', [
             'product_id' => $this->productId,
             'content_version' => $this->contentVersion,
-            'provider' => (string) config('moderation.provider'),
+            'provider' => ModerationProvider::TEXT,
             'decision' => $result->decision,
             'risk_score' => $result->riskScore,
             'latency_ms' => (int) round((hrtime(true) - $startedAt) / 1_000_000),
         ]);
 
         if (($waitingForImages ?? false) && config('moderation.images.enabled', false)) {
-            $imageProvider = (string) config('moderation.images.provider', 'gemini');
-            $imageModel = (string) config('moderation.images.model');
+            $imageModel = (string) config('moderation.openrouter.image_model');
             ModerateProductImagesJob::dispatch(
                 $this->productId,
                 $this->contentVersion,
-                $imageProvider,
                 $imageModel,
-                (string) config('moderation.images.base_url'),
                 $this->mode ?? (string) config('moderation.mode'),
-                $this->configurationHash($imageProvider, $imageModel, 'image'),
+                $this->configurationHash(ModerationProvider::IMAGE, $imageModel, 'image'),
             )->afterCommit();
         }
     }
@@ -313,8 +287,6 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
             $channel,
             $provider,
             $model,
-            $this->baseUrl ?? '',
-            $this->endpointPath ?? '',
             $this->mode ?? (string) config('moderation.mode'),
             (string) config('moderation.audit.policy_version'),
             (string) config('moderation.images.audit.policy_version'),
@@ -326,7 +298,7 @@ class ModerateProductJob implements ShouldBeUnique, ShouldQueue
         Log::channel('moderation')->error('AI moderation job exhausted all attempts.', [
             'product_id' => $this->productId,
             'content_version' => $this->contentVersion,
-            'provider' => (string) config('moderation.provider'),
+            'provider' => ModerationProvider::TEXT,
             'exception' => $exception?->getMessage() === null ? null : $exception::class,
         ]);
 

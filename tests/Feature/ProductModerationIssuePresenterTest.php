@@ -71,7 +71,7 @@ class ProductModerationIssuePresenterTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 2,
             'trigger' => 'image_queue',
-            'provider' => 'image_google',
+            'provider' => 'image_openrouter',
             'status' => 'completed',
             'request_fingerprint' => hash('sha256', 'image-version'),
             'reasons' => [[

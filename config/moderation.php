@@ -1,104 +1,40 @@
 <?php
 
-$imageProvider = env('AI_IMAGE_MODERATION_PROVIDER', 'gemini');
-
 return [
     'ai_enabled' => env('PRODUCT_MODERATION_AI_ENABLED', false),
-    'provider' => env('PRODUCT_MODERATION_AI_PROVIDER', 'fake'),
     'mode' => env('PRODUCT_MODERATION_AI_MODE', 'shadow'),
     'queue' => env('PRODUCT_MODERATION_QUEUE', 'moderation'),
     'timeout' => (int) env('PRODUCT_MODERATION_TIMEOUT', 60),
     'max_attempts' => (int) env('PRODUCT_MODERATION_MAX_ATTEMPTS', 3),
-    'fake_decision' => env('PRODUCT_MODERATION_FAKE_DECISION', 'review'),
-    'google' => [
-        'api_key' => env('AI_TEXT_GOOGLE_API_KEY', env('AI_MODERATION_API_KEY', env('GEMINI_API_KEY'))),
-        'model' => env('AI_TEXT_GOOGLE_MODEL', env('AI_MODERATION_MODEL', env('GEMINI_MODEL', 'gemini-3.5-flash'))),
-        'base_url' => env('AI_TEXT_GOOGLE_BASE_URL', env('AI_MODERATION_BASE_URL', env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'))),
+
+    // Единственный сервис ИИ — OpenRouter (https://openrouter.ai). Один ключ и для текста, и для фото;
+    // ключ, введённый в админке, хранится зашифрованным в базе и имеет приоритет над OPENROUTER_API_KEY.
+    'openrouter' => [
+        'api_key' => env('OPENROUTER_API_KEY'),
+        'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'),
+        'text_model' => env('OPENROUTER_TEXT_MODEL', 'openai/gpt-4o-mini'),
+        'image_model' => env('OPENROUTER_IMAGE_MODEL', 'openai/gpt-4o-mini'),
     ],
-    'openai_compatible' => [
-        'api_key' => env('AI_TEXT_OPENAI_COMPATIBLE_API_KEY', env('AI_MODERATION_API_KEY')),
-        'model' => env('AI_TEXT_OPENAI_COMPATIBLE_MODEL', env('AI_MODERATION_MODEL')),
-        'base_url' => env('AI_TEXT_OPENAI_COMPATIBLE_BASE_URL', env('AI_MODERATION_BASE_URL', 'https://api.openai.com/v1')),
-        'chat_completions_path' => env('AI_TEXT_OPENAI_COMPATIBLE_CHAT_COMPLETIONS_PATH', env('AI_MODERATION_CHAT_COMPLETIONS_PATH', '/chat/completions')),
-        'vision_enabled' => (bool) env('AI_MODERATION_COMPATIBLE_VISION_ENABLED', false),
-    ],
-    'deepseek' => [
-        'api_key' => env('AI_TEXT_DEEPSEEK_API_KEY'),
-        'model' => env('AI_TEXT_DEEPSEEK_MODEL', 'deepseek-chat'),
-        'base_url' => env('AI_TEXT_DEEPSEEK_BASE_URL', 'https://api.deepseek.com'),
-        'chat_completions_path' => env('AI_TEXT_DEEPSEEK_CHAT_COMPLETIONS_PATH', '/chat/completions'),
-        'vision_enabled' => false,
-    ],
+
     'http' => [
-        'max_output_tokens' => (int) env('AI_MODERATION_MAX_OUTPUT_TOKENS', env('GEMINI_MAX_OUTPUT_TOKENS', 1200)),
-        'retry_times' => (int) env('AI_MODERATION_RETRY_TIMES', env('GEMINI_RETRY_TIMES', 0)),
-        'retry_sleep_ms' => (int) env('AI_MODERATION_RETRY_SLEEP_MS', env('GEMINI_RETRY_SLEEP_MS', 500)),
-        'requests_per_minute' => (int) env('AI_MODERATION_REQUESTS_PER_MINUTE', env('GEMINI_REQUESTS_PER_MINUTE', 5)),
-        'rate_limit_safety_seconds' => (int) env('AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS', env('GEMINI_RATE_LIMIT_SAFETY_SECONDS', 1)),
+        'max_output_tokens' => (int) env('AI_MODERATION_MAX_OUTPUT_TOKENS', 1200),
+        'retry_times' => (int) env('AI_MODERATION_RETRY_TIMES', 0),
+        'retry_sleep_ms' => (int) env('AI_MODERATION_RETRY_SLEEP_MS', 500),
+        'requests_per_minute' => (int) env('AI_MODERATION_REQUESTS_PER_MINUTE', 5),
+        'rate_limit_safety_seconds' => (int) env('AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS', 1),
     ],
+
+    // Сколько фото и какого размера отправляется на проверку
     'vision' => [
-        'enabled' => (bool) env('AI_MODERATION_VISION_ENABLED', true),
         'max_images' => (int) env('AI_MODERATION_VISION_MAX_IMAGES', 5),
         'max_image_bytes' => (int) env('AI_MODERATION_VISION_MAX_IMAGE_BYTES', 2_000_000),
     ],
+
     'images' => [
         'enabled' => (bool) env('AI_IMAGE_MODERATION_ENABLED', false),
-        'provider' => $imageProvider,
-        'api_key' => env(
-            'AI_IMAGE_MODERATION_API_KEY',
-            env('AI_IMAGE_GEMINI_API_KEY', env('AI_IMAGE_GOOGLE_API_KEY', env('AI_IMAGE_OPENAI_COMPATIBLE_API_KEY', env('AI_IMAGE_OPENAI_MODERATION_API_KEY'))))
-        ),
-        'model' => env(
-            'AI_IMAGE_MODERATION_MODEL',
-            match ($imageProvider) {
-                'gemini', 'google' => env('AI_IMAGE_GEMINI_MODEL', env('AI_IMAGE_GOOGLE_MODEL', 'gemini-3.1-flash-lite')),
-                'openai_moderation' => env('AI_IMAGE_OPENAI_MODERATION_MODEL', env('AI_IMAGE_OPENAI_MODEL', 'omni-moderation-latest')),
-                default => env('AI_IMAGE_OPENAI_COMPATIBLE_MODEL', env('AI_IMAGE_OPENAI_MODEL', 'gpt-4o-mini')),
-            }
-        ),
-        'base_url' => env(
-            'AI_IMAGE_MODERATION_BASE_URL',
-            match ($imageProvider) {
-                'gemini', 'google' => env('AI_IMAGE_GEMINI_BASE_URL', env('AI_IMAGE_GOOGLE_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta')),
-                'openai_moderation' => env('AI_IMAGE_OPENAI_MODERATION_BASE_URL', env('AI_IMAGE_OPENAI_BASE_URL', 'https://api.openai.com/v1')),
-                default => env('AI_IMAGE_OPENAI_COMPATIBLE_BASE_URL', env('AI_IMAGE_OPENAI_BASE_URL', 'https://api.openai.com/v1')),
-            }
-        ),
-        'endpoint_path' => env(
-            'AI_IMAGE_MODERATION_ENDPOINT_PATH',
-            match ($imageProvider) {
-                'gemini', 'google' => '/models/{model}:generateContent',
-                'openai_moderation' => '/moderations',
-                default => '/chat/completions',
-            }
-        ),
-        'auth_header' => env(
-            'AI_IMAGE_MODERATION_AUTH_HEADER',
-            match ($imageProvider) {
-                'gemini', 'google' => 'x-goog-api-key',
-                default => 'Authorization',
-            }
-        ),
-        'auth_prefix' => env(
-            'AI_IMAGE_MODERATION_AUTH_PREFIX',
-            match ($imageProvider) {
-                'gemini', 'google' => '',
-                default => 'Bearer',
-            }
-        ),
         'queue' => env('AI_IMAGE_MODERATION_QUEUE', env('PRODUCT_MODERATION_QUEUE', 'moderation')),
         'timeout' => (int) env('AI_IMAGE_MODERATION_TIMEOUT', env('PRODUCT_MODERATION_TIMEOUT', 60)),
         'max_attempts' => (int) env('AI_IMAGE_MODERATION_MAX_ATTEMPTS', env('PRODUCT_MODERATION_MAX_ATTEMPTS', 3)),
-        'google' => [
-            'api_key' => env('AI_IMAGE_GOOGLE_API_KEY', env('AI_IMAGE_MODERATION_API_KEY')),
-            'model' => env('AI_IMAGE_GOOGLE_MODEL', env('AI_IMAGE_MODERATION_MODEL', 'gemini-2.5-flash')),
-            'base_url' => env('AI_IMAGE_GOOGLE_BASE_URL', env('AI_IMAGE_MODERATION_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta')),
-        ],
-        'openai_moderation' => [
-            'api_key' => env('AI_IMAGE_OPENAI_API_KEY', env('AI_IMAGE_MODERATION_API_KEY')),
-            'model' => 'omni-moderation-latest',
-            'base_url' => 'https://api.openai.com/v1',
-        ],
         'audit' => [
             'prompt_version' => 'product-image-moderation-v1',
             'policy_version' => 'marketplace-image-policy-v1',

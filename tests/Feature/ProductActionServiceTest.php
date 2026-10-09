@@ -158,7 +158,7 @@ class ProductActionServiceTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 4,
             'trigger' => 'image_queue',
-            'provider' => 'image_google',
+            'provider' => 'image_openrouter',
             'status' => 'completed',
             'decision' => 'review',
             'request_fingerprint' => hash('sha256', 'delete-image-issue'),

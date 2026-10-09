@@ -4,161 +4,85 @@ namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use Throwable;
 
+/**
+ * Проверка связи с OpenRouter по сохранённым настройкам: тот же ключ, та же модель, минимальный запрос.
+ * Для модели фото в запрос кладётся крошечная картинка, чтобы убедиться, что модель умеет читать изображения.
+ */
 class ModerationConnectionTester
 {
-    public function __construct(private readonly AiProviderUrlValidator $urlValidator) {}
+    /** Прозрачный PNG 1×1. */
+    private const TEST_IMAGE = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+    public function __construct(private readonly OpenRouterClient $openRouter) {}
 
     /** @return array{ok: bool, message: string} */
     public function text(): array
     {
-        $provider = (string) config('moderation.provider');
-
-        return match ($provider) {
-            'google' => $this->google(
-                (string) config('moderation.google.base_url'),
-                (string) config('moderation.google.model'),
-                (string) config('moderation.google.api_key'),
-            ),
-            'openai_compatible' => $this->openAiCompatible(
-                (string) config('moderation.openai_compatible.base_url'),
-                (string) config('moderation.openai_compatible.api_key'),
-            ),
-            'deepseek' => $this->openAiCompatible(
-                (string) config('moderation.deepseek.base_url'),
-                (string) config('moderation.deepseek.api_key'),
-            ),
-            default => ['ok' => false, 'message' => 'Выбранный текстовый провайдер не поддерживает проверку соединения.'],
-        };
+        return $this->probe((string) config('moderation.openrouter.text_model'), withImage: false);
     }
 
     /** @return array{ok: bool, message: string} */
     public function images(): array
     {
-        $provider = $this->normalizeImageProvider((string) config('moderation.images.provider', 'gemini'));
-        $baseUrl = rtrim((string) config('moderation.images.base_url'), '/');
-        $apiKey = (string) config('moderation.images.api_key');
-
-        return match ($provider) {
-            'gemini' => $this->request(function () use ($baseUrl, $apiKey) {
-                $this->validate($baseUrl, $apiKey);
-
-                return $this->imageRequest('gemini', $apiKey)
-                    ->timeout(15)
-                    ->get($baseUrl.'/models/'.(string) config('moderation.images.model'));
-            }),
-            'openai_moderation' => $this->request(function () use ($baseUrl, $apiKey) {
-                $this->validate($baseUrl, $apiKey);
-
-                return $this->imageRequest('openai_moderation', $apiKey)->timeout(15)
-                    ->post($baseUrl.'/moderations', [
-                        'model' => (string) config('moderation.images.model'),
-                        'input' => 'Connection test.',
-                    ]);
-            }, fn (Response $response): string => $this->openAiModerationMessage($response)),
-            default => $this->request(function () use ($baseUrl, $apiKey) {
-                $this->validate($baseUrl, $apiKey);
-
-                return $this->imageRequest('openai_compatible', $apiKey)->timeout(15)->get($baseUrl.'/models');
-            }),
-        };
+        return $this->probe((string) config('moderation.openrouter.image_model'), withImage: true);
     }
 
     /** @return array{ok: bool, message: string} */
-    private function google(string $baseUrl, string $model, string $apiKey): array
+    private function probe(string $model, bool $withImage): array
     {
-        $baseUrl = rtrim($baseUrl, '/');
-
-        return $this->request(function () use ($baseUrl, $model, $apiKey) {
-            $this->validate($baseUrl, $apiKey);
-
-            return Http::acceptJson()->withHeaders(['x-goog-api-key' => $apiKey])->timeout(15)
-                ->get("{$baseUrl}/models/{$model}");
-        });
-    }
-
-    /** @return array{ok: bool, message: string} */
-    private function openAiCompatible(string $baseUrl, string $apiKey): array
-    {
-        $baseUrl = rtrim($baseUrl, '/');
-
-        return $this->request(function () use ($baseUrl, $apiKey) {
-            $this->validate($baseUrl, $apiKey);
-
-            return Http::acceptJson()->withToken($apiKey)->timeout(15)->get($baseUrl.'/models');
-        });
-    }
-
-    private function validate(string $baseUrl, string $apiKey): void
-    {
-        if ($apiKey === '') {
-            throw new \RuntimeException('API-ключ выбранного провайдера не настроен.');
+        if ($this->openRouter->apiKey() === '') {
+            return ['ok' => false, 'message' => 'Ключ OpenRouter не задан. Введите его и нажмите «Сохранить».'];
         }
 
-        $this->urlValidator->validate($baseUrl);
-    }
+        if (trim($model) === '') {
+            return ['ok' => false, 'message' => 'Модель не указана. Укажите её и нажмите «Сохранить».'];
+        }
 
-    /** @return array{ok: bool, message: string} */
-    private function request(callable $callback, ?callable $errorMessage = null): array
-    {
         try {
-            $response = $callback();
-
-            if ($response->successful()) {
-                return ['ok' => true, 'message' => 'Соединение установлено, ключ и endpoint приняты.'];
-            }
-
-            return ['ok' => false, 'message' => $errorMessage
-                ? $errorMessage($response)
-                : 'Провайдер вернул HTTP '.$response->status().'. Проверьте ключ, URL и модель.'];
+            $response = $this->openRouter->pending(25)->post($this->openRouter->url('chat/completions'), [
+                'model' => $model,
+                'max_tokens' => 16,
+                'messages' => [[
+                    'role' => 'user',
+                    'content' => $withImage
+                        ? [
+                            ['type' => 'text', 'text' => 'Ответь одним словом: что на картинке?'],
+                            ['type' => 'image_url', 'image_url' => ['url' => 'data:image/png;base64,'.self::TEST_IMAGE]],
+                        ]
+                        : 'Ответь одним словом: ок.',
+                ]],
+            ]);
         } catch (ConnectionException) {
-            return ['ok' => false, 'message' => 'Не удалось соединиться с API провайдера.'];
+            return ['ok' => false, 'message' => 'Не удалось соединиться с OpenRouter. Проверьте интернет на сервере.'];
         } catch (Throwable $exception) {
             return ['ok' => false, 'message' => mb_substr($exception->getMessage(), 0, 300)];
         }
+
+        return $this->result($response, $model, $withImage);
     }
 
-    private function openAiModerationMessage(Response $response): string
+    /** @return array{ok: bool, message: string} */
+    private function result(Response $response, string $model, bool $withImage): array
     {
-        return match ($response->status()) {
-            401 => 'OpenAI отклонил ключ доступа (HTTP 401). Проверьте API key для модерации изображений.',
-            402 => 'OpenAI вернул HTTP 402. Проверьте биллинг и доступную квоту аккаунта.',
-            429 => 'OpenAI вернул HTTP 429. Подключение к API есть, но сработал rate limit или исчерпана квота. Проверьте лимиты, биллинг и повторите попытку позже.',
-            default => 'OpenAI moderation API вернул HTTP '.$response->status().'. Проверьте ключ, endpoint и доступность аккаунта.',
-        };
-    }
+        if ($response->successful() && ! is_array($response->json('error'))) {
+            return ['ok' => true, 'message' => "Связь есть: ключ принят, модель {$model} отвечает".($withImage ? ' и принимает изображения.' : '.')];
+        }
 
-    private function normalizeImageProvider(string $provider): string
-    {
-        return match ($provider) {
-            'google' => 'gemini',
-            'openai' => 'openai_compatible',
-            default => $provider,
-        };
-    }
+        $status = $response->successful() ? (int) $response->json('error.code') : $response->status();
+        $detail = (string) ($response->json('error.message') ?? '');
 
-    private function imageRequest(string $provider, string $apiKey)
-    {
-        $authHeader = (string) config('moderation.images.auth_header', $this->defaultImageAuthHeader($provider));
-        $authPrefix = (string) config('moderation.images.auth_prefix', $this->defaultImageAuthPrefix($provider));
-        $headerValue = $authHeader === 'x-goog-api-key'
-            ? $apiKey
-            : (trim($authPrefix) === '' ? $apiKey : rtrim($authPrefix).' '.$apiKey);
+        if ($withImage && in_array($status, [400, 404], true)) {
+            return ['ok' => false, 'message' => "Модель {$model} недоступна или не умеет читать изображения. Выберите модель с поддержкой фото."
+                .($detail !== '' ? ' Ответ OpenRouter: '.mb_substr($detail, 0, 200) : '')];
+        }
 
-        return Http::acceptJson()
-            ->asJson()
-            ->withHeaders([$authHeader => $headerValue]);
-    }
+        if ($response->successful()) {
+            // HTTP 200, но ошибка модели или поставщика лежит в теле ответа
+            return ['ok' => false, 'message' => 'OpenRouter: '.($detail !== '' ? mb_substr($detail, 0, 250) : 'ошибка поставщика модели.')];
+        }
 
-    private function defaultImageAuthHeader(string $provider): string
-    {
-        return $provider === 'gemini' ? 'x-goog-api-key' : 'Authorization';
-    }
-
-    private function defaultImageAuthPrefix(string $provider): string
-    {
-        return $provider === 'gemini' ? '' : 'Bearer';
+        return ['ok' => false, 'message' => $this->openRouter->failureMessage($response)];
     }
 }

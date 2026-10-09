@@ -17,7 +17,7 @@ Redis и Supervisor. Проект работает на Laravel 10.
 - Redis 6+;
 - Nginx, Supervisor и Certbot;
 - Git-доступ к репозиторию;
-- API-ключи ИИ-провайдера, если будет включена автоматическая модерация;
+- ключ OpenRouter (openrouter.ai) с положительным балансом, если будет включена ИИ-модерация;
 - Telegram-бот, если нужны уведомления продавцам.
 
 Создайте отдельного пользователя для деплоя, например `deploy`. Не выполняйте
@@ -177,15 +177,18 @@ CABINET_DESIGN_DEFAULT=legacy
 VIP_PRICE_PER_DAY=1
 
 PRODUCT_MODERATION_AI_ENABLED=false
-PRODUCT_MODERATION_AI_PROVIDER=fake
 PRODUCT_MODERATION_AI_MODE=shadow
 PRODUCT_MODERATION_QUEUE=moderation
 PRODUCT_MODERATION_TIMEOUT=60
 PRODUCT_MODERATION_MAX_ATTEMPTS=3
-PRODUCT_MODERATION_FAKE_DECISION=review
+
+# ИИ-модерация идёт только через OpenRouter. Ключ удобнее ввести в админке
+# («Система → Настройки модерации»): он хранится в базе зашифрованным.
+OPENROUTER_API_KEY=
+OPENROUTER_TEXT_MODEL=openai/gpt-4o-mini
+OPENROUTER_IMAGE_MODEL=openai/gpt-4o-mini
 
 AI_IMAGE_MODERATION_ENABLED=false
-AI_IMAGE_MODERATION_PROVIDER=gemini
 AI_IMAGE_MODERATION_QUEUE=moderation
 AI_IMAGE_MODERATION_TIMEOUT=60
 AI_IMAGE_MODERATION_MAX_ATTEMPTS=3
@@ -473,11 +476,11 @@ AI_IMAGE_MODERATION_ENABLED=false
 
 1. текстовую модерацию;
 2. модерацию изображений;
-3. провайдера, модель, базовый URL, endpoint и заголовок авторизации;
-4. очередь, timeout и число попыток.
+3. ключ OpenRouter и модели для текста и для фото;
+4. очередь, timeout и число попыток (блок «Дополнительные настройки»).
 
-После включения провайдера убедитесь, что API-ключ сохранён, затем проверьте
-тестовое подключение в панели. Для каждой включённой модерации worker должен
+После включения убедитесь, что ключ OpenRouter сохранён, затем нажмите «Проверить
+подключение» для текста и для фото. Для каждой включённой модерации worker должен
 слушать соответствующую очередь. Ошибки смотрите здесь:
 
 ```bash
@@ -486,7 +489,7 @@ php artisan queue:failed
 ```
 
 В production не включайте `PRODUCT_MODERATION_AI_MODE=auto`, пока не проверили
-реальные ответы провайдера на тестовых товарах. При выключенной ИИ-модерации
+реальные ответы OpenRouter на тестовых товарах. При выключенной ИИ-модерации
 новые товары должны переходить на ручную проверку согласно текущей логике проекта.
 
 ## 13. Meilisearch (необязательно)
@@ -586,6 +589,37 @@ php artisan optimize:clear
   `composer install --no-dev` достаточно убедиться, что есть папка `vendor/bacon/bacon-qr-code`. Если на сервере
   включён кеш маршрутов, выполните `php artisan optimize:clear` (в этой инструкции он уже есть), иначе страница
   `/account/store/qr` вернёт 404.
+
+## 13.3. Релиз «ИИ-модерация только через OpenRouter»
+
+Что нужно сделать на сервере при обновлении:
+
+```bash
+cd /var/www/granat
+php artisan migrate --force
+php artisan optimize:clear
+php artisan queue:restart
+```
+
+Что изменилось и что важно знать:
+
+- И проверка текста, и проверка фото идут только через **OpenRouter** (https://openrouter.ai). Поддержка Google
+  Gemini, DeepSeek, OpenAI и прочих «совместимых» сервисов, а также тестовый режим `fake` удалены.
+- **Ключ OpenRouter нужно ввести один раз** на странице «Система → Настройки модерации» (или задать
+  `OPENROUTER_API_KEY` в `.env`). Ключи прежних сервисов в базе удаляет миграция
+  `remove_legacy_moderation_provider_secrets`, поэтому после обновления страница покажет «Не задан ключ OpenRouter»,
+  пока вы его не введёте. До этого новые товары идут на ручную проверку: сайт продолжает работать.
+- Там же выберите модели для текста и для фото (например, `openai/gpt-4o-mini` для обеих), нажмите «Проверить
+  подключение» для каждой. Для фото нужна модель, которая читает изображения; на openrouter.ai должен быть
+  положительный баланс.
+- Старые строки в `.env` (`GEMINI_*`, `AI_TEXT_*`, `AI_MODERATION_API_KEY`, `AI_MODERATION_MODEL`,
+  `AI_MODERATION_BASE_URL`, `AI_IMAGE_MODERATION_PROVIDER/MODEL/BASE_URL/API_KEY/...`,
+  `PRODUCT_MODERATION_AI_PROVIDER`, `PRODUCT_MODERATION_FAKE_DECISION`) приложение больше не читает; их можно удалить.
+  Лимиты `AI_MODERATION_*_LIMIT`, `AI_MODERATION_RETRY_*`, `AI_MODERATION_REQUESTS_PER_MINUTE` и таймауты остаются.
+- Задачи, уже стоявшие в очереди до обновления, выполнятся с новыми настройками (модель берётся из настроек,
+  если в задаче её нет). Команда `moderation:migrate-secrets` удалена.
+- Для режима «ИИ публикует безопасные товары сам» включите и проверку фото: без неё товары с фотографиями
+  уходят модератору.
 
 ## 14. Финальная проверка
 

@@ -13,16 +13,15 @@ class ModerationOperationsStatus
     {
         $health = app(ApplicationHealthService::class)->readiness();
         $staleBefore = now()->subMinutes(10);
-        $imageProvider = (string) config('moderation.images.provider', 'gemini');
 
         return [
             'queue_ok' => (bool) data_get($health, 'checks.queue_worker.ok', false),
             'queue_mode' => data_get($health, 'checks.queue_worker.mode'),
             'queue_age_seconds' => data_get($health, 'checks.queue_worker.age_seconds'),
             'image_moderation_enabled' => (bool) config('moderation.images.enabled', false),
-            'image_provider' => $imageProvider,
-            'image_api_key_configured' => filled(config('moderation.images.api_key')),
-            'image_model' => config('moderation.images.model'),
+            'api_key_configured' => filled(config('moderation.openrouter.api_key')),
+            'text_model' => config('moderation.openrouter.text_model'),
+            'image_model' => config('moderation.openrouter.image_model'),
             'image_queue' => config('moderation.images.queue'),
             'failed_runs' => ProductModerationRun::query()
                 ->where('status', 'failed')

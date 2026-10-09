@@ -13,16 +13,14 @@ class ModerationStatusSummaryTest extends TestCase
      * @param  array<string, mixed>  $ops
      * @param  array<string, mixed>  $budget
      */
-    private function snapshot(array $data = [], array $ops = [], array $budget = [], bool $textKey = true, bool $imageKey = true): ModerationSettingsSnapshot
+    private function snapshot(array $data = [], array $ops = [], array $budget = [], bool $keyConfigured = true): ModerationSettingsSnapshot
     {
         return new ModerationSettingsSnapshot(
             data: array_merge([
                 'ai_enabled' => true, 'mode' => 'shadow', 'max_risk' => 10.0,
                 'image_moderation_enabled' => false, 'queue_connection' => 'database',
             ], $data),
-            apiKeyConfigured: $textKey || $imageKey,
-            textApiKeyConfigured: $textKey,
-            imageApiKeyConfigured: $imageKey,
+            apiKeyConfigured: $keyConfigured,
             budgetUsage: array_merge(['hourly_used' => 3, 'hourly_limit' => 60, 'daily_used' => 12, 'daily_limit' => 500], $budget),
             operationsStatus: array_merge(['queue_ok' => true, 'stuck_runs' => 0, 'failed_runs' => 0], $ops),
         );
@@ -67,22 +65,42 @@ class ModerationStatusSummaryTest extends TestCase
         $this->assertContains('Текст проверяет модератор; фото проверяются ИИ.', $result['lines']);
     }
 
-    public function test_missing_text_key_is_an_error_that_leads(): void
+    public function test_missing_key_is_an_error_that_leads(): void
     {
-        $result = $this->summary($this->snapshot(textKey: false));
+        $result = $this->summary($this->snapshot(keyConfigured: false));
 
         $this->assertSame('error', $result['level']);
-        $this->assertStringContainsString('Не задан ключ ИИ для проверки текста', $result['headline']);
+        $this->assertStringContainsString('Не задан ключ OpenRouter', $result['headline']);
     }
 
-    public function test_missing_photo_key_matters_only_when_photo_check_is_on(): void
+    public function test_missing_key_matters_for_photo_check_alone_too(): void
     {
-        $off = $this->summary($this->snapshot(imageKey: false));
-        $on = $this->summary($this->snapshot(['image_moderation_enabled' => true], imageKey: false));
+        $result = $this->summary($this->snapshot(['ai_enabled' => false, 'image_moderation_enabled' => true], keyConfigured: false));
 
-        $this->assertSame('ok', $off['level']);
-        $this->assertSame('error', $on['level']);
-        $this->assertStringContainsString('ключ для проверки фото', $on['headline']);
+        $this->assertSame('error', $result['level']);
+        $this->assertStringContainsString('Не задан ключ OpenRouter', $result['headline']);
+    }
+
+    public function test_missing_key_is_not_reported_while_everything_is_off(): void
+    {
+        $result = $this->summary($this->snapshot(['ai_enabled' => false], keyConfigured: false));
+
+        $this->assertSame('off', $result['level']);
+    }
+
+    public function test_auto_mode_without_photo_check_warns_that_photos_go_to_the_moderator(): void
+    {
+        $result = $this->summary($this->snapshot(['mode' => 'auto', 'image_moderation_enabled' => false]));
+
+        $this->assertSame('warning', $result['level']);
+        $this->assertStringContainsString('проверка фото выключена', $result['headline']);
+    }
+
+    public function test_assistant_mode_does_not_need_photo_check(): void
+    {
+        $result = $this->summary($this->snapshot(['mode' => 'shadow', 'image_moderation_enabled' => false]));
+
+        $this->assertSame('ok', $result['level']);
     }
 
     public function test_dead_queue_worker_is_an_error(): void

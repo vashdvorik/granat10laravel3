@@ -16,24 +16,25 @@ class ModerationOperationsStatusTest extends TestCase
     {
         config()->set('queue.default', 'sync');
         config()->set('moderation.images.enabled', true);
-        config()->set('moderation.images.provider', 'gemini');
-        config()->set('moderation.images.api_key', 'test-image-key');
-        config()->set('moderation.images.model', 'gemini-3.1-flash-lite');
+        config()->set('moderation.openrouter.api_key', 'test-key');
+        config()->set('moderation.openrouter.text_model', 'vendor/text');
+        config()->set('moderation.openrouter.image_model', 'vendor/vision');
         config()->set('moderation.images.queue', 'moderation');
         $product = Product::factory()->create();
 
         $this->createRun($product, 'failed', now());
         $this->createRun($product, 'processing', now()->subMinutes(15));
         $this->createRun($product, 'processing', now());
-        $this->createRun($product, 'failed', now(), 'image_google');
-        $this->createRun($product, 'processing', now()->subMinutes(15), 'image_google');
+        $this->createRun($product, 'failed', now(), 'image_openrouter');
+        $this->createRun($product, 'processing', now()->subMinutes(15), 'image_openrouter');
 
         $status = app(ModerationOperationsStatus::class)->current();
 
         $this->assertTrue($status['queue_ok']);
         $this->assertTrue($status['image_moderation_enabled']);
-        $this->assertTrue($status['image_api_key_configured']);
-        $this->assertSame('gemini-3.1-flash-lite', $status['image_model']);
+        $this->assertTrue($status['api_key_configured']);
+        $this->assertSame('vendor/text', $status['text_model']);
+        $this->assertSame('vendor/vision', $status['image_model']);
         $this->assertSame('moderation', $status['image_queue']);
         $this->assertSame(2, $status['failed_runs']);
         $this->assertSame(2, $status['stuck_runs']);

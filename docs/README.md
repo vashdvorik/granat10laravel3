@@ -16,9 +16,8 @@
 | [production_deployment_ru.md](production_deployment_ru.md) | Установка, обновление и production-эксплуатация |
 | [local_runtime_ru.md](local_runtime_ru.md) | Единая команда локального запуска workers, scheduler и сайта |
 | [order_system_ru.md](order_system_ru.md) | Фактическая реализация заказов и её ограничения |
-| [moderation_operations_ru.md](moderation_operations_ru.md) | Настройка и эксплуатация модерации товаров |
+| [moderation_operations_ru.md](moderation_operations_ru.md) | Настройка и эксплуатация модерации товаров (ИИ-проверка только через OpenRouter) |
 | [product_moderation_policy_ru.md](product_moderation_policy_ru.md) | Бизнес-политика проверки товаров |
-| [moderation_optimization_plan_ru.md](moderation_optimization_plan_ru.md) | План оптимизации AI-модерации |
 | [architecture_hardening_plan_ru.md](architecture_hardening_plan_ru.md) | Оставшиеся архитектурные улучшения |
 | [mobile_navigation_redesign_plan_ru.md](mobile_navigation_redesign_plan_ru.md) | Поэтапный план переделки мобильной навигации клиента и входа продавца |
 | [design_rules_ru.md](design_rules_ru.md) | Обязательные правила публичного интерфейса и изображений |

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ModerationProvider;
 use App\Enums\ProductModerationStatus;
 use App\Jobs\ModerateProductJob;
 use App\Models\Product;
@@ -31,12 +32,8 @@ class ProductModerationRetryService
             'moderation_source' => 'ai',
         ])->save();
 
-        $provider = (string) config('moderation.provider');
-        $model = (string) config("moderation.{$provider}.model", $provider === 'fake' ? 'fake' : '');
-        $baseUrl = (string) config("moderation.{$provider}.base_url", '');
-        $endpointPath = in_array($provider, ['openai_compatible', 'deepseek'], true)
-            ? (string) config("moderation.{$provider}.chat_completions_path", '/chat/completions')
-            : null;
+        $provider = ModerationProvider::TEXT;
+        $model = (string) config('moderation.openrouter.text_model');
         $latestRun = ProductModerationRun::query()
             ->where('product_id', $product->id)
             ->where('content_version', $product->moderation_version)
@@ -58,7 +55,7 @@ class ProductModerationRetryService
                 'request_fingerprint' => $latestRun->request_fingerprint,
             ]);
         }
-        ModerateProductJob::dispatch($product->id, $product->moderation_version, $provider, $model, $baseUrl, $endpointPath, (string) config('moderation.mode'), null, true)
+        ModerateProductJob::dispatch($product->id, $product->moderation_version, $model, (string) config('moderation.mode'), null, true)
             ->afterCommit();
 
         return true;

@@ -9,7 +9,7 @@ class AiModerationRequestBudget
 {
     public function consume(?string $scope = null): void
     {
-        $provider = $scope ?? 'text:'.(string) config('moderation.provider', 'unknown');
+        $provider = $scope ?? \App\Data\ModerationProvider::TEXT_SCOPE;
         $hourlyLimit = max(0, (int) config('moderation.budget.hourly_requests', 60));
         $dailyLimit = max(0, (int) config('moderation.budget.daily_requests', 500));
 
@@ -39,7 +39,7 @@ class AiModerationRequestBudget
      */
     public function usage(?string $scope = null): array
     {
-        $provider = $scope ?? 'text:'.(string) config('moderation.provider', 'unknown');
+        $provider = $scope ?? \App\Data\ModerationProvider::TEXT_SCOPE;
 
         return [
             'hourly_used' => (int) Cache::get(

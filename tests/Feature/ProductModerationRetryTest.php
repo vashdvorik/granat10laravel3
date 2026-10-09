@@ -102,7 +102,7 @@ class ProductModerationRetryTest extends TestCase
             'product_id' => $product->id,
             'content_version' => $product->moderation_version,
             'trigger' => 'queue',
-            'provider' => 'fake',
+            'provider' => 'openrouter',
             'status' => 'failed',
             'request_fingerprint' => hash('sha256', 'retry-'.$product->id),
         ]);

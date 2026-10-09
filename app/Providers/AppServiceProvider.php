@@ -10,8 +10,9 @@ use App\Services\CatalogCacheService;
 use App\Services\CustomerOrderListService;
 use App\Services\DesignManager;
 use App\Services\LegacySeoMetadataService;
-use App\Services\ModerationClientResolver;
 use App\Services\ModerationSecretStore;
+use App\Services\OpenRouterImageModerationClient;
+use App\Services\OpenRouterModerationClient;
 use App\Services\RegionalContext;
 use App\Services\RegionalUrlService;
 use App\Services\SeoService;
@@ -33,12 +34,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(DesignManager::class);
         $this->app->scoped(RegionalContext::class);
         $this->app->scoped(RegionalUrlService::class);
-        $this->app->bind(AiModerationClient::class, function () {
-            return app(ModerationClientResolver::class)->text((string) config('moderation.provider'));
-        });
-        $this->app->bind(ProductImageModerationClient::class, function () {
-            return app(ModerationClientResolver::class)->images((string) config('moderation.images.provider'));
-        });
+        $this->app->bind(AiModerationClient::class, OpenRouterModerationClient::class);
+        $this->app->bind(ProductImageModerationClient::class, OpenRouterImageModerationClient::class);
     }
 
     /**

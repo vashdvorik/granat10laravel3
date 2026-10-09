@@ -14,7 +14,6 @@ class AiModerationRequestBudgetTest extends TestCase
         parent::setUp();
 
         Cache::flush();
-        config()->set('moderation.provider', 'test');
         config()->set('moderation.budget.hourly_requests', 2);
         config()->set('moderation.budget.daily_requests', 3);
     }

@@ -56,8 +56,8 @@ class ModerateProductJobTest extends TestCase
         $this->assertTrue((bool) $product->is_active);
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
-            'provider' => 'fake',
-            'model' => 'fake',
+            'provider' => 'openrouter',
+            'model' => 'openai/gpt-4o-mini',
             'prompt_version' => 'product-moderation-v2',
             'decision' => 'allow',
             'status' => 'completed',
@@ -66,38 +66,8 @@ class ModerateProductJobTest extends TestCase
         $this->assertSame('marketplace-policy-v1', $run->text_result['policy_version']);
     }
 
-    public function test_allow_result_does_not_auto_approve_when_product_image_was_not_analyzed(): void
+    public function test_text_result_does_not_auto_approve_product_whose_photos_were_not_checked(): void
     {
-        config()->set('moderation.provider', 'google');
-        $product = Product::factory()->pendingModeration()->create([
-            'is_active' => true,
-            'moderation_version' => 2,
-        ]);
-        Image::factory()->for($product)->create();
-        $this->allowAutoApprovalFor($product);
-        $client = $this->clientReturning(new ProductModerationResult(
-            decision: 'allow',
-            riskScore: 0.05,
-            imagesAnalyzed: false,
-        ));
-
-        (new ModerateProductJob($product->id, 2))->handle(
-            $client,
-            app(ProductModerationPayloadFactory::class),
-            app(ProductAutoApprovalPolicy::class)
-        );
-
-        $product->refresh();
-
-        $this->assertSame(ProductModerationStatus::NeedsReview, $product->moderation_status);
-        $this->assertFalse((bool) $product->is_active);
-        $this->assertStringContainsString('Изображения товара', $product->moderation_summary);
-    }
-
-    public function test_text_only_compatible_provider_does_not_auto_approve_product_with_unchecked_images(): void
-    {
-        config()->set('moderation.provider', 'openai_compatible');
-        config()->set('moderation.openai_compatible.vision_enabled', false);
         $product = Product::factory()->pendingModeration()->create([
             'is_active' => true,
             'moderation_version' => 2,
@@ -215,7 +185,7 @@ class ModerateProductJobTest extends TestCase
             $this->assertFalse((bool) $product->fresh()->is_active);
             $this->assertDatabaseHas('product_moderation_runs', [
                 'product_id' => $product->id,
-                'provider' => 'fake',
+                'provider' => 'openrouter',
                 'status' => 'failed',
             ]);
         }

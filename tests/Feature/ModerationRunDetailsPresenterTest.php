@@ -19,8 +19,8 @@ class ModerationRunDetailsPresenterTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 1,
             'trigger' => 'image_queue',
-            'provider' => 'image_google',
-            'model' => 'gemini-2.5-flash',
+            'provider' => 'image_openrouter',
+            'model' => 'openai/gpt-4o-mini',
             'status' => 'completed',
             'decision' => 'review',
             'risk_score' => 0.8,
@@ -41,7 +41,7 @@ class ModerationRunDetailsPresenterTest extends TestCase
 
         $details = app(ModerationRunDetailsPresenter::class)->present($run);
 
-        $this->assertSame('image_google', $details['summary'][0]['value']);
+        $this->assertSame('image_openrouter', $details['summary'][0]['value']);
         $this->assertSame('wrong_image', $details['reasons'][0]['code']);
         $this->assertSame(2, $details['reasons'][0]['image_index']);
         $this->assertSame(3, $details['imageResult']['images_submitted']);

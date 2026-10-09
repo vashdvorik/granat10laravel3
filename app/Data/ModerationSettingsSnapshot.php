@@ -11,9 +11,8 @@ class ModerationSettingsSnapshot
      */
     public function __construct(
         public array $data,
+        /** Ключ OpenRouter задан (в базе или в .env). Он один на текст и на фото. */
         public bool $apiKeyConfigured,
-        public bool $textApiKeyConfigured,
-        public bool $imageApiKeyConfigured,
         public array $budgetUsage,
         public array $operationsStatus,
     ) {}

@@ -48,7 +48,7 @@ class ModerateProductImagesJobTest extends TestCase
         $this->assertSame(3, $product->moderated_version);
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
-            'provider' => 'image_gemini',
+            'provider' => 'image_openrouter',
             'status' => 'completed',
             'decision' => 'allow',
         ]);
@@ -127,7 +127,7 @@ class ModerateProductImagesJobTest extends TestCase
             'product_id' => $product->id,
             'content_version' => $product->moderation_version,
             'trigger' => 'queue',
-            'provider' => 'openai_compatible',
+            'provider' => 'openrouter',
             'status' => 'completed',
             'decision' => 'allow',
             'risk_score' => 0,

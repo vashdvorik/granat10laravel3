@@ -43,18 +43,18 @@ class ModerationStatusSummary
         $problems = [];
         $warnings = [];
 
-        if ($textOn && ! $snapshot->textApiKeyConfigured) {
-            $problems[] = 'Не задан ключ ИИ для проверки текста: товары будут ждать модератора.';
-        }
-
-        if ($imageOn && ! $snapshot->imageApiKeyConfigured) {
-            $problems[] = 'Не задан ключ для проверки фото: товары с фото не смогут пройти проверку.';
+        if (! $snapshot->apiKeyConfigured) {
+            $problems[] = 'Не задан ключ OpenRouter: проверки не выполняются, товары ждут модератора.';
         }
 
         if (! (bool) ($ops['queue_ok'] ?? false)) {
             $problems[] = 'Не запущен обработчик очереди: проверки не будут выполняться. Сообщите тому, кто отвечает за сервер.';
         } elseif ($production && ($data['queue_connection'] ?? null) === 'sync') {
             $warnings[] = 'Очередь работает в режиме Sync: проверка идёт прямо во время действий продавца и замедляет сайт. Переключите на Database в дополнительных настройках.';
+        }
+
+        if ($textOn && ($data['mode'] ?? 'shadow') === 'auto' && ! $imageOn) {
+            $warnings[] = 'ИИ публикует сам, но проверка фото выключена: товары с фото всё равно уходят на проверку модератору. Включите проверку фото.';
         }
 
         if ($this->exhausted($budget, 'daily')) {

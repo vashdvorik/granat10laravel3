@@ -13,10 +13,6 @@ class ProductModerationImagePreparer
      */
     public function prepare(array $paths): array
     {
-        if (! config('moderation.vision.enabled', true)) {
-            return [];
-        }
-
         $disk = Storage::disk('public');
         $images = [];
         $maxImages = max(0, (int) config('moderation.vision.max_images', 5));

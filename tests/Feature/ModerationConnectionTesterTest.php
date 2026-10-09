@@ -3,64 +3,149 @@
 namespace Tests\Feature;
 
 use App\Services\ModerationConnectionTester;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class ModerationConnectionTesterTest extends TestCase
 {
-    public function test_text_google_connection_uses_model_endpoint(): void
+    protected function setUp(): void
     {
-        config()->set('moderation.provider', 'google');
-        config()->set('moderation.google.api_key', 'secret');
-        config()->set('moderation.google.model', 'gemini-test');
-        config()->set('moderation.google.base_url', 'https://generativelanguage.googleapis.com/v1beta');
-        Http::fake(['*' => Http::response(['name' => 'gemini-test'], 200)]);
+        parent::setUp();
 
-        $result = app(ModerationConnectionTester::class)->text();
+        config()->set('moderation.openrouter.api_key', 'sk-or-test');
+        config()->set('moderation.openrouter.base_url', 'https://openrouter.test/api/v1');
+        config()->set('moderation.openrouter.text_model', 'vendor/text-model');
+        config()->set('moderation.openrouter.image_model', 'vendor/vision-model');
+    }
+
+    private function tester(): ModerationConnectionTester
+    {
+        return app(ModerationConnectionTester::class);
+    }
+
+    public function test_text_check_sends_a_tiny_request_to_the_text_model(): void
+    {
+        Http::fake(['*' => Http::response(['choices' => [['message' => ['content' => 'ок']]]])]);
+
+        $result = $this->tester()->text();
 
         $this->assertTrue($result['ok']);
-        Http::assertSent(fn ($request): bool => str_ends_with($request->url(), '/models/gemini-test'));
+        $this->assertStringContainsString('vendor/text-model', $result['message']);
+
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://openrouter.test/api/v1/chat/completions'
+            && $request->hasHeader('Authorization', 'Bearer sk-or-test')
+            && $request['model'] === 'vendor/text-model'
+            && $request['max_tokens'] === 16
+            && is_string(data_get($request->data(), 'messages.0.content')));
     }
 
-    public function test_openai_image_connection_reports_authentication_failure_without_leaking_body(): void
+    public function test_image_check_sends_a_tiny_picture_to_the_image_model(): void
     {
-        config()->set('moderation.images.provider', 'openai_moderation');
-        config()->set('moderation.images.api_key', 'bad-secret');
-        config()->set('moderation.images.base_url', 'https://api.openai.com/v1');
-        Http::fake(['*' => Http::response(['error' => ['message' => 'sensitive provider body']], 401)]);
+        Http::fake(['*' => Http::response(['choices' => [['message' => ['content' => 'пиксель']]]])]);
 
-        $result = app(ModerationConnectionTester::class)->images();
-
-        $this->assertFalse($result['ok']);
-        $this->assertStringContainsString('HTTP 401', $result['message']);
-        $this->assertStringNotContainsString('sensitive provider body', $result['message']);
-    }
-
-    public function test_openai_image_connection_reports_rate_limit_separately(): void
-    {
-        config()->set('moderation.images.provider', 'openai_moderation');
-        config()->set('moderation.images.api_key', 'openai-secret');
-        config()->set('moderation.images.base_url', 'https://api.openai.com/v1');
-        Http::fake(['*' => Http::response(['error' => ['message' => 'rate limited']], 429)]);
-
-        $result = app(ModerationConnectionTester::class)->images();
-
-        $this->assertFalse($result['ok']);
-        $this->assertStringContainsString('HTTP 429', $result['message']);
-        $this->assertStringContainsString('rate limit', $result['message']);
-        $this->assertStringNotContainsString('Проверьте ключ, URL и модель', $result['message']);
-    }
-
-    public function test_deepseek_connection_uses_official_models_endpoint(): void
-    {
-        config()->set('moderation.provider', 'deepseek');
-        config()->set('moderation.deepseek.api_key', 'deepseek-secret');
-        config()->set('moderation.deepseek.base_url', 'https://api.deepseek.com');
-        Http::fake(['*' => Http::response(['object' => 'list'], 200)]);
-
-        $result = app(ModerationConnectionTester::class)->text();
+        $result = $this->tester()->images();
 
         $this->assertTrue($result['ok']);
-        Http::assertSent(fn ($request): bool => $request->url() === 'https://api.deepseek.com/models');
+        $this->assertStringContainsString('принимает изображения', $result['message']);
+
+        Http::assertSent(fn (Request $request): bool => $request['model'] === 'vendor/vision-model'
+            && str_starts_with((string) data_get($request->data(), 'messages.0.content.1.image_url.url'), 'data:image/png;base64,'));
+    }
+
+    public function test_missing_key_is_reported_without_a_request(): void
+    {
+        config()->set('moderation.openrouter.api_key', '');
+        Http::fake();
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('Ключ OpenRouter не задан', $result['message']);
+        Http::assertNothingSent();
+    }
+
+    public function test_missing_model_is_reported_without_a_request(): void
+    {
+        config()->set('moderation.openrouter.image_model', '');
+        Http::fake();
+
+        $result = $this->tester()->images();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('Модель не указана', $result['message']);
+        Http::assertNothingSent();
+    }
+
+    public function test_rejected_key_is_explained_without_leaking_the_response_body(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'secret-internal-detail', 'code' => 401]], 401)]);
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('отклонил ключ', $result['message']);
+        $this->assertStringNotContainsString('secret-internal-detail', $result['message']);
+    }
+
+    public function test_empty_balance_is_explained(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'Insufficient credits']], 402)]);
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('недостаточно средств', $result['message']);
+    }
+
+    public function test_unknown_text_model_is_reported(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'No endpoints found for vendor/text-model']], 404)]);
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('Модель не найдена', $result['message']);
+    }
+
+    public function test_model_without_vision_is_reported_for_photos(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'No endpoints found that support image input']], 404)]);
+
+        $result = $this->tester()->images();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('не умеет читать изображения', $result['message']);
+        $this->assertStringContainsString('No endpoints found that support image input', $result['message']);
+    }
+
+    public function test_error_hidden_inside_http_200_is_not_treated_as_success(): void
+    {
+        Http::fake(['*' => Http::response(['error' => ['message' => 'Upstream overloaded', 'code' => 503]])]);
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('Upstream overloaded', $result['message']);
+    }
+
+    public function test_lost_connection_is_reported(): void
+    {
+        Http::fake(fn () => throw new ConnectionException('boom'));
+
+        $result = $this->tester()->text();
+
+        $this->assertFalse($result['ok']);
+        $this->assertStringContainsString('Не удалось соединиться', $result['message']);
+    }
+
+    public function test_check_does_not_spend_the_request_budget(): void
+    {
+        config()->set('moderation.budget.hourly_requests', 1);
+        Http::fake(['*' => Http::response(['choices' => [['message' => ['content' => 'ок']]]])]);
+
+        $this->assertTrue($this->tester()->text()['ok']);
+        $this->assertTrue($this->tester()->text()['ok']);
     }
 }

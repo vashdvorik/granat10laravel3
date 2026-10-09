@@ -27,10 +27,6 @@ class ProductAutoApprovalPolicy
             return new AutoModerationDecision(false, 'Изображения товара не были проверены нейросетью.');
         }
 
-        if ($this->requiresImageAnalysis() && $product->images()->exists() && ! $result->imagesAnalyzed) {
-            return new AutoModerationDecision(false, 'Изображения товара не были полностью проверены нейросетью.');
-        }
-
         $maxRisk = (float) config('moderation.auto_approve.max_risk_score', 0.10);
 
         if ($result->riskScore > $maxRisk) {
@@ -109,20 +105,6 @@ class ProductAutoApprovalPolicy
 
         return ! $result->imagesAnalyzed
             && ! $this->hasPassedImageModeration($product);
-    }
-
-    private function requiresImageAnalysis(): bool
-    {
-        if (! config('moderation.vision.enabled', true)) {
-            return false;
-        }
-
-        return match (config('moderation.provider')) {
-            'google' => true,
-            'openai_compatible' => (bool) config('moderation.openai_compatible.vision_enabled', false),
-            'deepseek' => false,
-            default => false,
-        };
     }
 
     private function requiresSeparateImageModeration(Product $product): bool

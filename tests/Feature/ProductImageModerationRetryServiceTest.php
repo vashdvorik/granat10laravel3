@@ -36,7 +36,7 @@ class ProductImageModerationRetryServiceTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 5,
             'trigger' => 'image_queue',
-            'provider' => 'image_gemini',
+            'provider' => 'image_openrouter',
             'status' => 'completed',
             'decision' => 'review',
             'request_fingerprint' => hash('sha256', 'image-review'),
@@ -50,7 +50,7 @@ class ProductImageModerationRetryServiceTest extends TestCase
         $this->assertDatabaseHas('product_moderation_runs', [
             'product_id' => $product->id,
             'retry_of_id' => $originalRun->id,
-            'provider' => 'image_gemini',
+            'provider' => 'image_openrouter',
             'trigger' => 'manual_retry',
         ]);
         $this->assertSame(2, ProductModerationRun::query()->count());
@@ -80,7 +80,7 @@ class ProductImageModerationRetryServiceTest extends TestCase
             'product_id' => $product->id,
             'content_version' => 2,
             'trigger' => 'image_queue',
-            'provider' => 'image_gemini',
+            'provider' => 'image_openrouter',
             'status' => 'completed',
             'decision' => 'allow',
             'request_fingerprint' => hash('sha256', 'image-allow'),

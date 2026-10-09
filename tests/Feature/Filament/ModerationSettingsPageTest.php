@@ -14,6 +14,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
+/** Настройки ИИ-модерации: один сервис — OpenRouter, один ключ на текст и фото. */
 class ModerationSettingsPageTest extends TestCase
 {
     use RefreshDatabase;
@@ -31,35 +32,30 @@ class ModerationSettingsPageTest extends TestCase
         file_put_contents($this->environmentPath, implode(PHP_EOL, [
             'QUEUE_CONNECTION=sync',
             'PRODUCT_MODERATION_AI_ENABLED=false',
-            'PRODUCT_MODERATION_AI_PROVIDER=google',
             'PRODUCT_MODERATION_AI_MODE=shadow',
             'PRODUCT_MODERATION_QUEUE=moderation',
             'PRODUCT_MODERATION_TIMEOUT=60',
             'PRODUCT_MODERATION_MAX_ATTEMPTS=3',
-            'PRODUCT_MODERATION_FAKE_DECISION=manual_review',
             'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK=0.10',
             'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES=',
-            'GEMINI_API_KEY=existing-secret',
-            'GEMINI_MODEL=gemini-3.5-flash',
-            'GEMINI_BASE_URL=https://generativelanguage.googleapis.com',
-            'GEMINI_MAX_OUTPUT_TOKENS=2048',
-            'GEMINI_RETRY_TIMES=2',
-            'GEMINI_RETRY_SLEEP_MS=500',
-            'GEMINI_REQUESTS_PER_MINUTE=5',
-            'GEMINI_RATE_LIMIT_SAFETY_SECONDS=1',
+            'OPENROUTER_API_KEY=existing-secret',
+            'OPENROUTER_TEXT_MODEL=openai/gpt-4o-mini',
+            'OPENROUTER_IMAGE_MODEL=google/gemini-2.5-flash',
+            'AI_MODERATION_MAX_OUTPUT_TOKENS=2048',
+            'AI_MODERATION_RETRY_TIMES=2',
+            'AI_MODERATION_RETRY_SLEEP_MS=500',
+            'AI_MODERATION_REQUESTS_PER_MINUTE=5',
+            'AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS=1',
             'AI_MODERATION_HOURLY_REQUEST_LIMIT=60',
             'AI_MODERATION_DAILY_REQUEST_LIMIT=500',
             'AI_IMAGE_MODERATION_ENABLED=false',
-            'AI_IMAGE_MODERATION_PROVIDER=gemini',
             'AI_IMAGE_MODERATION_QUEUE=moderation',
             'AI_IMAGE_MODERATION_TIMEOUT=60',
             'AI_IMAGE_MODERATION_MAX_ATTEMPTS=3',
-            'AI_IMAGE_MODERATION_API_KEY=existing-image-secret',
-            'AI_IMAGE_MODERATION_MODEL=gemini-3.1-flash-lite',
-            'AI_IMAGE_MODERATION_BASE_URL=https://generativelanguage.googleapis.com/v1beta',
-            'AI_IMAGE_MODERATION_ENDPOINT_PATH=/models/{model}:generateContent',
-            'AI_IMAGE_MODERATION_AUTH_HEADER=x-goog-api-key',
-            'AI_IMAGE_MODERATION_AUTH_PREFIX=',
+            // строки прежних сервисов остаются в .env нетронутыми: страница их не читает и не пишет
+            'GEMINI_API_KEY=legacy-gemini-secret',
+            'AI_TEXT_DEEPSEEK_API_KEY=legacy-deepseek-secret',
+            'PRODUCT_MODERATION_AI_PROVIDER=deepseek',
             '',
         ]));
         config()->set('environment-settings.path', $this->environmentPath);
@@ -73,15 +69,39 @@ class ModerationSettingsPageTest extends TestCase
         parent::tearDown();
     }
 
+    private function environment(): string
+    {
+        return (string) file_get_contents($this->environmentPath);
+    }
+
     public function test_administrator_can_open_settings_page(): void
     {
         $this->actingAs($this->createAdministrator())
             ->get('/admin/moderation-settings')
             ->assertOk()
             ->assertSee('Настройки ИИ-модерации')
-            ->assertDontSee('Провайдер проверки')
-            ->assertDontSee('Тестовый провайдер')
-            ->assertDontSee('existing-secret');
+            ->assertSee('Подключение к OpenRouter')
+            ->assertSee('Модель для текста')
+            ->assertDontSee('existing-secret')
+            ->assertDontSee('legacy-gemini-secret');
+    }
+
+    public function test_page_has_no_vocabulary_of_the_removed_providers(): void
+    {
+        $this->actingAs($this->createAdministrator())
+            ->get('/admin/moderation-settings')
+            ->assertOk()
+            ->assertDontSee('Протокол API')
+            ->assertDontSee('Формат API')
+            ->assertDontSee('Базовый URL')
+            ->assertDontSee('Адрес сервиса')
+            ->assertDontSee('Заголовок для ключа')
+            ->assertDontSee('Заголовок авторизации')
+            ->assertDontSee('Префикс ключа')
+            ->assertDontSee('Native moderation')
+            ->assertDontSee('OpenAI-compatible')
+            ->assertDontSee('Google Gemini')
+            ->assertDontSee('Путь запроса');
     }
 
     public function test_regular_user_cannot_open_settings_page(): void
@@ -99,14 +119,13 @@ class ModerationSettingsPageTest extends TestCase
             ->fillForm([
                 'queue_connection' => 'database',
                 'strategy' => 'auto',
+                'strictness' => 'strict',
+                'excluded_categories' => ['weapons', 'medicine'],
                 'queue' => 'moderation',
                 'timeout' => 90,
                 'max_attempts' => 4,
-                'strictness' => 'strict',
-                'excluded_categories' => ['weapons', 'medicine'],
-                'gemini_api_key' => '',
-                'gemini_model' => 'gemini-3.5-flash',
-                'gemini_base_url' => 'https://generativelanguage.googleapis.com',
+                'text_model' => 'openai/gpt-4o-mini',
+                'api_key' => '',
                 'max_output_tokens' => 2048,
                 'retry_times' => 2,
                 'retry_sleep_ms' => 500,
@@ -115,13 +134,7 @@ class ModerationSettingsPageTest extends TestCase
                 'hourly_request_limit' => 40,
                 'daily_request_limit' => 300,
                 'image_moderation_enabled' => true,
-                'image_api_key' => '',
-                'image_provider' => 'gemini',
-                'image_model' => 'gemini-3.1-flash-lite',
-                'image_base_url' => 'https://generativelanguage.googleapis.com/v1beta',
-                'image_endpoint_path' => '/models/{model}:generateContent',
-                'image_auth_header' => 'x-goog-api-key',
-                'image_auth_prefix' => '',
+                'image_model' => 'google/gemini-2.5-flash',
                 'image_queue' => 'moderation',
                 'image_timeout' => 80,
                 'image_max_attempts' => 2,
@@ -130,31 +143,156 @@ class ModerationSettingsPageTest extends TestCase
             ->assertHasNoFormErrors()
             ->assertNotified('Настройки сохранены');
 
-        $contents = file_get_contents($this->environmentPath);
+        $contents = $this->environment();
 
         $this->assertStringContainsString('QUEUE_CONNECTION=database', $contents);
         $this->assertStringContainsString('PRODUCT_MODERATION_AI_ENABLED=true', $contents);
         $this->assertStringContainsString('PRODUCT_MODERATION_AI_MODE=auto', $contents);
         $this->assertStringContainsString('PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK=0.05', $contents);
-        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=google', $contents);
-        $this->assertStringContainsString('PRODUCT_MODERATION_FAKE_DECISION=manual_review', $contents);
-        $this->assertStringContainsString(
-            'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES=weapons,medicine',
-            $contents
-        );
-        $this->assertStringContainsString('GEMINI_API_KEY=existing-secret', $contents);
+        $this->assertStringContainsString('PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES=weapons,medicine', $contents);
+        $this->assertStringContainsString('PRODUCT_MODERATION_TIMEOUT=90', $contents);
+        $this->assertStringContainsString('PRODUCT_MODERATION_MAX_ATTEMPTS=4', $contents);
+        $this->assertStringContainsString('OPENROUTER_TEXT_MODEL=openai/gpt-4o-mini', $contents);
+        $this->assertStringContainsString('OPENROUTER_IMAGE_MODEL=google/gemini-2.5-flash', $contents);
         $this->assertStringContainsString('AI_MODERATION_HOURLY_REQUEST_LIMIT=40', $contents);
         $this->assertStringContainsString('AI_MODERATION_DAILY_REQUEST_LIMIT=300', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_ENABLED=true', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=gemini', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_QUEUE=moderation', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_TIMEOUT=80', $contents);
         $this->assertStringContainsString('AI_IMAGE_MODERATION_MAX_ATTEMPTS=2', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_API_KEY=existing-image-secret', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=gemini-3.1-flash-lite', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_BASE_URL=https://generativelanguage.googleapis.com/v1beta', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_ENDPOINT_PATH="/models/{model}:generateContent"', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_HEADER=x-goog-api-key', $contents);
+        // ключ из .env не тронут, новый ключ не вводился
+        $this->assertStringContainsString('OPENROUTER_API_KEY=existing-secret', $contents);
+        $this->assertFalse(app(ModerationSecretStore::class)->has());
+        // строки прежних сервисов остались как были
+        $this->assertStringContainsString('GEMINI_API_KEY=legacy-gemini-secret', $contents);
+        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=deepseek', $contents);
+    }
+
+    public function test_new_key_is_stored_encrypted_and_never_written_to_env(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['api_key' => '  sk-or-v1-brand-new  '])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('sk-or-v1-brand-new', app(ModerationSecretStore::class)->get());
+        $this->assertStringNotContainsString('sk-or-v1-brand-new', $this->environment());
+        $this->assertNotSame(
+            'sk-or-v1-brand-new',
+            SiteSetting::query()->where('key', 'moderation.secret.openrouter')->value('value'),
+        );
+        // после сохранения рабочий ключ — новый
+        $this->assertSame('sk-or-v1-brand-new', config('moderation.openrouter.api_key'));
+    }
+
+    public function test_saved_key_is_not_put_back_into_the_form(): void
+    {
+        app(ModerationSecretStore::class)->put('sk-or-v1-stored');
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->assertSet('data.api_key', null)
+            ->assertSet('apiKeyConfigured', true);
+
+        $this->get('/admin/moderation-settings')->assertDontSee('sk-or-v1-stored');
+    }
+
+    public function test_ai_cannot_be_enabled_without_any_key(): void
+    {
+        file_put_contents($this->environmentPath, str_replace('OPENROUTER_API_KEY=existing-secret', 'OPENROUTER_API_KEY=', $this->environment()));
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['strategy' => 'assist'])
+            ->call('save')
+            ->assertHasFormErrors(['api_key']);
+
+        $this->assertStringContainsString('PRODUCT_MODERATION_AI_ENABLED=false', $this->environment());
+    }
+
+    public function test_photo_check_alone_also_needs_a_key(): void
+    {
+        file_put_contents($this->environmentPath, str_replace('OPENROUTER_API_KEY=existing-secret', 'OPENROUTER_API_KEY=', $this->environment()));
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['image_moderation_enabled' => true])
+            ->call('save')
+            ->assertHasFormErrors(['api_key']);
+    }
+
+    public function test_everything_can_be_switched_off_without_a_key(): void
+    {
+        file_put_contents($this->environmentPath, str_replace('OPENROUTER_API_KEY=existing-secret', 'OPENROUTER_API_KEY=', $this->environment()));
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['strategy' => 'manual', 'image_moderation_enabled' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+    }
+
+    /** @return array<string, array{0: string}> */
+    public static function badModels(): array
+    {
+        return ['no vendor' => ['gpt-4o-mini'], 'spaces' => ['openai/gpt 4o'], 'url' => ['https://openrouter.ai/openai/gpt-4o'], 'empty' => ['']];
+    }
+
+    /** @dataProvider badModels */
+    public function test_model_must_look_like_an_openrouter_model_id(string $model): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['text_model' => $model])
+            ->call('save')
+            ->assertHasFormErrors(['text_model']);
+
+        $this->assertStringContainsString('OPENROUTER_TEXT_MODEL=openai/gpt-4o-mini', $this->environment());
+    }
+
+    public function test_free_and_variant_models_are_accepted(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->fillForm([
+                'text_model' => 'meta-llama/llama-3.1-8b-instruct:free',
+                'image_moderation_enabled' => true,
+                'image_model' => 'google/gemma-3-27b-it:free',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertStringContainsString('OPENROUTER_TEXT_MODEL=meta-llama/llama-3.1-8b-instruct:free', $this->environment());
+        $this->assertStringContainsString('OPENROUTER_IMAGE_MODEL=google/gemma-3-27b-it:free', $this->environment());
+    }
+
+    public function test_photo_model_is_kept_while_photo_check_is_switched_off(): void
+    {
+        $this->actingAs($this->createAdministrator());
+
+        // поле модели скрыто, пока проверка фото выключена, но значение не теряется
+        Livewire::test(ModerationSettings::class)
+            ->fillForm(['image_moderation_enabled' => false])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertStringContainsString('OPENROUTER_IMAGE_MODEL=google/gemini-2.5-flash', $this->environment());
+    }
+
+    public function test_settings_are_loaded_from_env_with_defaults_for_missing_values(): void
+    {
+        file_put_contents($this->environmentPath, "QUEUE_CONNECTION=database\n");
+        $this->actingAs($this->createAdministrator());
+
+        Livewire::test(ModerationSettings::class)
+            ->assertSet('data.text_model', 'openai/gpt-4o-mini')
+            ->assertSet('data.image_model', 'openai/gpt-4o-mini')
+            ->assertSet('data.strategy', 'manual')
+            ->assertSet('data.hourly_request_limit', 60)
+            ->assertSet('data.daily_request_limit', 500);
     }
 
     public function test_administrator_can_test_text_connection(): void
@@ -162,12 +300,7 @@ class ModerationSettingsPageTest extends TestCase
         $this->actingAs($this->createAdministrator());
 
         $this->mock(ModerationConnectionTester::class, function ($mock): void {
-            $mock->shouldReceive('text')
-                ->once()
-                ->andReturn([
-                    'ok' => true,
-                    'message' => 'Connection test passed.',
-                ]);
+            $mock->shouldReceive('text')->once()->andReturn(['ok' => true, 'message' => 'Connection test passed.']);
         });
 
         Livewire::test(ModerationSettings::class)
@@ -175,170 +308,17 @@ class ModerationSettingsPageTest extends TestCase
             ->assertNotified('Текстовая модерация: подключение успешно');
     }
 
-    public function test_image_settings_do_not_inherit_text_provider_endpoint(): void
-    {
-        file_put_contents($this->environmentPath, implode(PHP_EOL, [
-            'QUEUE_CONNECTION=sync',
-            'PRODUCT_MODERATION_AI_ENABLED=true',
-            'PRODUCT_MODERATION_AI_PROVIDER=openai_compatible',
-            'PRODUCT_MODERATION_AI_MODE=auto',
-            'PRODUCT_MODERATION_QUEUE=moderation',
-            'PRODUCT_MODERATION_TIMEOUT=60',
-            'PRODUCT_MODERATION_MAX_ATTEMPTS=3',
-            'PRODUCT_MODERATION_AUTO_APPROVE_MAX_RISK=0.10',
-            'PRODUCT_MODERATION_AUTO_APPROVE_EXCLUDED_CATEGORIES=',
-            'AI_MODERATION_MODEL=deepseek-v4-flash',
-            'AI_MODERATION_BASE_URL=https://api.deepseek.com',
-            'AI_MODERATION_CHAT_COMPLETIONS_PATH=/chat/completions',
-            'AI_MODERATION_MAX_OUTPUT_TOKENS=2000',
-            'AI_MODERATION_RETRY_TIMES=2',
-            'AI_MODERATION_RETRY_SLEEP_MS=1000',
-            'AI_MODERATION_REQUESTS_PER_MINUTE=60',
-            'AI_MODERATION_RATE_LIMIT_SAFETY_SECONDS=1',
-            'AI_MODERATION_HOURLY_REQUEST_LIMIT=60',
-            'AI_MODERATION_DAILY_REQUEST_LIMIT=500',
-            'AI_IMAGE_MODERATION_ENABLED=false',
-            'AI_IMAGE_MODERATION_PROVIDER=gemini',
-            'AI_IMAGE_MODERATION_QUEUE=moderation',
-            'AI_IMAGE_MODERATION_TIMEOUT=60',
-            'AI_IMAGE_MODERATION_MAX_ATTEMPTS=3',
-            'AI_IMAGE_MODERATION_ENDPOINT_PATH=/models/{model}:generateContent',
-            '',
-        ]));
-
-        $this->actingAs($this->createAdministrator());
-
-        Livewire::test(ModerationSettings::class)
-            ->assertSet('data.model', 'deepseek-v4-flash')
-            ->assertSet('data.base_url', 'https://api.deepseek.com')
-            ->assertSet('data.image_model', 'gemini-3.1-flash-lite')
-            ->assertSet('data.image_base_url', 'https://generativelanguage.googleapis.com/v1beta')
-            ->assertSet('data.image_endpoint_path', '/models/{model}:generateContent')
-            ->assertSet('data.image_auth_header', 'x-goog-api-key')
-            ->assertSet('data.image_auth_prefix', '');
-    }
-
-    public function test_administrator_can_switch_image_moderation_to_native_openai(): void
+    public function test_administrator_can_test_image_connection_and_sees_a_failure(): void
     {
         $this->actingAs($this->createAdministrator());
 
-        Livewire::test(ModerationSettings::class)
-            ->fillForm([
-                'image_provider' => 'openai_moderation',
-                'image_api_key' => 'openai-test-key',
-                'image_model' => 'omni-moderation-latest',
-                'image_base_url' => 'https://api.openai.com/v1',
-                'image_endpoint_path' => '/moderations',
-                'image_auth_header' => 'Authorization',
-                'image_auth_prefix' => 'Bearer',
-            ])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        $contents = file_get_contents($this->environmentPath);
-
-        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=google', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_PROVIDER=openai_moderation', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_MODEL=omni-moderation-latest', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_BASE_URL=https://api.openai.com/v1', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_ENDPOINT_PATH=/moderations', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_HEADER=Authorization', $contents);
-        $this->assertStringContainsString('AI_IMAGE_MODERATION_AUTH_PREFIX=Bearer', $contents);
-        $this->assertSame('openai-test-key', app(ModerationSecretStore::class)->get('image.openai_moderation'));
-        $this->assertStringNotContainsString('openai-test-key', $contents);
-        $this->assertNotSame(
-            'openai-test-key',
-            SiteSetting::query()->where('key', 'moderation.secret.image.openai_moderation')->value('value')
-        );
-    }
-
-    public function test_administrator_can_select_deepseek_as_text_provider(): void
-    {
-        $this->actingAs($this->createAdministrator());
+        $this->mock(ModerationConnectionTester::class, function ($mock): void {
+            $mock->shouldReceive('images')->once()->andReturn(['ok' => false, 'message' => 'Модель не умеет читать изображения.']);
+        });
 
         Livewire::test(ModerationSettings::class)
-            ->set('data.provider', 'deepseek')
-            ->assertSet('data.model', 'deepseek-chat')
-            ->assertSet('data.base_url', 'https://api.deepseek.com')
-            ->fillForm(['api_key' => 'deepseek-test-key'])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        $contents = file_get_contents($this->environmentPath);
-        $this->assertStringContainsString('PRODUCT_MODERATION_AI_PROVIDER=deepseek', $contents);
-        $this->assertStringContainsString('AI_TEXT_DEEPSEEK_MODEL=deepseek-chat', $contents);
-        $this->assertStringContainsString('AI_TEXT_DEEPSEEK_BASE_URL=https://api.deepseek.com', $contents);
-        $this->assertSame('deepseek-test-key', app(ModerationSecretStore::class)->get('text.deepseek'));
-        $this->assertStringNotContainsString('deepseek-test-key', $contents);
-    }
-
-    public function test_google_provider_rejects_deepseek_model(): void
-    {
-        $this->actingAs($this->createAdministrator());
-
-        Livewire::test(ModerationSettings::class)
-            ->fillForm([
-                'provider' => 'google',
-                'model' => 'deepseek-chat',
-                'base_url' => 'https://api.deepseek.com',
-            ])
-            ->call('save')
-            ->assertHasFormErrors(['provider']);
-    }
-
-    public function test_provider_specific_image_keys_are_preserved_when_switching_provider(): void
-    {
-        $this->actingAs($this->createAdministrator());
-
-        Livewire::test(ModerationSettings::class)
-            ->fillForm([
-                'image_provider' => 'gemini',
-                'image_api_key' => 'google-image-key',
-                'image_model' => 'gemini-3.1-flash-lite',
-                'image_base_url' => 'https://generativelanguage.googleapis.com/v1beta',
-                'image_endpoint_path' => '/models/{model}:generateContent',
-                'image_auth_header' => 'x-goog-api-key',
-                'image_auth_prefix' => '',
-            ])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        Livewire::test(ModerationSettings::class)
-            ->fillForm([
-                'image_provider' => 'openai_compatible',
-                'image_api_key' => 'openai-image-key',
-                'image_model' => 'gpt-4o-mini',
-                'image_base_url' => 'https://api.openai.com/v1',
-                'image_endpoint_path' => '/chat/completions',
-                'image_auth_header' => 'Authorization',
-                'image_auth_prefix' => 'Bearer',
-            ])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        $store = app(ModerationSecretStore::class);
-        $this->assertSame('google-image-key', $store->get('image.gemini'));
-        $this->assertSame('google-image-key', $store->get('image.google'));
-        $this->assertSame('openai-image-key', $store->get('image.openai_compatible'));
-        $this->assertStringNotContainsString('google-image-key', file_get_contents($this->environmentPath));
-        $this->assertStringNotContainsString('openai-image-key', file_get_contents($this->environmentPath));
-    }
-
-    public function test_administrator_cannot_save_private_provider_url(): void
-    {
-        $this->actingAs($this->createAdministrator());
-
-        Livewire::test(ModerationSettings::class)
-            ->fillForm([
-                'base_url' => 'https://127.0.0.1/v1',
-            ])
-            ->call('save')
-            ->assertHasFormErrors(['base_url']);
-
-        $this->assertStringNotContainsString(
-            'AI_MODERATION_BASE_URL=https://127.0.0.1/v1',
-            file_get_contents($this->environmentPath)
-        );
+            ->call('testImageConnection')
+            ->assertNotified('Модерация изображений: подключение не удалось');
     }
 
     private function createAdministrator(): User
