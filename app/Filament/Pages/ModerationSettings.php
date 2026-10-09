@@ -155,7 +155,10 @@ class ModerationSettings extends Page implements HasForms
             ->schema([
                 Forms\Components\TextInput::make('api_key')
                     ->label('Ключ доступа (API-ключ)')
-                    ->password()->revealable()->autocomplete(false)
+                    // Chrome игнорирует autocomplete="off" у полей пароля и подставляет сюда сохранённый пароль от сайта,
+                    // а прежний текстовый ввод получает логин. new-password и метки менеджеров паролей это отключают.
+                    ->password()->revealable()->autocomplete('new-password')
+                    ->extraInputAttributes(['data-lpignore' => 'true', 'data-1p-ignore' => 'true', 'data-bwignore' => 'true'])
                     ->placeholder(fn (): string => $this->apiKeyConfigured ? 'Ключ сохранён — вводить заново не нужно' : 'Ключ ещё не задан')
                     ->helperText('Создаётся на openrouter.ai/keys. Хранится в зашифрованном виде и не показывается. Оставьте поле пустым, чтобы не менять сохранённый ключ.'),
                 Forms\Components\TextInput::make('text_model')

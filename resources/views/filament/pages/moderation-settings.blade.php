@@ -33,6 +33,24 @@
         </x-filament::button>
     </form>
 
+    {{-- Chrome вписывает сохранённый логин в строку поиска перед полем пароля: autocomplete="off" он там игнорирует,
+         а незнакомое значение — нет. Строку поиска создаёт Choices уже после загрузки страницы, поэтому следим за ней.
+         Комментарий вне скрипта: Livewire исполняет код как выражение Alpine, и "//" в начале ломает его. --}}
+    @script
+    <script>
+        const protectSearchInputs = () => document.querySelectorAll('.choices__input--cloned').forEach((input) => {
+            if (input.getAttribute('autocomplete') !== 'nope') {
+                input.setAttribute('autocomplete', 'nope')
+                input.setAttribute('data-lpignore', 'true')
+                input.setAttribute('data-1p-ignore', 'true')
+                input.setAttribute('data-bwignore', 'true')
+            }
+        })
+
+        protectSearchInputs()
+        new MutationObserver(protectSearchInputs).observe(document.body, { childList: true, subtree: true })
+    </script>
+    @endscript
     {{-- Подробные цифры: нужны редко, поэтому свёрнуты --}}
     <x-filament::section collapsible collapsed compact>
         <x-slot name="heading">Подробная статистика</x-slot>

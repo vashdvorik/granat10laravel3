@@ -86,6 +86,27 @@ class ModerationSettingsPageTest extends TestCase
             ->assertDontSee('legacy-gemini-secret');
     }
 
+    public function test_api_key_field_cannot_be_autofilled_with_a_saved_site_password(): void
+    {
+        // Chrome подставлял в поле ключа сохранённый пароль администратора: autocomplete="off" у паролей он игнорирует
+        $html = $this->actingAs($this->createAdministrator())
+            ->get('/admin/moderation-settings')
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression(
+            '/<input[^>]*autocomplete="new-password"[^>]*data-1p-ignore[^>]*>|<input[^>]*data-1p-ignore[^>]*autocomplete="new-password"[^>]*>/s',
+            $html
+        );
+        $this->assertStringContainsString('data-lpignore="true"', $html);
+        $this->assertStringContainsString('data-bwignore="true"', $html);
+        // строка поиска в списке категорий создаётся скриптом: ей тоже ставится значение, которое Chrome не автозаполняет
+        // скрипт Livewire хранится в снимке страницы и приходит экранированным
+        $this->assertStringContainsString('autocomplete&#039;, &#039;nope&#039;', $html);
+        $this->assertStringContainsString('.choices__input--cloned', $html);
+        $this->assertStringNotContainsString('autocomplete="off"', substr($html, (int) strpos($html, 'Ключ доступа'), 1500));
+    }
+
     public function test_page_has_no_vocabulary_of_the_removed_providers(): void
     {
         $this->actingAs($this->createAdministrator())
