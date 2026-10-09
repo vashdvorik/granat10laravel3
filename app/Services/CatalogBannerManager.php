@@ -35,7 +35,7 @@ class CatalogBannerManager
         }
 
         try {
-            if (! Schema::hasTable('site_settings')) {
+            if (! app(\App\Services\SchemaInspector::class)->hasTable('site_settings')) {
                 return [];
             }
 

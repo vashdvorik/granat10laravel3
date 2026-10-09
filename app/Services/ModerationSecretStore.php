@@ -65,7 +65,7 @@ class ModerationSecretStore
     private function available(): bool
     {
         try {
-            return Schema::hasTable('site_settings');
+            return app(\App\Services\SchemaInspector::class)->hasTable('site_settings');
         } catch (Throwable) {
             return false;
         }

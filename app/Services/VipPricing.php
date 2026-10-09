@@ -24,7 +24,7 @@ class VipPricing
         $cents = $this->defaultInCents();
 
         try {
-            if (Schema::hasTable('site_settings')) {
+            if (app(\App\Services\SchemaInspector::class)->hasTable('site_settings')) {
                 $stored = SiteSetting::query()
                     ->where('key', config('vip.setting_key'))
                     ->value('value');

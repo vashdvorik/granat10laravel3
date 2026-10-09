@@ -200,7 +200,7 @@ class CatalogCacheService
         Cache::forget($baseKey);
 
         try {
-            if (! Schema::hasTable('settlements')) {
+            if (! app(\App\Services\SchemaInspector::class)->hasTable('settlements')) {
                 return;
             }
 

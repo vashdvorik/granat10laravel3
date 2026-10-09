@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TelegramBotClient::class, TelegramHttpBotClient::class);
         $this->app->scoped(DesignManager::class);
         $this->app->scoped(RegionalContext::class);
+        $this->app->scoped(\App\Services\SchemaInspector::class);
         $this->app->scoped(RegionalUrlService::class);
         $this->app->scoped(SeoPageContext::class);
         $this->app->bind(AiModerationClient::class, OpenRouterModerationClient::class);
@@ -159,7 +160,7 @@ class AppServiceProvider extends ServiceProvider
     private function loadMenuCategories()
     {
         try {
-            if (! Schema::hasTable('categories')) {
+            if (! app(\App\Services\SchemaInspector::class)->hasTable('categories')) {
                 return collect();
             }
 

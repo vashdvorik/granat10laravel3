@@ -44,7 +44,7 @@ class CabinetDesignManager
         }
 
         try {
-            if (! Schema::hasTable('site_settings')) {
+            if (! app(\App\Services\SchemaInspector::class)->hasTable('site_settings')) {
                 return $this->active = $this->default();
             }
 

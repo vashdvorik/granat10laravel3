@@ -209,18 +209,21 @@ class CatalogPageService
             return $categories;
         }
 
-        return Category::filterTreeByProducts($categories);
+        // Поддерево одним запросом: иначе дети каждой категории подгружались бы по запросу на узел
+        $parent = $hasChildren ? $category : $category->parent;
+
+        if ($parent === null) {
+            return collect();
+        }
+
+        return Category::filterTreeByProducts(
+            Category::descendantsOf($parent->id)->toTree($parent->id)
+        );
     }
 
     private function getCategoryProductsCounts(Collection $categories): array
     {
-        $counts = [];
-
-        foreach ($categories as $category) {
-            $counts[$category->id] = Product::getCategoryProductsCount($category->id);
-        }
-
-        return $counts;
+        return Product::getCategoryProductsCounts($categories->pluck('id')->all());
     }
 
     private function getSellersForCategory(array $categoryIds): Collection

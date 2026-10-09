@@ -290,6 +290,68 @@ class Product extends Model
     }
 
     /**
+     * Количество видимых товаров сразу для нескольких категорий (с подкатегориями).
+     *
+     * Ключи кеша и их сброс те же, что у getCategoryProductsCount(). Но если в кеше нет нескольких категорий,
+     * считаются они все вместе тремя запросами, а не тремя запросами на каждую.
+     *
+     * @param  array<int, int|string>  $categoryIds
+     * @return array<int, int> [id категории => число товаров]
+     */
+    public static function getCategoryProductsCounts(array $categoryIds): array
+    {
+        $ids = array_values(array_unique(array_map('intval', $categoryIds)));
+        $cache = app(CatalogCacheService::class);
+        $batch = null;
+        $counts = [];
+
+        foreach ($ids as $id) {
+            $counts[$id] = $cache->rememberCategoryProductsCount($id, function () use (&$batch, $ids, $id): int {
+                $batch ??= self::countVisibleProductsByCategory($ids);
+
+                return $batch[$id] ?? 0;
+            });
+        }
+
+        return $counts;
+    }
+
+    /**
+     * @param  array<int, int>  $ids
+     * @return array<int, int>
+     */
+    private static function countVisibleProductsByCategory(array $ids): array
+    {
+        $perCategory = self::visible()
+            ->forRegionalContext()
+            ->select('category_id', \Illuminate\Support\Facades\DB::raw('count(*) as aggregate'))
+            ->groupBy('category_id')
+            ->pluck('aggregate', 'category_id');
+
+        if ($perCategory->isEmpty()) {
+            return [];
+        }
+
+        // потомки категории лежат внутри её границ _lft.._rgt (вложенные множества)
+        $lefts = \App\Models\Category::query()->whereIn('id', $perCategory->keys())->pluck('_lft', 'id');
+        $result = [];
+
+        foreach (\App\Models\Category::query()->whereIn('id', $ids)->get(['id', '_lft', '_rgt']) as $category) {
+            $total = 0;
+
+            foreach ($lefts as $categoryId => $left) {
+                if ($left >= $category->_lft && $left <= $category->_rgt) {
+                    $total += (int) $perCategory[$categoryId];
+                }
+            }
+
+            $result[$category->id] = $total;
+        }
+
+        return $result;
+    }
+
+    /**
      * Получить закешированный диапазон цен товаров
      */
     public static function getCachedPriceRange()
