@@ -212,6 +212,12 @@ class CatalogCacheService
         }
     }
 
+    /** Сбрасывает счётчики товаров категории и всех её родителей (после переноса категорий и товаров). */
+    public function forgetCategoryProductsCountWithAncestors(Category $category): void
+    {
+        $this->forgetCategoryAndAncestors($category);
+    }
+
     private function forgetCategoryAndAncestors(Category $category): void
     {
         $this->forgetCategoryProductsCount($category->id);

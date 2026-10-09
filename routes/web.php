@@ -36,6 +36,12 @@ Route::post('/webhooks/telegram', App\Http\Controllers\TelegramWebhookController
 Route::get('/', [HomeController::class, 'home'])->name('home');
 // старый адрес главной: постоянный редирект, чтобы у главной страницы был один адрес
 Route::permanentRedirect('/home', '/');
+
+// Дерево категорий объединено со страницей «Категории» (управление деревом в одном месте)
+if (config('admin.filament_enabled')) {
+    $adminPath = trim((string) config('admin.filament_path', 'admin'), '/');
+    Route::permanentRedirect('/'.$adminPath.'/category-tree', '/'.$adminPath.'/categories');
+}
 Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/sitemap-{page}.xml', SitemapController::class)->whereNumber('page')->name('sitemap.page');

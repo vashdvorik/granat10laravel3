@@ -2,11 +2,8 @@
 
 namespace Tests\Feature\Filament;
 
-use App\Filament\Pages\CategoryTree;
-use App\Filament\Resources\CategoryResource;
 use App\Filament\Resources\CategoryResource\Pages\CreateCategory;
 use App\Filament\Resources\CategoryResource\Pages\EditCategory;
-use App\Filament\Resources\CategoryResource\Pages\ListCategories;
 use App\Models\Category;
 use App\Models\Permission;
 use App\Models\Product;
@@ -34,20 +31,20 @@ class CategoryResourceTest extends TestCase
         Cache::flush();
     }
 
-    public function test_administrator_can_open_category_resource_and_tree(): void
+    public function test_administrator_can_open_category_page_and_old_tree_url_leads_to_it(): void
     {
         $administrator = $this->createAdministrator();
 
-        $this->actingAs($administrator)->get('/admin/categories')->assertOk();
-        $this->actingAs($administrator)->get('/admin/category-tree')->assertOk();
+        $this->actingAs($administrator)->get('/admin/categories')->assertOk()->assertSee('Добавить категорию');
+        $this->actingAs($administrator)->get('/admin/category-tree')->assertRedirect('/admin/categories');
     }
 
-    public function test_regular_user_cannot_open_category_resource_or_tree(): void
+    public function test_regular_user_cannot_open_category_pages(): void
     {
         $user = User::factory()->create();
 
         $this->actingAs($user)->get('/admin/categories')->assertForbidden();
-        $this->actingAs($user)->get('/admin/category-tree')->assertForbidden();
+        $this->actingAs($user)->get('/admin/categories/create')->assertForbidden();
     }
 
     public function test_administrator_can_create_root_and_child_categories(): void
@@ -85,6 +82,30 @@ class CategoryResourceTest extends TestCase
         $this->assertTrue(Cache::has('categories_root_tree'));
     }
 
+    public function test_alias_may_be_left_empty_when_creating_and_is_made_from_the_name(): void
+    {
+        $administrator = $this->createAdministrator();
+        $this->actingAs($administrator);
+
+        Livewire::test(CreateCategory::class)
+            ->fillForm($this->categoryData('Мышки и клавиатуры', ''))
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $category = Category::query()->where('name', 'Мышки и клавиатуры')->firstOrFail();
+        $this->assertMatchesRegularExpression('/^[a-z0-9-]+$/', $category->alias);
+        $this->assertNotSame('', $category->alias);
+
+        // второй раз то же название: адрес получает числовой хвост, а не падает на уникальности
+        Livewire::test(CreateCategory::class)
+            ->fillForm($this->categoryData('Мышки и клавиатуры', ''))
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(2, Category::query()->where('name', 'Мышки и клавиатуры')->count());
+        $this->assertSame(2, Category::query()->where('name', 'Мышки и клавиатуры')->distinct()->count('alias'));
+    }
+
     public function test_edit_moves_category_with_nested_set_methods(): void
     {
         $administrator = $this->createAdministrator();
@@ -113,6 +134,18 @@ class CategoryResourceTest extends TestCase
         $this->assertSame($secondRoot->id, $child->parent_id);
         $this->assertTrue($child->isDescendantOf($secondRoot->fresh()));
         $this->assertFalse($child->isDescendantOf($firstRoot->fresh()));
+    }
+
+    public function test_edit_page_links_back_to_the_category_in_the_tree(): void
+    {
+        $administrator = $this->createAdministrator();
+        $category = app(CategoryTreeService::class)->create($administrator, $this->categoryData('Раздел', 'razdel'));
+
+        $this->actingAs($administrator)
+            ->get("/admin/categories/{$category->id}/edit")
+            ->assertOk()
+            ->assertSee('Показать в дереве')
+            ->assertSee('focus='.$category->id, false);
     }
 
     public function test_service_rejects_self_parent_and_descendant_parent(): void
@@ -151,30 +184,23 @@ class CategoryResourceTest extends TestCase
         $this->assertSame($root->id, $child->fresh()->parent_id);
     }
 
-    public function test_delete_action_blocks_categories_with_children_or_products(): void
+    public function test_delete_blocks_categories_with_children_or_products(): void
     {
         $administrator = $this->createAdministrator();
         $service = app(CategoryTreeService::class);
         $parent = $service->create($administrator, $this->categoryData('Родитель', 'parent'));
-        $service->create(
-            $administrator,
-            $this->categoryData('Ребёнок', 'child', $parent->id),
-        );
-        $productCategory = $service->create(
-            $administrator,
-            $this->categoryData('С товарами', 'with-products'),
-        );
+        $service->create($administrator, $this->categoryData('Ребёнок', 'child', $parent->id));
+        $productCategory = $service->create($administrator, $this->categoryData('С товарами', 'with-products'));
         Product::factory()->create(['category_id' => $productCategory->id]);
 
-        $this->actingAs($administrator);
-
-        Livewire::test(ListCategories::class)
-            ->callTableAction('deleteCategory', $parent)
-            ->assertTableActionHalted('deleteCategory');
-
-        Livewire::test(ListCategories::class)
-            ->callTableAction('deleteCategory', $productCategory)
-            ->assertTableActionHalted('deleteCategory');
+        foreach ([$parent, $productCategory] as $category) {
+            try {
+                $service->delete($administrator, $category);
+                $this->fail('Удаление должно быть отклонено.');
+            } catch (ValidationException $exception) {
+                $this->assertArrayHasKey('category', $exception->errors());
+            }
+        }
 
         $this->assertDatabaseHas('categories', ['id' => $parent->id]);
         $this->assertDatabaseHas('categories', ['id' => $productCategory->id]);
@@ -188,36 +214,10 @@ class CategoryResourceTest extends TestCase
             $this->categoryData('Пустая', 'empty'),
         );
 
-        $this->actingAs($administrator);
-
-        Livewire::test(ListCategories::class)
-            ->callTableAction('deleteCategory', $category)
-            ->assertNotified();
+        app(CategoryTreeService::class)->delete($administrator, $category);
 
         $this->assertDatabaseMissing('categories', ['id' => $category->id]);
         $this->assertTrue(Cache::has('categories_root_tree'));
-    }
-
-    public function test_tree_page_displays_hierarchy_status_counts_and_edit_links(): void
-    {
-        $administrator = $this->createAdministrator();
-        $service = app(CategoryTreeService::class);
-        $root = $service->create($administrator, $this->categoryData('Каталог', 'catalog'));
-        $child = $service->create(
-            $administrator,
-            $this->categoryData('Скрытый раздел', 'hidden', $root->id, false),
-        );
-        Product::factory()->create(['category_id' => $child->id]);
-
-        $this->actingAs($administrator);
-
-        Livewire::test(CategoryTree::class)
-            ->assertSee('Дерево категорий')
-            ->assertSee('Каталог')
-            ->assertSee('Скрытый раздел')
-            ->assertSee('1 товаров')
-            ->assertSee('Скрыта')
-            ->assertSee(CategoryResource::getUrl('edit', ['record' => $child]));
     }
 
     public function test_regular_user_cannot_use_category_tree_service(): void
@@ -236,10 +236,7 @@ class CategoryResourceTest extends TestCase
             'name' => 'admin-'.uniqid(),
             'display_name' => 'Администратор',
         ]);
-        $permission = Permission::query()->create([
-            'key' => 'browse_admin',
-            'table_name' => null,
-        ]);
+        $permission = Permission::query()->firstOrCreate(['key' => 'browse_admin'], ['table_name' => null]);
         $role->permissions()->attach($permission);
 
         return User::factory()->create(['role_id' => $role->id]);

@@ -4,16 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
-use App\Services\CategoryTreeService;
+use App\Support\CategoryPicker;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
 
+/**
+ * Категории. Список и управление деревом — одна страница `ManageCategories` (дерево с раскрытием, поиском, переносом),
+ * а здесь форма полной правки: название, адрес, иконка, цвета, описание.
+ */
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
@@ -39,22 +38,21 @@ class CategoryResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('alias')
-                    ->label('Alias')
-                    ->required()
+                    ->label('Адрес (alias)')
+                    ->helperText('Часть ссылки на категорию, латиницей. При создании можно оставить пустым: адрес создастся из названия.')
+                    ->required(fn (string $operation): bool => $operation === 'edit')
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
-                Forms\Components\TextInput::make('number')
-                    ->label('Номер сортировки')
-                    ->integer()
-                    ->default(0)
-                    ->required(),
                 Forms\Components\Select::make('parent_id')
                     ->label('Родительская категория')
-                    ->options(fn (?Category $record): array => static::parentOptions($record))
+                    ->helperText('Начните вводить название. Пусто — корневая категория. Переносить категории удобнее в дереве: меню «⋮» → «Переместить».')
                     ->searchable()
-                    ->placeholder('Корневая категория'),
+                    ->options(fn (?Category $record): array => CategoryPicker::parents('', $record))
+                    ->getSearchResultsUsing(fn (string $search, ?Category $record): array => CategoryPicker::parents($search, $record))
+                    ->getOptionLabelUsing(fn ($value): ?string => CategoryPicker::path($value))
+                    ->placeholder('— Корневая категория —'),
                 Forms\Components\Toggle::make('is_active')
-                    ->label('Активна')
+                    ->label('Показывать в каталоге')
                     ->default(true),
                 Forms\Components\TextInput::make('icon')
                     ->label('Иконка')
@@ -73,101 +71,12 @@ class CategoryResource extends Resource
             ->columns(2);
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Название')
-                    ->description(fn (Category $record): string => $record->ancestors
-                        ->pluck('name')
-                        ->push($record->name)
-                        ->implode(' → '))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('alias')
-                    ->label('Alias')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('parent.name')
-                    ->label('Родитель')
-                    ->placeholder('Корневая'),
-                Tables\Columns\TextColumn::make('number')
-                    ->label('Сортировка')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('products_count')
-                    ->label('Товары')
-                    ->alignCenter(),
-                Tables\Columns\TextColumn::make('children_count')
-                    ->label('Дочерние')
-                    ->alignCenter(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Активна')
-                    ->boolean(),
-            ])
-            ->defaultSort('_lft')
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('deleteCategory')
-                    ->label('Удалить')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->action(function (
-                        Category $record,
-                        CategoryTreeService $service,
-                        Tables\Actions\Action $action
-                    ): void {
-                        try {
-                            $service->delete(auth()->user(), $record);
-                        } catch (ValidationException $exception) {
-                            Notification::make()
-                                ->title('Категория не удалена')
-                                ->body(collect($exception->errors())->flatten()->first())
-                                ->danger()
-                                ->send();
-
-                            $action->halt();
-                        }
-
-                        Notification::make()
-                            ->title('Категория удалена')
-                            ->success()
-                            ->send();
-                    }),
-            ])
-            ->bulkActions([]);
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->with(['parent', 'ancestors'])
-            ->withCount(['products', 'children']);
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
+            'index' => Pages\ManageCategories::route('/'),
             'create' => Pages\CreateCategory::route('/create'),
             'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
-    }
-
-    private static function parentOptions(?Category $record): array
-    {
-        $excludedIds = $record
-            ? Category::query()->descendantsAndSelf($record->getKey())->pluck('id')->all()
-            : [];
-
-        return Category::query()
-            ->when($excludedIds !== [], fn (Builder $query): Builder => $query->whereNotIn('id', $excludedIds))
-            ->withDepth()
-            ->defaultOrder()
-            ->get()
-            ->mapWithKeys(fn (Category $category): array => [
-                $category->getKey() => str_repeat('— ', max(0, (int) $category->depth)).$category->name,
-            ])
-            ->all();
     }
 }

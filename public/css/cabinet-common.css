@@ -7726,3 +7726,66 @@ body.seller-cabinet-body .product-edit-page .product-form-section,
     .seller-hidden-notice .seller-hidden-notice__icon { width: 34px; height: 34px; font-size: 18px; }
     .seller-hidden-notice .seller-hidden-notice__title { font-size: 16px; }
 }
+
+
+/* ===== Основная тема кабинета: тень блоков только при наведении =====
+   Как на странице «VIP-размещение»: в покое у блока тонкая рамка без тени, при наведении мягко появляется тень.
+   Правила привязаны к body.seller-cabinet-body: тема «new» (body.cabinet-new) их не получает.
+   Тень сохраняют плавающие элементы: панель сохранения (.store-edit-submit-bar), выпадающие меню шапки —
+   она отделяет их от страницы. */
+html body.seller-cabinet-body .card.store-overview-card,
+html body.seller-cabinet-body .card.store-tariff-card,
+html body.seller-cabinet-body .card.seller-cabinet-state,
+html body.seller-cabinet-body .card.store-edit-card,
+html body.seller-cabinet-body .card.product-form-section,
+html body.seller-cabinet-body .card.product-show-card,
+html body.seller-cabinet-body .store-overview-hero,
+html body.seller-cabinet-body .seller-products-categories-card,
+html body.seller-cabinet-body .product-form-guide,
+html body.seller-cabinet-body .product-form-actions,
+html body.seller-cabinet-body .file-upload,
+html body.seller-cabinet-body .order-list-card,
+html body.seller-cabinet-body .order-show-hero,
+html body.seller-cabinet-body .order-detail-card,
+html body.seller-cabinet-body .events-hero,
+html body.seller-cabinet-body .event-timeline__item {
+    box-shadow: none !important;
+}
+
+html body.seller-cabinet-body .store-overview-hero,
+html body.seller-cabinet-body .seller-products-categories-card,
+html body.seller-cabinet-body .product-form-guide,
+html body.seller-cabinet-body .product-form-actions,
+html body.seller-cabinet-body .file-upload,
+html body.seller-cabinet-body .order-list-card,
+html body.seller-cabinet-body .order-show-hero,
+html body.seller-cabinet-body .order-detail-card,
+html body.seller-cabinet-body .events-hero,
+html body.seller-cabinet-body .event-timeline__item {
+    transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+html body.seller-cabinet-body .card.store-overview-card:hover,
+html body.seller-cabinet-body .card.store-tariff-card:hover,
+html body.seller-cabinet-body .card.seller-cabinet-state:hover,
+html body.seller-cabinet-body .card.store-edit-card:hover,
+html body.seller-cabinet-body .card.product-form-section:hover,
+html body.seller-cabinet-body .card.product-show-card:hover,
+html body.seller-cabinet-body .store-overview-hero:hover,
+html body.seller-cabinet-body .seller-products-categories-card:hover,
+html body.seller-cabinet-body .product-form-guide:hover,
+html body.seller-cabinet-body .product-form-actions:hover,
+html body.seller-cabinet-body .file-upload:hover,
+html body.seller-cabinet-body .order-list-card:hover,
+html body.seller-cabinet-body .order-show-hero:hover,
+html body.seller-cabinet-body .order-detail-card:hover,
+html body.seller-cabinet-body .events-hero:hover,
+html body.seller-cabinet-body .event-timeline__item:hover {
+    box-shadow: var(--seller-cabinet-shadow) !important;
+}
+
+/* Плашки на карточках товаров без тени (основная тема кабинета; тема «new» не затронута).
+   Это подписи-статусы («VIP», «Нет фото», «Опубликован»): тень им не нужна ни в покое, ни при наведении. */
+html body.seller-cabinet-body .seller-product-card__badge {
+    box-shadow: none !important;
+}
