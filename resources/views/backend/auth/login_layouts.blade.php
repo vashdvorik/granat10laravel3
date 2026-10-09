@@ -2,7 +2,7 @@
 <html class="scroll-smooth overflow-x-hidden" lang="en">
   <head>
     <meta charset="utf-8">
-    <title>@yield('title')</title>
+    <title>@yield('title', \App\Support\PageTitle::brand())</title>
     <meta name="description" content="">
     <meta name="keywords" content="">
     <meta name="robots" content="noindex, nofollow">
@@ -66,9 +66,7 @@
       <div class="w-full bg-neutral h-[1px] dark:bg-dark-neutral-border mb-[25px] hidden md:block"></div>
       <div class="flex items-center justify-between text-desc text-gray-400 flex-wrap gap-5 dark:text-gray-dark-400 hidden md:flex">
         <div class="flex items-center gap-2 flex-wrap">
-          <p> <span>© 2025 -</span><span class="text-color-brands">&nbsp;Маркетплейс</span><span>&nbsp;</span></p>
-          <div class="bg-color-brands rounded-full hidden w-[2px] h-[2px] md:block"></div>
-          <p> <span>Создан:</span><a class="text-color-brands" href="https://granatlab.com/" target="_blank">&nbsp; Рекламное агентство "Гранат"</a></p>
+          <p> <span>© {{ now()->year }}</span><span class="text-color-brands">&nbsp;{{ \App\Support\PageTitle::brand() }}</span></p>
         </div>
       <!--  <div class="flex items-center gap-[15px]"><a class="transition-colors duration-300 hover:text-color-brands" href="#">Об агентстве</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Careers</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Policy</a><a class="transition-colors duration-300 hover:text-color-brands" href="#">Contact</a></div> -->
       </div>

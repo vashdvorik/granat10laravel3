@@ -27,7 +27,7 @@ class SalePageHeadingTest extends TestCase
 
         $this->assertStringNotContainsString('sale-page__heading', $html);
         $this->assertStringNotContainsString('Показано', $html);
-        $this->assertStringContainsString('<h1 class="sr-only">Акции в ПМР</h1>', $html);
+        $this->assertStringContainsString('<h1 class="sr-only">Скидки и акции в ПМР</h1>', $html);
         $this->assertSame(1, substr_count($html, '<h1'));
     }
 }

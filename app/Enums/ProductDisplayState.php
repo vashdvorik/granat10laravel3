@@ -13,4 +13,5 @@ enum ProductDisplayState: string
     case ApprovedHidden = 'approved_hidden';
     case Published = 'published';
     case Unavailable = 'unavailable';
+    case SellerHidden = 'seller_hidden';
 }

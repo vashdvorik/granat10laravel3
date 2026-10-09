@@ -1,5 +1,5 @@
 @extends('main_layots')
-@section('title', 'Каталог товара | Маркетплейс ПМР')
+@section('title', 'Каталог товаров — BIMM')
 
 @section('meta')
     {{-- SEO: Пагинация для поисковиков --}}
@@ -63,7 +63,7 @@
                    <a class="image-bd effect_img2" @if($catalogBanner['link']) href="{{ $catalogBanner['link'] }}" @endif><img src="{{ $catalogBanner['url'] }}" alt="" class="img-reponsive"></a>
                 </div>
                 <div class="pd-top">
-                    <h1 class="title">Каталог товаров{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : '' }}</h1>
+                    <h1 class="title">{{ $seoHeading ?? 'Каталог товаров' }}</h1>
                     <div class="show-element">
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>

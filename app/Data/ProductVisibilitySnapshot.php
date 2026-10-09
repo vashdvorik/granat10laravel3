@@ -15,5 +15,7 @@ final readonly class ProductVisibilitySnapshot
         public bool $isModerationCurrent,
         public bool $hasImages,
         public array $buyerBlockingReasons,
+        /** Магазин скрыт администратором: товар не показывается, что бы ни стояло в самом товаре. */
+        public bool $sellerHidden = false,
     ) {}
 }

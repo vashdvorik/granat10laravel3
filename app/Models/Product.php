@@ -88,7 +88,8 @@ class Product extends Model
     {
         return $this->moderation_status === ProductModerationStatus::Approved
             && $this->moderated_version === $this->moderation_version
-            && $this->is_active;
+            && $this->is_active
+            && ! $this->seller?->isHidden();
     }
 
     public function toSearchableArray(): array

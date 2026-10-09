@@ -67,6 +67,7 @@ class Seller extends Model
         'delivery_enabled' => 'boolean',
         'telegram_notifications_enabled' => 'boolean',
         'telegram_verified_at' => 'datetime',
+        'hidden_at' => 'datetime',
     ];
 
     public function user()
@@ -87,6 +88,28 @@ class Seller extends Model
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function hiddenBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'hidden_by_user_id');
+    }
+
+    /** Магазин скрыт администратором: на сайте его нет, а причину видит только владелец в кабинете. */
+    public function isHidden(): bool
+    {
+        return $this->hidden_at !== null;
+    }
+
+    /** Магазины, которые можно показывать покупателям. */
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->whereNull($query->qualifyColumn('hidden_at'));
+    }
+
+    public function scopeHiddenByAdmin(Builder $query): Builder
+    {
+        return $query->whereNotNull($query->qualifyColumn('hidden_at'));
     }
 
     public function scopeForRegionalContext(Builder $query, ?RegionalContext $context = null): Builder
@@ -113,7 +136,7 @@ class Seller extends Model
     public static function getCachedAll()
     {
         return app(CatalogCacheService::class)->rememberSellers(function () {
-            return self::forRegionalContext()->withCount(['products' => function ($query) {
+            return self::forRegionalContext()->publiclyVisible()->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
                 ->orderBy('products_count', 'desc')
@@ -131,7 +154,7 @@ class Seller extends Model
         }
 
         return app(CatalogCacheService::class)->rememberSellerByAlias($alias, function () use ($alias) {
-            return self::forRegionalContext()->withCount(['products' => function ($query) {
+            return self::forRegionalContext()->publiclyVisible()->withCount(['products' => function ($query) {
                 $query->where('is_active', true);
             }])
                 ->where('alias', $alias)

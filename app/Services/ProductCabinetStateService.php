@@ -31,6 +31,7 @@ class ProductCabinetStateService
             moderationActual: $moderationActual,
             hasImages: $hasImages,
             visibleToBuyers: $visibleToBuyers,
+            sellerHidden: $visibility->sellerHidden,
         );
 
         return new ProductCabinetState(
@@ -56,6 +57,7 @@ class ProductCabinetStateService
         bool $moderationActual,
         bool $hasImages,
         bool $visibleToBuyers,
+        bool $sellerHidden,
     ): array {
         // Тексты берутся из единого источника, чтобы карточка, страница товара и уведомления говорили одно и то же
         $story = $this->storyFactory->make($product);
@@ -75,6 +77,7 @@ class ProductCabinetStateService
                 => ['rejected', $label, $story->remark ?: $explanation, $tone, 'moderation_not_approved', 'edit'],
             ! $moderationActual => ['hidden_moderation_outdated', $label, $explanation, $tone, 'moderation_outdated', 'submit'],
             ! $product->is_active => ['approved_hidden', $label, $explanation, $tone, 'not_enabled_by_seller', 'publish'],
+            $sellerHidden => ['hidden_seller', $label, $explanation, $tone, 'seller_hidden', null],
             ! $hasImages => ['hidden_no_images', $label, $explanation, $tone, 'no_images', 'add_images'],
             $visibleToBuyers || $this->transitions->isPublic($product) => ['visible', $label, $explanation, $tone, null, 'push_up'],
             default => ['hidden_not_enabled', 'Снят с публикации', 'Товар сейчас не показывается покупателям.', 'gray', 'not_enabled_by_seller', 'publish'],

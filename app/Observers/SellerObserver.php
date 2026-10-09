@@ -20,7 +20,7 @@ class SellerObserver
     {
         $this->cache->forgetSellerRelated(
             $seller,
-            visibilityChanged: $seller->wasChanged('settlement_id')
+            visibilityChanged: $seller->wasChanged(['settlement_id', 'hidden_at'])
         );
     }
 

@@ -4,7 +4,7 @@
 
 @section('content')
 <nav class="joom-breadcrumbs" aria-label="Хлебные крошки"><a href="{{ $regionalUrl->route('home') }}">Главная</a><span>Каталог</span></nav>
-<header class="joom-page-head"><span class="joom-eyebrow">ВЫБИРАЙ ЛЕГКО</span><h1>Каталог товаров</h1><p>Предложения местных продавцов с понятной ценой, доставкой и прямым контактом.</p></header>
+<header class="joom-page-head"><span class="joom-eyebrow">ВЫБИРАЙ ЛЕГКО</span><h1>{{ $seoHeading ?? 'Каталог товаров' }}</h1><p>Предложения местных продавцов с понятной ценой, доставкой и прямым контактом.</p></header>
 
 <div class="joom-catalog-layout">
     <aside class="joom-sidebar">

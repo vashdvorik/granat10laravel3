@@ -28,7 +28,7 @@ class ModerationSettingsPageTest extends TestCase
         config()->set('admin.filament_enabled', true);
         Filament::setCurrentPanel(Filament::getPanel('control'));
 
-        $this->environmentPath = tempnam(sys_get_temp_dir(), 'granat-env-');
+        $this->environmentPath = tempnam(sys_get_temp_dir(), 'bimm-env-');
         file_put_contents($this->environmentPath, implode(PHP_EOL, [
             'QUEUE_CONNECTION=sync',
             'PRODUCT_MODERATION_AI_ENABLED=false',

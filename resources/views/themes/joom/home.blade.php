@@ -10,7 +10,7 @@
 <section class="joom-hero">
     <div class="joom-hero__copy">
         <span class="joom-eyebrow">BIMM · МАРКЕТПЛЕЙС ПРИДНЕСТРОВЬЯ</span>
-        <h1>Покупки на каждый день<br><em>рядом с вами</em></h1>
+        <h1>{{ $seoHeading ?? 'Покупки на каждый день' }}<br><em>рядом с вами</em></h1>
         <p>Заказывай товары с доставкой, сравнивай цены и находи контакты продавцов в своём городе.</p>
         <div class="joom-hero__buttons">
             <a class="joom-button joom-button--primary" href="{{ $regionalUrl->route('catalog.index') }}">Начать покупки <i class="fa-solid fa-arrow-right"></i></a>

@@ -1,6 +1,6 @@
 @extends('main_layots')
 
-@section('title', 'Мои заказы | BIMM')
+@section('title', 'Мои заказы — BIMM')
 
 @section('meta')
     <meta name="robots" content="noindex, nofollow">

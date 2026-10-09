@@ -5,7 +5,7 @@
 Для локальной разработки есть единая команда:
 
 ```bash
-php artisan granat:work
+php artisan bimm:work
 ```
 
 Она запускает:
@@ -17,19 +17,19 @@ php artisan granat:work
 Если нужно одновременно поднять локальный сайт:
 
 ```bash
-php artisan granat:work --serve
+php artisan bimm:work --serve
 ```
 
 По умолчанию сайт запускается на `127.0.0.1:8000`. Хост и порт можно изменить:
 
 ```bash
-php artisan granat:work --serve --host=127.0.0.1 --port=8001
+php artisan bimm:work --serve --host=127.0.0.1 --port=8001
 ```
 
 Перед запуском можно посмотреть, какие процессы будут стартовать:
 
 ```bash
-php artisan granat:work --dry-run --serve
+php artisan bimm:work --dry-run --serve
 ```
 
 ## Что должно быть настроено
@@ -56,7 +56,7 @@ TELEGRAM_WEBHOOK_SECRET=...
 
 ## Production
 
-`php artisan granat:work` предназначена для локальной разработки и ручной
+`php artisan bimm:work` предназначена для локальной разработки и ручной
 проверки. На production процессы должны запускаться через Supervisor или
 systemd, чтобы они автоматически поднимались после перезагрузки и
 перезапускались после ошибки.

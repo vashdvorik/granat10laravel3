@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @php
-        $cabinetDefaultTitle = html_entity_decode('&#1050;&#1072;&#1073;&#1080;&#1085;&#1077;&#1090; &#1087;&#1088;&#1086;&#1076;&#1072;&#1074;&#1094;&#1072;');
         $cabinetOpenSite = html_entity_decode('&#1054;&#1090;&#1082;&#1088;&#1099;&#1090;&#1100; &#1089;&#1072;&#1081;&#1090;');
         $cabinetWorkspace = html_entity_decode('&#1056;&#1072;&#1073;&#1086;&#1095;&#1077;&#1077; &#1087;&#1088;&#1086;&#1089;&#1090;&#1088;&#1072;&#1085;&#1089;&#1090;&#1074;&#1086;');
         $cabinetOverview = html_entity_decode('&#1054;&#1073;&#1079;&#1086;&#1088;');
@@ -17,7 +16,7 @@
         $cabinetMarketplaceBack = html_entity_decode('&#1042;&#1077;&#1088;&#1085;&#1091;&#1090;&#1100;&#1089;&#1103; &#1074; &#1084;&#1072;&#1088;&#1082;&#1077;&#1090;&#1087;&#1083;&#1077;&#1081;&#1089;');
         $cabinetGuestLabel = html_entity_decode('&#1055;&#1088;&#1086;&#1076;&#1072;&#1074;&#1077;&#1094;');
     @endphp
-    <title>{{ trim($__env->yieldContent('title', $cabinetDefaultTitle)) }}</title>
+    <title>{{ \App\Support\PageTitle::cabinet(trim($__env->yieldContent('title')), request()->route()?->getName()) }}</title>
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
@@ -136,6 +135,7 @@
 
         <main class="cabinet-content">
             <div class="cabinet-content__inner">
+                @include('backend.cabinet.partials.seller-hidden-notice')
                 @if(session('success'))
                     <div class="alert cabinet-flash cabinet-flash--success">{{ session('success') }}</div>
                 @endif

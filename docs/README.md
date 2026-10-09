@@ -22,7 +22,8 @@
 | [mobile_navigation_redesign_plan_ru.md](mobile_navigation_redesign_plan_ru.md) | Поэтапный план переделки мобильной навигации клиента и входа продавца |
 | [design_rules_ru.md](design_rules_ru.md) | Обязательные правила публичного интерфейса и изображений |
 | [design/README.md](design/README.md) | Дизайн-система и план унификации кабинета |
-| [seo/seo_modernization_plan_ru.md](seo/seo_modernization_plan_ru.md) | План SEO-модернизации |
+| [seo/local_seo_ru.md](seo/local_seo_ru.md) | Локальное SEO: что реализовано (заголовки, canonical, микроразметка, sitemap) и что сделать вне кода |
+| [seo/seo_modernization_plan_ru.md](seo/seo_modernization_plan_ru.md) | План SEO-модернизации (часть этапов уже выполнена, см. «Выполнено») |
 | [filament_manual_acceptance_checklist_ru.md](filament_manual_acceptance_checklist_ru.md) | Ручная приёмка административной панели |
 | [WebPayment-Документация.md](WebPayment-Документация.md) | Документация банка «Web-платёж» (пополнение баланса картой) |
 | [BACKLOG.md](BACKLOG.md) | Нерешённые пользовательские и технические задачи |

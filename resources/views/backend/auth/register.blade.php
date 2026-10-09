@@ -1,5 +1,5 @@
 @extends('backend.auth.login_layouts')
-@section('title', 'Стать продавцом | Маркетплейс ПМР')
+@section('title', 'Стать продавцом — BIMM')
 
 @section('content')
 {{--

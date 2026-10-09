@@ -34,9 +34,11 @@ Route::post('/webhooks/telegram', App\Http\Controllers\TelegramWebhookController
     ->name('webhooks.telegram');
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/home', [HomeController::class, 'home']);
+// старый адрес главной: постоянный редирект, чтобы у главной страницы был один адрес
+Route::permanentRedirect('/home', '/');
 Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/sitemap-{page}.xml', SitemapController::class)->whereNumber('page')->name('sitemap.page');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
 
 Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');

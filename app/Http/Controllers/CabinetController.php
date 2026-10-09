@@ -134,6 +134,11 @@ class CabinetController extends Controller
             return redirect()->route('account.index')->with('error', 'У вас нет магазина');
         }
 
+        if ($user->seller->isHidden()) {
+            return redirect()->route('account.index')
+                ->with('error', 'Магазин скрыт администратором, поэтому удалить его сейчас нельзя. Напишите в поддержку.');
+        }
+
         $this->authorize('delete', $user->seller);
 
         return view('backend.cabinet.delete_shop', compact('user'));
@@ -148,6 +153,11 @@ class CabinetController extends Controller
 
         if (!$user->seller) {
             return redirect()->route('account.index')->with('error', 'Магазин не найден');
+        }
+
+        if ($user->seller->isHidden()) {
+            return redirect()->route('account.index')
+                ->with('error', 'Магазин скрыт администратором, поэтому удалить его сейчас нельзя. Напишите в поддержку.');
         }
 
         $this->authorize('delete', $user->seller);

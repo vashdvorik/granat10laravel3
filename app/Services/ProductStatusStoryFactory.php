@@ -132,6 +132,18 @@ class ProductStatusStoryFactory
             );
         }
 
+        if ($snapshot->sellerHidden) {
+            return new ProductStatusStory(
+                key: 'seller_hidden',
+                headline: 'Магазин скрыт',
+                explanation: 'Товар не показывается покупателям, пока магазин скрыт администратором.',
+                nextStep: 'Причина указана в красном уведомлении вверху страницы. Исправьте её и напишите в поддержку: '
+                    .'после проверки магазин и товары вернутся на сайт.',
+                tone: 'danger',
+                icon: 'ban',
+            );
+        }
+
         if (! $snapshot->hasImages) {
             return new ProductStatusStory(
                 key: 'no_images',

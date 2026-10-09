@@ -3,12 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $seoTitle ?: trim($__env->yieldContent('title')) }}</title>
-    @if(config('regionality.seo_enabled'))
-        <link rel="canonical" href="{{ $canonicalUrl }}">
-        <meta name="robots" content="{{ $robotsMeta }}">
-        @if($seoDescription)<meta name="description" content="{{ $seoDescription }}">@endif
-    @endif
+    <title>{{ $seoTitle ?: (trim($__env->yieldContent('title')) ?: \App\Support\PageTitle::brand()) }}</title>
+    @include('partials.seo.head')
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -93,6 +89,7 @@
                 <div><strong>Помощь</strong><a href="{{ $regionalUrl->route('help') }}">Поддержка</a><a href="{{ $regionalUrl->route('help') }}">Доставка</a><a href="{{ $regionalUrl->route('gobuyer') }}">Продавцам</a></div>
                 <div><strong>Ваш регион</strong><span>{{ $regionalContext->label() }}</span><a href="{{ $regionalUrl->route('catalog.index') }}">Смотреть товары</a></div>
             </div>
+            @include('partials.seo.cities')
             <div class="joom-footer__bottom">© {{ now()->year }} BIMM · Маркетплейс Приднестровья</div>
         </div>
     </footer>

@@ -1,5 +1,5 @@
 @extends('main_layots')
-@section('title', 'Распродажи | Маркетплейс ПМР')
+@section('title', 'Распродажи — BIMM')
 
 @section('meta')
     @if(isset($products) && $products->hasPages())
@@ -22,7 +22,7 @@
         </ul>
 
         {{-- Видимого заголовка нет, но h1 остаётся для поисковиков и экранных дикторов --}}
-        <h1 class="sr-only">Акции{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' в ПМР' }}</h1>
+        <h1 class="sr-only">{{ $seoHeading ?? 'Скидки и акции' }}</h1>
 
         <div class="product-collection-grid product-grid sale-products-grid">
             @forelse($products as $product)

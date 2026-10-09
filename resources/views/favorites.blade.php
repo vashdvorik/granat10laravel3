@@ -1,5 +1,5 @@
 @extends('main_layots')
-@section('title', 'Избранные товары | Маркетплейс ПМР')
+@section('title', 'Избранное — BIMM')
 
 @section('content')
 

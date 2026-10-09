@@ -9,13 +9,14 @@ use App\Models\Category;
 use App\Services\CatalogCacheService;
 use App\Services\CustomerOrderListService;
 use App\Services\DesignManager;
-use App\Services\LegacySeoMetadataService;
 use App\Services\ModerationSecretStore;
 use App\Services\OpenRouterImageModerationClient;
 use App\Services\OpenRouterModerationClient;
 use App\Services\RegionalContext;
 use App\Services\RegionalUrlService;
+use App\Services\SeoPageContext;
 use App\Services\SeoService;
+use App\Services\StructuredDataService;
 use App\Services\TelegramHttpBotClient;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
@@ -34,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(DesignManager::class);
         $this->app->scoped(RegionalContext::class);
         $this->app->scoped(RegionalUrlService::class);
+        $this->app->scoped(SeoPageContext::class);
         $this->app->bind(AiModerationClient::class, OpenRouterModerationClient::class);
         $this->app->bind(ProductImageModerationClient::class, OpenRouterImageModerationClient::class);
     }
@@ -66,20 +68,50 @@ class AppServiceProvider extends ServiceProvider
 
     private function composeSeo(): void
     {
+        // Макет: canonical, robots, описание, Open Graph и микроразметка — одинаково для всех тем оформления
         View::composer('main_layots', function ($view) {
-            $seo = app(DesignManager::class)->current() === 'legacy'
-                ? app(LegacySeoMetadataService::class)
-                : app(SeoService::class);
             $request = request();
 
-            $view
-                ->with('canonicalUrl', $seo->canonical($request))
-                ->with('robotsMeta', $seo->robots($request))
-                ->with('seoTitle', $seo->title($request))
-                ->with('seoDescription', $seo->description($request));
+            try {
+                app(SeoPageContext::class)->useViewData($view->getData());
+                $seo = app(SeoService::class);
+
+                $view
+                    ->with('canonicalUrl', $seo->canonical($request))
+                    ->with('robotsMeta', $seo->robots($request))
+                    ->with('seoTitle', $seo->title($request))
+                    ->with('seoDescription', $seo->description($request))
+                    ->with('seoOgType', $seo->ogType($request))
+                    ->with('seoOgImage', $seo->ogImage($request))
+                    ->with('structuredData', app(StructuredDataService::class)->forRequest($request))
+                    ->with('seoCities', app(SeoPageContext::class)->citiesWithProducts(12));
+            } catch (Throwable $exception) {
+                // SEO-обогащение не должно ронять страницу: отдаём безопасные значения и пишем причину в журнал
+                report($exception);
+
+                $view
+                    ->with('canonicalUrl', $request->url())
+                    ->with('robotsMeta', 'index, follow')
+                    ->with('seoTitle', '')
+                    ->with('seoDescription', '')
+                    ->with('seoOgType', 'website')
+                    ->with('seoOgImage', null)
+                    ->with('structuredData', [])
+                    ->with('seoCities', collect());
+            }
+        });
+
+        // H1 страниц-списков: «Мыши в Тирасполе», «Каталог товаров в Тирасполе» (тот же текст для всех тем)
+        View::composer(['home', 'catalog.index', 'catalog.show', 'sellers', 'salepage'], function ($view) {
+            try {
+                app(SeoPageContext::class)->useViewData($view->getData());
+                $view->with('seoHeading', app(SeoService::class)->heading(request()));
+            } catch (Throwable $exception) {
+                report($exception);
+                $view->with('seoHeading', null);
+            }
         });
     }
-
     private function composeRegionalContext(): void
     {
         View::composer('main_layots', function ($view) {

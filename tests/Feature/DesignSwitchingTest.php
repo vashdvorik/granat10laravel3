@@ -91,7 +91,7 @@ class DesignSwitchingTest extends TestCase
                 ->assertOk()
                 ->assertSee('joom-header')
                 ->assertSee('theme-joom.css')
-                ->assertSeeText('Покупки на каждый день');
+                ->assertSeeText('Маркетплейс Приднестровья');
         } finally {
             config()->set('design.default', 'legacy');
             Cache::forget(config('design.cache_key'));

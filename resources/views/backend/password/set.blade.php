@@ -6,7 +6,7 @@
 @endif
 --}}
 @extends('backend.auth.login_layouts')
-@section('title', 'Сброс пароля | Маркетплейс ПМР')
+@section('title', 'Сброс пароля — BIMM')
 
 @section('content')
 <!-- Форма восстановления пароля из reset-password.html -->

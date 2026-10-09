@@ -1,6 +1,6 @@
 @extends('main_layots')
 
-@section('title', $product->name . ' | ГРАНАТ')
+@section('title', $product->name.' — BIMM')
 @section('og_type', 'product')
 
 @php
@@ -25,75 +25,10 @@
         $product->features4,
     ])->filter()->values();
 
-    $breadcrumbItems = [
-        [
-            '@type' => 'ListItem',
-            'position' => 1,
-            'name' => 'Главная',
-            'item' => route('home'),
-        ],
-        [
-            '@type' => 'ListItem',
-            'position' => 2,
-            'name' => 'Каталог',
-            'item' => $regionalUrl->route('catalog.index'),
-        ],
-    ];
-
-    foreach ($breadcrumbs as $crumb) {
-        $breadcrumbItems[] = [
-            '@type' => 'ListItem',
-            'position' => count($breadcrumbItems) + 1,
-            'name' => $crumb->name,
-            'item' => $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]),
-        ];
-    }
-
-    $breadcrumbItems[] = [
-        '@type' => 'ListItem',
-        'position' => count($breadcrumbItems) + 1,
-        'name' => $product->name,
-        'item' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
-    ];
-
-    $productSchema = [
-        '@context' => 'https://schema.org',
-        '@type' => 'Product',
-        'name' => $product->name,
-        'url' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
-        'description' => $product->desc ?: $product->name,
-        'sku' => (string) $product->id,
-        'offers' => [
-            '@type' => 'Offer',
-            'url' => $regionalUrl->route('product.show', ['alias' => $product->alias]),
-            'priceCurrency' => 'RUB',
-            'price' => number_format((float) $currentPrice, 2, '.', ''),
-            'availability' => 'https://schema.org/InStock',
-            'seller' => [
-                '@type' => 'Organization',
-                'name' => $product->seller->name,
-            ],
-        ],
-    ];
-
-    if ($images->isNotEmpty()) {
-        $productSchema['image'] = $images
-            ->map(fn ($image) => url(Storage::url($image->path)))
-            ->values()
-            ->all();
-    }
 @endphp
 
 @section('og_image', $mainImageUrl)
 
-@push('head')
-<script type="application/ld+json">{!! json_encode([
-    '@context' => 'https://schema.org',
-    '@type' => 'BreadcrumbList',
-    'itemListElement' => $breadcrumbItems,
-], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-<script type="application/ld+json">{!! json_encode($productSchema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-@endpush
 
 @section('content')
 <main class="product-page">

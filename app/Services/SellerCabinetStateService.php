@@ -41,14 +41,18 @@ class SellerCabinetStateService
             ->count();
         $canAcceptOrders = (bool) $seller->can_order;
 
-        $blockers = $this->blockers(
-            seller: $seller,
-            visibleProductsCount: $visibleProductsCount,
-        );
+        // Скрытый магазин: причину объясняет красное уведомление, остальные замечания неважны, пока магазин не вернули на сайт
+        $blockers = $seller->isHidden()
+            ? []
+            : $this->blockers(
+                seller: $seller,
+                visibleProductsCount: $visibleProductsCount,
+            );
 
         [$status, $label, $description, $alertType] = $this->status(
             visibleProductsCount: $visibleProductsCount,
             blockers: $blockers,
+            hidden: $seller->isHidden(),
         );
         $primaryBlocker = $blockers[0] ?? null;
 
@@ -115,8 +119,17 @@ class SellerCabinetStateService
         return $blockers;
     }
 
-    private function status(int $visibleProductsCount, array $blockers): array
+    private function status(int $visibleProductsCount, array $blockers, bool $hidden = false): array
     {
+        if ($hidden) {
+            return [
+                'hidden',
+                'Магазин скрыт',
+                'Покупатели не видят магазин и его товары. Причина указана в красном уведомлении вверху страницы.',
+                'danger',
+            ];
+        }
+
         if ($visibleProductsCount === 0) {
             return [
                 'empty',
@@ -176,6 +189,7 @@ class SellerCabinetStateService
             'no_store' => 'create_store',
             'empty' => 'add_product',
             'working' => 'open_store',
+            'hidden' => 'edit_store',
             default => null,
         };
     }

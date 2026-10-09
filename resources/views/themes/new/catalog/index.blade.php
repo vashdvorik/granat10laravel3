@@ -4,7 +4,7 @@
 
 @section('content')
 <nav class="bimm-breadcrumbs" aria-label="Хлебные крошки"><a href="{{ $regionalUrl->route('home') }}">Главная</a><span>Каталог</span></nav>
-<header class="bimm-page-head"><span class="bimm-kicker">Открытый каталог</span><h1>Товары рядом</h1><p>Выбирайте предложения локальных продавцов. Фильтруйте по категории, региону и цене.</p></header>
+<header class="bimm-page-head"><span class="bimm-kicker">Открытый каталог</span><h1>{{ $seoHeading ?? 'Каталог товаров' }}</h1><p>Выбирайте предложения локальных продавцов. Фильтруйте по категории, региону и цене.</p></header>
 
 <div class="bimm-catalog">
     <aside class="bimm-sidebar">

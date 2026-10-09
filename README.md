@@ -11,10 +11,10 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --seed
-php artisan granat:work --serve
+php artisan bimm:work --serve
 ```
 
-`granat:work` запускает сайт, воркеры очередей и планировщик одной командой
+`bimm:work` запускает сайт, воркеры очередей и планировщик одной командой
 (подробности — [docs/local_runtime_ru.md](docs/local_runtime_ru.md)). Сборка фронтенда не нужна:
 стили и скрипты лежат в `public/`.
 

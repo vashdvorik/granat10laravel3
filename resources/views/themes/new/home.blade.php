@@ -6,7 +6,7 @@
 <section class="bimm-hero bimm-hero--compact">
     <div class="bimm-hero__content">
         <span class="bimm-kicker">BIMM</span>
-        <h1>Маркетплейс Приднестровья</h1>
+        <h1>{{ $seoHeading ?? 'Маркетплейс Приднестровья' }}</h1>
         <p>Заказывай товары с доставкой, узнавай, где купить и по какой цене, и находи контакты продавцов.</p>
     </div>
     <form class="bimm-search bimm-search--hero" action="{{ $regionalUrl->route('search') }}" method="GET" role="search">

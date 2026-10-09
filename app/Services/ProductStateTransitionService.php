@@ -28,7 +28,18 @@ class ProductStateTransitionService
 
     public function canUnpublish(Product $product): bool
     {
-        return $this->isPublic($product);
+        // Снять с публикации можно любой опубликованный товар, даже пока магазин скрыт администратором
+        $snapshot = $this->visibilityResolver->snapshot($product);
+
+        return $snapshot->isActive && $snapshot->isModerationCurrent;
+    }
+
+    /** Товар готов к показу, но не виден покупателям только потому, что магазин скрыт администратором. */
+    public function isHeldByHiddenSeller(Product $product): bool
+    {
+        $snapshot = $this->visibilityResolver->snapshot($product);
+
+        return $snapshot->sellerHidden && $snapshot->isActive && $snapshot->isModerationCurrent;
     }
 
     public function canPushUp(Product $product): bool

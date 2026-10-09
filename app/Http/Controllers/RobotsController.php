@@ -19,6 +19,8 @@ class RobotsController extends Controller
             'Disallow: /*/favorites',
             'Disallow: /search',
             'Disallow: /*/search',
+            'Disallow: /location',
+            'Disallow: /*load-more',
             'Sitemap: '.route('sitemap'),
             '',
         ]);

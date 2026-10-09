@@ -12,7 +12,7 @@
     $orderBoxLead = 'Продавец позвонит, подтвердит наличие и договорится с вами о получении.';
 @endphp
 
-@section('title', 'Оформление заказа — '.$product->name)
+@section('title', 'Оформление заказа: '.$product->name.' — BIMM')
 
 {{-- noindex ставит общий SeoService для всех маршрутов orders.* --}}
 

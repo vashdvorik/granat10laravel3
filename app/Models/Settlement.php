@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\RussianLocative;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,7 @@ class Settlement extends Model
         'type',
         'zip',
         'slug',
+        'name_in',
         'is_active',
         'sort_order',
         'meta_title',
@@ -37,6 +39,26 @@ class Settlement extends Model
         'is_active' => 'boolean',
         'sort_order' => 'integer',
     ];
+
+    /** «Тирасполе»: предложный падеж для заголовков (задан вручную в админке или подобран автоматически). */
+    public function nameIn(): string
+    {
+        $manual = trim((string) $this->name_in);
+
+        return $manual !== '' ? $manual : RussianLocative::prepositional((string) $this->name);
+    }
+
+    /** «в Тирасполе» — готовая фраза с предлогом. */
+    public function inPhrase(): string
+    {
+        $manual = trim((string) $this->name_in);
+
+        if ($manual === '') {
+            return RussianLocative::in((string) $this->name);
+        }
+
+        return (preg_match('/^[вф][бвгджзйклмнпрстфхцчшщ]/iu', $manual) ? 'во ' : 'в ').$manual;
+    }
 
     public function region(): BelongsTo
     {

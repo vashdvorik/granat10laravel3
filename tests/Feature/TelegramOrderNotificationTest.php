@@ -21,7 +21,7 @@ class TelegramOrderNotificationTest extends TestCase
     {
         parent::setUp();
 
-        config()->set('services.telegram.bot_username', 'granat_test_bot');
+        config()->set('services.telegram.bot_username', 'bimm_test_bot');
         config()->set('services.telegram.webhook_secret', 'webhook-secret');
     }
 

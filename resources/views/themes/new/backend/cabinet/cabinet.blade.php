@@ -20,7 +20,7 @@
             <h1>Обзор магазина</h1>
             <p>Управляйте витриной, товарами и заказами из одного рабочего пространства.</p>
         </div>
-        @if($seller)
+        @if($seller && ! $seller->isHidden())
             <a class="btn" href="{{ route('seller', $seller->alias) }}" target="_blank" rel="noopener"><i class="fa-solid fa-store"></i>&nbsp; Открыть витрину</a>
         @endif
     </div>

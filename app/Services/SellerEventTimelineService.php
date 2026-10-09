@@ -105,7 +105,11 @@ class SellerEventTimelineService
         }
 
         if ($activity->subject_type === Seller::class || $activity->log_name === 'sellers') {
-            return 'Обновлены данные магазина, которые видят покупатели.';
+            return match ($activity->properties->get('visibility')) {
+                'hidden' => $reason !== null ? 'Причина: '.$reason : 'Магазин не показывается покупателям.',
+                'shown' => 'Магазин и его товары снова видны покупателям.',
+                default => 'Обновлены данные магазина, которые видят покупатели.',
+            };
         }
 
         return null;
@@ -117,7 +121,11 @@ class SellerEventTimelineService
             return 'info';
         }
 
-        return 'neutral';
+        return match ($activity->properties->get('visibility')) {
+            'hidden' => 'danger',
+            'shown' => 'success',
+            default => 'neutral',
+        };
     }
 
     private function activityUrl(Activity $activity): ?string

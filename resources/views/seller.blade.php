@@ -21,7 +21,7 @@
     }
 @endphp
 
-@section('title', $sellerName.' | Магазины ГРАНАТ')
+@section('title', $sellerName.' — BIMM')
 
 @section('content')
 <main class="market-page">

@@ -45,15 +45,16 @@ class RegionalLinksAndSitemapTest extends TestCase
         $settlement = Settlement::factory()->create([
             'slug' => 'meta-city',
             'name' => 'Мета-город',
+            'name_in' => 'Мета-городе',
         ]);
         $url = route('regional.catalog.index', ['location' => $settlement->slug]);
 
         $this->get($url)
             ->assertOk()
             ->assertSee(route('regional.shops', ['location' => $settlement->slug]))
-            ->assertSee('Каталог товаров в Мета-город | ГРАНАТ')
-            ->assertSee('Товары местных магазинов в Мета-город')
-            ->assertSee('Каталог товаров в Мета-город');
+            ->assertSee('Каталог товаров в Мета-городе — купить у местных продавцов — BIMM')
+            ->assertSee('Каталог товаров в Мета-городе: товары местных магазинов')
+            ->assertSee('<h1 class="title">Каталог товаров в Мета-городе</h1>', false);
     }
 
     public function test_sitemap_contains_only_available_regional_entities(): void
@@ -103,6 +104,7 @@ class RegionalLinksAndSitemapTest extends TestCase
         $settlement = Settlement::factory()->create([
             'slug' => 'seo-city',
             'name' => 'SEO-город',
+            'name_in' => 'SEO-городе',
         ]);
         $seller = $this->createSeller($settlement, 'seo-shop');
         $category = Category::factory()->create([
@@ -114,6 +116,8 @@ class RegionalLinksAndSitemapTest extends TestCase
             'category_id' => $category->id,
             'name' => 'Ноутбук Pro',
             'alias' => 'laptop-pro',
+            'price' => 45000,
+            'lowprice' => null,
             'is_active' => true,
         ]);
 
@@ -122,14 +126,15 @@ class RegionalLinksAndSitemapTest extends TestCase
             'alias' => $category->alias,
         ]))
             ->assertOk()
-            ->assertSee('Ноутбуки — товары в SEO-город | ГРАНАТ');
+            ->assertSee('Ноутбуки — купить в SEO-городе, цены от 45 000 руб. — BIMM')
+            ->assertSee('<h1 class="title">Ноутбуки в SEO-городе</h1>', false);
 
         $this->get(route('regional.product.show', [
             'location' => $settlement->slug,
             'alias' => $product->alias,
         ]))
             ->assertOk()
-            ->assertSee('Ноутбук Pro в SEO-город | ГРАНАТ')
+            ->assertSee('Ноутбук Pro — купить в SEO-городе, цена 45 000 руб. — BIMM')
             ->assertSee('<h1 class="product-title">', false);
 
         $this->get(route('regional.seller', [
@@ -137,7 +142,7 @@ class RegionalLinksAndSitemapTest extends TestCase
             'alias' => $seller->alias,
         ]))
             ->assertOk()
-            ->assertSee($seller->name.' в SEO-город | ГРАНАТ')
+            ->assertSee(trim($seller->name, "\"'«» ").' в SEO-городе — товары, цены, контакты — BIMM')
             ->assertSee('<h1 class="blog-heading text-center">', false);
     }
 

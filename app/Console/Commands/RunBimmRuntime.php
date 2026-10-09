@@ -5,15 +5,15 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 
-class RunGranatRuntime extends Command
+class RunBimmRuntime extends Command
 {
-    protected $signature = 'granat:work
+    protected $signature = 'bimm:work
                             {--serve : Start the local HTTP server}
                             {--host=127.0.0.1 : Host for php artisan serve}
                             {--port=8000 : Port for php artisan serve}
                             {--dry-run : Print planned processes without starting them}';
 
-    protected $description = 'Run all local Granat runtime workers from one command';
+    protected $description = 'Run all local BIMM runtime workers from one command';
 
     /** @var array<string, Process> */
     private array $processes = [];
@@ -44,7 +44,7 @@ class RunGranatRuntime extends Command
             $this->info("Started {$name}");
         }
 
-        $this->info('Granat runtime is running. Press Ctrl+C to stop.');
+        $this->info('BIMM runtime is running. Press Ctrl+C to stop.');
 
         while (! $this->stopping) {
             foreach ($this->processes as $name => $process) {
@@ -148,7 +148,7 @@ class RunGranatRuntime extends Command
 
         $this->trap([SIGINT, SIGTERM], function (): void {
             $this->stopping = true;
-            $this->line('Stopping Granat runtime...');
+            $this->line('Stopping BIMM runtime...');
         });
     }
 

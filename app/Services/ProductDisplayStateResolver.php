@@ -32,6 +32,10 @@ class ProductDisplayStateResolver
             return ProductDisplayState::Published;
         }
 
+        if ($this->transitions->isHeldByHiddenSeller($product)) {
+            return ProductDisplayState::SellerHidden;
+        }
+
         if ($this->transitions->publicationBlockedReason($product) !== null) {
             return ProductDisplayState::Unavailable;
         }

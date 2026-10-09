@@ -1,6 +1,6 @@
 @extends('main_layots')
 
-@section('title', 'Помощь продавцам | Как продавать на BIMM')
+@section('title', 'Как продавать: помощь продавцам — BIMM')
 
 @section('content')
 <main class="market-page seller-help-page">

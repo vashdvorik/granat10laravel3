@@ -51,6 +51,11 @@ class SettlementResource extends Resource
                 ->minValue(0)
                 ->default(0)
                 ->required(),
+            Forms\Components\TextInput::make('name_in')
+                ->label('Название в предложном падеже')
+                ->placeholder(fn (?Settlement $record): string => $record ? \App\Support\RussianLocative::prepositional((string) $record->name) : 'Тирасполе')
+                ->helperText('Как в фразе «купить в …»: Тирасполе, Бендерах, Рыбнице. Используется в заголовках и описаниях страниц для поиска. Оставьте пустым — подставится автоматически; если авто-вариант неверный, впишите правильный.')
+                ->maxLength(120),
             Forms\Components\Toggle::make('is_active')->label('Активен')->default(true),
             Forms\Components\TextInput::make('meta_title')
                 ->label('SEO title')

@@ -226,6 +226,7 @@ class CatalogPageService
     private function getSellersForCategory(array $categoryIds): Collection
     {
         return Seller::forRegionalContext()
+            ->publiclyVisible()
             ->whereHas('products', function (Builder $query) use ($categoryIds) {
                 $query->where('is_active', true)
                     ->whereIn('category_id', $categoryIds);

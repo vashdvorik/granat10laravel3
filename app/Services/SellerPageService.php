@@ -13,6 +13,7 @@ class SellerPageService
     public function getShops(int $perPage = 12): LengthAwarePaginator
     {
         return Seller::forRegionalContext()
+            ->publiclyVisible()
             ->with('settlement')
             ->withCount(['products' => function ($query) {
                 $query->where('is_active', true);

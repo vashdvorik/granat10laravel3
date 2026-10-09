@@ -1,5 +1,5 @@
 @extends('backend.auth.login_layouts')
-@section('title', 'Подтвердите почту | Маркетплейс ПМР')
+@section('title', 'Подтвердите почту — BIMM')
 
 @section('content')
 <div>

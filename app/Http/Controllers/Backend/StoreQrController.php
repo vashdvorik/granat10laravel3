@@ -21,6 +21,10 @@ class StoreQrController extends Controller
                 ->with('error', 'QR-код доступен после создания магазина.');
         }
 
+        if ($seller->isHidden()) {
+            return $this->hiddenResponse();
+        }
+
         return view('backend.cabinet.store.qr', [
             'user' => $request->user(),
             'seller' => $seller,
@@ -47,6 +51,12 @@ class StoreQrController extends Controller
         ]);
     }
 
+    private function hiddenResponse(): Response
+    {
+        return redirect()->route('account.index')
+            ->with('error', 'Магазин скрыт администратором: QR-код заработает, когда магазин вернётся на сайт.');
+    }
+
     public function download(Request $request, string $layout): Response
     {
         $seller = $request->user()->seller;
@@ -54,6 +64,10 @@ class StoreQrController extends Controller
         if ($seller === null) {
             return redirect()->route('account.store.create')
                 ->with('error', 'QR-код доступен после создания магазина.');
+        }
+
+        if ($seller->isHidden()) {
+            return $this->hiddenResponse();
         }
 
         return response($this->poster->svg($seller, $layout), 200, [

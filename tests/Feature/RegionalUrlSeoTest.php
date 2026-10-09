@@ -63,6 +63,8 @@ class RegionalUrlSeoTest extends TestCase
 
     public function test_paginated_catalog_pages_have_self_canonical_and_are_indexable(): void
     {
+        // в каталоге есть товар: пустой каталог в поиск не отдаётся (см. SeoLocalMarketplaceTest)
+        $this->createVisibleProduct(Settlement::factory()->create(), Category::factory()->create(), 'Page Product');
         $url = route('catalog.index');
 
         $this->get($url.'?page=2')

@@ -5,7 +5,7 @@
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-   <title>Кабинет продавца | Маркетплейс Гранат</title>
+   <title>{{ \App\Support\PageTitle::cabinet(trim($__env->yieldContent('title')), request()->route()?->getName()) }}</title>
 
    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap&subset=cyrillic" rel="stylesheet">
 
@@ -448,13 +448,6 @@
                      </div>
                   </div>
                   <div class="col-md-6">
-                     <div class="footer-menu text-end">
-                        <ul>
-                           <li>
-                              <a href="https://granatlab.com/">Контакты</a>
-                           </li>
-                        </ul>
-                     </div>
                      <!-- ends: .Footer Menu -->
                   </div>
                </div>

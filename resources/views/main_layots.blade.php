@@ -5,14 +5,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>{{ $seoTitle ?: trim($__env->yieldContent('title')) }}</title>
-    @if(config('regionality.seo_enabled'))
-    <link rel="canonical" href="{{ $canonicalUrl }}">
-    <meta name="robots" content="{{ $robotsMeta }}">
-    @if($seoDescription)
-    <meta name="description" content="{{ $seoDescription }}">
-    @endif
-    @endif
+    <title>{{ $seoTitle ?: (trim($__env->yieldContent('title')) ?: \App\Support\PageTitle::brand()) }}</title>
+    @include('partials.seo.head')
     <link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
     <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('css/slick.css') }}">
@@ -24,38 +18,6 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('css/pagination.css') }}">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    @if(request()->routeIs('catalog.index', 'catalog.show', 'regional.catalog.index', 'regional.catalog.show'))
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Главная",
-          "item": "{{ url('/') }}"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Каталог",
-          "item": "{{ $regionalUrl->route('catalog.index') }}"
-        }
-        @if(isset($breadcrumbs) && $breadcrumbs->count() > 0)
-          @foreach($breadcrumbs as $index => $crumb)
-          ,{
-            "@type": "ListItem",
-            "position": {{ $index + 3 }},
-            "name": "{{ $crumb->name }}",
-            "item": "{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}"
-          }
-          @endforeach
-        @endif
-      ]
-    }
-    </script>
-    @endif
     <style>
         /* Якорь пагинации - отступ от header */
         #catalog-top {
@@ -493,26 +455,6 @@
 
     </style>
 
-    {{-- Open Graph для соцсетей --}}
-    <meta property="og:title" content="{{ $seoTitle ?: trim($__env->yieldContent('title')) }}">
-    <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:url" content="{{ $canonicalUrl }}">
-    <meta property="og:locale" content="ru_RU">
-    <meta property="og:site_name" content="Маркетплейс ПМР">
-    @if($seoDescription)
-    <meta property="og:description" content="{{ $seoDescription }}">
-    @endif
-    @hasSection('og_image')
-    <meta property="og:image" content="@yield('og_image')">
-    @endif
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $seoTitle ?: trim($__env->yieldContent('title')) }}">
-    @if($seoDescription)
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    @endif
-    @hasSection('og_image')
-    <meta name="twitter:image" content="@yield('og_image')">
-    @endif
     
     {{-- SEO: Pagination meta tags --}}
     @yield('meta')
@@ -816,6 +758,8 @@
                 </section>
             </nav>
         </div>
+
+        @include('partials.seo.cities')
 
         <div class="site-footer__bottom">
             <span>© {{ now()->year }} BIMM — товары Приднестровья в одном месте</span>

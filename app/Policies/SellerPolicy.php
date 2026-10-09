@@ -34,7 +34,14 @@ class SellerPolicy
 
     public function delete(User $user, Seller $seller): bool
     {
-        return $this->ownsSeller($user, $seller);
+        // Скрытый администратором магазин владелец удалить не может: иначе причина скрытия исчезнет вместе с ним
+        return $this->ownsSeller($user, $seller) && ! $seller->isHidden();
+    }
+
+    /** Скрыть магазин и вернуть его на сайт может только администратор (доступ даёт before()). */
+    public function manageVisibility(User $user, Seller $seller): bool
+    {
+        return false;
     }
 
     public function manageSettings(User $user, Seller $seller): bool

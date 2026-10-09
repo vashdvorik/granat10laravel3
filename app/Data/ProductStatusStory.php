@@ -9,7 +9,7 @@ namespace App\Data;
 final readonly class ProductStatusStory
 {
     public function __construct(
-        /** draft | queued | checking | manual_review | changes_required | rejected | approved_hidden | published | outdated | no_images */
+        /** draft | queued | checking | manual_review | changes_required | rejected | approved_hidden | published | outdated | no_images | seller_hidden */
         public string $key,
         /** Короткое название состояния: «Черновик», «Нужно исправить». */
         public string $headline,

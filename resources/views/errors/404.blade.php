@@ -1,5 +1,5 @@
 @extends('main_layots')
-@section('title', 'Продавцы Тирасполя | Маркетплейс ПМР')
+@section('title', 'Страница не найдена — BIMM')
 
 @section('content')
 <div class="container container-240">

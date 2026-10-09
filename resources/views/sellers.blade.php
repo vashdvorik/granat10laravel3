@@ -1,6 +1,6 @@
 @extends('main_layots')
 
-@section('title', 'Магазины'.($regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' ПМР').' | ГРАНАТ')
+@section('title', 'Магазины'.($regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' ПМР').' — BIMM')
 
 @section('meta')
     @if($sellers->hasPages())
@@ -25,7 +25,7 @@
             <div class="shops-hero__panel">
                 <div>
                     <span class="market-eyebrow">Выбирай свой город</span>
-                    <h1>Магазины{{ $regionalContext->settlement() ? ' в '.$regionalContext->settlement()->name : ' ПМР' }}</h1>
+                    <h1>{{ $seoHeading ?? 'Магазины' }}</h1>
                     <p>Смотрите ассортимент, адреса и контакты местных продавцов в одном месте.</p>
                     <div class="shops-hero__region">
                         @include('components.regional-selector', ['variant' => 'hero'])

@@ -6,7 +6,7 @@
 @endif
 
 @extends('backend.auth.login_layouts')
-@section('title', 'Войти продавцу | Маркетплейс ПМР')
+@section('title', 'Войти продавцу — BIMM')
 
 @section('content')
 <div>

@@ -4,7 +4,7 @@
 
 @section('content')
 <nav class="joom-breadcrumbs" aria-label="Хлебные крошки"><a href="{{ $regionalUrl->route('home') }}">Главная</a><a href="{{ $regionalUrl->route('catalog.index') }}">Каталог</a>@foreach($breadcrumbs as $crumb)<a href="{{ $regionalUrl->route('catalog.show', ['alias' => $crumb->alias]) }}">{{ $crumb->name }}</a>@endforeach<span>{{ $category->name }}</span></nav>
-<header class="joom-page-head"><span class="joom-eyebrow">КАТЕГОРИЯ</span><h1>{{ $category->name }}</h1><p>{{ $category->desc ?: 'Подборка товаров и предложений от локальных продавцов.' }}</p></header>
+<header class="joom-page-head"><span class="joom-eyebrow">КАТЕГОРИЯ</span><h1>{{ $seoHeading ?? $category->name }}</h1><p>{{ $category->desc ?: 'Подборка товаров и предложений от локальных продавцов.' }}</p></header>
 
 <div class="joom-catalog-layout">
     <aside class="joom-sidebar">

@@ -4,13 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SellerResource\Pages;
 use App\Filament\Resources\SellerResource\RelationManagers\ProductsRelationManager;
+use App\Filament\Resources\SellerResource\Tables\SellerTableActions;
 use App\Models\Seller;
 use App\Models\Settlement;
 use App\Models\User;
-use App\Services\AdminSellerService;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -36,6 +35,19 @@ class SellerResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('Магазин скрыт от покупателей')
+                    ->icon('heroicon-o-eye-slash')
+                    ->iconColor('danger')
+                    ->description(fn (?Seller $record): ?string => $record?->isHidden()
+                        ? 'Скрыт '.$record->hidden_at->format('d.m.Y H:i')
+                            .($record->hiddenBy ? ' · '.$record->hiddenBy->name : '')
+                        : null)
+                    ->schema([
+                        Forms\Components\Placeholder::make('hidden_reason_text')
+                            ->label('Причина, которую видит продавец')
+                            ->content(fn (?Seller $record): string => (string) $record?->hidden_reason),
+                    ])
+                    ->visible(fn (?Seller $record): bool => (bool) $record?->isHidden()),
                 Forms\Components\Section::make('Основная информация')
                     ->schema([
                         Forms\Components\Select::make('user_id')
@@ -145,6 +157,9 @@ class SellerResource extends Resource
                     ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Название')
+                    ->limit(40)
+                    ->wrap()
+                    ->tooltip(fn (Seller $record): string => $record->name)
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('user.email')
@@ -155,7 +170,7 @@ class SellerResource extends Resource
                 Tables\Columns\TextColumn::make('alias')
                     ->label('Alias')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('settlement.name')
                     ->label('Населённый пункт')
                     ->description(fn (Seller $record): ?string => $record->settlement?->region?->name)
@@ -166,12 +181,30 @@ class SellerResource extends Resource
                     ->label('Активные товары')
                     ->alignCenter()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('hidden_at')
+                    ->label('На сайте')
+                    ->badge()
+                    ->getStateUsing(fn (Seller $record): string => $record->isHidden() ? 'Скрыт' : 'Виден')
+                    ->color(fn (string $state): string => $state === 'Скрыт' ? 'danger' : 'success')
+                    // Причина — во всплывающей подсказке: текст под значком расширял бы таблицу и возвращал прокрутку
+                    ->tooltip(fn (Seller $record): ?string => $record->hidden_reason)
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Создан')
                     ->dateTime('d.m.Y H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\TernaryFilter::make('hidden')
+                    ->label('На сайте')
+                    ->placeholder('Все продавцы')
+                    ->trueLabel('Скрытые')
+                    ->falseLabel('Видимые')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query->whereNotNull('hidden_at'),
+                        false: fn (Builder $query): Builder => $query->whereNull('hidden_at'),
+                    ),
                 Tables\Filters\TernaryFilter::make('without_settlement')
                     ->label('Населённый пункт')
                     ->placeholder('Все продавцы')
@@ -182,35 +215,7 @@ class SellerResource extends Resource
                         false: fn (Builder $query): Builder => $query->whereNotNull('settlement_id'),
                     ),
             ])
-            ->actions([
-                Tables\Actions\Action::make('publicPage')
-                    ->label('Открыть магазин')
-                    ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->url(fn (Seller $record): string => route('seller', $record->alias))
-                    ->openUrlInNewTab(),
-                Tables\Actions\Action::make('products')
-                    ->label('Товары')
-                    ->icon('heroicon-o-shopping-bag')
-                    ->url(fn (Seller $record): string => static::getUrl('edit', [
-                        'record' => $record,
-                        'activeRelationManager' => 0,
-                    ])),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('deleteSeller')
-                    ->label('Удалить магазин')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalDescription('Магазин, его товары, изображения будут удалены без возможности восстановления.')
-                    ->action(function (Seller $record, AdminSellerService $service): void {
-                        $service->delete(auth()->user(), $record);
-
-                        Notification::make()
-                            ->title('Магазин удалён')
-                            ->success()
-                            ->send();
-                    }),
-            ])
+            ->actions(SellerTableActions::make())
             ->bulkActions([]);
     }
 

@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
-class GranatRuntimeCommandTest extends TestCase
+class BimmRuntimeCommandTest extends TestCase
 {
     public function test_dry_run_prints_runtime_processes_without_starting_them(): void
     {
@@ -16,7 +16,7 @@ class GranatRuntimeCommandTest extends TestCase
         config()->set('services.telegram.bot_token', 'test-token');
         config()->set('services.telegram.webhook_secret', 'test-secret');
 
-        $exitCode = Artisan::call('granat:work', [
+        $exitCode = Artisan::call('bimm:work', [
             '--dry-run' => true,
             '--serve' => true,
         ]);

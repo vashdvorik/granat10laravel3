@@ -14,7 +14,7 @@ class EnvironmentSettingsServiceTest extends TestCase
     {
         parent::setUp();
 
-        $this->environmentPath = tempnam(sys_get_temp_dir(), 'granat-env-');
+        $this->environmentPath = tempnam(sys_get_temp_dir(), 'bimm-env-');
         file_put_contents($this->environmentPath, implode(PHP_EOL, [
             'APP_KEY=secret-app-key',
             'OPENROUTER_API_KEY=existing-secret',

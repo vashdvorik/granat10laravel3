@@ -1,5 +1,5 @@
 @extends('main_layots')
-@section('title', $q ? 'Поиск: ' . $q . ' | Маркетплейс ПМР' : 'Поиск товаров | Маркетплейс ПМР')
+@section('title', $q ? 'Поиск: '.$q.' — BIMM' : 'Поиск товаров — BIMM')
 
 @section('content')
 
