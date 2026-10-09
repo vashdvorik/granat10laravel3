@@ -371,6 +371,9 @@
                         <li class="{{ request()->routeIs('account.store.qr*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.qr') }}">QR-код магазина</a>
                         </li>
+                        <li class="{{ request()->routeIs('account.store.telegram*') ? 'active' : '' }}">
+                           <a href="{{ route('account.store.telegram') }}">Telegram-уведомления</a>
+                        </li>
                         <li class="{{ request()->routeIs('account.store.events.*') ? 'active' : '' }}">
                            <a href="{{ route('account.store.events.index') }}">Журнал событий</a>
                         </li>

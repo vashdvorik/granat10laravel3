@@ -107,7 +107,7 @@ OPENROUTER_IMAGE_MODEL=openai/gpt-4o-mini
   имеет приоритет над `OPENROUTER_API_KEY` из `.env`.
 - Модель указывается так, как она называется на openrouter.ai/models: «автор/название», например
   `openai/gpt-4o-mini`, `google/gemini-2.5-flash`, `meta-llama/llama-3.1-8b-instruct:free`. Для фото нужна модель,
-  которая умеет читать изображения.
+  которая умеет читать изображения. Как выбирать и принимать модель — в `moderation_model_selection_ru.md`.
 - Пределы запросов, повторы и таймауты — `AI_MODERATION_*` (общие) и `AI_IMAGE_MODERATION_*` (очередь, таймаут и
   попытки для фото).
 - Адрес API (`OPENROUTER_BASE_URL`, по умолчанию `https://openrouter.ai/api/v1`) менять не нужно; в админке его нет.

@@ -1,6 +1,6 @@
 # Документация проекта
 
-Актуализировано: 07.10.2026.
+Актуализировано: 09.10.2026.
 
 В корне `docs` находятся только документы, которыми можно пользоваться при
 разработке и эксплуатации текущей версии приложения. Завершённые планы,
@@ -17,6 +17,7 @@
 | [local_runtime_ru.md](local_runtime_ru.md) | Единая команда локального запуска workers, scheduler и сайта |
 | [order_system_ru.md](order_system_ru.md) | Фактическая реализация заказов и её ограничения |
 | [moderation_operations_ru.md](moderation_operations_ru.md) | Настройка и эксплуатация модерации товаров (ИИ-проверка только через OpenRouter) |
+| [moderation_model_selection_ru.md](moderation_model_selection_ru.md) | Правила выбора моделей OpenRouter для проверки текста и фото: требования, пороги приёмки, стоимость, журнал выбора |
 | [product_moderation_policy_ru.md](product_moderation_policy_ru.md) | Бизнес-политика проверки товаров |
 | [architecture_hardening_plan_ru.md](architecture_hardening_plan_ru.md) | Оставшиеся архитектурные улучшения |
 | [mobile_navigation_redesign_plan_ru.md](mobile_navigation_redesign_plan_ru.md) | Поэтапный план переделки мобильной навигации клиента и входа продавца |

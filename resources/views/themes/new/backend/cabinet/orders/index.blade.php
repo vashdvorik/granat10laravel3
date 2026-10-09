@@ -65,7 +65,7 @@
                             </span>
                         </div>
                         <h5>{{ $order->product_name }}</h5>
-                        <p>{{ $order->customer_name }} · {{ $order->customer_phone }}</p>
+                        <p>@if($order->isUnreadable('customer_name') && $order->isUnreadable('customer_phone'))Данные покупателя недоступны@else{{ $order->customer_name }} · {{ $order->customer_phone }}@endif</p>
                     </div>
                     <div class="order-list-card__meta">
                         <strong>{{ number_format((float) $order->unit_price * $order->quantity, 2, ',', ' ') }} руб.</strong>

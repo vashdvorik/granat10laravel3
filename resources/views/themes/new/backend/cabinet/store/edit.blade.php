@@ -136,18 +136,10 @@
                                 <small class="text-muted">Например: районы доставки, стоимость и сроки.</small>
                                 @error('delivery_terms')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 <hr>
-                                <h6>Telegram-уведомления</h6>
-                                @if($seller->telegram_verified_at)
-                                    <p class="text-success mb-2">
-                                        Telegram подключён {{ $seller->telegram_verified_at->format('d.m.Y H:i') }}.
-                                    </p>
-                                    <button type="submit" form="store-telegram-disconnect-form" class="btn btn-outline-danger btn-sm">Отключить Telegram</button>
-                                @else
-                                    <p class="text-muted">
-                                        После подключения бот будет присылать сообщения о новых заказах.
-                                    </p>
-                                    <button type="submit" form="store-telegram-connect-form" class="btn btn-outline-primary btn-sm">Подключить Telegram</button>
-                                @endif
+                                <p class="mb-0">
+                                    <i class="uil uil-telegram"></i>
+                                    <a href="{{ route('account.store.telegram') }}">Telegram-уведомления о новых заказах</a>
+                                </p>
                             </div>
                         </div>
 
@@ -306,16 +298,6 @@
                 </div>
             </form>
 
-            @if($seller->telegram_verified_at)
-                <form id="store-telegram-disconnect-form" method="POST" action="{{ route('account.store.telegram.disconnect') }}" class="d-none">
-                    @csrf
-                    @method('DELETE')
-                </form>
-            @else
-                <form id="store-telegram-connect-form" method="POST" action="{{ route('account.store.telegram.connect') }}" class="d-none">
-                    @csrf
-                </form>
-            @endif
         @endif
     </div>
 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\SafeEncrypted;
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -19,10 +20,11 @@ class Order extends Model
 
     protected $casts = [
         'status' => OrderStatus::class,
-        'customer_name' => 'encrypted',
-        'customer_phone' => 'encrypted',
-        'delivery_address' => 'encrypted',
-        'customer_comment' => 'encrypted',
+        // Личные данные покупателя шифруются; нечитаемое значение даёт «Данные недоступны», а не ошибку 500
+        'customer_name' => SafeEncrypted::class,
+        'customer_phone' => SafeEncrypted::class,
+        'delivery_address' => SafeEncrypted::class,
+        'customer_comment' => SafeEncrypted::class,
         'original_unit_price' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'quantity' => 'integer',
@@ -58,8 +60,24 @@ class Order extends Model
         return $query->latest('created_at');
     }
 
-    public function isDelivery(): bool
+    /** Это поле не удалось расшифровать (например, заказ создан до смены ключа шифрования). */
+    public function isUnreadable(string $field): bool
     {
+        return $this->getAttribute($field) === SafeEncrypted::UNREADABLE;
+    }
+
+    public function hasUnreadableData(): bool
+    {
+        foreach (['customer_name', 'customer_phone', 'delivery_address', 'customer_comment'] as $field) {
+            if ($this->isUnreadable($field)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isDelivery(): bool    {
         return $this->fulfillment_method === 'delivery';
     }
 

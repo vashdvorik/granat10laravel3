@@ -110,13 +110,16 @@
                         <h6>Покупатель и получение</h6>
                     </div>
                     <div class="order-detail-card__body">
+                        @if($order->hasUnreadableData())
+                            <p class="text-muted small mb-2">Данные покупателя не удалось прочитать: заказ создан до смены ключа шифрования. Номер, товар, цена и статус заказа доступны.</p>
+                        @endif
                         <div class="order-detail-row">
                             <span>Имя</span>
                             <strong>{{ $order->customer_name }}</strong>
                         </div>
                         <div class="order-detail-row">
                             <span>Телефон</span>
-                            <strong><a href="tel:{{ preg_replace('/\D+/', '', $order->customer_phone) }}">{{ $order->customer_phone }}</a></strong>
+                            <strong>@if($order->isUnreadable('customer_phone')){{ $order->customer_phone }}@else<a href="tel:{{ preg_replace('/\D+/', '', $order->customer_phone) }}">{{ $order->customer_phone }}</a>@endif</strong>
                         </div>
                         <div class="order-detail-row">
                             <span>Способ получения</span>

@@ -107,7 +107,9 @@ class BackendSellerControllerTest extends TestCase
         $response->assertSee('store-edit-card', false);
         $response->assertSee('store-edit-submit-bar', false);
         $response->assertSee('store-edit-contact-group', false);
-        $response->assertSee('store-telegram-connect-form', false);
+        // подключение Telegram переехало в отдельный пункт меню; на странице настроек осталась ссылка на него
+        $response->assertDontSee('store-telegram-connect-form', false);
+        $response->assertSee(route('account.store.telegram'), false);
         $response->assertDontSee('store-edit-actions-card', false);
         $response->assertSee('store-feature-grid', false);
         $html = $response->getContent();

@@ -124,7 +124,8 @@ chmod 600 .env
 nano .env
 ```
 
-Минимальная production-конфигурация:
+Образец рабочего файла с пометками «оставить / изменить / добавить / удалить» (Telegram, ИИ-модерация, список лишних
+переменных): `deployment/env.production.annotated.example`. Ниже — минимальная production-конфигурация:
 
 ```env
 APP_NAME="BIMM"
@@ -445,7 +446,8 @@ TELEGRAM_BOT_USERNAME=имя_бота_без_символа_@
 TELEGRAM_WEBHOOK_SECRET=длинная_случайная_строка
 ```
 
-Очередь заказов должна работать постоянно. После включения HTTPS зарегистрируйте
+Уведомления идут через очередь `orders`: обработчик очереди должен слушать её (при `QUEUE_CONNECTION=database`:
+`php artisan queue:work --queue=default,moderation,orders`). После включения HTTPS зарегистрируйте
 webhook:
 
 ```bash
@@ -460,8 +462,9 @@ curl -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
 curl "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getWebhookInfo"
 ```
 
-Продавец подключает Telegram из кабинета. Уведомление отправляется только после
-проверки чата и при включённом `telegram_notifications_enabled`.
+Продавец подключает Telegram в кабинете: меню «Магазин» → «Telegram-уведомления»
+(`/account/store/telegram`). Сообщение отправляется только о **новом заказе**, после проверки чата и при включённом
+`telegram_notifications_enabled`; о смене статуса заказа бот не пишет.
 
 ## 12. ИИ-модерация
 

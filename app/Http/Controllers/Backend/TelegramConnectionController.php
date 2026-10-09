@@ -6,9 +6,27 @@ use App\Http\Controllers\Controller;
 use App\Services\TelegramConnectionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TelegramConnectionController extends Controller
 {
+    public function show(Request $request): View|RedirectResponse
+    {
+        $seller = $request->user()->seller;
+
+        if ($seller === null) {
+            return redirect()->route('account.store.create')
+                ->with('error', 'Telegram-уведомления доступны после создания магазина.');
+        }
+
+        $this->authorize('manageSettings', $seller);
+
+        return view('backend.cabinet.store.telegram', [
+            'user' => $request->user(),
+            'seller' => $seller,
+            'botUsername' => ltrim((string) config('services.telegram.bot_username'), '@'),
+        ]);
+    }
     public function connect(Request $request, TelegramConnectionService $connections): RedirectResponse
     {
         $seller = $request->user()->seller;

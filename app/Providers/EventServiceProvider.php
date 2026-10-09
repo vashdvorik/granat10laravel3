@@ -49,9 +49,9 @@ class EventServiceProvider extends ServiceProvider
             SendNewOrderNotification::class,
             SendOrderTelegramNotification::class,
         ],
+        // В Telegram уходит только сообщение о новом заказе; смена статуса приходит в уведомления кабинета
         OrderStatusChanged::class => [
             SendOrderStatusChangedNotification::class,
-            SendOrderTelegramNotification::class,
         ],
     ];
 

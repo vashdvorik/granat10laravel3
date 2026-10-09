@@ -117,6 +117,9 @@
                     <a class="{{ request()->routeIs('account.store.qr*') ? 'active' : '' }}" href="{{ route('account.store.qr') }}">
                         <i class="fa-solid fa-qrcode"></i><span>QR-код магазина</span>
                     </a>
+                    <a class="{{ request()->routeIs('account.store.telegram*') ? 'active' : '' }}" href="{{ route('account.store.telegram') }}">
+                        <i class="fa-brands fa-telegram"></i><span>Telegram-уведомления</span>
+                    </a>
                 @endif
                 <a class="{{ request()->routeIs('account.balance.*', 'account.user.balance.*') ? 'active' : '' }}" href="{{ route('account.balance.index') }}">
                     <i class="fa-solid fa-wallet"></i><span>Баланс</span>

@@ -221,6 +221,9 @@ Route::middleware(['auth', 'verified', 'cabinet.design'])->prefix('account')->na
         Route::get('{seller}/edit', [App\Http\Controllers\Backend\SellerController::class, 'edit'])->name('edit');
         Route::put('{seller}', [App\Http\Controllers\Backend\SellerController::class, 'update'])->name('update');
 
+        // Telegram-уведомления о новых заказах: отдельный пункт меню магазина
+        Route::get('telegram', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'show'])
+            ->name('telegram');
         Route::post('telegram/connect', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'connect'])
             ->name('telegram.connect');
         Route::delete('telegram', [App\Http\Controllers\Backend\TelegramConnectionController::class, 'disconnect'])

@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Contracts\TelegramBotClient;
 use App\Events\OrderCreated;
-use App\Events\OrderStatusChanged;
 use App\Models\Order;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
@@ -18,7 +17,8 @@ class SendOrderTelegramNotification implements ShouldQueue
         private readonly TelegramBotClient $telegram,
     ) {}
 
-    public function handle(OrderCreated|OrderStatusChanged $event): void
+    /** Сообщение о новом заказе. О смене статуса в Telegram не пишем: продавец сам её и меняет. */
+    public function handle(OrderCreated $event): void
     {
         $order = Order::query()->with('seller')->find($event->orderId);
         $seller = $order?->seller;
@@ -33,11 +33,7 @@ class SendOrderTelegramNotification implements ShouldQueue
             return;
         }
 
-        $message = $event instanceof OrderCreated
-            ? $this->newOrderMessage($order)
-            : $this->statusChangedMessage($order);
-
-        $this->telegram->sendMessage($seller->telegram_chat_id, $message);
+        $this->telegram->sendMessage($seller->telegram_chat_id, $this->newOrderMessage($order));
     }
 
     public function viaQueue(): string
@@ -68,16 +64,6 @@ class SendOrderTelegramNotification implements ShouldQueue
             '',
             'Открыть заказ: '.route('account.store.orders.show', $order),
         ], static fn ($line): bool => $line !== null));
-    }
-
-    private function statusChangedMessage(Order $order): string
-    {
-        return implode("\n", [
-            'Статус заказа '.$order->number.' изменён.',
-            'Новый статус: '.$order->status->label(),
-            'Товар: '.$order->product_name,
-            'Открыть заказ: '.route('account.store.orders.show', $order),
-        ]);
     }
 
     private function fulfillmentMethodLabel(string $method): string

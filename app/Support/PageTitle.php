@@ -55,6 +55,7 @@ class PageTitle
             'account.store.orders.show' => 'Заказ',
             'account.store.events.index' => 'Журнал событий',
             'account.store.qr' => 'QR-код магазина',
+            'account.store.telegram' => 'Telegram-уведомления',
             'account.user.index' => 'Профиль',
             'account.user.edit' => 'Редактирование профиля',
             'account.user.change_password' => 'Безопасность',
