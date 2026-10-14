@@ -8,7 +8,7 @@
     $issues = array_values((array) $issues);
 @endphp
 
-<div class="product-status-box product-status-box--{{ $story->tone }}" id="product-status-box" role="status">
+<div class="product-status-box product-status-box--{{ $story->tone }}" id="product-status-box" role="status" data-live-region="product:status">
     <div class="product-status-box__head">
         <span class="product-status-box__icon" aria-hidden="true"><i class="uil uil-{{ $story->icon }}"></i></span>
         <div class="product-status-box__titles">

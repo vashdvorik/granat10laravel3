@@ -154,6 +154,7 @@
                                                 <div class="seller-product-card-col">
                                                     <div class="card product product--grid position-relative seller-product-card"
                                                          data-product-id="{{ $product->id }}"
+                                                         data-card-state="{{ $productCabinetState->status }}"
                                                          data-card-signature="{{ $product->cabinet_state_signature }}">
                                                         <div
                                                             class="position-absolute seller-product-card__menu"
@@ -460,18 +461,31 @@ $(document).ready(function() {
             },
             complete: function() {
                 sellerProductStatusRefreshInFlight = false;
+                scheduleSellerProductStatusRefresh();
             }
         });
     }
 
-    function startSellerProductStatusRefresh() {
-        refreshSellerProductCardStatuses();
+    // Пока какую-то карточку проверяют, статус может смениться в любую секунду: спрашиваем чаще
+    function sellerProductStatusRefreshDelay() {
+        const checking = $('.seller-product-card[data-card-state="queued"], .seller-product-card[data-card-state="checking"]');
 
-        if (sellerProductStatusRefreshTimer) {
-            clearInterval(sellerProductStatusRefreshTimer);
+        return checking.length ? 8000 : 25000;
+    }
+
+    function scheduleSellerProductStatusRefresh() {
+        clearTimeout(sellerProductStatusRefreshTimer);
+
+        // На скрытой вкладке не опрашиваем: вернувшись, страница обновится сразу (visibilitychange ниже)
+        if (document.hidden) {
+            return;
         }
 
-        sellerProductStatusRefreshTimer = setInterval(refreshSellerProductCardStatuses, 25000);
+        sellerProductStatusRefreshTimer = setTimeout(refreshSellerProductCardStatuses, sellerProductStatusRefreshDelay());
+    }
+
+    function startSellerProductStatusRefresh() {
+        refreshSellerProductCardStatuses();
     }
 
     if ($('.seller-product-card[data-product-id]').length) {

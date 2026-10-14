@@ -7879,7 +7879,6 @@ span.star:before {
   font-weight: 500;
   letter-spacing: 0.2em; }
 .homecate-cosre-title-wrap .homecate-title-block {
-  text-transform: capitalize;
   font-size: 50px;
   padding-top: 20px;
   padding-bottom: 30px;
@@ -9320,13 +9319,11 @@ span.star:before {
     5.2. Item view templates
  */
 .product-title {
-  font-size: 14px;
-  text-transform: capitalize; }
+  font-size: 14px; }
 
 .product-cate {
   color: #999;
-  font-size: 12px;
-  text-transform: capitalize; }
+  font-size: 12px; }
 
 .product-price {
   color: #666;
@@ -9446,13 +9443,6 @@ span.star:before {
   /* NEW - Chrome */
   display: flex;
   /* NEW, Spec - Opera 12.1, Firefox 20+ */ }
-  @media (max-width: 480px) {
-    .pd-sort {
-      -moz-flex-direction: column;
-      -ms-flex-direction: column;
-      -webkit-box-orient: vertical;
-      -webkit-box-direction: normal;
-              flex-direction: column; } }
   .pd-sort .dropdown {
     height: 43px;
     border: 2px solid #f0f0f0;
@@ -9464,13 +9454,6 @@ span.star:before {
       font-family: FontAwesome;
       position: absolute;
       top: 10px; }
-  @media (max-width: 480px) {
-    .pd-sort .dropdown-menu {
-      width: 100%; } }
-
-@media (max-width: 480px) {
-  .filter-sort {
-    margin-bottom: 15px; } }
 .filter-sort .dropdown {
   padding: 10px 23px; }
   .filter-sort .dropdown-menu > .catalog-region-heading {
@@ -9506,6 +9489,47 @@ span.star:before {
 .filter-show .dropdown-menu {
   left: unset;
   right: 0; }
+
+/* Телефон: фильтры «Регион» и «Сортировка» стоят в одной строке, каждый занимает половину ширины */
+@media (max-width: 480px) {
+  .pd-sort {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+            flex-direction: row;
+    gap: 8px; }
+  .pd-sort .filter-sort,
+  .pd-sort .filter-show {
+    -webkit-box-flex: 1;
+            flex: 1 1 0;
+    min-width: 0;
+    margin: 0; }
+  .pd-sort .dropdown {
+    padding: 10px 28px 10px 14px; }
+  .pd-sort .dropdown:after {
+    right: 14px; }
+  .pd-sort .dropdown button {
+    display: block;
+    width: 100%;
+    padding: 1px 0;
+    text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; }
+  .pd-sort .dropdown-prefix {
+    display: none; }
+  .pd-sort .dropdown span.dropdown-label {
+    color: #333; }
+  .pd-sort .dropdown-menu {
+    width: auto;
+    min-width: 190px;
+    max-width: calc(100vw - 30px); } }
+@media (max-width: 360px) {
+  .pd-sort .dropdown {
+    padding: 10px 24px 10px 12px; }
+  .pd-sort .dropdown:after {
+    right: 11px; }
+  .pd-sort .dropdown button {
+    font-size: 13px; } }
 
 .view-mode.view-group {
   width: 169px;
@@ -10901,7 +10925,6 @@ span.star:before {
 .btn-shoplook {
   background: #000;
   font-size: 16px;
-  text-transform: capitalize;
   font-weight: 500;
   color: #fff;
   width: 180px;
@@ -11024,7 +11047,6 @@ span.star:before {
   .heading-content .breadcrumb {
     background: transparent; }
     .heading-content .breadcrumb li a {
-      text-transform: capitalize;
       font-size: 12px;
       font-weight: normal; }
     .heading-content .breadcrumb li + li:before {
@@ -11100,7 +11122,6 @@ span.star:before {
   color: #000000;
   font-weight: 500;
   font-family: "Helvetica Neue LT Std", sans-serif;
-  text-transform: capitalize;
   display: inline-block;
   padding: 26px 0;
   width: 100%; }
@@ -11359,11 +11380,9 @@ span.star:before {
 .product-info .product-cate {
   color: #999;
   font-size: 12px;
-  text-transform: capitalize;
   margin-bottom: 8px; }
 .product-info .product-title {
   font-size: 14px;
-  text-transform: capitalize;
   margin-bottom: 12px; }
   .product-info .product-title.v2 {
     font-size: 16px;
@@ -11844,8 +11863,7 @@ span.star:before {
         font: 500 14px/35px "Helvetica Neue LT Std", sans-serif;
         color: #a4a4a4;
         display: block;
-        position: relative;
-        text-transform: capitalize; }
+        position: relative; }
         .filter-product .filter-content > li > a:hover {
           color: #777; }
       .filter-product .filter-content > li .filter-menu {
@@ -11890,8 +11908,7 @@ span.star:before {
       -webkit-transition: all 0.1s ease 0s;
       -o-transition: all 0.1s ease 0s; }
   .filter-product .filter-color .filter-content > li > a {
-    font-weight: 600;
-    text-transform: capitalize; }
+    font-weight: 600; }
   .filter-product .filter-size .filter-content .btn {
     width: 100%;
     border-radius: 0;
@@ -15988,7 +16005,6 @@ span.star:before {
         float: none;
         display: inline-block; } }
   .navbar-nav > li > a {
-    text-transform: capitalize;
     font-size: 16px;
     font-weight: 500;
     position: relative;
@@ -16059,7 +16075,6 @@ span.star:before {
     background: none; }
     .menu-level-1 > li > a {
       font: 14px/16px "Helvetica Neue LT Std", sans-serif;
-      text-transform: capitalize;
       padding: 7px 25px;
       color: #878787;
       font-weight: 400;
@@ -16129,7 +16144,6 @@ span.star:before {
       line-height: 30px;
       color: #666666;
       font-size: 14px;
-      text-transform: capitalize;
       white-space: nowrap;
       -webkit-transition: all 0.3s ease 0s;
       transition: all 0.3s ease 0s;
@@ -16573,8 +16587,7 @@ span.star:before {
     color: #ffffff;
     font-size: 18px;
     font-weight: 500;
-    line-height: 55px;
-    text-transform: capitalize; }
+    line-height: 55px; }
   .widget-verticalmenu .navbar-toggles:after {
     content: "";
     position: absolute;
@@ -17682,8 +17695,7 @@ footer .f-top {
           width: 70px;
           height: 70px; } }
     .countdown-time li span {
-      font-weight: 500;
-      text-transform: capitalize; }
+      font-weight: 500; }
 
 .bestseller2 {
   padding-top: 50px;

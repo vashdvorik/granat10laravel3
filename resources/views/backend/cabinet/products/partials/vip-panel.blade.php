@@ -8,7 +8,7 @@
     $defaultDays = ($firstAffordable ?? ($s->options[0] ?? null))['days'] ?? null;
 @endphp
 
-<div class="card mb-3 product-vip-panel" id="vip">
+<div class="card mb-3 product-vip-panel" id="vip" data-live-region="product:vip">
     <div class="card-body">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
             <h6 class="mb-0"><i class="uil uil-star text-warning"></i> VIP-размещение</h6>

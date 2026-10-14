@@ -24,7 +24,7 @@
 <div class="filter-show">
     <div class="dropdown">
         <button class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-            Сортировать по
+            <span class="dropdown-prefix">Сортировать по</span>
             <span class="dropdown-label">{{ $currentLabel }}</span>
         </button>
         <ul class="dropdown-menu">

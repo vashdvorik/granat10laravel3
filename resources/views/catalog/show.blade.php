@@ -159,8 +159,9 @@
     @endphp
 
     @if($hasIconsCheck)
-        {{-- РЕЖИМ С ИКОНКАМИ - карточки --}}
-        <div class="mobile-categories-grid">
+        {{-- РЕЖИМ С ИКОНКАМИ - карточки: не больше двух рядов, остальное листается вправо.
+             Если вместе с «Назад» их не больше трёх, они стоят в один ряд на всю ширину. --}}
+        <div class="mobile-categories-grid {{ $categories->count() + 1 <= 3 ? 'mobile-categories-grid--single' : '' }}">
             <!-- Кнопка "Назад" в виде карточки -->
             <div class="mobile-category-card back-card">
                 <a href="{{ $backUrl }}">
@@ -195,7 +196,14 @@
             @endforeach
         </div>
     @else
-        {{-- РЕЖИМ БЕЗ ИКОНОК - текстовые плитки --}}
+        {{-- РЕЖИМ БЕЗ ИКОНОК - текстовые плитки: не больше двух рядов, остальное листается вправо.
+             Плитки раскладываются по рядам по очереди (1-я сверху, 2-я снизу, 3-я сверху...), чтобы ряды были
+             одной длины; если категорий одна или две, они остаются в одном ряду. --}}
+        @php
+            $tileRows = $categories->count() > 2
+                ? $categories->values()->partition(fn ($category, $index) => $index % 2 === 0)
+                : collect([$categories->values()]);
+        @endphp
         <div class="mobile-categories-list">
             <!-- Кнопка "Назад" в виде плитки -->
             <div class="mobile-category-tile back-tile">
@@ -206,13 +214,19 @@
             </div>
 
             <!-- Список категорий текстом -->
-            @foreach ($categories as $subcategory)
-                <div class="mobile-category-tile">
-                    <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">
-                        <span>{{ $subcategory->name }}</span>
-                    </a>
-                </div>
-            @endforeach
+            <div class="mobile-categories-rows">
+                @foreach ($tileRows as $tileRow)
+                    <div class="mobile-categories-row">
+                        @foreach ($tileRow as $subcategory)
+                            <div class="mobile-category-tile">
+                                <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">
+                                    <span>{{ $subcategory->name }}</span>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
         </div>
     @endif
 </div>

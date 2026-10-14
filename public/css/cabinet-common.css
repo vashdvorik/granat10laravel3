@@ -7789,3 +7789,20 @@ html body.seller-cabinet-body .event-timeline__item:hover {
 html body.seller-cabinet-body .seller-product-card__badge {
     box-shadow: none !important;
 }
+
+/* Автообновление статуса (public/js/cabinet-live.js): блок, который только что подменили свежим, коротко подсвечивается,
+   чтобы продавец заметил, что статус товара изменился. */
+@keyframes cabinet-live-flash {
+    from { box-shadow: 0 0 0 4px rgba(95, 99, 242, .35); }
+    to { box-shadow: 0 0 0 4px rgba(95, 99, 242, 0); }
+}
+
+.live-updated {
+    animation: cabinet-live-flash 1.8s ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-updated {
+        animation: none;
+    }
+}

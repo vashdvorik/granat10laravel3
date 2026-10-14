@@ -172,6 +172,10 @@ Route::middleware(['auth', 'verified', 'cabinet.design'])->prefix('account')->na
 
     // Журнал баланса (все операции: пополнения, VIP, благодарности, корректировки)
     Route::get('balance', [App\Http\Controllers\Backend\BalanceJournalController::class, 'index'])->name('balance.index');
+    // Проверка «что изменилось» для автообновления статуса товара и колокольчика без перезагрузки страницы
+    Route::get('live', App\Http\Controllers\Backend\LiveStateController::class)
+        ->middleware('throttle:90,1')
+        ->name('live');
     Route::get('notifications/{notification}', [App\Http\Controllers\Backend\NotificationController::class, 'read'])
         ->name('notifications.read');
     Route::post('notifications/read-all', [App\Http\Controllers\Backend\NotificationController::class, 'readAll'])

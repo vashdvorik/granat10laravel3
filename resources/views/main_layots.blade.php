@@ -242,10 +242,34 @@
         margin: 15px 0;
     }
     
+    /* Категории не занимают весь экран: два ряда, остальное листается вправо.
+       Карточка чуть уже трети ширины, поэтому справа выглядывает следующая и видно, что список продолжается. */
     .mobile-categories-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-auto-flow: column;
+        grid-template-rows: repeat(2, auto);
+        grid-auto-columns: calc((100% - 20px) / 3.3);
         gap: 10px;
+        /* до краёв экрана; отступ внутри оставляет место тени карточек, которую иначе обрезала бы прокрутка */
+        margin: 0 -15px;
+        padding: 4px 15px 10px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .mobile-categories-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Совсем мало категорий: один ряд на всю ширину, листать нечего */
+    .mobile-categories-grid.mobile-categories-grid--single {
+        grid-template-rows: auto;
+        grid-auto-columns: calc((100% - 20px) / 3);
+        margin: 0;
+        padding: 0;
+        overflow: visible;
     }
     
     .mobile-category-card {
@@ -318,15 +342,40 @@
 
 /* Стили для текстовых плиток (без иконок) */
 
+/* Текстовые плитки: «Назад» слева на всю высоту, справа не больше двух рядов, остальное листается вправо */
 .mobile-categories-list {
     display: flex;
-    flex-wrap: wrap;
+    align-items: stretch;
     gap: 8px;
-    margin: 15px 0;
+    /* до краёв экрана; отступ внутри оставляет место тени плиток, которую иначе обрезала бы прокрутка */
+    margin: 11px -15px;
+    padding: 4px 15px 10px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.mobile-categories-list::-webkit-scrollbar {
+    display: none;
+}
+
+.mobile-categories-rows {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 8px;
+    width: max-content;
+}
+
+.mobile-categories-row {
+    display: flex;
+    gap: 8px;
 }
 
 .mobile-category-tile {
     flex: 0 0 auto;
+    white-space: nowrap;
     min-width: 50px;
     background: #fff;
     border-radius: 8px;
@@ -341,7 +390,7 @@
 
 .mobile-category-tile a {
     display: block;
-    padding: 14px 16px;
+    padding: 12px 16px;
     text-decoration: none;
     color: #333;
     font-size: 14px;
@@ -350,11 +399,13 @@
 
 /* Кнопка "Назад" для плиток */
 .mobile-category-tile.back-tile {
+    display: flex;
     background: linear-gradient(135deg, #e8f4f8 0%, #e8e4f3 100%);
     border: 1px solid #d1d1d1;
 }
 
 .mobile-category-tile.back-tile a {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 10px;

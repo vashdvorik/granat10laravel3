@@ -195,7 +195,8 @@
 
     .search-mobile-filters .pd-sort {
         display: grid;
-        gap: 10px;
+        gap: 8px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     @media (max-width: 767px) {

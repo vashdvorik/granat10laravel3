@@ -4,7 +4,8 @@
 
 @section('content_cabinet')
 
-<div class="contents product-show-page">
+<div class="contents product-show-page"
+     @if($seller) data-live-product="{{ $product->id }}" data-live-signature="{{ $product->cabinet_state_signature }}" data-live-reload @endif>
     <div class="container-fluid">
         @include('backend.cabinet.partials.flash')
         @if(!$seller)
@@ -162,13 +163,13 @@
                                         @endif
                                         <!-- End: Product Characteristics -->
                                     {{-- Кнопки действий --}}
-                                        <div class="mb-3 product-show-primary-action">
+                                        <div class="mb-3 product-show-primary-action" data-live-region="product:primary-action">
                                             <x-product-moderation-actions :product="$product" />
                                         </div>
                                         {{-- VIP: включить, продлить, отключить, оплатить --}}
                                         @include('backend.cabinet.products.partials.vip-panel')
                                         {{-- КНОПКИ УДАЛИТЬ И ИЗМЕНИТЬ --}}
-                                        <div class="d-flex mt-20 flex-wrap gap-2 product-show-actions">
+                                        <div class="d-flex mt-20 flex-wrap gap-2 product-show-actions" data-live-region="product:actions">
                                             @if($product->view_state->canUnpublish)
                                             <form action="{{ route('account.store.products.deactivate', $product) }}"
                                                   method="POST"
@@ -257,7 +258,8 @@ $(document).ready(function() {
     });
     
     // Подтверждение удаления товара
-    $('.delete-product-btn').on('click', function(e) {
+    // Делегированный обработчик: блок с кнопками подменяется при автообновлении статуса, прямая привязка к кнопке пропала бы
+    $(document).on('click', '.delete-product-btn', function(e) {
         e.preventDefault();
         const form = $(this).closest('.delete-product-form');
         const productName = form.data('product-name');

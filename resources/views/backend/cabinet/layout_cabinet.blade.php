@@ -55,23 +55,24 @@
          <div class="navbar-right">
             <ul class="navbar-right__menu">
                @php
-                  $cabinetNotifications = auth()->user()->notifications()->latest()->limit(5)->get();
+                  // Вторая сортировка по id нужна, чтобы «последнее уведомление» было одним и тем же для страницы и для автообновления
+                  $cabinetNotifications = auth()->user()->notifications()->latest()->orderByDesc('id')->limit(5)->get();
                   $unreadNotificationsCount = auth()->user()->unreadNotifications()->count();
                @endphp
-               <li class="nav-notification">
+               <li class="nav-notification" data-live-notifications="{{ $unreadNotificationsCount }}:{{ $cabinetNotifications->first()?->id }}">
                   <div class="dropdown-custom">
                      <a href="javascript:;" class="nav-item-toggle {{ $unreadNotificationsCount > 0 ? 'icon-active' : '' }}">
                         <img class="svg" src="{{ asset('cabinet/img/svg/alarm.svg') }}" alt="Уведомления">
                      </a>
                      <div class="dropdown-parent-wrapper">
                         <div class="dropdown-wrapper">
-                           <h2 class="dropdown-wrapper__title">
+                           <h2 class="dropdown-wrapper__title" data-live-region="notifications:title">
                               Уведомления
                               @if($unreadNotificationsCount > 0)
                                  <span class="badge-circle badge-warning ms-1">{{ $unreadNotificationsCount }}</span>
                               @endif
                            </h2>
-                           <ul>
+                           <ul data-live-region="notifications:list">
                               @forelse($cabinetNotifications as $notification)
                                  <li class="nav-notification__single {{ $notification->read_at ? '' : 'nav-notification__single--unread' }} d-flex flex-wrap">
                                     <div class="nav-notification__type nav-notification__type--primary">
@@ -97,14 +98,16 @@
                                  <li class="p-3 text-center text-muted">Новых уведомлений нет</li>
                               @endforelse
                            </ul>
-                           @if($unreadNotificationsCount > 0)
-                              <form method="POST" action="{{ route('account.notifications.read-all') }}">
-                                 @csrf
-                                 <button type="submit" class="dropdown-wrapper__more border-0 bg-transparent w-100">
-                                    Отметить все прочитанными
-                                 </button>
-                              </form>
-                           @endif
+                           <div data-live-region="notifications:footer">
+                              @if($unreadNotificationsCount > 0)
+                                 <form method="POST" action="{{ route('account.notifications.read-all') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-wrapper__more border-0 bg-transparent w-100">
+                                       Отметить все прочитанными
+                                    </button>
+                                 </form>
+                              @endif
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -490,6 +493,7 @@
 <script src="{{ asset('cabinet/assets/vendor_assets/js/trumbowyg.min.js') }}"></script>
 <script src="{{ asset('cabinet/assets/vendor_assets/js/wickedpicker.min.js') }}"></script>
 <script src="{{ asset('cabinet/assets/theme_assets/js/main.js') }}"></script>
+<script src="{{ asset('js/cabinet-live.js') }}?v={{ @filemtime(public_path('js/cabinet-live.js')) }}" data-live-url="{{ route('account.live') }}" defer></script>
 <script>
    (function() {
       function syncSellerSidebarState() {

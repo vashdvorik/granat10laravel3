@@ -461,6 +461,46 @@ class CatalogControllerTest extends TestCase
         $response->assertDontSee('class="btn btn-load-more"', false);
     }
 
+    public function test_sort_dropdown_prefix_is_separate_so_phones_can_show_only_the_value(): void
+    {
+        $category = Category::factory()->create();
+
+        $response = $this->get(route('catalog.show', ['alias' => $category->alias, 'sort' => 'sale']));
+
+        $response->assertOk();
+        $response->assertSee('<span class="dropdown-prefix">Сортировать по</span>', false);
+        $response->assertSeeInOrder(['class="pd-sort"', 'class="filter-show"'], false);
+        $response->assertSee('Сначала акции');
+    }
+
+    /** Подкатегории на телефоне занимают не больше двух рядов, остальное листается вправо. */
+    public function test_mobile_subcategory_tiles_are_split_into_two_rows_that_scroll_sideways(): void
+    {
+        config(['categories.hide_empty' => false]);
+        $parent = Category::factory()->create(['parent_id' => null]);
+        foreach (range(1, 5) as $number) {
+            Category::factory()->create(['parent_id' => $parent->id, 'name' => 'Плитка '.$number]);
+        }
+
+        $html = $this->get(route('catalog.show', $parent->alias))->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($html, 'class="mobile-categories-rows"'));
+        $this->assertSame(2, substr_count($html, 'class="mobile-categories-row"'), 'плиток много: два ряда');
+        // плитки идут по очереди: 1, 3, 5 сверху и 2, 4 снизу
+        $this->assertMatchesRegularExpression('/Плитка 1.*Плитка 3.*Плитка 5.*mobile-categories-row.*Плитка 2.*Плитка 4/s', $html);
+    }
+
+    public function test_one_or_two_mobile_subcategory_tiles_stay_in_a_single_row(): void
+    {
+        config(['categories.hide_empty' => false]);
+        $parent = Category::factory()->create(['parent_id' => null]);
+        Category::factory()->create(['parent_id' => $parent->id, 'name' => 'Единственная плитка']);
+
+        $html = $this->get(route('catalog.show', $parent->alias))->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($html, 'class="mobile-categories-row"'));
+    }
+
     public function test_search_page_accepts_cyrillic_query(): void
     {
         $product = $this->createVisibleProductWithSeller();

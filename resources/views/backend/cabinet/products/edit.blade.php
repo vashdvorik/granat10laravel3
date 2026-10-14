@@ -30,7 +30,8 @@
 @endphp
 @include('backend.cabinet.partials.flash')
 
-<div class="contents product-form-page product-edit-page">
+<div class="contents product-form-page product-edit-page"
+     data-live-product="{{ $product->id }}" data-live-signature="{{ $product->cabinet_state_signature }}">
     <div class="container-fluid product-form-page__container">
         <div class="row">
             <div class="col-lg-12">
@@ -44,7 +45,8 @@
                                 form="product-edit-form"
                                 name="save_action"
                                 value="save_and_submit"
-                                class="btn btn-sm btn-primary">
+                                class="btn btn-sm btn-primary"
+                                data-live-region="product:header-action">
                             <i class="uil uil-shield-check"></i> {{ $submitLabel }}
                         </button>
                     </div>
@@ -66,6 +68,7 @@
                                       id="product-edit-form"
                                       class="product-edit-form"
                                       data-recheck-mode="{{ $editMode }}"
+                                      data-live-sync="data-recheck-mode"
                                       data-original="{{ json_encode($originalContent, JSON_UNESCAPED_UNICODE) }}"
                                       novalidate>
                                     @csrf
@@ -75,6 +78,7 @@
                                            value="{{ $product->moderation_version }}">
                                     <x-product-moderation-status :product="$product" :issues="$moderationIssues" />
 
+                                    <div data-live-region="product:hint">
                                     @if($editMode === 'live')
                                         <div class="product-recheck-hint">
                                             <strong>Что можно менять без проверки.</strong>
@@ -87,6 +91,7 @@
                                             Цену, скидку и условия заказа: проверка от этого не собьётся и изменения применятся сразу.
                                         </div>
                                     @endif
+                                    </div>
 
                                     {{-- Основная информация --}}
                                     <div class="card add-product product-form-section mb-24">
@@ -403,6 +408,7 @@
                                     </div>
 
                                     {{-- Кнопки --}}
+                                    <div data-live-region="product:form-actions">
                                     @if($editMode === 'draft')
                                         <p class="product-form-actions__hint">
                                             После отправки товар проверят. Пока проверка не пройдена, покупатели его не видят,
@@ -428,6 +434,7 @@
                                                 class="btn btn-primary btn-default btn-squared text-capitalize">
                                             <i class="uil uil-shield-check"></i> {{ $submitLabel }}
                                         </button>
+                                    </div>
                                     </div>
                                 </form>
                             </div>
