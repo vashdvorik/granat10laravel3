@@ -490,6 +490,16 @@ class CatalogControllerTest extends TestCase
         $this->assertMatchesRegularExpression('/Плитка 1.*Плитка 3.*Плитка 5.*mobile-categories-row.*Плитка 2.*Плитка 4/s', $html);
     }
 
+    /** Главная страница каталога: корневые категории переносятся рядами по три, вбок не листаются. */
+    public function test_catalog_index_root_categories_wrap_instead_of_scrolling_sideways(): void
+    {
+        Category::factory()->create(['parent_id' => null]);
+
+        $this->get(route('catalog.index'))
+            ->assertOk()
+            ->assertSee('class="mobile-categories-grid mobile-categories-grid--wrap"', false);
+    }
+
     public function test_one_or_two_mobile_subcategory_tiles_stay_in_a_single_row(): void
     {
         config(['categories.hide_empty' => false]);

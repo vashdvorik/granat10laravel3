@@ -68,9 +68,10 @@
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>
                 </div>
-                <!-- Мобильная версия: карточки категорий, не больше двух рядов, остальное листается вправо -->
+                <!-- Мобильная версия: карточки корневых категорий 3x3. Здесь они переносятся на следующие ряды и не листаются вбок
+                     (прокрутка вправо работает только внутри категорий, см. catalog/show) -->
                 <div class="mobile-categories-wrapper hidden-md hidden-lg">
-                    <div class="mobile-categories-grid {{ $categories->count() <= 3 ? 'mobile-categories-grid--single' : '' }}">
+                    <div class="mobile-categories-grid mobile-categories-grid--wrap">
                         @foreach ($categories as $subcategory)
                             <div class="mobile-category-card">
                                 <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">

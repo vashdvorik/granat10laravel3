@@ -198,25 +198,27 @@
     @else
         {{-- РЕЖИМ БЕЗ ИКОНОК - текстовые плитки: не больше двух рядов, остальное листается вправо.
              Плитки раскладываются по рядам по очереди (1-я сверху, 2-я снизу, 3-я сверху...), чтобы ряды были
-             одной длины; если категорий одна или две, они остаются в одном ряду. --}}
+             одной длины; «Назад» стоит первой плиткой первого ряда. Если категорий одна или две, они остаются
+             в одном ряду вместе с «Назад». --}}
         @php
             $tileRows = $categories->count() > 2
                 ? $categories->values()->partition(fn ($category, $index) => $index % 2 === 0)
                 : collect([$categories->values()]);
         @endphp
         <div class="mobile-categories-list">
-            <!-- Кнопка "Назад" в виде плитки -->
-            <div class="mobile-category-tile back-tile">
-                <a href="{{ $backUrl }}">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Назад</span>
-                </a>
-            </div>
-
-            <!-- Список категорий текстом -->
             <div class="mobile-categories-rows">
                 @foreach ($tileRows as $tileRow)
                     <div class="mobile-categories-row">
+                        @if ($loop->first)
+                            <!-- Кнопка "Назад" в виде плитки: обычная плитка в начале первого ряда -->
+                            <div class="mobile-category-tile back-tile">
+                                <a href="{{ $backUrl }}">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span>Назад</span>
+                                </a>
+                            </div>
+                        @endif
+                        <!-- Список категорий текстом -->
                         @foreach ($tileRow as $subcategory)
                             <div class="mobile-category-tile">
                                 <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $subcategory->alias ?? $subcategory->id]) }}">

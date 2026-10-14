@@ -263,6 +263,17 @@
         display: none;
     }
 
+    /* Главная страница каталога (корневые категории): карточки по три в ряд, ряды переносятся, вбок не листаются */
+    .mobile-categories-grid.mobile-categories-grid--wrap {
+        grid-auto-flow: row;
+        grid-template-rows: none;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-columns: auto;
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+    }
+
     /* Совсем мало категорий: один ряд на всю ширину, листать нечего */
     .mobile-categories-grid.mobile-categories-grid--single {
         grid-template-rows: auto;
@@ -342,10 +353,10 @@
 
 /* Стили для текстовых плиток (без иконок) */
 
-/* Текстовые плитки: «Назад» слева на всю высоту, справа не больше двух рядов, остальное листается вправо */
+/* Текстовые плитки: не больше двух рядов, остальное листается вправо; «Назад» первая плитка первого ряда */
 .mobile-categories-list {
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 8px;
     /* до краёв экрана; отступ внутри оставляет место тени плиток, которую иначе обрезала бы прокрутка */
     margin: 11px -15px;
@@ -399,9 +410,9 @@
 
 /* Кнопка "Назад" для плиток */
 .mobile-category-tile.back-tile {
-    display: flex;
     background: linear-gradient(135deg, #e8f4f8 0%, #e8e4f3 100%);
-    border: 1px solid #d1d1d1;
+    /* рамка внутренней тенью, а не border: иначе плитка выше остальных на 2 px */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08), inset 0 0 0 1px #d1d1d1;
 }
 
 .mobile-category-tile.back-tile a {
