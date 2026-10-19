@@ -32,6 +32,7 @@ class RegionalCatalogFilteringTest extends TestCase
         parent::setUp();
 
         config()->set('regionality.enabled', true);
+        config()->set('regionality.urls_enabled', true);
         Cache::flush();
 
         $this->selectedSettlement = Settlement::factory()->create();
@@ -45,9 +46,8 @@ class RegionalCatalogFilteringTest extends TestCase
 
     public function test_catalog_and_ajax_only_show_products_from_selected_settlement(): void
     {
-        foreach ([route('catalog.index'), route('catalog.loadMore')] as $url) {
-            $this->withSelectedSettlement()
-                ->get($url)
+        foreach ([$this->regional('catalog.index'), $this->regional('catalog.loadMore')] as $url) {
+            $this->get($url)
                 ->assertOk()
                 ->assertSee($this->selectedProduct->name)
                 ->assertDontSee($this->otherProduct->name);
@@ -59,14 +59,12 @@ class RegionalCatalogFilteringTest extends TestCase
         $this->selectedProduct->update(['lowprice' => 50, 'sale_started_at' => now()]);
         $this->otherProduct->update(['lowprice' => 50, 'sale_started_at' => now()]);
 
-        $this->withSelectedSettlement()
-            ->get(route('search', ['q' => 'Regional Product']))
+        $this->get($this->regional('search', ['q' => 'Regional Product']))
             ->assertOk()
             ->assertSee($this->selectedProduct->name)
             ->assertDontSee($this->otherProduct->name);
 
-        $this->withSelectedSettlement()
-            ->get(route('catalog.sale'))
+        $this->get($this->regional('catalog.sale'))
             ->assertOk()
             ->assertSee($this->selectedProduct->name)
             ->assertDontSee($this->otherProduct->name);
@@ -74,25 +72,21 @@ class RegionalCatalogFilteringTest extends TestCase
 
     public function test_shops_and_shop_details_are_limited_to_selected_settlement(): void
     {
-        $this->withSelectedSettlement()
-            ->get(route('shops'))
+        $this->get($this->regional('shops'))
             ->assertOk()
             ->assertSee($this->selectedSeller->name)
             ->assertDontSee($this->otherSeller->name);
 
-        $this->withSelectedSettlement()
-            ->get(route('seller', $this->otherSeller->alias))
+        $this->get($this->regional('seller', ['alias' => $this->otherSeller->alias]))
             ->assertNotFound();
     }
 
     public function test_product_details_and_favorites_reject_products_from_other_settlement(): void
     {
-        $this->withSelectedSettlement()
-            ->get(route('product.show', $this->otherProduct->alias))
+        $this->get($this->regional('product.show', ['alias' => $this->otherProduct->alias]))
             ->assertNotFound();
 
-        $this->withSelectedSettlement()
-            ->getJson(route('favorites.products', [
+        $this->getJson($this->regional('favorites.products', [
                 'ids' => $this->selectedProduct->id.','.$this->otherProduct->id,
             ]))
             ->assertOk()
@@ -114,11 +108,30 @@ class RegionalCatalogFilteringTest extends TestCase
             ->assertSee($this->otherSeller->name);
     }
 
+    /** Сессия и cookie со старым выбором города не фильтруют общие адреса: фильтр включается только адресом. */
+    public function test_stored_selection_does_not_filter_common_addresses(): void
+    {
+        $cookieName = config('regionality.cookie_name');
+
+        foreach ([route('home'), route('catalog.index'), route('catalog.loadMore'), route('shops')] as $url) {
+            $this->withSession(['regional_settlement_id' => $this->selectedSettlement->id])
+                ->withCookie($cookieName, (string) $this->selectedSettlement->id)
+                ->get($url)
+                ->assertOk();
+        }
+
+        $this->withSession(['regional_settlement_id' => $this->selectedSettlement->id])
+            ->withCookie($cookieName, (string) $this->selectedSettlement->id)
+            ->get(route('catalog.index'))
+            ->assertSee($this->selectedProduct->name)
+            ->assertSee($this->otherProduct->name);
+    }
+
     public function test_regional_cache_keys_are_isolated(): void
     {
         $cache = app(CatalogCacheService::class);
 
-        $this->withSelectedSettlement()->get(route('catalog.index'))->assertOk();
+        $this->get($this->regional('catalog.index'))->assertOk();
 
         $this->assertTrue(Cache::has(
             CatalogCacheService::PRODUCT_PRICE_RANGE_KEY.':settlement:'.$this->selectedSettlement->id
@@ -147,16 +160,16 @@ class RegionalCatalogFilteringTest extends TestCase
         $this->createProduct($this->selectedSeller, $selectedCategory, 'Selected Category Product');
         $this->createProduct($this->otherSeller, $otherCategory, 'Other Category Product');
 
-        $this->withSelectedSettlement()
-            ->get(route('catalog.index'))
+        $this->get($this->regional('catalog.index'))
             ->assertOk()
             ->assertSee($selectedCategory->name)
             ->assertDontSee($otherCategory->name);
     }
 
-    private function withSelectedSettlement(): static
+    /** Адрес региональной страницы выбранного города: город определяется только адресом. */
+    private function regional(string $name, array $parameters = []): string
     {
-        return $this->withSession(['regional_settlement_id' => $this->selectedSettlement->id]);
+        return route('regional.'.$name, ['location' => $this->selectedSettlement->slug, ...$parameters]);
     }
 
     private function createSeller(Settlement $settlement, string $alias): Seller

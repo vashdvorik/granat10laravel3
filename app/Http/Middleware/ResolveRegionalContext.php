@@ -38,12 +38,22 @@ class ResolveRegionalContext
             abort_unless($settlement, 404);
 
             $this->context->setSettlement($settlement);
-            $request->session()->put('regional_settlement_id', $settlement->id);
             $request->route()->forgetParameter('location');
 
             return $next($request);
         }
 
+        // Город определяется только адресом (/tiraspol/catalog). На общих адресах (/, /catalog, /search) всегда
+        // «Все регионы»: иначе фильтр включался бы незаметно, держался месяцами и покупатель не понимал бы, почему
+        // товаров мало. Ранее выбранный город остаётся в cookie только как подсказка на главной
+        // (RegionalContext::suggestedSettlement()).
+        if (config('regionality.urls_enabled')) {
+            $this->context->setSettlement(null);
+
+            return $next($request);
+        }
+
+        // Региональные адреса выключены: город помним в сессии и cookie (прежнее поведение)
         $settlementId = $request->session()->get('regional_settlement_id')
             ?? $request->cookie(config('regionality.cookie_name'));
 

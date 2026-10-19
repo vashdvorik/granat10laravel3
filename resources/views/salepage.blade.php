@@ -20,6 +20,7 @@
             <li><a href="{{ $regionalUrl->route('home') }}">Главная</a></li>
             <li class="active">Распродажи</li>
         </ul>
+        @include('components.region-notice', ['total' => $products->total()])
 
         {{-- Видимого заголовка нет, но h1 остаётся для поисковиков и экранных дикторов --}}
         <h1 class="sr-only">{{ $seoHeading ?? 'Скидки и акции' }}</h1>

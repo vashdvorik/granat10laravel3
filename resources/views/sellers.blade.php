@@ -15,6 +15,9 @@
 
 @section('content')
 <main class="market-page">
+    <div class="container container-240">
+        @include('components.region-notice')
+    </div>
     <section class="shops-hero">
         <div class="container container-240">
             <ul class="market-breadcrumbs" aria-label="Хлебные крошки">

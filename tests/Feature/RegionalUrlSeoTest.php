@@ -36,8 +36,7 @@ class RegionalUrlSeoTest extends TestCase
             ->assertSee($regionalProduct->name)
             ->assertDontSee($otherProduct->name)
             ->assertSee('<link rel="canonical" href="'.$url.'">', false)
-            ->assertSee('<meta name="robots" content="index, follow">', false)
-            ->assertSessionHas('regional_settlement_id', $settlement->id);
+            ->assertSee('<meta name="robots" content="index, follow">', false);
     }
 
     public function test_invalid_location_returns_not_found(): void

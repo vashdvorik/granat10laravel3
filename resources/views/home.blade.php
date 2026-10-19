@@ -4,6 +4,11 @@
 
 @section('content')
 <main class="home-page">
+    {{-- Город применяется только по адресу: здесь либо плашка «показан один город», либо подсказка «в прошлый раз вы выбирали...» --}}
+    <div class="container container-240">
+        @include('components.region-notice')
+        @include('components.region-suggestion')
+    </div>
     <section class="home-hero">
         <div class="container container-240">
             <div class="home-hero__panel home-hero__panel--search">

@@ -20,6 +20,7 @@
         <li><a href="{{ route('home') }}">Главная</a></li>
         <li class="active">Каталог</li>
     </ul>
+    @include('components.region-notice', ['total' => $products->total()])
 <!--<div class="filter-collection-left hidden-lg hidden-md">
       <a class="btn">Filter</a>
     </div>-->

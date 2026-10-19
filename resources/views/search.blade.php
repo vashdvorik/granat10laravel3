@@ -10,6 +10,7 @@
             <li><a href="{{ route('home') }}">Главная</a></li>
             <li class="active">Поиск{{ $q ? ': ' . $q : '' }}</li>
         </ul>
+        @include('components.region-notice', ['total' => $q ? $products->total() : null])
 
         <div class="pd-top">
             @if($q)

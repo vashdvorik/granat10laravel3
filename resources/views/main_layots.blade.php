@@ -677,22 +677,32 @@
                         <input type="hidden" name="type" value="product">
                         <input type="text" name="q" class="form-control" placeholder="Я ищу ..." value="{{ request('q') }}" aria-label="Поиск товаров и магазинов" autocomplete="off">
                         <input type="hidden" name="category" id="search-category-input" value="{{ request('category') }}">
-                        <div class="search-panel">
-                            <a class="dropdown-toggle" data-toggle="dropdown" href='#' id="search-category-label">
-                                @if(request('category') && isset($menuRootCategories))
-                                    @php $activeSearchCat = $menuRootCategories->firstWhere('alias', request('category')); @endphp
-                                    {{ $activeSearchCat ? $activeSearchCat->name : 'Все категории' }}
-                                @else
-                                    Все категории
-                                @endif
-                                <span class="fa fa-caret-down"></span>
-                            </a>
-                            <ul id="category" class="dropdown-menu dropdown-category">
-                                <li><a href="#" data-alias="" data-name="Все категории">Все категории</a></li>
-                                @foreach($menuRootCategories as $cat)
-                                    <li><a href="#" data-alias="{{ $cat->alias }}" data-name="{{ $cat->name }}">{{ $cat->name }}</a></li>
-                                @endforeach
-                            </ul>
+                        {{-- Справа в строке поиска стоит выбор города (раньше здесь был выбор категории). Если региональность
+                             выключена или городов нет, остаётся прежний выбор категории. Категория, уже заданная в адресе
+                             поиска, сохраняется скрытым полем выше. --}}
+                        @php
+                            $regionSwitcherAvailable = config('regionality.enabled') && $regionalContext->availableRegions()->isNotEmpty();
+                        @endphp
+                        <div class="search-panel {{ $regionSwitcherAvailable ? 'search-panel--region' : '' }}">
+                            @if($regionSwitcherAvailable)
+                                @include('components.region-switcher', ['variant' => 'header'])
+                            @else
+                                <a class="dropdown-toggle" data-toggle="dropdown" href='#' id="search-category-label">
+                                    @if(request('category') && isset($menuRootCategories))
+                                        @php $activeSearchCat = $menuRootCategories->firstWhere('alias', request('category')); @endphp
+                                        {{ $activeSearchCat ? $activeSearchCat->name : 'Все категории' }}
+                                    @else
+                                        Все категории
+                                    @endif
+                                    <span class="fa fa-caret-down"></span>
+                                </a>
+                                <ul id="category" class="dropdown-menu dropdown-category">
+                                    <li><a href="#" data-alias="" data-name="Все категории">Все категории</a></li>
+                                    @foreach($menuRootCategories as $cat)
+                                        <li><a href="#" data-alias="{{ $cat->alias }}" data-name="{{ $cat->name }}">{{ $cat->name }}</a></li>
+                                    @endforeach
+                                </ul>
+                            @endif
                         </div>
                         <span class="input-group-btn">
                             <button class="button_search" type="submit"><i class="ion-ios-search-strong"></i></button>
@@ -761,7 +771,18 @@
             </div>
         </div>
     </div>
+    {{-- На телефоне строка поиска в шапке скрыта, поэтому выбор города стоит отдельной строкой под шапкой:
+         его видно сразу, без бургер-меню --}}
+    @if($regionSwitcherAvailable ?? false)
+        <div class="header-region-bar hidden-md hidden-lg">
+            <div class="container container-240">
+                @include('components.region-switcher', ['variant' => 'bar'])
+            </div>
+        </div>
+    @endif
 </header>
+{{-- Формы для кнопок выбора города (они привязаны к ним атрибутом form: строка поиска сама внутри формы) --}}
+@include('components.region-switch-forms')
 
 <!-- подключаем основную часть индекс-страницы -->
 @yield('content')
@@ -923,7 +944,7 @@
         });
     });
 
-    // Выбор категории в поиске
+    // Выбор категории в поиске (работает, только если в шапке нет выбора города)
     $(document).on('click', '#category a', function(e) {
         e.preventDefault();
         const alias = $(this).data('alias');

@@ -16,9 +16,44 @@ class RegionalContext
 
     private ?object $availableRegionsFor = null;
 
+    /** Город, который посетитель выбирал раньше (cookie); читается один раз и только по требованию. */
+    private ?Settlement $suggested = null;
+
+    private bool $suggestionResolved = false;
+
     public function setSettlement(?Settlement $settlement): void
     {
         $this->settlement = $settlement;
+    }
+
+    /**
+     * Город, который посетитель выбирал в прошлый раз. Показывается только подсказкой на главной
+     * («Показать только Тирасполь?») и никогда не включает фильтр сам: город применяется только по адресу.
+     */
+    public function suggestedSettlement(): ?Settlement
+    {
+        if ($this->settlement !== null || ! config('regionality.enabled') || ! config('regionality.urls_enabled')) {
+            return null;
+        }
+
+        if ($this->suggestionResolved) {
+            return $this->suggested;
+        }
+
+        $this->suggestionResolved = true;
+        $settlementId = app()->bound('request') ? app('request')->cookie(config('regionality.cookie_name')) : null;
+
+        if (! $settlementId) {
+            return null;
+        }
+
+        try {
+            $settlement = Settlement::query()->active()->with('region')->find($settlementId);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return $this->suggested = ($settlement && $settlement->region?->is_active) ? $settlement : null;
     }
 
     public function settlement(): ?Settlement
