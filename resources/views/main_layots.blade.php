@@ -7,15 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>{{ $seoTitle ?: (trim($__env->yieldContent('title')) ?: \App\Support\PageTitle::brand()) }}</title>
     @include('partials.seo.head')
-    <link rel="stylesheet" href="{{ asset('css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="@assetv('css/owl.carousel.min.css')">
     <link rel="shortcut icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
-    <link rel="stylesheet" href="{{ asset('css/slick.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/slick-theme.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/owl.theme.default.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/cabinet.css') }}"> 
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/bootstrap-slider.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/pagination.css') }}">
+    <link rel="stylesheet" href="@assetv('css/slick.css')">
+    <link rel="stylesheet" href="@assetv('css/slick-theme.css')">
+    <link rel="stylesheet" href="@assetv('css/owl.theme.default.min.css')">
+    <link rel="stylesheet" href="@assetv('css/cabinet.css')"> 
+    <link rel="stylesheet" type="text/css" href="@assetv('css/style.css')">
+    <link rel="stylesheet" type="text/css" href="@assetv('css/bootstrap-slider.css')">
+    <link rel="stylesheet" type="text/css" href="@assetv('css/pagination.css')">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -520,7 +520,7 @@
     
     {{-- SEO: Pagination meta tags --}}
     @yield('meta')
-    <link rel="stylesheet" href="{{ asset('css/marketplace-design.css') }}">
+    <link rel="stylesheet" href="@assetv('css/marketplace-design.css')">
     @stack('head')
     @stack('styles')
 </head>
@@ -567,8 +567,10 @@
                 </form>
             </div>
         @endif
-        <ul class="nav-home5 js-menubar">
-            @include('components.menu-tree', ['items' => $menuRootCategories, 'level' => 1])
+        {{-- Полное дерево категорий весит около 230 КБ HTML, поэтому на странице только верхний уровень (ссылки есть и без
+             скрипта), а всё дерево public/js/drawer-menu.js подгружает при касании кнопки меню (MenuController). --}}
+        <ul class="nav-home5 js-menubar" data-menu-url="{{ $regionalUrl->route('menu.categories') }}">
+            @include('components.menu-tree', ['items' => $menuRootCategories, 'level' => 1, 'shallow' => true])
         </ul>
 
         <nav class="drawer__links" aria-label="Разделы сайта">
@@ -779,13 +781,13 @@
     <a href="#" class="btn-gradient scroll_top"><i class="ion-ios-arrow-up"></i></a>
 
     <!--скрипты --> 
-    <script src="{{ asset('js/jquery.js') }}"></script>
-    <script src="{{ asset('js/bootstrap.js') }}"></script>
-    <script src="{{ asset('js/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset('js/slick.js') }}"></script>
-    <script src="{{ asset('js/countdown.js') }}"></script>
-    <script src="{{ asset('js/bootstrap-slider.min.js') }}"></script>
-    <script src="{{ asset('js/main.js') }}"></script>
+    <script src="@assetv('js/jquery.js')"></script>
+    <script src="@assetv('js/bootstrap.js')"></script>
+    <script src="@assetv('js/owl.carousel.min.js')"></script>
+    <script src="@assetv('js/slick.js')"></script>
+    <script src="@assetv('js/countdown.js')"></script>
+    <script src="@assetv('js/bootstrap-slider.min.js')"></script>
+    <script src="@assetv('js/main.js')"></script>
     <script>
     // Сохранение позиции скролла для возврата с карточки товара (только DESKTOP)
     const preserveScrollPages = ['catalog.index', 'catalog.show', 'catalog.sale', 'shops'];
@@ -940,7 +942,8 @@
         }
     });
 </script>
-<script src="{{ asset('js/home-feed.js') }}?v={{ @filemtime(public_path('js/home-feed.js')) }}" defer></script>
+<script src="@assetv('js/home-feed.js')" defer></script>
+<script src="@assetv('js/drawer-menu.js')" defer></script>
 @stack('scripts')
 </body>
 

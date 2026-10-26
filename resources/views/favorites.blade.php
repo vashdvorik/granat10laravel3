@@ -49,7 +49,7 @@
                 </span>
                 <div>
                     <h2 id="favorites-empty-title">В избранном пока пусто</h2>
-                    <p>Нажимайте сердечко на карточках товаров — сохранённые позиции появятся здесь.</p>
+                    <p>Нажимайте сердечко на карточках товаров, и они появятся здесь.</p>
                     <div class="favorites-empty__actions">
                         <a href="{{ $regionalUrl->route('catalog.index') }}" class="home-btn home-btn--primary">Перейти в каталог</a>
                         <a href="{{ $regionalUrl->route('catalog.sale') }}" class="home-btn home-btn--light">Посмотреть скидки</a>

@@ -19,6 +19,7 @@ use App\Services\SeoService;
 use App\Services\StructuredDataService;
 use App\Services\TelegramHttpBotClient;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -49,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
 
         app(ModerationSecretStore::class)->applyToConfig();
+
+        // @assetv('css/style.css') печатает адрес файла с датой изменения: после выкладки браузер берёт новую версию
+        Blade::directive('assetv', fn (string $expression): string => "<?php echo \\App\\Support\\AssetVersion::url({$expression}); ?>");
 
         $this->composeMenuCategories();
         $this->composeBackendUser();

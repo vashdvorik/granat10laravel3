@@ -176,6 +176,7 @@ class HomeFeedTest extends TestCase
             ->assertSee('id="home-returns" hidden', false)
             ->assertSee('data-products-url="'.route('favorites.products').'"', false)
             ->assertSee('Вы смотрели')
-            ->assertSee('home-returns__favorites', false);
+            // напоминание «В избранном N товаров» убрано: оно только мешало
+            ->assertDontSee('home-returns__favorites', false);
     }
 }

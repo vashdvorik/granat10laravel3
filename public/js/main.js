@@ -87,7 +87,8 @@ jQuery(document).ready(function($) {
         });
     });
     // Open menu dropdown home 5
-    $(".js-menubar li .icon-sub-menu").on("click", function() {
+    // делегирование: пункты дерева подгружаются позже (public/js/drawer-menu.js), на них прямой обработчик не попал бы
+    $(".js-menubar").on("click", "li .icon-sub-menu", function() {
 
         $(this).toggleClass('up-icon');
         $(this).parent().find(".js-open-menu").slideToggle('fast', function() {

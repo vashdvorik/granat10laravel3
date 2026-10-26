@@ -42,17 +42,6 @@
         }
     }
 
-    function plural(count, one, few, many) {
-        var n = Math.abs(count) % 100;
-        var last = n % 10;
-
-        if (n > 10 && n < 20) { return many; }
-        if (last === 1) { return one; }
-        if (last >= 2 && last <= 4) { return few; }
-
-        return many;
-    }
-
     // 1. Запоминаем просмотренный товар
     var current = document.querySelector('[data-recent-product]');
 
@@ -119,15 +108,13 @@
         });
     }
 
-    // 3. Для вернувшихся: «Вы смотрели» и напоминание об избранном (у новичка блока нет вообще)
+    // 3. Для вернувшихся: «Вы смотрели» (у новичка блока нет вообще)
     var returns = document.getElementById('home-returns');
 
     if (returns && window.fetch) {
         var productsUrl = returns.getAttribute('data-products-url');
         var viewedBox = returns.querySelector('.home-returns__viewed');
         var viewedList = returns.querySelector('.home-returns__list');
-        var favoritesLink = returns.querySelector('.home-returns__favorites');
-        var favoritesText = returns.querySelector('.home-returns__favorites-text');
 
         var request = function (ids) {
             return fetch(productsUrl + '?ids=' + ids.join(','), {
@@ -142,20 +129,7 @@
             });
         };
 
-        var favoriteIds = readIds('favorites');
         var viewedIds = readIds(RECENT_KEY).slice(0, SHOWN_MAX);
-
-        if (favoriteIds.length) {
-            request(favoriteIds).then(function (data) {
-                var total = parseInt(data.total, 10) || 0;
-
-                if (total > 0) {
-                    favoritesText.textContent = 'В избранном ' + total + ' ' + plural(total, 'товар', 'товара', 'товаров');
-                    favoritesLink.hidden = false;
-                    returns.hidden = false;
-                }
-            }).catch(function () {});
-        }
 
         if (viewedIds.length) {
             request(viewedIds).then(function (data) {

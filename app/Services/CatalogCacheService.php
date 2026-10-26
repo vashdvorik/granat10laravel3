@@ -20,6 +20,8 @@ class CatalogCacheService
 
     public const MENU_CATEGORIES_KEY = 'menu_categories';
 
+    public const MENU_HTML_KEY = 'menu_tree_html';
+
     public const PRODUCT_PRICE_RANGE_KEY = 'product_price_range';
 
     public const SELLERS_LIST_KEY = 'sellers_list';
@@ -41,6 +43,16 @@ class CatalogCacheService
     public function rememberMenuCategories(Closure $callback): mixed
     {
         return Cache::remember($this->regionalKey(self::MENU_CATEGORIES_KEY), now()->addHours(24), $callback);
+    }
+
+    /**
+     * Готовый HTML дерева категорий для бокового меню. Дерево весит около 230 КБ (1100 ссылок) и выводится на каждой
+     * странице, а сборка шаблона по узлам занимает у сервера больше времени, чем вся остальная страница.
+     * Сбрасывается вместе с данными меню (forgetMenuCategories).
+     */
+    public function rememberMenuHtml(Closure $callback): string
+    {
+        return Cache::remember($this->regionalKey(self::MENU_HTML_KEY), now()->addHours(24), $callback);
     }
 
     public function rememberProductPriceRange(Closure $callback): mixed
@@ -77,6 +89,7 @@ class CatalogCacheService
     public function forgetMenuCategories(): void
     {
         $this->forgetRegionalVariants(self::MENU_CATEGORIES_KEY);
+        $this->forgetRegionalVariants(self::MENU_HTML_KEY);
     }
 
     public function forgetProductPriceRange(): void

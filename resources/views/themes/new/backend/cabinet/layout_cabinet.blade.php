@@ -20,9 +20,9 @@
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link rel="stylesheet" href="{{ asset('cabinet/assets/vendor_assets/css/bootstrap/bootstrap.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/cabinet-common.css') }}?v={{ filemtime(public_path('css/cabinet-common.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/theme-cabinet-new.css') }}?v={{ filemtime(public_path('css/theme-cabinet-new.css')) }}">
+    <link rel="stylesheet" href="@assetv('cabinet/assets/vendor_assets/css/bootstrap/bootstrap.css')">
+    <link rel="stylesheet" href="@assetv('css/cabinet-common.css')">
+    <link rel="stylesheet" href="@assetv('css/theme-cabinet-new.css')">
     @stack('styles')
 </head>
 <body class="cabinet-new">
@@ -158,9 +158,9 @@
     </div>
 </div>
 
-<script src="{{ asset('cabinet/assets/vendor_assets/js/jquery/jquery-3.5.1.min.js') }}"></script>
-<script src="{{ asset('cabinet/assets/vendor_assets/js/bootstrap/popper.js') }}"></script>
-<script src="{{ asset('cabinet/assets/vendor_assets/js/bootstrap/bootstrap.min.js') }}"></script>
+<script src="@assetv('cabinet/assets/vendor_assets/js/jquery/jquery-3.5.1.min.js')"></script>
+<script src="@assetv('cabinet/assets/vendor_assets/js/bootstrap/popper.js')"></script>
+<script src="@assetv('cabinet/assets/vendor_assets/js/bootstrap/bootstrap.min.js')"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(function () {

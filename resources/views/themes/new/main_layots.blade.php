@@ -8,7 +8,7 @@
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/theme-new.css') }}">
+    <link rel="stylesheet" href="@assetv('css/theme-new.css')">
     @stack('head')
     @stack('styles')
 </head>
@@ -90,7 +90,7 @@
         <a href="{{ $regionalUrl->route('orders.index') }}"><i class="fa-solid fa-bag-shopping"></i><span>Заказы</span></a>
     </nav>
 
-    <script src="{{ asset('js/theme-new.js') }}"></script>
+    <script src="@assetv('js/theme-new.js')"></script>
     @stack('scripts')
 </body>
 </html>

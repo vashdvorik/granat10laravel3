@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex,nofollow">
     <link rel="icon" href="{{ asset('img/favicon.png') }}?v={{ filemtime(public_path('img/favicon.png')) }}" type="image/png">
     <link rel="stylesheet" href="{{ asset('auth/assets/styles/tailwind.min.css?v=5.0') }}">
-    <link rel="stylesheet" href="{{ asset('css/theme-new.css') }}">
+    <link rel="stylesheet" href="@assetv('css/theme-new.css')">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body.bimm-auth{display:block;min-height:100vh;color:#222;background:linear-gradient(135deg,#fff5ef 0%,#fff 48%,#fff1e9 100%)}

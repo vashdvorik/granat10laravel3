@@ -76,9 +76,9 @@
     </div>
 
     @include('components.mobile-bottom-nav')
-    <script type="text/javascript" src="{{ asset('auth/assets/scripts/vendors/jquery-3.6.0.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('auth/assets/scripts/chart-utils.min.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('auth/assets/scripts/chart.min.js') }}"></script>
+    <script type="text/javascript" src="@assetv('auth/assets/scripts/vendors/jquery-3.6.0.min.js')"></script>
+    <script type="text/javascript" src="@assetv('auth/assets/scripts/chart-utils.min.js')"></script>
+    <script type="text/javascript" src="@assetv('auth/assets/scripts/chart.min.js')"></script>
     <script type="text/javascript" src="https://unpkg.com/chartjs-chart-geo@3"></script>
     <script src="{{ asset('auth/assets/scripts/app.js?v=5.0') }}"></script>
  

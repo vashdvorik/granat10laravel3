@@ -76,28 +76,6 @@
         </section>
     @endif
 
-    {{-- Возвращающимся посетителям: что они смотрели и сколько у них в избранном. Всё берётся из памяти браузера
-         (public/js/home-feed.js), поэтому у новичка блока нет вообще. --}}
-    <section class="home-section home-returns" id="home-returns" hidden
-        data-products-url="{{ $regionalUrl->route('favorites.products') }}"
-        data-favorites-url="{{ $regionalUrl->route('favorites') }}">
-        <div class="container container-240">
-            <a class="home-returns__favorites" href="{{ $regionalUrl->route('favorites') }}" hidden>
-                <i class="fa fa-heart" aria-hidden="true"></i>
-                <span class="home-returns__favorites-text"></span>
-                <span class="home-returns__favorites-open">Открыть</span>
-            </a>
-            <div class="home-returns__viewed" hidden>
-                <div class="home-section__heading">
-                    <div>
-                        <h2>Вы смотрели</h2>
-                    </div>
-                </div>
-                <div class="home-products home-returns__list"></div>
-            </div>
-        </div>
-    </section>
-
     {{-- Категории плитками с картинками (как на странице «Каталог»): корневые категории, где сейчас есть товары.
          Цифры «2 товара» убраны: у молодой площадки маленькие числа только отпугивают. На телефоне 4 в ряд, помещается всё,
          листать не нужно; последней идёт плитка «Все категории». --}}
@@ -187,6 +165,22 @@
             </div>
         </section>
     @endif
+
+    {{-- Возвращающимся посетителям: что они смотрели. Стоит после новинок и скидок: сначала свежее для всех, потом личное.
+         Всё берётся из памяти браузера (public/js/home-feed.js), поэтому у новичка блока нет вообще. --}}
+    <section class="home-section home-returns" id="home-returns" hidden
+        data-products-url="{{ $regionalUrl->route('favorites.products') }}">
+        <div class="container container-240">
+            <div class="home-returns__viewed" hidden>
+                <div class="home-section__heading">
+                    <div>
+                        <h2>Вы смотрели</h2>
+                    </div>
+                </div>
+                <div class="home-products home-returns__list"></div>
+            </div>
+        </div>
+    </section>
 
     @if($featuredSellers->isNotEmpty())
         <section class="home-section home-shops-section" aria-labelledby="home-sellers-title">

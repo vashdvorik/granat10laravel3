@@ -5,6 +5,7 @@ use App\Http\Controllers\CabinetController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MenuController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProductController;
@@ -45,6 +46,8 @@ if (config('admin.filament_enabled')) {
 Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
 // Карточки новинок для быстрых фильтров на главной (HTML)
 Route::get('/feed/latest', [HomeController::class, 'latest'])->middleware('throttle:60,1')->name('home.latest');
+// Полное дерево категорий для бокового меню телефона (HTML), подгружается при открытии меню
+Route::get('/menu/categories', [MenuController::class, 'categories'])->middleware('throttle:60,1')->name('menu.categories');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/sitemap-{page}.xml', SitemapController::class)->whereNumber('page')->name('sitemap.page');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
@@ -98,6 +101,7 @@ if (config('regionality.urls_enabled')) {
         ->group(function () {
             Route::get('/', [HomeController::class, 'home'])->name('home');
             Route::get('/feed/latest', [HomeController::class, 'latest'])->middleware('throttle:60,1')->name('home.latest');
+            Route::get('/menu/categories', [MenuController::class, 'categories'])->middleware('throttle:60,1')->name('menu.categories');
             Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
             Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
             Route::get('/catalog/{alias}/load-more', [CatalogController::class, 'loadMoreCategory'])->name('catalog.loadMoreCategory');

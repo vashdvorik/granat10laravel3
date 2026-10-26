@@ -21,7 +21,7 @@
     @if(($level ?? 1) == 1)
         <li class="level1 {{ $loop->first ? 'active dropdown' : '' }}">
             <a href="{{ $regionalUrl->route('catalog.show', ['alias' => $item->alias ?? $item->id]) }}">{{ $item->name }}</a>
-            @if(isset($item->children) && $item->children->count())
+            @if(! ($shallow ?? false) && isset($item->children) && $item->children->count())
                 <span class="icon-sub-menu"></span>
                 <div class="menu-level1 js-open-menu">
                     <ul class="level1">
