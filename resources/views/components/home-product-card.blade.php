@@ -8,6 +8,8 @@
         ? round(100 - ($currentPrice / $product->price * 100))
         : null;
     $formatPrice = static fn ($price) => rtrim(rtrim(number_format((float) $price, 2, '.', ' '), '0'), '.');
+    // Доставка есть, только если её разрешили и магазин, и сам товар (как при оформлении заказа)
+    $hasDelivery = (bool) ($product->delivery_enabled && $product->seller?->delivery_enabled);
 @endphp
 
 <article class="home-product">
@@ -40,6 +42,9 @@
                 {{ $product->name }}
             </a>
         </h3>
+        @if($hasDelivery)
+            <span class="home-product__delivery"><i class="fa fa-truck" aria-hidden="true"></i> Есть доставка</span>
+        @endif
         <p class="home-product__price">
             <strong>{{ $formatPrice($currentPrice) }} руб.</strong>
             @if($hasDiscount)

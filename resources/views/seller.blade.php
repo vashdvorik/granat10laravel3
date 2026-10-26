@@ -32,6 +32,7 @@
                 <li><a href="{{ $regionalUrl->route('shops') }}">Магазины</a></li>
                 <li aria-current="page">{{ $sellerName }}</li>
             </ul>
+            @include('components.region-notice')
 
             <div class="seller-profile__panel">
                 <div class="seller-profile__logo">

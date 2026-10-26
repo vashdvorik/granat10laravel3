@@ -43,6 +43,8 @@ if (config('admin.filament_enabled')) {
     Route::permanentRedirect('/'.$adminPath.'/category-tree', '/'.$adminPath.'/categories');
 }
 Route::post('/location', [RegionalSelectionController::class, 'update'])->name('regionality.update');
+// Карточки новинок для быстрых фильтров на главной (HTML)
+Route::get('/feed/latest', [HomeController::class, 'latest'])->middleware('throttle:60,1')->name('home.latest');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/sitemap-{page}.xml', SitemapController::class)->whereNumber('page')->name('sitemap.page');
 Route::get('/robots.txt', RobotsController::class)->name('robots');
@@ -95,6 +97,7 @@ if (config('regionality.urls_enabled')) {
         ->name('regional.')
         ->group(function () {
             Route::get('/', [HomeController::class, 'home'])->name('home');
+            Route::get('/feed/latest', [HomeController::class, 'latest'])->middleware('throttle:60,1')->name('home.latest');
             Route::get('/catalog', [CatalogController::class, 'catalog'])->name('catalog.index');
             Route::get('/catalog/load-more', [CatalogController::class, 'loadMoreCatalog'])->name('catalog.loadMore');
             Route::get('/catalog/{alias}/load-more', [CatalogController::class, 'loadMoreCategory'])->name('catalog.loadMoreCategory');

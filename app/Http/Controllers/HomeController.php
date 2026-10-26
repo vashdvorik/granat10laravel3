@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Seller;
+use App\Services\HomeFeedService;
 use App\Services\RegionalContext;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 // home() - Отображает главную страницу сайта
 class HomeController extends Controller
 {
-    public function home(RegionalContext $regionalContext)
+    public function home(RegionalContext $regionalContext, HomeFeedService $feed)
     {
         $productScope = static fn ($query) => $query
             ->visible()
@@ -44,14 +47,7 @@ class HomeController extends Controller
             ->take(9)
             ->values();
 
-        $latestProducts = Product::visible()
-            ->forRegionalContext()
-            ->with(['images', 'seller'])
-            ->orderByVipFirst()
-            ->orderByDesc('push_at')
-            ->orderByDesc('created_at')
-            ->limit(8)
-            ->get();
+        $latestProducts = $feed->latest();
 
         $saleProducts = Product::visible()
             ->forRegionalContext()
@@ -77,11 +73,35 @@ class HomeController extends Controller
             'featuredCategories' => $featuredCategories,
             'popularSearchCategories' => $popularSearchCategories,
             'latestProducts' => $latestProducts,
+            'feedChips' => $feed->chips(),
             'saleProducts' => $saleProducts,
             'featuredSellers' => $featuredSellers,
             'locationName' => $regionalContext->settlement()?->name ?? 'ПМР',
             'visibleProductsCount' => Product::visible()->forRegionalContext()->count(),
             'visibleSellersCount' => $visibleSellersCount,
         ]);
+    }
+
+    /**
+     * Карточки новинок для быстрых фильтров над лентой на главной: без параметра — вся лента, с `category` — одна
+     * корневая категория. Возвращает готовый HTML карточек. Неизвестная или пустая категория — 404.
+     */
+    public function latest(Request $request, HomeFeedService $feed): Response
+    {
+        $alias = trim((string) $request->query('category', ''));
+        $root = null;
+
+        if ($alias !== '') {
+            $root = $feed->chipCategory($alias);
+            abort_unless($root, 404);
+        }
+
+        $products = $feed->latest($root);
+
+        $html = $products->isEmpty()
+            ? '<p class="home-feed-empty">Пока нет новинок. Загляните в каталог.</p>'
+            : view('components.products-load-more', ['products' => $products])->render();
+
+        return response($html)->header('Cache-Control', 'no-store');
     }
 }

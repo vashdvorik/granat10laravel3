@@ -31,7 +31,7 @@
 
 
 @section('content')
-<main class="product-page">
+<main class="product-page" data-recent-product="{{ $product->id }}">
     <div class="container container-240">
         <nav aria-label="Хлебные крошки">
             <ol class="breadcrumb product-breadcrumbs">
@@ -47,6 +47,7 @@
                 <li class="active" aria-current="page">{{ $product->name }}</li>
             </ol>
         </nav>
+        @include('components.region-notice')
 
         <section class="product-hero" aria-label="{{ $product->name }}">
             <div class="product-gallery">
@@ -125,6 +126,10 @@
                         <del>{{ $formatPrice($product->price) }} руб.</del>
                     @endif
                 </div>
+
+                @if($product->delivery_enabled && $product->seller->delivery_enabled)
+                    <p class="product-delivery"><i class="fa fa-truck" aria-hidden="true"></i> Есть доставка</p>
+                @endif
 
                 <dl class="product-meta">
                     @if(!empty($product->seller->town))

@@ -25,18 +25,32 @@
                 <li aria-current="page">Магазины</li>
             </ul>
 
+            {{-- Компактная шапка: заголовок, число магазинов и выбор города в одной строке; справа кнопки для продавцов
+                 (тем, кто ещё не продаёт: регистрация и вход; вошедшему: кабинет или создание магазина). --}}
+            @php
+                $shopsUser = auth()->user();
+            @endphp
             <div class="shops-hero__panel">
-                <div>
-                    <span class="market-eyebrow">Выбирай свой город</span>
+                <div class="shops-hero__main">
                     <h1>{{ $seoHeading ?? 'Магазины' }}</h1>
-                    <p>Смотрите ассортимент, адреса и контакты местных продавцов в одном месте.</p>
-                    <div class="shops-hero__region">
-                        @include('components.regional-selector', ['variant' => 'hero'])
+                    <div class="shops-hero__meta">
+                        <span class="shops-hero__count">{{ $sellers->total() }} {{ trans_choice('магазин|магазина|магазинов', $sellers->total()) }}</span>
+                        <div class="shops-hero__region">
+                            @include('components.regional-selector', ['variant' => 'hero'])
+                        </div>
                     </div>
                 </div>
-                <div class="shops-hero__count">
-                    <strong>{{ $sellers->total() }}</strong>
-                    <span>{{ trans_choice('магазин|магазина|магазинов', $sellers->total()) }}</span>
+                <div class="shops-hero__actions">
+                    @if(! $shopsUser)
+                        <span class="shops-hero__ask">Продаёте товары?</span>
+                        <a class="shops-hero__btn shops-hero__btn--primary" href="{{ route('register') }}">Стать продавцом</a>
+                        <a class="shops-hero__btn" href="{{ route('login') }}">Войти в кабинет</a>
+                    @elseif($shopsUser->seller)
+                        <a class="shops-hero__btn shops-hero__btn--primary" href="{{ route('account.index') }}">Мой кабинет</a>
+                    @else
+                        <span class="shops-hero__ask">Продаёте товары?</span>
+                        <a class="shops-hero__btn shops-hero__btn--primary" href="{{ route('account.store.create') }}">Открыть магазин</a>
+                    @endif
                 </div>
             </div>
         </div>

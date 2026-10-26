@@ -72,9 +72,12 @@ class HeaderMenuTest extends TestCase
         $this->assertStringNotContainsString('header-mobile-region', $html);
         $this->assertStringNotContainsString('>Помощь продавцам<', $html);
 
-        // страница для продавцов по-прежнему доступна из подвала, а выбор региона — из мобильного меню
+        // страница для продавцов по-прежнему доступна из подвала, а выбор региона стоит в шапке на компьютере;
+        // отдельной строки под шапкой на телефоне и выбора в бургер-меню нет
         $this->assertStringContainsString('<a href="'.route('seller.help').'">Как продавать</a>', $html);
-        $this->assertStringContainsString('regional-selector--push-menu', $html);
+        $this->assertStringContainsString('region-switcher--header', $html);
+        $this->assertStringNotContainsString('header-region-bar', $html);
+        $this->assertStringNotContainsString('regional-selector--push-menu', $html);
         $this->assertStringContainsString('<header id="header" class="header-v1">', $html);
     }
 

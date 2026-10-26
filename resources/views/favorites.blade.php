@@ -10,6 +10,7 @@
             <li><a href="{{ $regionalUrl->route('home') }}">Главная</a></li>
             <li class="active">Избранное</li>
         </ul>
+        @include('components.region-notice')
 
         <section class="favorites-hero" aria-labelledby="favorites-title">
             <div>

@@ -527,132 +527,62 @@
 
 <body>
 
-<!-- подключаем выезжающее меню для мобильных-->
+{{-- Выезжающее меню на телефоне. Плоский список без карточек: логотип и закрытие, одна кнопка для продавцов, категории
+     (раскрываются по стрелке), три раздела сайта и ссылки помощи. Поиска и выбора города здесь нет: поиск есть на главной
+     и в нижней панели, выбор города стоит отдельной строкой под шапкой. Раскрытие категорий делает public/js/main.js
+     (.js-menubar .icon-sub-menu, .js-open-menu), закрытие — .js-close. --}}
 <div class="pushmenu menu-home5">
-    <div class="menu-push">
-        <span class="close-left js-close"><i class="icon-close f-20"></i></span>
-        <div class="clearfix"></div>
-        <div class="mobile-menu-heading">
-            <div class="mobile-menu-heading__title">Меню маркетплейса</div>
-            <div class="mobile-menu-heading__subtitle">Товары, магазины и вход для продавцов</div>
+    <div class="menu-push drawer">
+        <div class="drawer__head">
+            <a href="{{ $regionalUrl->route('home') }}" class="drawer__logo" aria-label="BIMM — на главную">
+                <img src="{{ asset('img/logo.png') }}" alt="BIMM">
+            </a>
+            <button type="button" class="close-left js-close" aria-label="Закрыть меню">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
         </div>
-        <form role="search" method="get" id="searchform" class="searchform mobile-menu-search" action="{{ $regionalUrl->route('search') }}">
-           <div>
-              <label class="screen-reader-text" for="mobile-menu-query">Поиск товаров</label>
-              <input type="text" placeholder="Что ищем?" value="{{ request('q') }}" name="q" id="mobile-menu-query" autocomplete="off"><input type="hidden" name="type" value="product"><button type="submit" id="searchsubmit" aria-label="Найти">Найти</button>
-           </div>
-        </form>
-        <div class="mobile-menu-region">
-            @include('components.regional-selector', ['variant' => 'push-menu'])
+
+        <div class="drawer__account">
+            @auth
+                <a class="drawer__cta" href="{{ route('account.index') }}">Мой кабинет</a>
+            @else
+                <a class="drawer__cta" href="{{ route('register') }}">Стать продавцом</a>
+                <p class="drawer__login">Уже продаёте? <a href="{{ route('login') }}">Войти</a></p>
+            @endauth
         </div>
-        <div class="mobile-menu-section-title">Покупателям</div>
-        <nav class="mobile-menu-quick" aria-label="Быстрые ссылки покупателя">
-            <a href="{{ $regionalUrl->route('home') }}" class="mobile-menu-quick__item">
-                <i class="fa fa-home"></i>
-                <span>Главная</span>
-            </a>
-            <a href="{{ $regionalUrl->route('catalog.index') }}" class="mobile-menu-quick__item">
-                <i class="fa fa-th"></i>
-                <span>Каталог</span>
-            </a>
-            <a href="{{ $regionalUrl->route('shops') }}" class="mobile-menu-quick__item">
-                <i class="fa fa-shopping-bag"></i>
-                <span>Магазины</span>
-            </a>
-            <a href="{{ $regionalUrl->route('favorites') }}" class="mobile-menu-quick__item">
-                <i class="fa fa-heart"></i>
-                <span>Избранное</span>
-            </a>
-            <a href="{{ $regionalUrl->route('catalog.sale') }}" class="mobile-menu-quick__item">
-                <i class="fa fa-percent"></i>
-                <span>Распродажи</span>
-            </a>
-        </nav>
-        <div class="mobile-seller-entry">
-            <div>
-                <div class="mobile-seller-entry__title">Продавцам</div>
-                <div class="mobile-seller-entry__text">Управляйте товарами и магазином в кабинете продавца.</div>
+
+        <div class="drawer__label">Категории</div>
+        {{-- Если выбран город, об этом сказано прямо над списком: список категорий, поиск и каталог показывают только его.
+             Если города нет (Все регионы), блока нет. --}}
+        @if(config('regionality.enabled') && $regionalContext->settlement())
+            <div class="drawer__region" role="status">
+                <span class="drawer__region-text">
+                    <i class="fa fa-map-marker" aria-hidden="true"></i>
+                    Товары и поиск только {{ $regionalContext->settlement()->inPhrase() }}
+                </span>
+                <form method="POST" action="{{ route('regionality.update') }}">
+                    @csrf
+                    <input type="hidden" name="return_to" value="{{ request()->fullUrl() }}">
+                    <button type="submit" class="drawer__region-reset">Показать все регионы</button>
+                </form>
             </div>
-            <div class="mobile-seller-entry__actions">
-                <a href="{{ route('account.index') }}">Войти продавцу</a>
-                <a href="{{ route('register') }}">Стать продавцом</a>
-            </div>
-        </div>
-        <div class="mobile-menu-categories-head">
-            <div>
-                <span class="mobile-menu-section-title">Категории товаров</span>
-                <p>Выберите раздел или откройте весь каталог.</p>
-            </div>
-            <a href="{{ $regionalUrl->route('catalog.index') }}">Весь каталог</a>
-        </div>
+        @endif
         <ul class="nav-home5 js-menubar">
             @include('components.menu-tree', ['items' => $menuRootCategories, 'level' => 1])
-            <!--
-            <li class="level1 active dropdown"><a href="#">Одежда и обувь</a>
-                <span class="icon-sub-menu"></span>
-                <div class="menu-level1 js-open-menu">   
-                    <ul class="level1">
-                        <li class="level2">
-                            <a href="#">Одежда мужская</a>
-                            <ul class="menu-level-2">
-                                <li class="level3"><a href="shop_full.html" title="">Вверхняя одежда</a></li>
-                                <li class="level3"><a href="shopgrid_v1.html" title="">Толстовки и регланы</a></li>
-                                <li class="level3"><a href="shopgrid_v2.html" title="">Белье и плавки</a></li>
-                                <li class="level3"><a href="shoplist.html" title="">Костюмы</a></li>
-                            </ul>
-                        </li>
-                        <li class="level2">
-                            <a href="#">Одежда женская</a>
-                            <ul class="menu-level-2">
-                                <li class="level3"><a href="cat_fullwidth.html" title="">Платья</a></li>
-                                <li class="level3"><a href="cat_left_sidebar.html" title="">Блузки</a></li>
-                                <li class="level3"><a href="cat_right_sidebar.html" title="">Костюмы</a></li>
-                            </ul>
-                        </li>
-                        <li class="level2">
-                            <a href="#">Обувь мужская</a>
-                            <ul class="menu-level-2">
-                                <li class="level3"><a href="bundle.html" title="">Туфли</a></li>
-                                <li class="level3"><a href="pin_product.html" title="">Кросовки</a></li>
-                                <li class="level3"><a href="360degree.html" title="">Мокасины</a></li>
-                                <li class="level3"><a href="feature_video.html" title="">Ботинки</a></li>
-                                <li class="level3"><a href="simple.html">Сандали</a></li>
-                                <li class="level3"><a href="variable.html">Шлепанцы</a></li>
-                                <li class="level3"><a href="affilate.html">Сапоги</a></li>
-                                <li class="level3"><a href="grouped.html">Тапочки</a></li>
-                                <li class="level3"><a href="outofstock.html">Ортопедическая</a></li>
-                            </ul>
-                        </li>
-                        <li class="level2">
-                            <a href="#">Обувь женская</a>
-                            <ul class="menu-level-2">
-                                <li class="level3"><a href="bundle.html" title="">Туфли</a></li>
-                                <li class="level3"><a href="pin_product.html" title="">Кросовки</a></li>
-                                <li class="level3"><a href="360degree.html" title="">Мокасины</a></li>
-                                <li class="level3"><a href="feature_video.html" title="">Ботинки</a></li>
-                                <li class="level3"><a href="simple.html">Сандали</a></li>
-                                <li class="level3"><a href="variable.html">Шлепанцы</a></li>
-                                <li class="level3"><a href="affilate.html">Сапоги</a></li>
-                                <li class="level3"><a href="grouped.html">Тапочки</a></li>
-                                <li class="level3"><a href="outofstock.html">Ортопедическая</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <div class="clearfix"></div>
-                </div>
-            </li>
-            -->
-            {{-- Меню категорий (рекурсивно через components.menu-tree) --}}
-            <!--<li class="level1 active dropdown"><a href="#">Mega Menu</a></li>-->
         </ul>
-        <nav class="mobile-menu-links" aria-label="Дополнительные разделы">
-            <a href="{{ $regionalUrl->route('shops') }}"><i class="fa fa-shopping-bag" aria-hidden="true"></i> Магазины</a>
-            <a href="{{ $regionalUrl->route('catalog.sale') }}"><i class="fa fa-percent" aria-hidden="true"></i> Распродажи</a>
-            <a href="{{ $regionalUrl->route('favorites') }}"><i class="fa fa-heart" aria-hidden="true"></i> Избранное</a>
+
+        <nav class="drawer__links" aria-label="Разделы сайта">
+            <a href="{{ $regionalUrl->route('shops') }}"><i class="fa fa-shopping-bag" aria-hidden="true"></i><span>Магазины</span></a>
+            <a href="{{ $regionalUrl->route('catalog.sale') }}"><i class="fa fa-percent" aria-hidden="true"></i><span>Распродажи</span></a>
+            <a href="{{ $regionalUrl->route('favorites') }}"><i class="fa fa-heart" aria-hidden="true"></i><span>Избранное</span></a>
         </nav>
+
+        <div class="drawer__help">
+            <a href="{{ route('seller.help') }}">Как продавать на BIMM</a>
+            <a href="{{ route('help') }}">Помощь</a>
+        </div>
     </div>
 </div>
-
 <div class="wrappage">
 
  <!-- подключаем шапку сайта-->
@@ -771,15 +701,6 @@
             </div>
         </div>
     </div>
-    {{-- На телефоне строка поиска в шапке скрыта, поэтому выбор города стоит отдельной строкой под шапкой:
-         его видно сразу, без бургер-меню --}}
-    @if($regionSwitcherAvailable ?? false)
-        <div class="header-region-bar hidden-md hidden-lg">
-            <div class="container container-240">
-                @include('components.region-switcher', ['variant' => 'bar'])
-            </div>
-        </div>
-    @endif
 </header>
 {{-- Формы для кнопок выбора города (они привязаны к ним атрибутом form: строка поиска сама внутри формы) --}}
 @include('components.region-switch-forms')
@@ -1019,6 +940,7 @@
         }
     });
 </script>
+<script src="{{ asset('js/home-feed.js') }}?v={{ @filemtime(public_path('js/home-feed.js')) }}" defer></script>
 @stack('scripts')
 </body>
 

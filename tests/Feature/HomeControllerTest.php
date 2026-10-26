@@ -33,10 +33,11 @@ class HomeControllerTest extends TestCase
             ->assertSee('Где купить? Смотри на BIMM.')
             ->assertSee('Маркетплейс Приднестровья')
             ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
-            ->assertSee('Товары, которые уже есть на BIMM')
-            ->assertSee('Новые товары продавцов')
+            ->assertSee('Категории товаров')
+            ->assertSee('Новинки в Приднестровье')
             ->assertSee('Товары со скидкой')
-            ->assertSee('Продавцы на BIMM')
+            ->assertSee('Магазины Приднестровья')
+            ->assertSee('Все магазины')
             ->assertSee('Не ищи по чатам. Смотри:')
             ->assertSee('Всё, что продаётся рядом, должно быть видно')
             ->assertSee('Как BIMM помогает купить')
@@ -63,15 +64,16 @@ class HomeControllerTest extends TestCase
             ->assertDontSee('icon-cart.png', false)
             ->assertDontSee('class="cart"', false)
             ->assertDontSee('dropdown-cart', false)
-            ->assertSee('class="mobile-menu-region"', false)
-            ->assertSee('regional-selector--push-menu', false)
-            ->assertSee('id="mobile-menu-query"', false)
-            ->assertSee('class="mobile-menu-categories-head"', false)
-            ->assertSee('class="mobile-menu-links"', false)
-            ->assertSee('class="mobile-seller-entry"', false)
-            ->assertSee('Категории товаров')
-            ->assertSee('Товары, магазины и вход для продавцов')
-            ->assertSee('Войти продавцу')
+            // бургер-меню: плоский список (логотип, кнопка для продавцов, категории, разделы, помощь); поиска и города в нём нет
+            ->assertSee('class="drawer__head"', false)
+            ->assertSee('class="drawer__cta"', false)
+            ->assertSee('class="drawer__label">Категории<', false)
+            ->assertSee('class="drawer__links"', false)
+            ->assertSee('class="drawer__help"', false)
+            ->assertDontSee('mobile-menu-region', false)
+            ->assertDontSee('mobile-menu-query', false)
+            ->assertDontSee('Меню маркетплейса')
+            ->assertDontSee('mobile-seller-entry', false)
             ->assertSee('Стать продавцом')
             ->assertSee('Оплата проходит напрямую продавцу')
             ->assertSee('BIMM собирает товары продавцов из Приднестровья в одном месте')
@@ -94,8 +96,10 @@ class HomeControllerTest extends TestCase
         $this->assertStringContainsString('transform: translate3d(-100%, 0, 0);', $css);
         $this->assertStringContainsString('transform: translate3d(0, 0, 0) !important;', $css);
         $this->assertStringContainsString('transform: none !important;', $css);
-        $this->assertStringContainsString('.pushmenu.menu-home5 .screen-reader-text', $css);
-        $this->assertStringContainsString('grid-template-columns: minmax(0, 1fr) 86px;', $css);
+        // новое бургер-меню: плоский список, кнопка для продавцов, стрелка раскрытия категорий
+        $this->assertStringContainsString('.drawer__cta', $css);
+        $this->assertStringContainsString('.pushmenu.menu-home5 .icon-sub-menu.up-icon:before', $css);
+        $this->assertStringNotContainsString('.mobile-menu-search', $css);
         $this->assertStringContainsString('.header-sub .header-sub-element.row > a', $css);
         $this->assertStringContainsString('gap: 18px;', $css);
         $this->assertStringContainsString('width: 32px;', $css);

@@ -90,7 +90,7 @@ class RegionalSelectionTest extends TestCase
     {
         $settlement = Settlement::factory()->create(['name' => 'Тирасполь', 'slug' => 'tiraspol-test']);
 
-        foreach (['home', 'catalog.index', 'search', 'catalog.sale', 'shops'] as $name) {
+        foreach (['home', 'catalog.index', 'search', 'catalog.sale', 'shops', 'favorites'] as $name) {
             $this->get(route('regional.'.$name, ['location' => 'tiraspol-test']))
                 ->assertOk()
                 ->assertSee('region-notice', false)
@@ -121,7 +121,7 @@ class RegionalSelectionTest extends TestCase
         $this->get(route('home'))
             ->assertOk()
             ->assertSee('region-switcher--header', false)
-            ->assertSee('region-switcher--bar', false)
+            ->assertDontSee('header-region-bar', false)
             ->assertSee('id="region-switch-all"', false)
             ->assertSee('id="region-switch-'.$settlement->id.'"', false)
             ->assertSee('form="region-switch-'.$settlement->id.'"', false)
