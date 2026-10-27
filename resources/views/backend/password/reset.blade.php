@@ -18,7 +18,7 @@
     <div class="mb-4 text-center mx-auto">
         <img class="inline-block" src="{{ asset('auth/assets/images/icons/icon-landing-reset-password.svg') }}" alt="landing success">
     </div>
-    <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Сброс пароля</h3>
+    <h3 class="font-bold text-2xl text-gray-1100 mb-[5px] dark:text-gray-dark-1100">Сброс пароля</h3>
     <p class="text-sm text-gray-500 mb-[30px] dark:text-gray-dark-500">
         Введите ваш e-mail, и мы отправим вам инструкции по сбросу пароля.
     </p>

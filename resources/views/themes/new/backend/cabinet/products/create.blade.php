@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <div class="breadcrumb-main">
-                    <h4 class="text-capitalize breadcrumb-title">Добавить товар</h4>
+                    <h4 class="breadcrumb-title">Добавить товар</h4>
                     <div class="breadcrumb-action justify-content-center flex-wrap">
                         <a href="{{ route('account.store.products.index') }}" class="btn btn-sm btn-secondary">
                             <i class="uil uil-arrow-left"></i> Назад
@@ -84,7 +84,7 @@
                                                                     <li>{{ $error }}</li>
                                                                 @endforeach
                                                             </ul>
-                                                            <button type="button" class="btn-close text-capitalize" data-bs-dismiss="alert" aria-label="Close">
+                                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
                                                                 <img src="{{ asset('cabinet/img/svg/x.svg') }}" alt="x" class="svg" aria-hidden="true">
                                                             </button>
                                                         </div>
@@ -332,19 +332,19 @@
                                     </p>
                                     <div class="button-group add-product-btn product-form-actions d-flex justify-content-end gap-2">
                                         <a href="{{ route('account.store.products.index') }}" 
-                                           class="btn btn-light btn-default btn-squared fw-400 text-capitalize">
+                                           class="btn btn-light btn-default btn-squared fw-400">
                                             Отмена
                                         </a>
                                         <button type="submit"
                                                 name="save_action"
                                                 value="save_draft"
-                                                class="btn btn-light btn-default btn-squared text-capitalize">
+                                                class="btn btn-light btn-default btn-squared">
                                             <i class="uil uil-save"></i> Сохранить черновик
                                         </button>
                                         <button type="submit"
                                                 name="save_action"
                                                 value="save_and_submit"
-                                                class="btn btn-primary btn-default btn-squared text-capitalize">
+                                                class="btn btn-primary btn-default btn-squared">
                                             <i class="uil uil-shield-check"></i> Отправить на проверку
                                         </button>
                                     </div>

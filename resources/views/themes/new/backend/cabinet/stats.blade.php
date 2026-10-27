@@ -11,7 +11,7 @@
       <div class="row mb-25">
          <div class="col-12">
             <div class="breadcrumb-main">
-               <h4 class="text-capitalize breadcrumb-title">Статистика магазина</h4>
+               <h4 class="breadcrumb-title">Статистика магазина</h4>
                <div class="breadcrumb-action justify-content-center flex-wrap">
                   <nav aria-label="breadcrumb">
                      <ol class="breadcrumb">

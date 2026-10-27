@@ -9466,7 +9466,7 @@ span.star:before {
       .filter-sort .dropdown button {
         padding-right: 71px;
         padding-left: 4px; } }
-    @media (max-width: 480px) {
+    @media (max-width: 767px) {
       .filter-sort .dropdown button {
         width: 100%; } }
 
@@ -9483,19 +9483,21 @@ span.star:before {
     .filter-show button {
       padding-right: 24px;
       padding-left: 5px; } }
-  @media (max-width: 480px) {
+  @media (max-width: 767px) {
     .filter-show button {
       width: 100%; } }
 .filter-show .dropdown-menu {
   left: unset;
   right: 0; }
 
-/* Телефон: фильтры «Регион» и «Сортировка» стоят в одной строке, каждый занимает половину ширины */
-@media (max-width: 480px) {
+/* Телефон и узкий планшет (до 767 px): фильтры «Регион» и «Сортировка» стоят в одной строке, каждый занимает половину ширины,
+   у сортировки показано только значение («Сначала новые») */
+@media (max-width: 767px) {
   .pd-sort {
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
             flex-direction: row;
+    width: 100%;
     gap: 8px; }
   .pd-sort .filter-sort,
   .pd-sort .filter-show {

@@ -46,7 +46,8 @@ class HeaderMenuTest extends TestCase
         $this->assertStringContainsString('href="'.route('login').'">Войти</a>', $block);
         $this->assertStringContainsString('href="'.route('register').'"', $block);
         $this->assertStringContainsString('Стать продавцом', $block);
-        $this->assertStringContainsString('Регистрация', $block); // короткая подпись для окон уже 1200 px
+        $this->assertStringContainsString('Продавцам', $block); // короткая подпись для окон уже 1100 px
+        $this->assertStringNotContainsString('Регистрация', $block);
         $this->assertStringNotContainsString('Мой кабинет', $block);
 
         // иконка кабинета убрана, а «Войти продавцу» из верхней полосы больше не дублирует кнопку
@@ -119,6 +120,7 @@ class HeaderMenuTest extends TestCase
         $css = file_get_contents(public_path('css/marketplace-design.css'));
 
         $this->assertStringContainsString('.header-auth__btn--primary', $css);
+        $this->assertMatchesRegularExpression('/@media \(max-width: 1099px\) \{\s*\.header-auth__full \{ display: none; \}/', $css);
         $this->assertStringContainsString('.header-sub .header-sub-element.row > a:not(.header-auth__btn) { display: none; }', $css);
         // колонка справа больше не зажата в 172 px под три иконки
         $this->assertStringNotContainsString('flex: 0 0 172px', $css);

@@ -17,7 +17,7 @@
 {{-- noindex ставит общий SeoService для всех маршрутов orders.* --}}
 
 @section('content')
-<main class="checkout-page">
+<main class="container container-240 checkout-page">
     <nav class="checkout-crumbs" aria-label="Хлебные крошки">
         <a href="{{ $regionalUrl->route('home') }}">Главная</a>
         <span aria-hidden="true">›</span>
@@ -55,13 +55,14 @@
 </main>
 
 <style>
-.checkout-page{max-width:1080px;margin:0 auto;padding:22px 15px 70px;color:#222}
+/* Страница стоит в сетке сайта (container-240: те же боковые отступы, что у шапки и других страниц), а не узкой колонкой по центру */
+.checkout-page{padding-top:22px;padding-bottom:70px;color:#222}
 .checkout-crumbs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px;font-size:13px;color:#888}
 .checkout-crumbs a{color:#666}.checkout-crumbs a:hover{color:#222}
 .checkout-title{margin:0 0 22px;font-size:32px;line-height:1.15;font-weight:700}
-.checkout-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start}
+.checkout-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:26px;align-items:start;max-width:1140px}
 .checkout-form{order:1;min-width:0}
-.checkout-product{order:2;position:sticky;top:20px;display:flex;gap:14px;padding:16px;border:1px solid #e4e4ea;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(40,30,60,.05)}
+.checkout-product{order:2;position:sticky;top:20px;display:flex;gap:14px;padding:16px;border:1px solid #e4e4ea;border-radius:14px;background:#fff}
 .checkout-product__image{flex:0 0 96px;width:96px;height:96px;overflow:hidden;border-radius:10px;background:#f4f4f6}
 .checkout-product__image img{display:block;width:100%;height:100%;object-fit:cover}
 .checkout-product__info{display:flex;flex-direction:column;gap:5px;min-width:0}

@@ -20,12 +20,20 @@
         <li><a href="{{ route('home') }}">Главная</a></li>
         <li class="active">Каталог</li>
     </ul>
-    @include('components.region-notice', ['total' => $products->total()])
+    {{-- Без товаров плашку города заменяет карточка с тем же действием («Показать все регионы»); пустое меню слева не рисуется --}}
+    @php
+        $catalogEmpty = $products->total() === 0;
+        $hideSidebar = $categories->isEmpty();
+    @endphp
+    @unless($catalogEmpty)
+        @include('components.region-notice', ['total' => $products->total()])
+    @endunless
 <!--<div class="filter-collection-left hidden-lg hidden-md">
       <a class="btn">Filter</a>
     </div>-->
     <div class="row shop-colect"> 
     <!--СИТИБАР СЛЕВА  -->
+        @unless($hideSidebar)
         <div class="col-md-3 col-sm-3 col-xs-12 col-left collection-sidebar" id="filter-sidebar">
             <div class="close-sidebar-collection hidden-lg hidden-md">
                 <span>filter</span><i class="icon_close ion-close"></i>
@@ -52,10 +60,11 @@
                 <a class="image-bd hover-images" href=""><img src="{{ asset('img/o-banner3.jpg') }}" alt="" class="img-reponsive"></a>
             </div> --}} 
         </div>
+        @endunless
     <!--// СИТИБАР СЛЕВА  -->
 
     
-        <div class="col-md-9 col-sm-12 col-xs-12 collection-list">
+        <div class="{{ $hideSidebar ? 'col-md-12' : 'col-md-9' }} col-sm-12 col-xs-12 collection-list">
             <div class="e-product">
                 <div class="pd-banner">
                    @php
@@ -65,9 +74,11 @@
                 </div>
                 <div class="pd-top">
                     <h1 class="title">{{ $seoHeading ?? 'Каталог товаров' }}</h1>
+                    @unless($catalogEmpty)
                     <div class="show-element">
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>
+                    @endunless
                 </div>
                 <!-- Мобильная версия: карточки корневых категорий 3x3. Здесь они переносятся на следующие ряды и не листаются вбок
                      (прокрутка вправо работает только внутри категорий, см. catalog/show) -->
@@ -100,19 +111,24 @@
                 </div>
                 <!-- / МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ -->
 
+                {{-- Выбор города остаётся и без товаров (можно перейти в другой город); сортировать нечего --}}
                 <div class="pd-middle">
                     <div class="pd-sort">
                         @include('components.catalog-region-selector')
-                        @include('components.catalog-sort-dropdown')
+                        @unless($catalogEmpty)
+                            @include('components.catalog-sort-dropdown')
+                        @endunless
                     </div>
                 </div>
+                @if($catalogEmpty)
+                    @include('components.catalog-empty')
+                @else
                 <div class="product-collection-grid product-grid catalog-products-grid">
-                    @forelse($products as $product)
+                    @foreach($products as $product)
                         @include('components.home-product-card', ['product' => $product])
-                    @empty
-                        <p>Нет товаров в этой категории.</p>
-                    @endforelse
+                    @endforeach
                 </div>
+                @endif
                 <div class="pd-middle space-v1">
                     @if($products->hasPages())
                         <!-- Пагинация для десктопа и SEO -->

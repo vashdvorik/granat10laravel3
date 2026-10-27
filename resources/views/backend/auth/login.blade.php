@@ -9,14 +9,32 @@
 @section('title', 'Войти продавцу — BIMM')
 
 @section('content')
+<style>
+/* Форма компактнее: без полей по 84 px сверху и снизу, меньше отступов между полями. Тогда вход помещается в экран ноутбука
+   (высота окна около 650 px) и страница не листается. */
+form.auth-login {
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 40px 24px;
+}
+form.auth-login .form-control { margin-bottom: 12px; }
+form.auth-login > p.text-sm { margin-bottom: 18px; }
+form.auth-login > button[type=submit] { margin-bottom: 12px; padding-top: 12px; padding-bottom: 12px; }
+form.auth-login > a.text-xs { margin-bottom: 12px; }
+form.auth-login .auth-social__divider,
+form.auth-login .auth-social__btn { margin-bottom: 12px; }
+@media (max-width: 767px) {
+    form.auth-login { padding: 22px 18px 20px; }
+}
+</style>
 <div>
 
-    <form class="rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] mt-0 mb-6 md:my-[84px] dark:bg-[#1F2128]" action="{{ route('login') }}" method="POST">
+    <form class="auth-login rounded-2xl bg-white mx-auto p-10 text-center max-w-[440px] mt-0 mb-6 md:my-[84px] dark:bg-[#1F2128]" action="{{ route('login') }}" method="POST">
         @csrf
         <div class="mb-4 text-center mx-auto">
         {{--    <img class="inline-block" src="{{ asset('auth/assets/images/icons/icon-landing-success-1.svg') }}" alt="landing success">--}}
         </div>
-        <h3 class="font-bold text-2xl text-gray-1100 capitalize mb-[5px] dark:text-gray-dark-1100">Войти в кабинет продавца</h3>
+        <h3 class="font-bold text-2xl text-gray-1100 mb-[5px] dark:text-gray-dark-1100">Войти в кабинет продавца</h3>
         <p class="text-sm text-gray-500 mb-[30px] dark:text-gray-dark-500">Аккаунт продавца</p>
 
         @if ($errors->any())

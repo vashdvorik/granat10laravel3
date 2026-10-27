@@ -8,13 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Приглашение стать продавцом: блок на главной сразу после первого блока и кнопки вверху бургер-меню.
+ * Приглашение стать продавцом: блок на главной сразу после первого блока (на телефоне и планшете; на компьютере его нет,
+ * там кнопка в шапке) и кнопки вверху бургер-меню.
  */
 class SellerInvitationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_sees_the_become_a_seller_block_right_after_the_hero(): void
+    public function test_guest_sees_the_become_a_seller_block_right_after_the_hero_on_small_screens(): void
     {
         $this->get(route('home'))
             ->assertOk()
@@ -22,7 +23,8 @@ class SellerInvitationTest extends TestCase
             ->assertSee('href="'.route('register').'"', false)
             ->assertSee('href="'.route('seller.help').'"', false)
             ->assertSee('Уже продаёте?')
-            ->assertSeeInOrder(['class="home-hero"', 'class="home-become-seller"'], false);
+            // классы Bootstrap hidden-md hidden-lg прячут блок от 1025 px (так шаблон переопределил Bootstrap): два широких блока подряд на компьютере выглядели как два баннера
+            ->assertSeeInOrder(['class="home-hero"', 'class="home-become-seller hidden-md hidden-lg"'], false);
     }
 
     public function test_user_without_a_store_is_offered_to_open_one(): void

@@ -30,12 +30,35 @@
     @endforeach
 
     </ul>
-    @include('components.region-notice', ['total' => $products->total()])
+    {{-- Без товаров плашку города заменяет карточка с тем же действием («Показать все регионы»); меню слева, где кроме «Назад» ничего нет, не рисуется --}}
+    @php
+        $catalogEmpty = $products->total() === 0;
+        $hideSidebar = $catalogEmpty && $categories->isEmpty();
+
+        // Используем ту же логику что и для мобильной версии
+        if ($hasChildren) {
+            // Есть дети - назад к родителю или каталог
+            $desktopBackUrl = $category->parent 
+                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->alias ?? $category->parent->id])
+                : $regionalUrl->route('catalog.index');
+            $backText = $category->parent ? 'Назад' : 'В каталог';
+        } else {
+            // Нет детей, показываются братья - назад на 2 уровня вверх
+            $desktopBackUrl = ($category->parent && $category->parent->parent) 
+                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->parent->alias ?? $category->parent->parent->id])
+                : $regionalUrl->route('catalog.index');
+            $backText = ($category->parent && $category->parent->parent) ? 'Назад' : 'В каталог';
+        }
+    @endphp
+    @unless($catalogEmpty)
+        @include('components.region-notice', ['total' => $products->total()])
+    @endunless
 <!--<div class="filter-collection-left hidden-lg hidden-md">
       <a class="btn">Filter</a>
     </div>-->
     <div class="row shop-colect">  
     <!--СИТИБАР СЛЕВА  -->
+        @unless($hideSidebar)
         <div class="col-md-3 col-sm-3 col-xs-12 col-left collection-sidebar" id="filter-sidebar">
             <div class="close-sidebar-collection hidden-lg hidden-md">
                 <span>filter</span><i class="icon_close ion-close"></i>
@@ -45,22 +68,6 @@
             <div class="filter filter-cate ">
                 <ul class="wiget-content v2">
                     {{-- Кнопка "Назад" с умной логикой --}}
-                    @php
-                        // Используем ту же логику что и для мобильной версии
-                        if ($hasChildren) {
-                            // Есть дети - назад к родителю или каталог
-                            $desktopBackUrl = $category->parent 
-                                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->alias ?? $category->parent->id])
-                                : $regionalUrl->route('catalog.index');
-                            $backText = $category->parent ? 'Назад' : 'В каталог';
-                        } else {
-                            // Нет детей, показываются братья - назад на 2 уровня вверх
-                            $desktopBackUrl = ($category->parent && $category->parent->parent) 
-                                ? $regionalUrl->route('catalog.show', ['alias' => $category->parent->parent->alias ?? $category->parent->parent->id])
-                                : $regionalUrl->route('catalog.index');
-                            $backText = ($category->parent && $category->parent->parent) ? 'Назад' : 'В каталог';
-                        }
-                    @endphp
                     
                     <li class="back-category" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
                         <a href="{{ $desktopBackUrl }}" style="display: flex; align-items: center; color: #666;">
@@ -86,10 +93,11 @@
                 <a class="image-bd hover-images" href=""><img src="{{ asset('img/o-banner3.jpg') }}" alt="" class="img-reponsive"></a>
             </div>--}}  
         </div>
+        @endunless
     <!--// СИТИБАР СЛЕВА  -->
 
     
-        <div class="col-md-9 col-sm-12 col-xs-12 collection-list">
+        <div class="{{ $hideSidebar ? 'col-md-12' : 'col-md-9' }} col-sm-12 col-xs-12 collection-list">
             <div class="e-product">
                 <div class="pd-banner">
                    @php
@@ -99,9 +107,11 @@
                 </div>
                 <div class="pd-top">
                     <h1 class="title">{{ $seoHeading ?? $category->name }}</h1>
+                    @unless($catalogEmpty)
                     <div class="show-element">
                         <span>Показано {{ $products->firstItem() ?? 0 }}–{{ $products->lastItem() ?? 0 }} из {{ $products->total() }} товаров</span>
                     </div>
+                    @endunless
                 </div>
                 <div class="pd-middle">
                     <!--
@@ -132,12 +142,15 @@
                             </div>
                         </div>
                         --}}
-                        @include('components.catalog-sort-dropdown')
+                        @unless($catalogEmpty)
+                            @include('components.catalog-sort-dropdown')
+                        @endunless
                     </div>
                     
                 </div>
 <!-- МОБИЛЬНЫЕ КАРТОЧКИ КАТЕГОРИЙ /-->
 <!-- Мобильная версия: карточки категорий 3x3 и плитки 3x3  -->
+@unless($hideSidebar)
 <div class="mobile-categories-wrapper hidden-md hidden-lg">
     @php
         // Проверяем, есть ли хотя бы одна иконка у категорий
@@ -233,15 +246,18 @@
         </div>
     @endif
 </div>
+@endunless
 
 <!-- Карточки подкатегорий -->
+                @if($catalogEmpty)
+                    @include('components.catalog-empty', ['category' => $category, 'backUrl' => $desktopBackUrl ?? null, 'backText' => $backText ?? 'Назад'])
+                @else
                 <div class="product-collection-grid product-grid catalog-products-grid">
-                    @forelse($products as $product)
+                    @foreach($products as $product)
                         @include('components.home-product-card', ['product' => $product])
-                    @empty
-                        <p>Нет товаров в этой категории.</p>
-                    @endforelse
+                    @endforeach
                 </div>
+                @endif
                 <div class="pd-middle space-v1">
                     @if($products->hasPages())
                         <!-- Пагинация для десктопа и SEO -->

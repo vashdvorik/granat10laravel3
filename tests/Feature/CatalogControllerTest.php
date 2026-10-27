@@ -464,6 +464,12 @@ class CatalogControllerTest extends TestCase
     public function test_sort_dropdown_prefix_is_separate_so_phones_can_show_only_the_value(): void
     {
         $category = Category::factory()->create();
+        // сортировка показывается, только когда в категории есть товары: у пустой категории вместо неё карточка «товаров нет»
+        Product::factory()->create([
+            'seller_id' => Seller::factory()->create()->id,
+            'category_id' => $category->id,
+            'is_active' => true,
+        ]);
 
         $response = $this->get(route('catalog.show', ['alias' => $category->alias, 'sort' => 'sale']));
 
@@ -479,7 +485,8 @@ class CatalogControllerTest extends TestCase
         config(['categories.hide_empty' => false]);
         $parent = Category::factory()->create(['parent_id' => null]);
         foreach (range(1, 5) as $number) {
-            Category::factory()->create(['parent_id' => $parent->id, 'name' => 'Плитка '.$number]);
+            // порядок плиток задаёт number: без него фабрика ставит случайный, и проверка порядка срабатывала через раз
+            Category::factory()->create(['parent_id' => $parent->id, 'name' => 'Плитка '.$number, 'number' => $number]);
         }
 
         $html = $this->get(route('catalog.show', $parent->alias))->assertOk()->getContent();

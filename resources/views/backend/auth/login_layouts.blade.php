@@ -41,9 +41,58 @@
             }
         }
 
-        @media (min-width: 1025px) {
+        /* Страница входа не должна листаться, если форма помещается в экран: лишние отступы убраны, форма стоит по центру
+           свободного места, высота считается по видимой части экрана (dvh), на телефоне за вычетом нижней панели (60 px). */
+        #layout {
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        @media (min-width: 768px) {
             header {
-                padding-bottom: 42px !important;
+                min-height: 0;
+                padding-top: 16px !important;
+                padding-bottom: 16px !important;
+            }
+        }
+
+        main {
+            padding-top: 16px !important;
+            padding-bottom: 14px !important;
+        }
+
+        main > div:first-of-type {
+            display: flex;
+            flex: 1 1 auto;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        main footer {
+            padding-top: 12px !important;
+        }
+
+        main footer > div:first-child {
+            margin-bottom: 10px !important;
+        }
+
+        @media (max-width: 767px) {
+            #layout {
+                min-height: calc(100vh - 60px);
+                min-height: calc(100dvh - 60px);
+            }
+
+            main {
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+        }
+
+        /* Низкие окна (ноутбуки, горизонтальный телефон): подвал не нужен */
+        @media (max-height: 700px) {
+            main footer {
+                display: none !important;
             }
         }
     </style>

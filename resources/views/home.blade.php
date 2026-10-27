@@ -47,13 +47,15 @@
         </div>
     </section>
 
-    {{-- Призыв для будущих продавцов сразу после первого блока. Тем, у кого уже есть магазин, он не нужен. --}}
+    {{-- Призыв для будущих продавцов сразу после первого блока на телефоне и планшете (там кнопки продавца в шапке нет).
+         На компьютере его нет: два широких блока подряд выглядели как два баннера, а кнопка есть в шапке и в подвале.
+         Тем, у кого уже есть магазин, он не нужен. --}}
     @php
         $becomeSellerUser = auth()->user();
         $showBecomeSeller = ! $becomeSellerUser || ! $becomeSellerUser->seller;
     @endphp
     @if($showBecomeSeller)
-        <section class="home-become-seller" aria-labelledby="home-become-seller-title">
+        <section class="home-become-seller hidden-md hidden-lg" aria-labelledby="home-become-seller-title">
             <div class="container container-240">
                 <div class="home-become-seller__panel">
                     <div class="home-become-seller__text">

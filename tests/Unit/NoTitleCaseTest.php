@@ -55,6 +55,19 @@ class NoTitleCaseTest extends TestCase
         $this->assertSame([], $offenders, 'В шаблонах нельзя задавать text-transform: capitalize.');
     }
 
+    public function test_templates_do_not_use_capitalize_classes(): void
+    {
+        $offenders = [];
+
+        foreach ($this->files($this->root().'/resources/views', ['php']) as $file) {
+            // классы Tailwind «capitalize» и Bootstrap «text-capitalize» делают из «Войти в кабинет» «Войти В Кабинет»
+            if (preg_match('/class\s*=\s*"[^"]*(?<![\w-])(?:text-)?capitalize(?![\w-])[^"]*"/i', (string) file_get_contents($file))) {
+                $offenders[] = $this->relative($file);
+            }
+        }
+
+        $this->assertSame([], $offenders, 'В шаблонах нельзя использовать классы capitalize и text-capitalize: они портят заголовки и подписи.');
+    }
     public function test_php_code_does_not_title_case_text(): void
     {
         $offenders = [];

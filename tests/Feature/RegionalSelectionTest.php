@@ -91,9 +91,12 @@ class RegionalSelectionTest extends TestCase
         $settlement = Settlement::factory()->create(['name' => 'Тирасполь', 'slug' => 'tiraspol-test']);
 
         foreach (['home', 'catalog.index', 'search', 'catalog.sale', 'shops', 'favorites'] as $name) {
+            // в каталоге без товаров плашку заменяет карточка «товаров нет» с тем же действием
+            $marker = $name === 'catalog.index' ? 'catalog-empty' : 'region-notice';
+
             $this->get(route('regional.'.$name, ['location' => 'tiraspol-test']))
                 ->assertOk()
-                ->assertSee('region-notice', false)
+                ->assertSee($marker, false)
                 ->assertSee('Показать все регионы');
 
             $this->get(route($name))->assertOk()->assertDontSee('Показать все регионы');

@@ -657,7 +657,7 @@
                                 @else
                                     <a class="header-auth__btn header-auth__btn--light" href="{{ route('login') }}">Войти</a>
                                     <a class="header-auth__btn header-auth__btn--primary" href="{{ route('register') }}">
-                                        <span class="header-auth__full">Стать продавцом</span><span class="header-auth__short">Регистрация</span>
+                                        <span class="header-auth__full">Стать продавцом</span><span class="header-auth__short">Продавцам</span>
                                     </a>
                                 @endauth
                             </div>
